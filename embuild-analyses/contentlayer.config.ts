@@ -2,7 +2,8 @@ import { defineDocumentType, makeSource } from 'contentlayer/source-files'
 
 export const Analysis = defineDocumentType(() => ({
   name: 'Analysis',
-  filePathPattern: `**/*.mdx`,
+  // Only pick the main analysis MDX files; ignore results JSON files
+  filePathPattern: `**/content.mdx`,
   contentType: 'mdx',
   fields: {
     title: { type: 'string', required: true },
