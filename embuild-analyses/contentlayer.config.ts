@@ -20,8 +20,15 @@ export const Analysis = defineDocumentType(() => ({
   },
 }))
 
+export const Result = defineDocumentType(() => ({
+  name: 'Result',
+  // Ingest result JSON files produced by analyses
+  filePathPattern: `**/results/*.json`,
+  contentType: 'data',
+}))
+
 export default makeSource({
   contentDirPath: 'analyses',
-  documentTypes: [Analysis],
+  documentTypes: [Analysis, Result],
   disableImportAliasWarning: true,
 })
