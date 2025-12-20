@@ -1,0 +1,81 @@
+import pandas as pd
+import json
+from pathlib import Path
+import math
+
+# Configuration
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+RESULTS_DIR = BASE_DIR / "results"
+INPUT_FILE = DATA_DIR / "BV_opendata_251125_082807.txt"
+OUTPUT_DATA_FILE = RESULTS_DIR / "data_quarterly.json"
+OUTPUT_MUNICIPALITIES_FILE = RESULTS_DIR / "municipalities.json"
+
+def process_data():
+    print(f"Reading {INPUT_FILE}...")
+    # Read the text file (assuming comma separated based on previous CSV check, or check delimiter)
+    # The previous read_file of csv showed comma. Let's assume the txt is also comma or tab.
+    # Usually these exports are CSVs.
+    try:
+        df = pd.read_csv(INPUT_FILE, encoding='utf-8', sep='|', low_memory=False)
+    except:
+        df = pd.read_csv(INPUT_FILE, encoding='latin1', sep='|', low_memory=False)
+
+    print("Filtering for municipalities (Level 5)...")
+    # Filter for municipalities
+    df_mun = df[df['CD_REFNIS_LEVEL'] == 5].copy()
+
+    # Filter out yearly totals (Period 0)
+    df_mun = df_mun[df_mun['CD_PERIOD'] != 0]
+
+    # Calculate Quarter
+    df_mun['Quarter'] = (df_mun['CD_PERIOD'] - 1) // 3 + 1
+
+    # Select relevant columns
+    # MS_BUILDING_RES_RENOVATION: Renovation
+    # MS_BUILDING_RES_NEW: New Construction
+    cols = ['CD_YEAR', 'Quarter', 'CD_REFNIS_MUNICIPALITY', 'REFNIS_NL', 'MS_BUILDING_RES_RENOVATION', 'MS_BUILDING_RES_NEW']
+    df_subset = df_mun[cols]
+
+    print("Aggregating by Quarter...")
+    # Group by Year, Quarter, Municipality
+    df_agg = df_subset.groupby(['CD_YEAR', 'Quarter', 'CD_REFNIS_MUNICIPALITY', 'REFNIS_NL']).sum().reset_index()
+
+    # Prepare data for JSON export
+    # We want a list of objects, but to save space, maybe a compact format?
+    # Or just standard JSON.
+    
+    # Create municipalities list
+    municipalities = df_agg[['CD_REFNIS_MUNICIPALITY', 'REFNIS_NL']].drop_duplicates().sort_values('REFNIS_NL')
+    municipalities_list = municipalities.rename(columns={'CD_REFNIS_MUNICIPALITY': 'code', 'REFNIS_NL': 'name'}).to_dict(orient='records')
+
+    # Create data list
+    # Rename columns for compactness
+    df_agg = df_agg.rename(columns={
+        'CD_YEAR': 'y',
+        'Quarter': 'q',
+        'CD_REFNIS_MUNICIPALITY': 'm',
+        'MS_BUILDING_RES_RENOVATION': 'ren',
+        'MS_BUILDING_RES_NEW': 'new'
+    })
+    
+    # Drop name from data to save space (lookup via municipalities list)
+    df_export = df_agg[['y', 'q', 'm', 'ren', 'new']]
+    
+    data_list = df_export.to_dict(orient='records')
+
+    print(f"Exporting to {OUTPUT_DATA_FILE}...")
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    
+    with open(OUTPUT_DATA_FILE, 'w') as f:
+        json.dump(data_list, f)
+        
+    with open(OUTPUT_MUNICIPALITIES_FILE, 'w') as f:
+        json.dump(municipalities_list, f)
+
+    print("Done.")
+
+if __name__ == "__main__":
+    process_data()
+
+

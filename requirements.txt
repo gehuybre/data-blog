@@ -1,2 +1,5 @@
 # Python dependencies
-# Currently no external dependencies are required for run_blog.py
+pandas
+openpyxl
+requests
+geopandas
