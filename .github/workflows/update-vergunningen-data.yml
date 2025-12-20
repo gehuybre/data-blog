@@ -35,13 +35,15 @@ jobs:
           # here as `${{ vars.BV_DATA_URL }}`. If not provided, the job will fall back
           # to using the local file (if present) or an INPUT_FILE_PATH override.
           INPUT_URL: ${{ vars.BV_DATA_URL }}
+          # Set a local fallback input file path to use if INPUT_URL is not provided
+          INPUT_FILE_PATH: embuild-analyses/analyses/vergunningen-goedkeuringen/data/BV_opendata_251125_082807.txt
           # Optionally set INPUT_FILENAME to control the downloaded filename
           # INPUT_FILENAME: BV_opendata_latest.txt
         run: |
-          # Fail fast if no URL is configured and no local file exists
+          # Fail fast if no URL is configured and no local file exists (or INPUT_FILE_PATH is unset)
           set -e
-          if [ -z "${INPUT_URL}" ] && [ ! -f "embuild-analyses/analyses/vergunningen-goedkeuringen/data/$(basename "${INPUT_URL}")" ]; then
-            echo "No INPUT_URL provided and no local input file found. Set a repository variable 'BV_DATA_URL' or provide INPUT_FILE_PATH." >&2
+          if [ -z "${INPUT_URL}" ] && { [ -z "${INPUT_FILE_PATH}" ] || [ ! -f "${INPUT_FILE_PATH}" ]; }; then
+            echo "No INPUT_URL provided and no local input file found at ${INPUT_FILE_PATH}. Set a repository variable 'BV_DATA_URL' or provide INPUT_FILE_PATH." >&2
             exit 1
           fi
           python embuild-analyses/analyses/vergunningen-goedkeuringen/src/process_data.py
