@@ -25,6 +25,49 @@ export const Result = defineDocumentType(() => ({
   // Ingest result JSON files produced by analyses
   filePathPattern: `**/results/*.json`,
   contentType: 'data',
+  computedFields: {
+    // Number of top-level items or length of the first array found in the JSON
+    itemCount: {
+      type: 'number',
+      resolve: (doc) => {
+        try {
+          const fs = require('fs')
+          const data = JSON.parse(fs.readFileSync(doc._raw.sourceFilePath, 'utf8'))
+          if (Array.isArray(data)) return data.length
+          if (data && typeof data === 'object') {
+            const firstArr = Object.values(data).find((v) => Array.isArray(v))
+            if (firstArr) return firstArr.length
+            return Object.keys(data).length
+          }
+          return 0
+        } catch {
+          return 0
+        }
+      },
+    },
+    // Column keys for tabular JSON content (keys of first object found)
+    columns: {
+      type: 'list',
+      of: { type: 'string' },
+      resolve: (doc) => {
+        try {
+          const fs = require('fs')
+          const data = JSON.parse(fs.readFileSync(doc._raw.sourceFilePath, 'utf8'))
+          if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') return Object.keys(data[0])
+          if (data && typeof data === 'object') {
+            const firstArr = Object.values(data).find((v) => Array.isArray(v))
+            if (firstArr && firstArr.length > 0 && typeof firstArr[0] === 'object') return Object.keys(firstArr[0])
+            const firstObj = Object.values(data).find((v) => v && typeof v === 'object')
+            if (firstObj && typeof firstObj === 'object') return Object.keys(firstObj)
+            return Object.keys(data)
+          }
+          return []
+        } catch {
+          return []
+        }
+      },
+    },
+  },
 }))
 
 export default makeSource({
