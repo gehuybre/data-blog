@@ -24,6 +24,7 @@ def process_data():
     if INPUT_URL:
         try:
             import requests
+            import zipfile
             DATA_DIR.mkdir(parents=True, exist_ok=True)
             fname = os.environ.get('INPUT_FILENAME') or Path(INPUT_URL).name or 'BV_opendata_latest.txt'
             download_path = DATA_DIR / fname
@@ -34,7 +35,30 @@ def process_data():
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)
-            input_file = download_path
+
+            # If ZIP, try to extract the relevant file
+            if str(download_path).lower().endswith('.zip'):
+                print(f"Downloaded ZIP file {download_path}, extracting...")
+                with zipfile.ZipFile(download_path, 'r') as z:
+                    z.extractall(DATA_DIR)
+                    # Prefer a file that contains 'BUILDING' or 'TF_BUILDING' and ends with .txt or .csv
+                    candidates = [p for p in z.namelist() if p.lower().endswith(('.txt', '.csv'))]
+                    preferred = None
+                    for c in candidates:
+                        if 'building' in c.lower() or 'tf_building' in c.lower():
+                            preferred = c
+                            break
+                    if not preferred and candidates:
+                        preferred = candidates[0]
+                    if preferred:
+                        extracted_path = DATA_DIR / Path(preferred).name
+                        print(f"Using extracted file: {extracted_path}")
+                        input_file = extracted_path
+                    else:
+                        print('No text/csv file found inside ZIP; falling back to downloaded ZIP file path')
+                        input_file = download_path
+            else:
+                input_file = download_path
         except Exception as e:
             print('Download failed:', e)
             # fall back to environment-specified INPUT_FILE_PATH or default
