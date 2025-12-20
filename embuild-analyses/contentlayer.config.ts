@@ -22,4 +22,5 @@ export const Analysis = defineDocumentType(() => ({
 export default makeSource({
   contentDirPath: 'analyses',
   documentTypes: [Analysis],
+  disableImportAliasWarning: true,
 })
