@@ -4,21 +4,47 @@ from pathlib import Path
 import math
 
 # Configuration
+import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 RESULTS_DIR = BASE_DIR / "results"
-INPUT_FILE = DATA_DIR / "BV_opendata_251125_082807.txt"
+# Default input filename (kept for backwards compatibility)
+DEFAULT_INPUT_FILE = DATA_DIR / "BV_opendata_251125_082807.txt"
+# Allow override via environment variable INPUT_FILE_PATH or download via INPUT_URL/BV_DATA_URL
+INPUT_FILE = Path(os.environ.get('INPUT_FILE_PATH', DEFAULT_INPUT_FILE))
+INPUT_URL = os.environ.get('INPUT_URL') or os.environ.get('BV_DATA_URL')
 OUTPUT_DATA_FILE = RESULTS_DIR / "data_quarterly.json"
 OUTPUT_MUNICIPALITIES_FILE = RESULTS_DIR / "municipalities.json"
 
 def process_data():
+    # If INPUT_URL is provided, download into DATA_DIR and set INPUT_FILE accordingly
+    if INPUT_URL:
+        try:
+            import requests
+            DATA_DIR.mkdir(parents=True, exist_ok=True)
+            fname = os.environ.get('INPUT_FILENAME') or Path(INPUT_URL).name or 'BV_opendata_latest.txt'
+            download_path = DATA_DIR / fname
+            print(f"Downloading {INPUT_URL} -> {download_path}...")
+            with requests.get(INPUT_URL, stream=True, timeout=120) as r:
+                r.raise_for_status()
+                with open(download_path, 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+            INPUT_FILE = download_path
+        except Exception as e:
+            print('Download failed:', e)
+            # fall back to environment-specified INPUT_FILE_PATH or default
+    else:
+        print('No INPUT_URL provided, using local file or INPUT_FILE_PATH override.')
+
     print(f"Reading {INPUT_FILE}...")
     # Read the text file (assuming comma separated based on previous CSV check, or check delimiter)
     # The previous read_file of csv showed comma. Let's assume the txt is also comma or tab.
     # Usually these exports are CSVs.
     try:
         df = pd.read_csv(INPUT_FILE, encoding='utf-8', sep='|', low_memory=False)
-    except:
+    except Exception:
         df = pd.read_csv(INPUT_FILE, encoding='latin1', sep='|', low_memory=False)
 
     print("Filtering for municipalities (Level 5)...")

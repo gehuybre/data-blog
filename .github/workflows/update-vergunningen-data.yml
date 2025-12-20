@@ -1,0 +1,50 @@
+name: Update vergunningen data
+
+on:
+  schedule:
+    # At 00:00 on day-of-month 1
+    - cron: '0 0 1 * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run data processor (download & process)
+        env:
+          # Configure BV data URL here, set as a repository secret named BV_DATA_URL
+          INPUT_URL: ${{ secrets.BV_DATA_URL }}
+          # Optionally set INPUT_FILENAME to control the downloaded filename
+          # INPUT_FILENAME: BV_opendata_latest.txt
+        run: |
+          python embuild-analyses/analyses/vergunningen-goedkeuringen/src/process_data.py
+
+      - name: Commit and push changes if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add embuild-analyses/analyses/vergunningen-goedkeuringen/results
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(data): update vergunningen results (auto)"
+            git push origin HEAD:main
+          else
+            echo "No changes to commit"
+          fi
