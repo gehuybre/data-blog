@@ -17,7 +17,10 @@ OUTPUT_DATA_FILE = RESULTS_DIR / "data_quarterly.json"
 OUTPUT_MUNICIPALITIES_FILE = RESULTS_DIR / "municipalities.json"
 
 def process_data():
-    # If INPUT_URL is provided, download into DATA_DIR and set INPUT_FILE accordingly
+    # Choose input file: prioritize explicit environment override, then downloaded file, then default
+    input_file = Path(os.environ.get('INPUT_FILE_PATH')) if os.environ.get('INPUT_FILE_PATH') else DEFAULT_INPUT_FILE
+
+    # If INPUT_URL is provided, download into DATA_DIR and set input_file accordingly
     if INPUT_URL:
         try:
             import requests
@@ -31,21 +34,21 @@ def process_data():
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:
                             f.write(chunk)
-            INPUT_FILE = download_path
+            input_file = download_path
         except Exception as e:
             print('Download failed:', e)
             # fall back to environment-specified INPUT_FILE_PATH or default
     else:
         print('No INPUT_URL provided, using local file or INPUT_FILE_PATH override.')
 
-    print(f"Reading {INPUT_FILE}...")
+    print(f"Reading {input_file}...")
     # Read the text file (assuming comma separated based on previous CSV check, or check delimiter)
     # The previous read_file of csv showed comma. Let's assume the txt is also comma or tab.
     # Usually these exports are CSVs.
     try:
-        df = pd.read_csv(INPUT_FILE, encoding='utf-8', sep='|', low_memory=False)
+        df = pd.read_csv(input_file, encoding='utf-8', sep='|', low_memory=False)
     except Exception:
-        df = pd.read_csv(INPUT_FILE, encoding='latin1', sep='|', low_memory=False)
+        df = pd.read_csv(input_file, encoding='latin1', sep='|', low_memory=False)
 
     print("Filtering for municipalities (Level 5)...")
     # Filter for municipalities
