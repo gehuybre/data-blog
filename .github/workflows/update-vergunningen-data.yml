@@ -44,10 +44,8 @@ jobs:
 
           mkdir -p "$(dirname "$META_FILE")"
           headers=$(curl -sI "${INPUT_URL}" || true)
-          REMOTE_ETAG=$(printf '%s
-' "$headers" | awk -F': ' '/^ETag:/ {print $2}' | tr -d '\r"') || true
-          REMOTE_LASTMOD=$(printf '%s
-' "$headers" | awk -F': ' '/^Last-Modified:/ {print substr($0,index($0,$2)) }' | tr -d '\r') || true
+          REMOTE_ETAG=$(printf '%s\\n' "$headers" | awk -F': ' '/^ETag:/ {print $2}' | tr -d '\\r"') || true
+          REMOTE_LASTMOD=$(printf '%s\\n' "$headers" | awk -F': ' '/^Last-Modified:/ {print substr($0,index($0,$2)) }' | tr -d '\\r') || true
 
           python - <<PY
 import os,json,sys
@@ -97,10 +95,8 @@ PY
           set -e
           mkdir -p "$(dirname "$META_FILE")"
           headers=$(curl -sI "${INPUT_URL}" || true)
-          REMOTE_ETAG=$(printf '%s
-' "$headers" | awk -F': ' '/^ETag:/ {print $2}' | tr -d '\r"') || true
-          REMOTE_LASTMOD=$(printf '%s
-' "$headers" | awk -F': ' '/^Last-Modified:/ {print substr($0,index($0,$2)) }' | tr -d '\r') || true
+          REMOTE_ETAG=$(printf '%s\\n' "$headers" | awk -F': ' '/^ETag:/ {print $2}' | tr -d '\\r"') || true
+          REMOTE_LASTMOD=$(printf '%s\\n' "$headers" | awk -F': ' '/^Last-Modified:/ {print substr($0,index($0,$2)) }' | tr -d '\\r') || true
           fname=$(basename "${INPUT_URL}")
           download_path=embuild-analyses/analyses/vergunningen-goedkeuringen/data/$fname
           if [ -f "$download_path" ]; then
