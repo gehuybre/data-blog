@@ -28,20 +28,59 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run data processor (download & process)
+      - name: Check remote metadata (ETag / Last-Modified)
+        id: check_remote
         env:
-          # Configure BV data URL here. Because the URL is public, you can store it in
-          # Repository Variables under the name `BV_DATA_URL`, and it will be available
-          # here as `${{ vars.BV_DATA_URL }}`. If not provided, the job will fall back
-          # to using the local file (if present) or an INPUT_FILE_PATH override.
-          # Default to the official Statbel ZIP for building permits (public URL)
           INPUT_URL: https://statbel.fgov.be/sites/default/files/files/opendata/Building%20permits/TF_BUILDING_PERMITS.zip
-          # Set a local fallback input file path to use if INPUT_URL is not provided
+          META_FILE: embuild-analyses/analyses/vergunningen-goedkeuringen/data/.remote_metadata.json
+        run: |
+          set -e
+          # If there's no public URL configured, rely on local INPUT_FILE_PATH (do not skip)
+          if [ -z "${INPUT_URL}" ]; then
+            echo "INPUT_URL empty; proceeding (will use local file if present)."
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          mkdir -p "$(dirname "$META_FILE")"
+          headers=$(curl -sI "${INPUT_URL}" || true)
+          REMOTE_ETAG=$(printf '%s
+' "$headers" | awk -F': ' '/^ETag:/ {print $2}' | tr -d '\r"') || true
+          REMOTE_LASTMOD=$(printf '%s
+' "$headers" | awk -F': ' '/^Last-Modified:/ {print substr($0,index($0,$2)) }' | tr -d '\r') || true
+
+          python - <<PY
+import os,json,sys
+meta=os.environ.get('META_FILE')
+etag=os.environ.get('REMOTE_ETAG') or ''
+lm=os.environ.get('REMOTE_LASTMOD') or ''
+if os.path.exists(meta):
+  j=json.load(open(meta))
+  if etag and j.get('etag')==etag:
+    print('No change: ETag matches')
+    sys.exit(2)
+  if lm and j.get('last_modified')==lm:
+    print('No change: Last-Modified matches')
+    sys.exit(2)
+print('Changed or no previous metadata, continue')
+PY
+          rc=$?
+          if [ "$rc" -eq 2 ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No remote change detected; skipping download and processing."
+            exit 0
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run data processor (download & process)
+        if: steps.check_remote.outputs.changed == 'true'
+        env:
+          INPUT_URL: https://statbel.fgov.be/sites/default/files/files/opendata/Building%20permits/TF_BUILDING_PERMITS.zip
           INPUT_FILE_PATH: embuild-analyses/analyses/vergunningen-goedkeuringen/data/BV_opendata_251125_082807.txt
           # Optionally set INPUT_FILENAME to control the downloaded filename
           # INPUT_FILENAME: BV_opendata_latest.txt
         run: |
-          # Fail fast if no URL is configured and no local file exists (or INPUT_FILE_PATH is unset)
           set -e
           if [ -z "${INPUT_URL}" ] && { [ -z "${INPUT_FILE_PATH}" ] || [ ! -f "${INPUT_FILE_PATH}" ]; }; then
             echo "No INPUT_URL provided and no local input file found at ${INPUT_FILE_PATH}. Set a repository variable 'BV_DATA_URL' or provide INPUT_FILE_PATH." >&2
@@ -49,11 +88,38 @@ jobs:
           fi
           python embuild-analyses/analyses/vergunningen-goedkeuringen/src/process_data.py
 
+      - name: Update remote metadata and checksum
+        if: steps.check_remote.outputs.changed == 'true'
+        env:
+          INPUT_URL: https://statbel.fgov.be/sites/default/files/files/opendata/Building%20permits/TF_BUILDING_PERMITS.zip
+          META_FILE: embuild-analyses/analyses/vergunningen-goedkeuringen/data/.remote_metadata.json
+        run: |
+          set -e
+          mkdir -p "$(dirname "$META_FILE")"
+          headers=$(curl -sI "${INPUT_URL}" || true)
+          REMOTE_ETAG=$(printf '%s
+' "$headers" | awk -F': ' '/^ETag:/ {print $2}' | tr -d '\r"') || true
+          REMOTE_LASTMOD=$(printf '%s
+' "$headers" | awk -F': ' '/^Last-Modified:/ {print substr($0,index($0,$2)) }' | tr -d '\r') || true
+          fname=$(basename "${INPUT_URL}")
+          download_path=embuild-analyses/analyses/vergunningen-goedkeuringen/data/$fname
+          if [ -f "$download_path" ]; then
+            sha=$(sha256sum "$download_path" | cut -d' ' -f1)
+          else
+            sha=''
+          fi
+          python - <<PY
+import json, os
+meta={'url': os.environ.get('INPUT_URL'), 'etag': os.environ.get('REMOTE_ETAG') or None, 'last_modified': os.environ.get('REMOTE_LASTMOD') or None, 'sha256': os.environ.get('sha') or None}
+json.dump(meta, open(os.environ.get('META_FILE'), 'w'), indent=2)
+PY
+
       - name: Commit and push changes if any
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add embuild-analyses/analyses/vergunningen-goedkeuringen/results
+          git add embuild-analyses/analyses/vergunningen-goedkeuringen/data/.remote_metadata.json || true
           if ! git diff --staged --quiet; then
             git commit -m "chore(data): update vergunningen results (auto)"
             git push origin HEAD:main
