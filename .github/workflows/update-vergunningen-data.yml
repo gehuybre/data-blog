@@ -61,7 +61,7 @@ if os.path.exists(meta):
     print('No change: Last-Modified matches')
     sys.exit(2)
 print('Changed or no previous metadata, continue')
-PY
+          PY
           rc=$?
           if [ "$rc" -eq 2 ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -108,7 +108,7 @@ PY
 import json, os
 meta={'url': os.environ.get('INPUT_URL'), 'etag': os.environ.get('REMOTE_ETAG') or None, 'last_modified': os.environ.get('REMOTE_LASTMOD') or None, 'sha256': os.environ.get('sha') or None}
 json.dump(meta, open(os.environ.get('META_FILE'), 'w'), indent=2)
-PY
+          PY
 
       - name: Commit and push changes if any
         run: |
