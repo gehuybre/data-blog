@@ -30,11 +30,20 @@ jobs:
 
       - name: Run data processor (download & process)
         env:
-          # Configure BV data URL here, set as a repository secret named BV_DATA_URL
-          INPUT_URL: ${{ secrets.BV_DATA_URL }}
+          # Configure BV data URL here. Because the URL is public, you can store it in
+          # Repository Variables under the name `BV_DATA_URL`, and it will be available
+          # here as `${{ vars.BV_DATA_URL }}`. If not provided, the job will fall back
+          # to using the local file (if present) or an INPUT_FILE_PATH override.
+          INPUT_URL: ${{ vars.BV_DATA_URL }}
           # Optionally set INPUT_FILENAME to control the downloaded filename
           # INPUT_FILENAME: BV_opendata_latest.txt
         run: |
+          # Fail fast if no URL is configured and no local file exists
+          set -e
+          if [ -z "${INPUT_URL}" ] && [ ! -f "embuild-analyses/analyses/vergunningen-goedkeuringen/data/$(basename "${INPUT_URL}")" ]; then
+            echo "No INPUT_URL provided and no local input file found. Set a repository variable 'BV_DATA_URL' or provide INPUT_FILE_PATH." >&2
+            exit 1
+          fi
           python embuild-analyses/analyses/vergunningen-goedkeuringen/src/process_data.py
 
       - name: Commit and push changes if any
