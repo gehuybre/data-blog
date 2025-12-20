@@ -9,4 +9,11 @@ inputs: []
 
 # requirements.txt
 
-Lists Python dependencies for the project. Currently empty as `run_blog.py` uses only standard libraries.
+Lists Python dependencies for the project.
+
+## Dependencies
+- `pandas`: Data manipulation.
+- `openpyxl`: Excel file reading (for NACE codes).
+- `requests`: HTTP requests.
+- `geopandas`: Geospatial data processing (for maps).
+
