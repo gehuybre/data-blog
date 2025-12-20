@@ -34,7 +34,8 @@ jobs:
           # Repository Variables under the name `BV_DATA_URL`, and it will be available
           # here as `${{ vars.BV_DATA_URL }}`. If not provided, the job will fall back
           # to using the local file (if present) or an INPUT_FILE_PATH override.
-          INPUT_URL: ${{ vars.BV_DATA_URL }}
+          # Default to the official Statbel ZIP for building permits (public URL)
+          INPUT_URL: https://statbel.fgov.be/sites/default/files/files/opendata/Building%20permits/TF_BUILDING_PERMITS.zip
           # Set a local fallback input file path to use if INPUT_URL is not provided
           INPUT_FILE_PATH: embuild-analyses/analyses/vergunningen-goedkeuringen/data/BV_opendata_251125_082807.txt
           # Optionally set INPUT_FILENAME to control the downloaded filename
