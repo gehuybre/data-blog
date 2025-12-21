@@ -3,29 +3,59 @@
 import { useMemo } from "react"
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, ComposedChart } from "recharts"
 
-interface DataPoint {
-  y: number
-  q: number
-  [key: string]: any
+type UnknownRecord = Record<string, any>
+
+interface FilterableChartProps<TData = UnknownRecord> {
+  data: TData[]
+  metric?: string
+  getLabel?: (d: TData) => string
+  getValue?: (d: TData, metric?: string) => number
+  getSortValue?: (d: TData) => number
 }
 
-interface FilterableChartProps {
-  data: DataPoint[]
-  metric: string
-}
-
-export function FilterableChart({ data, metric }: FilterableChartProps) {
+export function FilterableChart<TData = UnknownRecord>({
+  data,
+  metric,
+  getLabel,
+  getValue,
+  getSortValue,
+}: FilterableChartProps<TData>) {
   const chartData = useMemo(() => {
+    const labelGetter =
+      getLabel ??
+      ((d: any) => d?.label ?? d?.name ?? (metric ? `${d?.y} Q${d?.q}` : ""))
+
+    const valueGetter =
+      getValue ??
+      ((d: any, m?: string) => {
+        if (typeof d?.value === "number") return d.value
+        if (m) return Number(d?.[m] ?? 0)
+        return Number(d?.value ?? 0)
+      })
+
+    const sortGetter =
+      getSortValue ??
+      ((d: any) => {
+        if (typeof d?.sortValue === "number") return d.sortValue
+        if (typeof d?.y === "number" && typeof d?.q === "number") return d.y * 10 + d.q
+        return 0
+      })
+
+    const input = [...data]
+    if (input.some((d: any) => typeof d?.sortValue === "number") || getSortValue) {
+      input.sort((a: any, b: any) => sortGetter(a) - sortGetter(b))
+    }
+
     // Calculate moving average (last 4 quarters)
-    return data.map((d, i) => {
-      const val = d[metric] as number
+    return input.map((d, i) => {
+      const val = valueGetter(d, metric)
       let sum = 0
       let count = 0
       // Look back 3 quarters + current
       for (let j = 0; j < 4; j++) {
         if (i - j >= 0) {
-          const prev = data[i - j]
-          sum += prev[metric] as number
+          const prev = input[i - j]
+          sum += valueGetter(prev, metric)
           count++
         }
       }
@@ -37,12 +67,12 @@ export function FilterableChart({ data, metric }: FilterableChartProps) {
       const ma = count === 4 ? sum / 4 : null // Only show if we have full year? Or show partial?
       
       return {
-        name: `${d.y} Q${d.q}`,
+        name: labelGetter(d),
         value: val,
         ma: ma
       }
     })
-  }, [data, metric])
+  }, [data, metric, getLabel, getValue, getSortValue])
 
   return (
     <div className="h-[400px] w-full min-w-0">

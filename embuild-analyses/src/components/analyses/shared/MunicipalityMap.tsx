@@ -7,27 +7,44 @@ import { geoBounds, geoMercator } from "d3-geo"
 import { Loader2 } from "lucide-react"
 import { getProvinceForMunicipality, getRegionForMunicipality, RegionCode, ProvinceCode, MunicipalityCode } from "@/lib/geo-utils"
 
-interface MunicipalityMapProps {
-  data: any[]
+type UnknownRecord = Record<string, any>
+
+interface MunicipalityMapProps<TData extends UnknownRecord = UnknownRecord> {
+  data: TData[]
   metric: string
   municipalities: any[]
   level?: 'region' | 'province' | 'municipality'
   selectedRegion?: RegionCode
   selectedProvince?: ProvinceCode | null
   selectedMunicipality?: MunicipalityCode | null
+  getMunicipalityCode?: (d: TData) => number | string
+  getMetricValue?: (d: TData, metric: string) => number
+  getPeriodKey?: (d: TData) => string
+  getPeriodSortValue?: (d: TData) => number
+  getPeriodLabel?: (d: TData) => string
 }
 
-const GEO_URL = "/maps/belgium_municipalities.json"
+// In production this site is exported under `basePath` (see `embuild-analyses/next.config.mjs`),
+// so we must prefix public asset URLs accordingly.
+const GEO_URL =
+  process.env.NODE_ENV === "production"
+    ? "/data-blog/maps/belgium_municipalities.json"
+    : "/maps/belgium_municipalities.json"
 
-export function MunicipalityMap({ 
+export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
   data, 
   metric, 
   municipalities,
   level = 'region',
   selectedRegion = '1000',
   selectedProvince = null,
-  selectedMunicipality = null
-}: MunicipalityMapProps) {
+  selectedMunicipality = null,
+  getMunicipalityCode,
+  getMetricValue,
+  getPeriodKey,
+  getPeriodSortValue,
+  getPeriodLabel,
+}: MunicipalityMapProps<TData>) {
   const [geoData, setGeoData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -136,28 +153,39 @@ export function MunicipalityMap({
     }
   }, [geoData, filteredGeographies, level, selectedRegion])
 
-  // Find latest quarter
+  const municipalityCodeGetter =
+    getMunicipalityCode ?? ((d: any) => d?.m)
+  const metricGetter =
+    getMetricValue ?? ((d: any, m: string) => Number(d?.[m] ?? 0))
+  const periodKeyGetter =
+    getPeriodKey ?? ((d: any) => `${d?.y}-${d?.q}`)
+  const periodSortGetter =
+    getPeriodSortValue ?? ((d: any) => (Number(d?.y) || 0) * 10 + (Number(d?.q) || 0))
+  const periodLabelGetter =
+    getPeriodLabel ?? ((d: any) => `${d?.y} Q${d?.q}`)
+
+  // Find latest period
   const latestPeriod = useMemo(() => {
     if (!data || !data.length) return null
     return data.reduce((prev, current) => {
-      if (current.y > prev.y) return current
-      if (current.y === prev.y && current.q > prev.q) return current
-      return prev
+      return periodSortGetter(current) > periodSortGetter(prev) ? current : prev
     }, data[0])
-  }, [data])
+  }, [data, getPeriodSortValue])
 
   // Prepare data for the map (map municipality code -> value)
   const mapData = useMemo(() => {
     if (!latestPeriod) return {}
-    const { y, q } = latestPeriod
-    const currentData = data.filter(d => d.y === y && d.q === q)
+    const latestKey = periodKeyGetter(latestPeriod)
+    const currentData = data.filter(d => periodKeyGetter(d) === latestKey)
     
     const dataMap: Record<string, number> = {}
     currentData.forEach(d => {
-      dataMap[d.m.toString()] = d[metric]
+      const code = municipalityCodeGetter(d)
+      if (code === null || code === undefined) return
+      dataMap[String(code)] = metricGetter(d, metric)
     })
     return dataMap
-  }, [data, latestPeriod, metric])
+  }, [data, latestPeriod, metric, getMunicipalityCode, getMetricValue, getPeriodKey])
 
   const colorScale = useMemo(() => {
     const values = Object.values(mapData)
@@ -188,15 +216,9 @@ export function MunicipalityMap({
 
   return (
     <div className="flex flex-col space-y-4">
-        {/* Debug Info - Temporary */}
-        <div className="text-xs bg-yellow-100 p-2 rounded border border-yellow-300">
-          DEBUG: Level: {level}, Region: {selectedRegion}, Province: {selectedProvince}, 
-          Features: {filteredGeographies.length} / {geoData.features.length}
-        </div>
-
         {latestPeriod && (
             <div className="text-center text-sm text-muted-foreground">
-                Data voor {latestPeriod.y} Q{latestPeriod.q}
+                Data voor {periodLabelGetter(latestPeriod)}
             </div>
         )}
         <div className="h-[500px] w-full border rounded-lg overflow-hidden bg-slate-50 relative">
@@ -225,7 +247,7 @@ export function MunicipalityMap({
                         <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={value ? colorScale(value) : "#EEE"}
+                        fill={value !== undefined ? colorScale(value) : "#EEE"}
                         stroke="#D6D6DA"
                         strokeWidth={0.5 / zoom} // Adjust stroke width based on zoom
                         style={{
