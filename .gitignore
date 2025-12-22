@@ -14,3 +14,7 @@ Thumbs.db
 .next/
 out/
 node_modules/
+
+# Starters-stoppers (Statbel VAT survival) raw downloads
+embuild-analyses/analyses/starters-stoppers/data/TF_VAT_SURVIVALS.zip
+embuild-analyses/analyses/starters-stoppers/data/TF_VAT_SURVIVALS.txt

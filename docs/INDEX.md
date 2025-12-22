@@ -5,6 +5,8 @@
 - [Project Setup](workflows/WF-project-setup.md)
 - [Deploy](workflows/WF-deploy.md)
 - [Vergunningen Goedkeuringen](workflows/WF-vergunningen-goedkeuringen.md)
+- [Update Vergunningen Data](workflows/WF-update-vergunningen-data.md)
+- [Update Starters-Stoppers Data](workflows/WF-update-starters-stoppers-data.md)
 
 ## Files
 

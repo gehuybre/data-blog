@@ -1,9 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, RotateCcw } from "lucide-react"
 import { useGeo } from "./GeoContext"
 import { REGIONS, PROVINCES, Municipality, getProvinceForMunicipality } from "@/lib/geo-utils"
+import { formatMunicipalityName } from "@/lib/name-utils"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,9 +24,15 @@ import {
 
 interface GeoFilterProps {
   municipalities: Municipality[]
+  showProvinces?: boolean
+  showMunicipalities?: boolean
 }
 
-export function GeoFilter({ municipalities }: GeoFilterProps) {
+export function GeoFilter({
+  municipalities,
+  showProvinces = true,
+  showMunicipalities = true,
+}: GeoFilterProps) {
   const {
     level,
     setLevel,
@@ -53,6 +60,12 @@ export function GeoFilter({ municipalities }: GeoFilterProps) {
     return REGIONS.find((r) => r.code === selectedRegion)?.name ?? "België"
   }, [selectedRegion])
 
+  const isDefaultSelection =
+    level === "region" &&
+    selectedRegion === "1000" &&
+    !selectedProvince &&
+    !selectedMunicipality
+
   const currentSelectionLabel = selectedMunicipalityName
     ? `Gemeente: ${selectedMunicipalityName}`
     : selectedProvinceName
@@ -74,36 +87,6 @@ export function GeoFilter({ municipalities }: GeoFilterProps) {
   const sortedMunicipalities = React.useMemo(() => {
     return [...municipalities].sort((a, b) => a.name.localeCompare(b.name))
   }, [municipalities])
-
-  function formatMunicipalityName(name: string) {
-    const trimmed = name.trim()
-    if (!trimmed) return trimmed
-
-    const cap = (s: string) => {
-      const lower = s.toLowerCase()
-      return lower.charAt(0).toUpperCase() + lower.slice(1)
-    }
-
-    if (trimmed.includes("-")) {
-      return trimmed
-        .split("-")
-        .map((part) => cap(part.trim()))
-        .join("-")
-    }
-
-    return cap(trimmed)
-  }
-
-  function bindSelect(action: () => void) {
-    return {
-      onSelect: () => action(),
-      onPointerDown: (e: React.PointerEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        action()
-      },
-    }
-  }
 
   function selectBelgium() {
     setSelectedRegion("1000")
@@ -144,7 +127,7 @@ export function GeoFilter({ municipalities }: GeoFilterProps) {
     <div className="space-y-3 p-4 border rounded-lg bg-card text-card-foreground shadow-sm border-blue-500">
       <div className="space-y-2">
         <label className="text-sm font-medium leading-none">Locatie</label>
-        <Popover open={open} onOpenChange={setOpen} modal>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -158,12 +141,20 @@ export function GeoFilter({ municipalities }: GeoFilterProps) {
           </PopoverTrigger>
           <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
             <Command>
-              <CommandInput placeholder="Zoek België, regio, provincie of gemeente..." />
+              <CommandInput
+                placeholder={
+                  showProvinces && showMunicipalities
+                    ? "Zoek België, regio, provincie of gemeente..."
+                    : showProvinces
+                      ? "Zoek België, regio of provincie..."
+                      : "Zoek België of regio..."
+                }
+              />
               <CommandList>
                 <CommandEmpty>Geen resultaat gevonden.</CommandEmpty>
 
                 <CommandGroup heading="Land">
-                  <CommandItem value="België" {...bindSelect(selectBelgium)}>
+                  <CommandItem value="België" onSelect={selectBelgium}>
                     <Check className={cn("mr-2 h-4 w-4", currentSelectionKey === "reg:1000" ? "opacity-100" : "opacity-0")} />
                     België
                   </CommandItem>
@@ -173,7 +164,7 @@ export function GeoFilter({ municipalities }: GeoFilterProps) {
 
                 <CommandGroup heading="Regio">
                   {REGIONS.filter((r) => r.code !== "1000").map((r) => (
-                    <CommandItem key={r.code} value={r.name} {...bindSelect(() => selectRegion(r.code))}>
+                    <CommandItem key={r.code} value={r.name} onSelect={() => selectRegion(r.code)}>
                       <Check
                         className={cn(
                           "mr-2 h-4 w-4",
@@ -187,34 +178,55 @@ export function GeoFilter({ municipalities }: GeoFilterProps) {
 
                 <CommandSeparator />
 
-                <CommandGroup heading="Provincie">
-                  {sortedProvinces.map((p) => (
-                    <CommandItem key={p.code} value={p.name} {...bindSelect(() => selectProvince(p.code))}>
-                      <Check className={cn("mr-2 h-4 w-4", currentSelectionKey === `prov:${p.code}` ? "opacity-100" : "opacity-0")} />
-                      {p.name}
-                      <span className="ml-2 text-xs text-muted-foreground">({REGIONS.find((r) => r.code === p.regionCode)?.name})</span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                {showProvinces ? (
+                  <>
+                    <CommandGroup heading="Provincie">
+                      {sortedProvinces.map((p) => (
+                        <CommandItem key={p.code} value={p.name} onSelect={() => selectProvince(p.code)}>
+                          <Check className={cn("mr-2 h-4 w-4", currentSelectionKey === `prov:${p.code}` ? "opacity-100" : "opacity-0")} />
+                          {p.name}
+                          <span className="ml-2 text-xs text-muted-foreground">({REGIONS.find((r) => r.code === p.regionCode)?.name})</span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </>
+                ) : null}
 
-                <CommandSeparator />
-
-                <CommandGroup heading="Gemeente">
-                  {sortedMunicipalities.map((m) => (
-                    <CommandItem
-                      key={m.code}
-                      value={formatMunicipalityName(m.name)}
-                      {...bindSelect(() => selectMunicipality(m.code))}
-                    >
-                      <Check className={cn("mr-2 h-4 w-4", currentSelectionKey === `mun:${m.code}` ? "opacity-100" : "opacity-0")} />
-                      {formatMunicipalityName(m.name)}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                {showMunicipalities ? (
+                  <>
+                    <CommandSeparator />
+                    <CommandGroup heading="Gemeente">
+                      {sortedMunicipalities.map((m) => (
+                        <CommandItem
+                          key={m.code}
+                          value={formatMunicipalityName(m.name)}
+                          onSelect={() => selectMunicipality(m.code)}
+                        >
+                          <Check className={cn("mr-2 h-4 w-4", currentSelectionKey === `mun:${m.code}` ? "opacity-100" : "opacity-0")} />
+                          {formatMunicipalityName(m.name)}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </>
+                ) : null}
               </CommandList>
             </Command>
           </PopoverContent>
         </Popover>
+
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={isDefaultSelection}
+            onClick={selectBelgium}
+            className="gap-2"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset filters
+          </Button>
+        </div>
 
         <div className="text-xs text-muted-foreground">
           Huidige selectie:{" "}
