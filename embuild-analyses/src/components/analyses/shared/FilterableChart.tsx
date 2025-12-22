@@ -46,12 +46,12 @@ export function FilterableChart<TData = UnknownRecord>({
       input.sort((a: any, b: any) => sortGetter(a) - sortGetter(b))
     }
 
-    // Calculate moving average (last 4 quarters)
+    // Calculate moving average (last 4 periods)
     return input.map((d, i) => {
       const val = valueGetter(d, metric)
       let sum = 0
       let count = 0
-      // Look back 3 quarters + current
+      // Look back 3 periods + current
       for (let j = 0; j < 4; j++) {
         if (i - j >= 0) {
           const prev = input[i - j]
@@ -59,11 +59,6 @@ export function FilterableChart<TData = UnknownRecord>({
           count++
         }
       }
-      // We want "12-maandelijks lopend gemiddelde".
-      // If we have quarterly data, the sum of the last 4 quarters is the annual total.
-      // The average of the last 4 quarters is the quarterly average.
-      // Usually "12-month moving average" on monthly data means "Average of last 12 months".
-      // On quarterly data, "Average of last 4 quarters" is equivalent.
       const ma = count === 4 ? sum / 4 : null // Only show if we have full year? Or show partial?
       
       return {
@@ -83,8 +78,8 @@ export function FilterableChart<TData = UnknownRecord>({
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="value" name="Kwartaal" fill="#8884d8" />
-          <Line type="monotone" dataKey="ma" name="Gemiddelde (4 kwartalen)" stroke="#ff7300" dot={false} strokeWidth={2} />
+          <Bar dataKey="value" name="Periode" fill="#8884d8" />
+          <Line type="monotone" dataKey="ma" name="Gemiddelde (4 periodes)" stroke="#ff7300" dot={false} strokeWidth={2} />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
