@@ -42,6 +42,42 @@ export function GeoProvider({ children }: { children: ReactNode }) {
   );
 }
 
+export function GeoProviderWithDefaults({
+  children,
+  initialLevel = "region",
+  initialRegion = "1000",
+  initialProvince = null,
+  initialMunicipality = null,
+}: {
+  children: ReactNode
+  initialLevel?: GeoLevel
+  initialRegion?: RegionCode
+  initialProvince?: ProvinceCode | null
+  initialMunicipality?: MunicipalityCode | null
+}) {
+  const [level, setLevel] = useState<GeoLevel>(initialLevel)
+  const [selectedRegion, setSelectedRegion] = useState<RegionCode>(initialRegion)
+  const [selectedProvince, setSelectedProvince] = useState<ProvinceCode | null>(initialProvince)
+  const [selectedMunicipality, setSelectedMunicipality] = useState<MunicipalityCode | null>(initialMunicipality)
+
+  return (
+    <GeoContext.Provider
+      value={{
+        level,
+        setLevel,
+        selectedRegion,
+        setSelectedRegion,
+        selectedProvince,
+        setSelectedProvince,
+        selectedMunicipality,
+        setSelectedMunicipality,
+      }}
+    >
+      {children}
+    </GeoContext.Provider>
+  )
+}
+
 export function useGeo() {
   const context = useContext(GeoContext);
   if (context === undefined) {

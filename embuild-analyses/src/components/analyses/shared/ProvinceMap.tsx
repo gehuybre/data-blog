@@ -5,32 +5,40 @@ import { ComposableMap, Geographies, Geography } from "react-simple-maps"
 import { scaleQuantile } from "d3-scale"
 import { Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { REGIONS, RegionCode } from "@/lib/geo-utils"
+import {
+  PROVINCES,
+  ProvinceCode,
+  RegionCode,
+  getProvinceForMunicipality,
+  getRegionForMunicipality,
+} from "@/lib/geo-utils"
 
 type UnknownRecord = Record<string, any>
 
-interface RegionMapProps<TData extends UnknownRecord = UnknownRecord> {
+interface ProvinceMapProps<TData extends UnknownRecord = UnknownRecord> {
   data: TData[]
   metric?: string
   selectedRegion?: RegionCode
-  onSelectRegion?: (code: RegionCode) => void
-  getRegionCode?: (d: TData) => RegionCode | string | null | undefined
+  selectedProvince?: ProvinceCode | null
+  onSelectProvince?: (code: ProvinceCode) => void
+  getProvinceCode?: (d: TData) => ProvinceCode | string | null | undefined
   getMetricValue?: (d: TData, metric?: string) => number | null | undefined
   formatValue?: (value: number) => string
 }
 
 const GEO_URL =
-  (process.env.NODE_ENV === "production" ? "/data-blog" : "") + "/maps/belgium_regions.json"
+  (process.env.NODE_ENV === "production" ? "/data-blog" : "") + "/maps/belgium_municipalities.json"
 
-export function RegionMap<TData extends UnknownRecord = UnknownRecord>({
+export function ProvinceMap<TData extends UnknownRecord = UnknownRecord>({
   data,
   metric,
   selectedRegion = "1000",
-  onSelectRegion,
-  getRegionCode,
+  selectedProvince = null,
+  onSelectProvince,
+  getProvinceCode,
   getMetricValue,
   formatValue,
-}: RegionMapProps<TData>) {
+}: ProvinceMapProps<TData>) {
   const [geoData, setGeoData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -50,7 +58,7 @@ export function RegionMap<TData extends UnknownRecord = UnknownRecord>({
       })
   }, [])
 
-  const regionCodeGetter = getRegionCode ?? ((d: any) => d?.r)
+  const provinceCodeGetter = getProvinceCode ?? ((d: any) => d?.p)
   const metricGetter =
     getMetricValue ??
     ((d: any, m?: string) => {
@@ -59,64 +67,83 @@ export function RegionMap<TData extends UnknownRecord = UnknownRecord>({
       return typeof d?.value === "number" ? d.value : Number(d?.value ?? 0)
     })
 
-  const valueByRegion = useMemo(() => {
+  const valueByProvince = useMemo(() => {
     const m = new Map<string, number>()
     for (const row of data ?? []) {
-      const code = regionCodeGetter(row)
+      const code = provinceCodeGetter(row)
       if (!code) continue
       const v = metricGetter(row, metric)
       if (typeof v !== "number" || !Number.isFinite(v)) continue
       m.set(String(code), v)
     }
     return m
-  }, [data, metric, getRegionCode, getMetricValue])
+  }, [data, metric, getProvinceCode, getMetricValue])
+
+  const filteredGeo = useMemo(() => {
+    if (!geoData?.features) return null
+    if (selectedRegion === "1000") return geoData
+
+    const features = geoData.features.filter((f: any) => {
+      const raw = f?.properties?.code
+      if (!raw) return false
+      const munCode = Number.parseInt(String(raw), 10)
+      if (!Number.isFinite(munCode)) return false
+      return String(getRegionForMunicipality(munCode)) === String(selectedRegion)
+    })
+
+    return { ...geoData, features }
+  }, [geoData, selectedRegion])
 
   const colorScale = useMemo(() => {
-    const values = Array.from(valueByRegion.values()).filter((v) => Number.isFinite(v))
+    const values = Array.from(valueByProvince.values()).filter((v) => Number.isFinite(v))
     if (!values.length) return null
     return scaleQuantile<string>()
       .domain(values)
       .range(["#e6f2ff", "#b3d9ff", "#66b3ff", "#0077cc", "#004c99"])
-  }, [valueByRegion])
+  }, [valueByProvince])
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[360px]">
+      <div className="flex items-center justify-center h-[420px]">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     )
   }
 
-  if (!geoData) {
+  if (!filteredGeo) {
     return (
-      <div className="flex items-center justify-center h-[360px] text-sm text-muted-foreground">
+      <div className="flex items-center justify-center h-[420px] text-sm text-muted-foreground">
         Kaartdata kon niet geladen worden.
       </div>
     )
   }
 
   return (
-    <div className="w-full h-[360px]">
+    <div className="w-full h-[420px]">
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{ center: [4.4, 50.6], scale: 6500 }}
         width={800}
-        height={360}
+        height={420}
         className="w-full h-full"
       >
-        <Geographies geography={geoData}>
+        <Geographies geography={filteredGeo}>
           {({ geographies }) =>
             geographies.map((geo) => {
-              const code = String(geo.properties?.code ?? "")
-              const value = valueByRegion.get(code)
-              const isActive = selectedRegion !== "1000" && String(selectedRegion) === code
+              const rawCode = geo.properties?.code
+              const munCode = Number.parseInt(String(rawCode ?? ""), 10)
+              if (!Number.isFinite(munCode)) return null
+
+              const provCode = String(getProvinceForMunicipality(munCode))
+              const value = valueByProvince.get(provCode)
+              const isActive = selectedProvince && String(selectedProvince) === provCode
               const fill =
                 value === undefined || !colorScale
                   ? "#f3f4f6"
                   : colorScale(value) ?? "#f3f4f6"
 
-              const regionName =
-                REGIONS.find((r) => String(r.code) === code)?.name ?? geo.properties?.name ?? code
+              const provinceName =
+                PROVINCES.find((p) => String(p.code) === provCode)?.name ?? provCode
 
               const tooltipValue =
                 value === undefined || !Number.isFinite(value)
@@ -129,32 +156,32 @@ export function RegionMap<TData extends UnknownRecord = UnknownRecord>({
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  onClick={() => onSelectRegion?.(code as RegionCode)}
+                  onClick={() => onSelectProvince?.(provCode as ProvinceCode)}
                   style={{
                     default: {
                       fill,
                       stroke: "#ffffff",
-                      strokeWidth: 1,
+                      strokeWidth: 0.6,
                       outline: "none",
-                      cursor: onSelectRegion ? "pointer" : "default",
+                      cursor: onSelectProvince ? "pointer" : "default",
                     },
                     hover: {
                       fill: value === undefined || !colorScale ? "#e5e7eb" : fill,
                       stroke: "#ffffff",
-                      strokeWidth: 1,
+                      strokeWidth: 0.6,
                       outline: "none",
                     },
                     pressed: {
-                      fill: fill,
+                      fill,
                       stroke: "#ffffff",
-                      strokeWidth: 1,
+                      strokeWidth: 0.6,
                       outline: "none",
                     },
                   }}
                   className={cn(isActive ? "drop-shadow-sm" : "")}
-                  aria-label={regionName}
+                  aria-label={provinceName}
                 >
-                  <title>{`${regionName}: ${tooltipValue}`}</title>
+                  <title>{`${provinceName}: ${tooltipValue}`}</title>
                 </Geography>
               )
             })
@@ -164,3 +191,4 @@ export function RegionMap<TData extends UnknownRecord = UnknownRecord>({
     </div>
   )
 }
+

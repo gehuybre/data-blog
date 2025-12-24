@@ -21,6 +21,8 @@ import { GeoProvider, useGeo } from "../shared/GeoContext"
 import { GeoFilter } from "../shared/GeoFilter"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
+import { ExportButtons } from "../shared/ExportButtons"
+import { ProvinceMap } from "../shared/ProvinceMap"
 import { RegionMap } from "../shared/RegionMap"
 
 import raw from "../../../../analyses/starters-stoppers/results/vat_survivals.json"
@@ -47,6 +49,11 @@ type YearPoint = {
 
 type RegionPoint = {
   r: RegionCode
+  value: number
+}
+
+type ProvincePoint = {
+  p: ProvinceCode
   value: number
 }
 
@@ -219,29 +226,83 @@ function aggregateByRegionForYear(rows: VatSurvivalRow[], year: number, valueFn:
     .sort((a, b) => a.r.localeCompare(b.r))
 }
 
+function aggregateByProvinceForYear(
+  rows: VatSurvivalRow[],
+  year: number,
+  valueFn: (r: VatSurvivalRow) => number | null
+): ProvincePoint[] {
+  const agg = new Map<string, number>()
+  for (const r of rows) {
+    if (r.y !== year) continue
+    if (!r.p) continue
+    const code = String(r.p)
+    const v = valueFn(r)
+    if (typeof v !== "number" || !Number.isFinite(v)) continue
+    agg.set(code, (agg.get(code) ?? 0) + v)
+  }
+  return Array.from(agg.entries())
+    .map(([p, value]) => ({ p, value }))
+    .sort((a, b) => a.p.localeCompare(b.p))
+}
+
 function MetricSection({
   title,
   label,
   yearSeries,
   mapData,
   mapYear,
+  mapLevel,
   formatValue,
   selectedRegion,
+  selectedProvince,
   onSelectRegion,
+  onSelectProvince,
+  slug,
+  sectionId,
 }: {
   title: string
   label: string
   yearSeries: YearPoint[]
-  mapData: RegionPoint[]
+  mapData: RegionPoint[] | ProvincePoint[]
   mapYear: number | null
+  mapLevel: "region" | "province"
   formatValue: (v: number) => string
   selectedRegion: RegionCode
+  selectedProvince: ProvinceCode | null
   onSelectRegion: (code: RegionCode) => void
+  onSelectProvince: (code: ProvinceCode) => void
+  slug?: string
+  sectionId?: string
 }) {
+  const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("chart")
+
+  // Transform yearSeries to the format ExportButtons expects
+  const exportData = React.useMemo(() =>
+    yearSeries.map(d => ({
+      label: String(d.sortValue),
+      value: d.value,
+      periodCells: d.periodCells,
+    })),
+    [yearSeries]
+  )
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">{title}</h2>
-      <Tabs defaultValue="chart">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">{title}</h2>
+        {slug && sectionId && (
+          <ExportButtons
+            data={exportData}
+            title={title}
+            slug={slug}
+            sectionId={sectionId}
+            viewType={currentView}
+            periodHeaders={["Jaar"]}
+            valueLabel={label}
+          />
+        )}
+      </div>
+      <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table" | "map")}>
         <TabsList>
           <TabsTrigger value="chart">Grafiek</TabsTrigger>
           <TabsTrigger value="table">Tabel</TabsTrigger>
@@ -275,19 +336,37 @@ function MetricSection({
         <TabsContent value="map">
           <Card>
             <CardHeader>
-              <CardTitle>{mapYear ? `Verdeling per regio (${mapYear})` : "Verdeling per regio"}</CardTitle>
+              <CardTitle>
+                {mapYear
+                  ? `Verdeling per ${mapLevel === "province" ? "provincie" : "regio"} (${mapYear})`
+                  : `Verdeling per ${mapLevel === "province" ? "provincie" : "regio"}`}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <RegionMap
-                data={mapData}
-                selectedRegion={selectedRegion}
-                onSelectRegion={onSelectRegion}
-                getRegionCode={(d) => (d as any).r}
-                getMetricValue={(d) => (d as any).value}
-                formatValue={formatValue}
-              />
+              {mapLevel === "province" ? (
+                <ProvinceMap
+                  data={mapData as ProvincePoint[]}
+                  selectedRegion={selectedRegion}
+                  selectedProvince={selectedProvince}
+                  onSelectProvince={onSelectProvince}
+                  getProvinceCode={(d) => (d as any).p}
+                  getMetricValue={(d) => (d as any).value}
+                  formatValue={formatValue}
+                />
+              ) : (
+                <RegionMap
+                  data={mapData as RegionPoint[]}
+                  selectedRegion={selectedRegion}
+                  onSelectRegion={onSelectRegion}
+                  getRegionCode={(d) => (d as any).r}
+                  getMetricValue={(d) => (d as any).value}
+                  formatValue={formatValue}
+                />
+              )}
               <div className="mt-3 text-xs text-muted-foreground">
-                Klik op een regio om de regiofilter te zetten (België kiezen kan via de locatie-filter bovenaan).
+                {mapLevel === "province"
+                  ? "Klik op een provincie om de provinciefilter te zetten (België kiezen kan via de locatie-filter bovenaan)."
+                  : "Klik op een regio om de regiofilter te zetten (België kiezen kan via de locatie-filter bovenaan)."}
               </div>
             </CardContent>
           </Card>
@@ -328,21 +407,29 @@ function InnerDashboard() {
   const stoppersMapYear = latestYear(stoppersSeries)
   const survivalMapYear = latestYear(survivalSeries)
 
+  const mapLevel = level === "province" ? "province" : "region"
+
   const startersMap = React.useMemo(() => {
     if (!startersMapYear) return []
-    return aggregateByRegionForYear(mapRows, startersMapYear, (r) => (typeof r.fr === "number" ? r.fr : null))
-  }, [mapRows, startersMapYear])
+    const val = (r: VatSurvivalRow) => (typeof r.fr === "number" ? r.fr : null)
+    return mapLevel === "province"
+      ? aggregateByProvinceForYear(mapRows, startersMapYear, val)
+      : aggregateByRegionForYear(mapRows, startersMapYear, val)
+  }, [mapRows, startersMapYear, mapLevel])
 
   const stoppersMap = React.useMemo(() => {
     if (!stoppersMapYear) return []
     const key = survivalKeyForHorizon(stopHorizon)
-    return aggregateByRegionForYear(mapRows, stoppersMapYear, (r) => {
+    const val = (r: VatSurvivalRow) => {
       const surv = (r as any)[key]
       return typeof r.fr === "number" && typeof surv === "number" ? Math.max(0, r.fr - surv) : null
-    })
-  }, [mapRows, stoppersMapYear, stopHorizon])
+    }
+    return mapLevel === "province"
+      ? aggregateByProvinceForYear(mapRows, stoppersMapYear, val)
+      : aggregateByRegionForYear(mapRows, stoppersMapYear, val)
+  }, [mapRows, stoppersMapYear, stopHorizon, mapLevel])
 
-  function survMap(mapYear: number | null, key: "s1" | "s2" | "s3" | "s4" | "s5") {
+  function survMapByRegion(mapYear: number | null, key: "s1" | "s2" | "s3" | "s4" | "s5"): RegionPoint[] {
     if (!mapYear) return []
     const byRegion = new Map<RegionCode, { fr: number; surv: number }>()
     for (const r of mapRows) {
@@ -362,16 +449,46 @@ function InnerDashboard() {
     }))
   }
 
-  const survivalMap = React.useMemo(
-    () => survMap(survivalMapYear, survivalKeyForHorizon(stopHorizon)),
-    [mapRows, survivalMapYear, stopHorizon]
-  )
+  function survMapByProvince(mapYear: number | null, key: "s1" | "s2" | "s3" | "s4" | "s5"): ProvincePoint[] {
+    if (!mapYear) return []
+    const byProvince = new Map<string, { fr: number; surv: number }>()
+    for (const r of mapRows) {
+      if (r.y !== mapYear) continue
+      if (!r.p) continue
+      const surv = (r as any)[key]
+      if (typeof r.fr !== "number" || typeof surv !== "number") continue
+      const code = String(r.p)
+      const prev = byProvince.get(code) ?? { fr: 0, surv: 0 }
+      prev.fr += r.fr
+      prev.surv += surv
+      byProvince.set(code, prev)
+    }
+    return Array.from(byProvince.entries()).map(([p, v]) => ({
+      p,
+      value: v.fr > 0 ? Math.round(((v.surv / v.fr) * 100) * 10) / 10 : 0,
+    }))
+  }
+
+  const survivalMap: RegionPoint[] | ProvincePoint[] = React.useMemo(() => {
+    const key = survivalKeyForHorizon(stopHorizon)
+    return mapLevel === "province"
+      ? survMapByProvince(survivalMapYear, key)
+      : survMapByRegion(survivalMapYear, key)
+  }, [mapRows, survivalMapYear, stopHorizon, mapLevel])
 
   function selectRegion(code: RegionCode) {
     setSelectedRegion(code)
     setSelectedProvince(null)
     setSelectedMunicipality(null)
     setLevel("region")
+  }
+
+  function selectProvince(code: ProvinceCode) {
+    setSelectedProvince(code)
+    setSelectedMunicipality(null)
+    const prov = PROVINCES.find((p) => String(p.code) === String(code))
+    if (prov) setSelectedRegion(prov.regionCode)
+    setLevel("province")
   }
 
   const placeLabel = React.useMemo(() => {
@@ -406,9 +523,14 @@ function InnerDashboard() {
         yearSeries={startersSeries}
         mapData={startersMap}
         mapYear={startersMapYear}
+        mapLevel={mapLevel}
         formatValue={formatInt}
         selectedRegion={selectedRegion}
+        selectedProvince={selectedProvince}
         onSelectRegion={selectRegion}
+        onSelectProvince={selectProvince}
+        slug="starters-stoppers"
+        sectionId="starters"
       />
 
       <div className="space-y-3">
@@ -436,9 +558,14 @@ function InnerDashboard() {
           yearSeries={stoppersSeries}
           mapData={stoppersMap}
           mapYear={stoppersMapYear}
+          mapLevel={mapLevel}
           formatValue={formatInt}
           selectedRegion={selectedRegion}
+          selectedProvince={selectedProvince}
           onSelectRegion={selectRegion}
+          onSelectProvince={selectProvince}
+          slug="starters-stoppers"
+          sectionId="stoppers"
         />
       </div>
 
@@ -448,9 +575,14 @@ function InnerDashboard() {
         yearSeries={survivalSeries}
         mapData={survivalMap}
         mapYear={survivalMapYear}
+        mapLevel={mapLevel}
         formatValue={formatPct}
         selectedRegion={selectedRegion}
+        selectedProvince={selectedProvince}
         onSelectRegion={selectRegion}
+        onSelectProvince={selectProvince}
+        slug="starters-stoppers"
+        sectionId="survival"
       />
     </div>
   )

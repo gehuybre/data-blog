@@ -27,4 +27,7 @@
 - [GeoContext.tsx](files/embuild-analyses/src/components/analyses/shared/GeoContext.tsx.md)
 - [GeoFilter.tsx](files/embuild-analyses/src/components/analyses/shared/GeoFilter.tsx.md)
 - [MunicipalityMap.tsx](files/embuild-analyses/src/components/analyses/shared/MunicipalityMap.tsx.md)
+- [ExportButtons.tsx](files/embuild-analyses/src/components/analyses/shared/ExportButtons.tsx.md) - CSV download and embed code generation
+- [EmbeddableSection.tsx](files/embuild-analyses/src/components/analyses/shared/EmbeddableSection.tsx.md) - Standalone section for iframe embeds
+- [Embed Route](files/embuild-analyses/src/app/embed/README.md) - Iframe embedding endpoint
 - [geo-utils.ts](files/embuild-analyses/src/lib/geo-utils.ts.md)
