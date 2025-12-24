@@ -3,9 +3,9 @@
 import { useEffect, useState, useMemo } from "react"
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps"
 import { scaleQuantile } from "d3-scale"
-import { geoBounds, geoMercator } from "d3-geo"
+import { geoBounds } from "d3-geo"
 import { Loader2 } from "lucide-react"
-import { getProvinceForMunicipality, getRegionForMunicipality, RegionCode, ProvinceCode, MunicipalityCode } from "@/lib/geo-utils"
+import { PROVINCES, getProvinceForMunicipality, getRegionForMunicipality, RegionCode, ProvinceCode, MunicipalityCode } from "@/lib/geo-utils"
 
 type UnknownRecord = Record<string, any>
 
@@ -14,6 +14,7 @@ interface MunicipalityMapProps<TData extends UnknownRecord = UnknownRecord> {
   metric: string
   municipalities: any[]
   level?: 'region' | 'province' | 'municipality'
+  displayMode?: "auto" | "province" | "municipality"
   selectedRegion?: RegionCode
   selectedProvince?: ProvinceCode | null
   selectedMunicipality?: MunicipalityCode | null
@@ -22,20 +23,21 @@ interface MunicipalityMapProps<TData extends UnknownRecord = UnknownRecord> {
   getPeriodKey?: (d: TData) => string
   getPeriodSortValue?: (d: TData) => number
   getPeriodLabel?: (d: TData) => string
+  onSelectProvince?: (code: ProvinceCode) => void
+  onSelectMunicipality?: (code: MunicipalityCode) => void
+  tooltipMetricLabel?: string
+  formatValue?: (value: number) => string
 }
 
-// In production this site is exported under `basePath` (see `embuild-analyses/next.config.mjs`),
-// so we must prefix public asset URLs accordingly.
 const GEO_URL =
-  process.env.NODE_ENV === "production"
-    ? "/data-blog/maps/belgium_municipalities.json"
-    : "/maps/belgium_municipalities.json"
+  (process.env.NODE_ENV === "production" ? "/data-blog" : "") + "/maps/belgium_municipalities.json"
 
 export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
   data, 
   metric, 
   municipalities,
   level = 'region',
+  displayMode = "auto",
   selectedRegion = '1000',
   selectedProvince = null,
   selectedMunicipality = null,
@@ -44,6 +46,10 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
   getPeriodKey,
   getPeriodSortValue,
   getPeriodLabel,
+  onSelectProvince,
+  onSelectMunicipality,
+  tooltipMetricLabel,
+  formatValue,
 }: MunicipalityMapProps<TData>) {
   const [geoData, setGeoData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -64,6 +70,15 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
       })
   }, [])
 
+  const resolvedDisplayMode = useMemo<"province" | "municipality">(() => {
+    if (displayMode === "province") return "province"
+    if (displayMode === "municipality") return "municipality"
+    // auto: show provinces for Belgium/region scopes; show municipalities when province/municipality is selected.
+    if (level === "province") return "municipality"
+    if (level === "municipality") return "municipality"
+    return "province"
+  }, [displayMode, level])
+
   // Filter geographies based on selection
   const filteredGeographies = useMemo(() => {
     if (!geoData) return []
@@ -75,25 +90,30 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
       const code = parseInt(rawCode)
       if (isNaN(code)) return false
       
-      if (level === 'municipality' && selectedMunicipality) {
+      // Province view: show only the selected region (or all Belgium)
+      if (resolvedDisplayMode === "province") {
+        if (level === "region" && selectedRegion !== "1000") {
+          const regCode = getRegionForMunicipality(code)
+          return String(regCode) === String(selectedRegion)
+        }
+        return true
+      }
+
+      // Municipality view
+      if (level === "municipality" && selectedMunicipality) {
         // Show province context for municipality
         const provCode = getProvinceForMunicipality(parseInt(selectedMunicipality))
         return getProvinceForMunicipality(code) === provCode
       }
-      
-      if (level === 'province' && selectedProvince) {
+
+      if (level === "province" && selectedProvince) {
         const provCode = getProvinceForMunicipality(code)
         return String(provCode) === String(selectedProvince)
       }
-      
-      if (level === 'region' && selectedRegion !== '1000') {
-        const regCode = getRegionForMunicipality(code)
-        return String(regCode) === String(selectedRegion)
-      }
-      
-      return true // Show all for Belgium
+
+      return true
     })
-  }, [geoData, level, selectedRegion, selectedProvince, selectedMunicipality])
+  }, [geoData, resolvedDisplayMode, level, selectedRegion, selectedProvince, selectedMunicipality])
 
   // Calculate center and zoom based on filtered geographies
   const { center, zoom } = useMemo(() => {
@@ -170,25 +190,39 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
     return data.reduce((prev, current) => {
       return periodSortGetter(current) > periodSortGetter(prev) ? current : prev
     }, data[0])
-  }, [data, getPeriodSortValue])
+  }, [data, periodSortGetter])
 
-  // Prepare data for the map (map municipality code -> value)
-  const mapData = useMemo(() => {
-    if (!latestPeriod) return {}
+  const latestPeriodRows = useMemo(() => {
+    if (!latestPeriod) return [] as TData[]
     const latestKey = periodKeyGetter(latestPeriod)
-    const currentData = data.filter(d => periodKeyGetter(d) === latestKey)
-    
-    const dataMap: Record<string, number> = {}
-    currentData.forEach(d => {
-      const code = municipalityCodeGetter(d)
-      if (code === null || code === undefined) return
-      dataMap[String(code)] = metricGetter(d, metric)
-    })
-    return dataMap
-  }, [data, latestPeriod, metric, getMunicipalityCode, getMetricValue, getPeriodKey])
+    return data.filter((d) => periodKeyGetter(d) === latestKey)
+  }, [data, latestPeriod, periodKeyGetter])
+
+  const municipalityValueByCode = useMemo(() => {
+    const out: Record<string, number> = {}
+    for (const row of latestPeriodRows) {
+      const code = municipalityCodeGetter(row)
+      if (code === null || code === undefined) continue
+      out[String(code)] = metricGetter(row, metric)
+    }
+    return out
+  }, [latestPeriodRows, metric, municipalityCodeGetter, metricGetter])
+
+  const provinceValueByCode = useMemo(() => {
+    const out: Record<string, number> = {}
+    for (const row of latestPeriodRows) {
+      const m = municipalityCodeGetter(row)
+      const mCode = typeof m === "string" ? Number.parseInt(m, 10) : Number(m)
+      if (!Number.isFinite(mCode)) continue
+      const pCode = String(getProvinceForMunicipality(mCode))
+      const inc = metricGetter(row, metric)
+      out[pCode] = (out[pCode] ?? 0) + (Number.isFinite(inc) ? inc : 0)
+    }
+    return out
+  }, [latestPeriodRows, metric, municipalityCodeGetter, metricGetter])
 
   const colorScale = useMemo(() => {
-    const values = Object.values(mapData)
+    const values = Object.values(resolvedDisplayMode === "province" ? provinceValueByCode : municipalityValueByCode)
     if (!values.length) return () => "#EEE"
     
     return scaleQuantile<string>()
@@ -204,7 +238,23 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
         "#9a311f",
         "#782618"
       ])
-  }, [mapData])
+  }, [resolvedDisplayMode, municipalityValueByCode, provinceValueByCode])
+
+  const municipalityNameByCode = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const row of municipalities ?? []) {
+      const code = row?.code
+      const name = row?.name
+      if (code === null || code === undefined) continue
+      if (typeof name !== "string" || !name.trim()) continue
+      m.set(String(code), name)
+    }
+    return m
+  }, [municipalities])
+
+  const formatNumber = useMemo(() => {
+    return formatValue ?? ((n: number) => new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(n))
+  }, [formatValue])
 
   if (loading) {
     return <div className="flex h-[400px] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
@@ -241,22 +291,71 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
             <Geographies geography={filteredGeoJson} key={JSON.stringify(filteredGeoJson?.features?.length)}>
             {({ geographies }) =>
                 geographies.map((geo) => {
-                    const code = geo.properties.code
-                    const value = mapData[code]
+                    const municipalityCode = String(geo.properties.code ?? "")
+                    const mCode = Number.parseInt(municipalityCode, 10)
+                    if (!Number.isFinite(mCode)) return null
+
+                    const provinceCode = String(getProvinceForMunicipality(mCode))
+                    const value =
+                      resolvedDisplayMode === "province"
+                        ? provinceValueByCode[provinceCode]
+                        : municipalityValueByCode[municipalityCode]
+
+                    const isInteractive =
+                      (resolvedDisplayMode === "province" && !!onSelectProvince) ||
+                      (resolvedDisplayMode === "municipality" && !!onSelectMunicipality)
+
+                    const isActive =
+                      resolvedDisplayMode === "province"
+                        ? !!selectedProvince && String(selectedProvince) === provinceCode
+                        : !!selectedMunicipality && String(selectedMunicipality) === municipalityCode
+
+                    const placeName =
+                      resolvedDisplayMode === "province"
+                        ? (PROVINCES.find((p) => String(p.code) === provinceCode)?.name ?? provinceCode)
+                        : (municipalityNameByCode.get(municipalityCode) ?? geo.properties?.LAU_NAME ?? municipalityCode)
+
+                    const metricLabel = tooltipMetricLabel ?? metric
+                    const tooltipValue =
+                      value === undefined || !Number.isFinite(value) ? "Geen data" : formatNumber(value)
+                    const tooltipText = `${placeName} · ${metricLabel}: ${tooltipValue}`
+
+                    const opacity =
+                      resolvedDisplayMode === "province" && selectedProvince
+                        ? String(selectedProvince) === provinceCode
+                          ? 1
+                          : 0.45
+                        : 1
+
+                    const showMunicipalityBoundaries = resolvedDisplayMode === "municipality"
+
                     return (
                         <Geography
                         key={geo.rsmKey}
                         geography={geo}
-                        fill={value !== undefined ? colorScale(value) : "#EEE"}
-                        stroke="#D6D6DA"
-                        strokeWidth={0.5 / zoom} // Adjust stroke width based on zoom
+                        fill={value !== undefined && Number.isFinite(value) ? colorScale(value) : "#EEE"}
+                        stroke={showMunicipalityBoundaries ? (isActive ? "#111827" : "#D6D6DA") : "transparent"}
+                        strokeWidth={(showMunicipalityBoundaries ? (isActive ? 1.2 : 0.5) : 0) / zoom}
+                        opacity={opacity}
                         style={{
                             default: { outline: "none" },
-                            hover: { fill: "#F53", outline: "none", cursor: "pointer" },
+                            hover: {
+                              outline: "none",
+                              cursor: isInteractive ? "pointer" : "default",
+                              ...(showMunicipalityBoundaries
+                                ? { stroke: "#111827", strokeWidth: 1.2 / zoom }
+                                : {}),
+                            },
                             pressed: { outline: "none" },
                         }}
-                        // title={`${geo.properties.LAU_NAME}: ${value || 0}`}
-                        />
+                        onClick={() => {
+                          if (resolvedDisplayMode === "province") onSelectProvince?.(provinceCode as ProvinceCode)
+                          else onSelectMunicipality?.(municipalityCode as MunicipalityCode)
+                        }}
+                        aria-label={placeName}
+                        >
+                          <title>{tooltipText}</title>
+                        </Geography>
                     )
                 })
             }

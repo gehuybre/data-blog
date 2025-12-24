@@ -1,0 +1,161 @@
+"use client"
+
+import { useState, useCallback } from "react"
+import { Button } from "@/components/ui/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Download, Code, Check, Copy } from "lucide-react"
+
+type ExportData = {
+  label: string
+  value: number
+  periodCells?: Array<string | number>
+}
+
+interface ExportButtonsProps {
+  /** Data to export as CSV */
+  data: ExportData[]
+  /** Title for the export (used in filename and embed) */
+  title: string
+  /** Analysis slug for embed URL */
+  slug: string
+  /** Unique section ID for embed URL */
+  sectionId: string
+  /** Current view type (chart, table, map) */
+  viewType: "chart" | "table" | "map"
+  /** Optional column headers for CSV */
+  periodHeaders?: string[]
+  /** Optional label for the value column */
+  valueLabel?: string
+}
+
+export function ExportButtons({
+  data,
+  title,
+  slug,
+  sectionId,
+  viewType,
+  periodHeaders = ["Jaar", "Kwartaal"],
+  valueLabel = "Aantal",
+}: ExportButtonsProps) {
+  const [copied, setCopied] = useState(false)
+
+  const downloadCSV = useCallback(() => {
+    if (!data?.length) return
+
+    // Build CSV headers
+    const headers = [...periodHeaders, valueLabel]
+
+    // Build CSV rows
+    const rows = data.map((row) => {
+      const periodValues = row.periodCells ?? [row.label]
+      return [...periodValues, row.value].join(",")
+    })
+
+    const csv = [headers.join(","), ...rows].join("\n")
+
+    // Create and trigger download
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${slug}-${sectionId}-${viewType}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }, [data, title, slug, sectionId, viewType, periodHeaders, valueLabel])
+
+  const getEmbedCode = useCallback(() => {
+    // Get the base URL - in production this will be the GitHub Pages URL
+    const baseUrl = typeof window !== "undefined"
+      ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "")
+      : ""
+
+    const embedUrl = `${baseUrl}/embed/${slug}/${sectionId}/?view=${viewType}`
+
+    return `<iframe
+  src="${embedUrl}"
+  width="100%"
+  height="500"
+  frameborder="0"
+  title="${title}"
+  loading="lazy"
+></iframe>`
+  }, [slug, sectionId, viewType, title])
+
+  const copyEmbedCode = useCallback(async () => {
+    const code = getEmbedCode()
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea")
+      textArea.value = code
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand("copy")
+      document.body.removeChild(textArea)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }, [getEmbedCode])
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={downloadCSV}
+        disabled={!data?.length}
+        title="Download CSV"
+      >
+        <Download className="h-4 w-4" />
+        <span className="hidden sm:inline">CSV</span>
+      </Button>
+
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm" title="Embed code">
+            <Code className="h-4 w-4" />
+            <span className="hidden sm:inline">Embed</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-96" align="end">
+          <div className="space-y-3">
+            <div className="font-medium text-sm">Embed deze visualisatie</div>
+            <p className="text-xs text-muted-foreground">
+              Kopieer de onderstaande code om deze {viewType === "chart" ? "grafiek" : viewType === "table" ? "tabel" : "kaart"} in je website te integreren.
+            </p>
+            <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto whitespace-pre-wrap break-all">
+              {getEmbedCode()}
+            </pre>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full"
+              onClick={copyEmbedCode}
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  Gekopieerd!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  Kopieer code
+                </>
+              )}
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  )
+}

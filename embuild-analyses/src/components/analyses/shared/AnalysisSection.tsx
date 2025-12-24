@@ -1,13 +1,15 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { FilterableChart } from "./FilterableChart"
 import { FilterableTable } from "./FilterableTable"
 import { MunicipalityMap } from "./MunicipalityMap"
+import { ExportButtons } from "./ExportButtons"
 import { useGeo } from "./GeoContext"
-import { getProvinceForMunicipality, getRegionForMunicipality, Municipality } from "@/lib/geo-utils"
+import { PROVINCES, getProvinceForMunicipality, Municipality, ProvinceCode } from "@/lib/geo-utils"
 
 type UnknownRecord = Record<string, any>
 
@@ -29,6 +31,10 @@ interface AnalysisSectionProps<TData extends UnknownRecord = UnknownRecord> {
   municipalities: Municipality[]
   metric: string
   label?: string
+  /** Analysis slug for embed URLs (e.g., "vergunningen-goedkeuringen") */
+  slug?: string
+  /** Section ID for embed URLs (e.g., "renovatie") */
+  sectionId?: string
   getMunicipalityCode?: (d: TData) => number
   getMetricValue?: (d: TData, metric: string) => number
   period?: PeriodConfig<TData>
@@ -47,11 +53,21 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
   municipalities,
   metric,
   label,
+  slug,
+  sectionId,
   getMunicipalityCode,
   getMetricValue,
   period,
 }: AnalysisSectionProps<TData>) {
-  const { level, selectedRegion, selectedProvince, selectedMunicipality } = useGeo()
+  const {
+    level,
+    setLevel,
+    selectedRegion,
+    setSelectedRegion,
+    selectedProvince,
+    setSelectedProvince,
+    setSelectedMunicipality,
+  } = useGeo()
 
   const municipalityCodeGetter =
     getMunicipalityCode ?? ((d: any) => Number(d?.m))
@@ -73,33 +89,17 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
     } satisfies PeriodTableConfig<any>)
 
   // 1. Filter raw data based on scope (for Map)
-  // If municipality is selected, show province context. Otherwise show selected level context.
+  // Province-only map: always show all provinces (color scale stays comparable).
   const mapScopeData = useMemo(() => {
-    if (level === 'municipality' && selectedMunicipality) {
-       // Show province context
-       const provCode = getProvinceForMunicipality(parseInt(selectedMunicipality))
-       return data.filter(d => getProvinceForMunicipality(municipalityCodeGetter(d)) === provCode)
-    }
-    if (level === 'province' && selectedProvince) {
-       return data.filter(d => getProvinceForMunicipality(municipalityCodeGetter(d)) === selectedProvince)
-    }
-    if (level === 'region' && selectedRegion !== '1000') {
-       return data.filter(d => getRegionForMunicipality(municipalityCodeGetter(d)) === selectedRegion)
-    }
-    return data // Show all
-  }, [data, level, selectedRegion, selectedProvince, selectedMunicipality, getMunicipalityCode])
+    return data
+  }, [data])
 
   // 2. Aggregate data for Chart/Table
   const chartData = useMemo(() => {
     // Filter based on exact selection
     let filtered = data
-    if (level === "municipality" && selectedMunicipality) {
-      const mCode = parseInt(selectedMunicipality)
-      filtered = data.filter((d) => municipalityCodeGetter(d) === mCode)
-    } else if (level === "province" && selectedProvince) {
+    if (level === "province" && selectedProvince) {
       filtered = data.filter((d) => getProvinceForMunicipality(municipalityCodeGetter(d)) === selectedProvince)
-    } else if (level === "region" && selectedRegion !== "1000") {
-      filtered = data.filter((d) => getRegionForMunicipality(municipalityCodeGetter(d)) === selectedRegion)
     }
 
     const agg = new Map<string, AggregatedPoint>()
@@ -125,20 +125,71 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
     level,
     selectedRegion,
     selectedProvince,
-    selectedMunicipality,
     metric,
     getMunicipalityCode,
     getMetricValue,
     period,
   ])
 
+  const formatInt = useMemo(() => {
+    return (n: number) => new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(n)
+  }, [])
+
+  const latestPeriodLabel = useMemo(() => {
+    if (!data?.length) return null
+    const latest = data.reduce((prev, cur) => (periodSortGetter(cur) > periodSortGetter(prev) ? cur : prev), data[0])
+    return periodLabelGetter(latest)
+  }, [data, periodSortGetter, periodLabelGetter])
+
+  const provinceValueByCode = useMemo(() => {
+    if (!data?.length) return {} as Record<string, number>
+    const latest = data.reduce((prev, cur) => (periodSortGetter(cur) > periodSortGetter(prev) ? cur : prev), data[0])
+    const latestKey = periodKeyGetter(latest)
+    const out: Record<string, number> = {}
+    for (const row of data) {
+      if (periodKeyGetter(row) !== latestKey) continue
+      const mCode = municipalityCodeGetter(row)
+      const numericMunCode = typeof mCode === "string" ? Number.parseInt(mCode, 10) : Number(mCode)
+      if (!Number.isFinite(numericMunCode)) continue
+      const provCode = String(getProvinceForMunicipality(numericMunCode))
+      out[provCode] = (out[provCode] ?? 0) + metricGetter(row, metric)
+    }
+    return out
+  }, [data, metric, municipalityCodeGetter, metricGetter, periodKeyGetter, periodSortGetter])
+
+  const [isPopupOpen, setIsPopupOpen] = useState(false)
+  const [popupProvince, setPopupProvince] = useState<ProvinceCode | null>(null)
+  const [currentView, setCurrentView] = useState<"chart" | "table" | "map">("chart")
+
+  const popupProvinceName = useMemo(() => {
+    if (!popupProvince) return null
+    return PROVINCES.find((p) => String(p.code) === String(popupProvince))?.name ?? String(popupProvince)
+  }, [popupProvince])
+
+  const popupValue = useMemo(() => {
+    if (!popupProvince) return null
+    const v = provinceValueByCode[String(popupProvince)]
+    return typeof v === "number" && Number.isFinite(v) ? v : null
+  }, [popupProvince, provinceValueByCode])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">{title}</h2>
+        {slug && sectionId && (
+          <ExportButtons
+            data={chartData}
+            title={title}
+            slug={slug}
+            sectionId={sectionId}
+            viewType={currentView}
+            periodHeaders={periodTable.headers}
+            valueLabel={label}
+          />
+        )}
       </div>
 
-      <Tabs defaultValue="chart">
+      <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table" | "map")}>
         <TabsList>
           <TabsTrigger value="chart">Grafiek</TabsTrigger>
           <TabsTrigger value="table">Tabel</TabsTrigger>
@@ -174,18 +225,45 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
                 data={mapScopeData} 
                 metric={metric} 
                 municipalities={municipalities}
-                level={level}
+                level="province"
+                displayMode="province"
                 selectedRegion={selectedRegion}
                 selectedProvince={selectedProvince}
-                selectedMunicipality={selectedMunicipality}
                 getMunicipalityCode={municipalityCodeGetter}
                 getMetricValue={metricGetter}
                 getPeriodKey={periodKeyGetter}
                 getPeriodSortValue={periodSortGetter}
                 getPeriodLabel={periodLabelGetter}
+                tooltipMetricLabel={title}
+                formatValue={formatInt}
+                onSelectProvince={(code: ProvinceCode) => {
+                  setSelectedProvince(code)
+                  setSelectedMunicipality(null)
+                  const prov = PROVINCES.find((p) => String(p.code) === String(code))
+                  if (prov) setSelectedRegion(prov.regionCode)
+                  setLevel("province")
+                  setPopupProvince(code)
+                  setIsPopupOpen(true)
+                }}
               />
             </CardContent>
           </Card>
+          <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{popupProvinceName ? popupProvinceName : "Provincie"}</DialogTitle>
+                <DialogDescription>
+                  {latestPeriodLabel ? `Laatste periode: ${latestPeriodLabel}` : "Laatste periode"}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="text-sm">
+                <div className="flex items-baseline justify-between gap-4">
+                  <div className="text-muted-foreground">{title}</div>
+                  <div className="font-semibold">{popupValue === null ? "Geen data" : formatInt(popupValue)}</div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
       </Tabs>
     </div>

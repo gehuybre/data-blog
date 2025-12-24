@@ -24,12 +24,14 @@ import {
 
 interface GeoFilterProps {
   municipalities: Municipality[]
+  showRegions?: boolean
   showProvinces?: boolean
   showMunicipalities?: boolean
 }
 
 export function GeoFilter({
   municipalities,
+  showRegions = true,
   showProvinces = true,
   showMunicipalities = true,
 }: GeoFilterProps) {
@@ -61,10 +63,9 @@ export function GeoFilter({
   }, [selectedRegion])
 
   const isDefaultSelection =
-    level === "region" &&
-    selectedRegion === "1000" &&
-    !selectedProvince &&
-    !selectedMunicipality
+    (showRegions
+      ? level === "region" && selectedRegion === "1000" && !selectedProvince && !selectedMunicipality
+      : level === "province" && selectedRegion === "1000" && !selectedProvince && !selectedMunicipality)
 
   const currentSelectionLabel = selectedMunicipalityName
     ? `Gemeente: ${selectedMunicipalityName}`
@@ -92,7 +93,7 @@ export function GeoFilter({
     setSelectedRegion("1000")
     setSelectedProvince(null)
     setSelectedMunicipality(null)
-    setLevel("region")
+    setLevel(showRegions ? "region" : "province")
     setOpen(false)
   }
 
@@ -143,11 +144,15 @@ export function GeoFilter({
             <Command>
               <CommandInput
                 placeholder={
-                  showProvinces && showMunicipalities
+                  showRegions && showProvinces && showMunicipalities
                     ? "Zoek België, regio, provincie of gemeente..."
-                    : showProvinces
+                    : showRegions && showProvinces
                       ? "Zoek België, regio of provincie..."
-                      : "Zoek België of regio..."
+                      : showRegions
+                        ? "Zoek België of regio..."
+                        : showProvinces
+                          ? "Zoek België of provincie..."
+                          : "Zoek België..."
                 }
               />
               <CommandList>
@@ -160,23 +165,27 @@ export function GeoFilter({
                   </CommandItem>
                 </CommandGroup>
 
-                <CommandSeparator />
-
-                <CommandGroup heading="Regio">
-                  {REGIONS.filter((r) => r.code !== "1000").map((r) => (
-                    <CommandItem key={r.code} value={r.name} onSelect={() => selectRegion(r.code)}>
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          !selectedProvince && !selectedMunicipality && selectedRegion === r.code ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {r.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-
-                <CommandSeparator />
+                {showRegions ? (
+                  <>
+                    <CommandSeparator />
+                    <CommandGroup heading="Regio">
+                      {REGIONS.filter((r) => r.code !== "1000").map((r) => (
+                        <CommandItem key={r.code} value={r.name} onSelect={() => selectRegion(r.code)}>
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              !selectedProvince && !selectedMunicipality && selectedRegion === r.code ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {r.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                    <CommandSeparator />
+                  </>
+                ) : (
+                  <CommandSeparator />
+                )}
 
                 {showProvinces ? (
                   <>
@@ -185,7 +194,11 @@ export function GeoFilter({
                         <CommandItem key={p.code} value={p.name} onSelect={() => selectProvince(p.code)}>
                           <Check className={cn("mr-2 h-4 w-4", currentSelectionKey === `prov:${p.code}` ? "opacity-100" : "opacity-0")} />
                           {p.name}
-                          <span className="ml-2 text-xs text-muted-foreground">({REGIONS.find((r) => r.code === p.regionCode)?.name})</span>
+                          {showRegions ? (
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              ({REGIONS.find((r) => r.code === p.regionCode)?.name})
+                            </span>
+                          ) : null}
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -231,9 +244,13 @@ export function GeoFilter({
         <div className="text-xs text-muted-foreground">
           Huidige selectie:{" "}
           {level === "municipality" && selectedMunicipalityName
-            ? `${selectedMunicipalityName} · ${selectedProvinceName ?? ""} · ${selectedRegionName}`
+            ? showRegions
+              ? `${selectedMunicipalityName} · ${selectedProvinceName ?? ""} · ${selectedRegionName}`
+              : `${selectedMunicipalityName} · ${selectedProvinceName ?? ""}`.trim()
             : level === "province" && selectedProvinceName
-              ? `${selectedProvinceName} · ${selectedRegionName}`
+              ? showRegions
+                ? `${selectedProvinceName} · ${selectedRegionName}`
+                : selectedProvinceName
               : selectedRegionName}
         </div>
       </div>
