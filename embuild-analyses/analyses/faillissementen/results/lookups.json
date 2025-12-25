@@ -1,0 +1,138 @@
+{
+  "sectors": [
+    {
+      "code": "?",
+      "nl": "Onbekend"
+    },
+    {
+      "code": "A",
+      "nl": "Landbouw, bosbouw en visserij"
+    },
+    {
+      "code": "B",
+      "nl": "Winning van delfstoffen"
+    },
+    {
+      "code": "C",
+      "nl": "Industrie"
+    },
+    {
+      "code": "D",
+      "nl": "Productie en distributie van elektriciteit, gas, stoom"
+    },
+    {
+      "code": "E",
+      "nl": "Distributie van water; afval- en afvalwaterbeheer"
+    },
+    {
+      "code": "F",
+      "nl": "Bouwnijverheid"
+    },
+    {
+      "code": "G",
+      "nl": "Groot- en detailhandel; reparatie van auto's"
+    },
+    {
+      "code": "H",
+      "nl": "Vervoer en opslag"
+    },
+    {
+      "code": "I",
+      "nl": "Verschaffen van accommodatie en maaltijden"
+    },
+    {
+      "code": "J",
+      "nl": "Informatie en communicatie"
+    },
+    {
+      "code": "K",
+      "nl": "Financiële activiteiten en verzekeringen"
+    },
+    {
+      "code": "L",
+      "nl": "Exploitatie van en handel in onroerend goed"
+    },
+    {
+      "code": "M",
+      "nl": "Vrije beroepen en wetenschappelijke activiteiten"
+    },
+    {
+      "code": "N",
+      "nl": "Administratieve en ondersteunende diensten"
+    },
+    {
+      "code": "O",
+      "nl": "Openbaar bestuur en defensie"
+    },
+    {
+      "code": "P",
+      "nl": "Onderwijs"
+    },
+    {
+      "code": "Q",
+      "nl": "Menselijke gezondheidszorg en maatschappelijke dienstverlening"
+    },
+    {
+      "code": "R",
+      "nl": "Kunst, amusement en recreatie"
+    },
+    {
+      "code": "S",
+      "nl": "Overige diensten"
+    },
+    {
+      "code": "T",
+      "nl": "Huishoudens als werkgever"
+    },
+    {
+      "code": "U",
+      "nl": "Extraterritoriale organisaties"
+    }
+  ],
+  "provinces": [
+    {
+      "code": "10000",
+      "name": "Antwerpen"
+    },
+    {
+      "code": "70000",
+      "name": "Limburg"
+    },
+    {
+      "code": "40000",
+      "name": "Oost-Vlaanderen"
+    },
+    {
+      "code": "20001",
+      "name": "Vlaams-Brabant"
+    },
+    {
+      "code": "30000",
+      "name": "West-Vlaanderen"
+    }
+  ],
+  "years": [
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "construction_sector": "F"
+}
