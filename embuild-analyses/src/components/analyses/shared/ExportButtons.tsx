@@ -30,6 +30,12 @@ interface ExportButtonsProps {
   periodHeaders?: string[]
   /** Optional label for the value column */
   valueLabel?: string
+  /** Optional data source description */
+  dataSource?: string
+  /** Optional data source URL */
+  dataSourceUrl?: string
+  /** Optional embed URL parameters (for starters-stoppers filters) */
+  embedParams?: Record<string, string | number | null | undefined>
 }
 
 export function ExportButtons({
@@ -40,11 +46,33 @@ export function ExportButtons({
   viewType,
   periodHeaders = ["Jaar", "Kwartaal"],
   valueLabel = "Aantal",
+  dataSource,
+  dataSourceUrl,
+  embedParams,
 }: ExportButtonsProps) {
   const [copied, setCopied] = useState(false)
 
   const downloadCSV = useCallback(() => {
     if (!data?.length) return
+
+    // Build metadata header as comments
+    const metadata: string[] = []
+    metadata.push(`# ${title}`)
+    metadata.push(`# Gedownload op: ${new Date().toLocaleDateString("nl-BE", { year: "numeric", month: "long", day: "numeric" })}`)
+
+    if (dataSource) {
+      metadata.push(`# Bron: ${dataSource}`)
+    }
+    if (dataSourceUrl) {
+      metadata.push(`# Bron URL: ${dataSourceUrl}`)
+    }
+
+    // Add the analysis page URL
+    const baseUrl = typeof window !== "undefined"
+      ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "")
+      : ""
+    metadata.push(`# Analyse: ${baseUrl}/analyses/${slug}/`)
+    metadata.push(`#`)
 
     // Build CSV headers
     const headers = [...periodHeaders, valueLabel]
@@ -55,19 +83,19 @@ export function ExportButtons({
       return [...periodValues, row.value].join(",")
     })
 
-    const csv = [headers.join(","), ...rows].join("\n")
+    const csv = [...metadata, headers.join(","), ...rows].join("\n")
 
     // Create and trigger download
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.href = url
-    link.download = `${slug}-${sectionId}-${viewType}.csv`
+    link.download = `${slug}-${sectionId}.csv`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
-  }, [data, title, slug, sectionId, viewType, periodHeaders, valueLabel])
+  }, [data, title, slug, sectionId, periodHeaders, valueLabel, dataSource, dataSourceUrl])
 
   const getEmbedCode = useCallback(() => {
     // Get the base URL - in production this will be the GitHub Pages URL
@@ -75,7 +103,19 @@ export function ExportButtons({
       ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "")
       : ""
 
-    const embedUrl = `${baseUrl}/embed/${slug}/${sectionId}/?view=${viewType}`
+    // Build query params including view and any additional embed params
+    const params = new URLSearchParams()
+    params.set("view", viewType)
+
+    if (embedParams) {
+      for (const [key, value] of Object.entries(embedParams)) {
+        if (value !== null && value !== undefined && value !== "") {
+          params.set(key, String(value))
+        }
+      }
+    }
+
+    const embedUrl = `${baseUrl}/embed/${slug}/${sectionId}/?${params.toString()}`
 
     return `<iframe
   src="${embedUrl}"
@@ -85,7 +125,7 @@ export function ExportButtons({
   title="${title}"
   loading="lazy"
 ></iframe>`
-  }, [slug, sectionId, viewType, title])
+  }, [slug, sectionId, viewType, title, embedParams])
 
   const copyEmbedCode = useCallback(async () => {
     const code = getEmbedCode()

@@ -259,6 +259,9 @@ function MetricSection({
   onSelectProvince,
   slug,
   sectionId,
+  dataSource,
+  dataSourceUrl,
+  embedParams,
 }: {
   title: string
   label: string
@@ -273,6 +276,9 @@ function MetricSection({
   onSelectProvince: (code: ProvinceCode) => void
   slug?: string
   sectionId?: string
+  dataSource?: string
+  dataSourceUrl?: string
+  embedParams?: Record<string, string | number | null | undefined>
 }) {
   const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("chart")
 
@@ -299,6 +305,9 @@ function MetricSection({
             viewType={currentView}
             periodHeaders={["Jaar"]}
             valueLabel={label}
+            dataSource={dataSource}
+            dataSourceUrl={dataSourceUrl}
+            embedParams={embedParams}
           />
         )}
       </div>
@@ -531,6 +540,13 @@ function InnerDashboard() {
         onSelectProvince={selectProvince}
         slug="starters-stoppers"
         sectionId="starters"
+        dataSource="Statbel - Overlevingsgraad van btw-plichtigen"
+        dataSourceUrl="https://statbel.fgov.be/nl/themas/ondernemingen/overlevingsgraad-van-btw-plichtigen"
+        embedParams={{
+          region: selectedRegion !== "1000" ? selectedRegion : null,
+          province: selectedProvince,
+          sector: selectedNace1,
+        }}
       />
 
       <div className="space-y-3">
@@ -566,6 +582,14 @@ function InnerDashboard() {
           onSelectProvince={selectProvince}
           slug="starters-stoppers"
           sectionId="stoppers"
+          dataSource="Statbel - Overlevingsgraad van btw-plichtigen"
+          dataSourceUrl="https://statbel.fgov.be/nl/themas/ondernemingen/overlevingsgraad-van-btw-plichtigen"
+          embedParams={{
+            horizon: stopHorizon,
+            region: selectedRegion !== "1000" ? selectedRegion : null,
+            province: selectedProvince,
+            sector: selectedNace1,
+          }}
         />
       </div>
 
@@ -583,6 +607,14 @@ function InnerDashboard() {
         onSelectProvince={selectProvince}
         slug="starters-stoppers"
         sectionId="survival"
+        dataSource="Statbel - Overlevingsgraad van btw-plichtigen"
+        dataSourceUrl="https://statbel.fgov.be/nl/themas/ondernemingen/overlevingsgraad-van-btw-plichtigen"
+        embedParams={{
+          horizon: stopHorizon,
+          region: selectedRegion !== "1000" ? selectedRegion : null,
+          province: selectedProvince,
+          sector: selectedNace1,
+        }}
       />
     </div>
   )

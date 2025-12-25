@@ -6,6 +6,10 @@ export function generateStaticParams() {
     // vergunningen-goedkeuringen analysis
     { slug: "vergunningen-goedkeuringen", section: "renovatie" },
     { slug: "vergunningen-goedkeuringen", section: "nieuwbouw" },
+    // starters-stoppers analysis
+    { slug: "starters-stoppers", section: "starters" },
+    { slug: "starters-stoppers", section: "stoppers" },
+    { slug: "starters-stoppers", section: "survival" },
   ]
 }
 
@@ -16,6 +20,6 @@ export default async function EmbedPage({
 }) {
   const { slug, section } = await params
 
-  // View type is now handled client-side via URL hash or query params
+  // View type and filters are handled client-side via URL query params
   return <EmbedClient slug={slug} section={section} />
 }
