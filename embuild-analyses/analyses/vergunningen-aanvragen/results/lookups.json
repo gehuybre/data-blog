@@ -1,14 +1,4 @@
 {
-  "handelingen": [
-    {
-      "code": "nieuwbouw",
-      "nl": "Nieuwbouw"
-    },
-    {
-      "code": "verbouw",
-      "nl": "Verbouwen of hergebruik"
-    }
-  ],
   "types": [
     {
       "code": "eengezins",
@@ -23,22 +13,26 @@
       "nl": "Kamerwoning"
     }
   ],
-  "metrics": [
+  "besluit_types": [
     {
-      "code": "p",
-      "nl": "Aantal projecten"
+      "code": "Gemeente",
+      "nl": "Gemeente"
     },
     {
-      "code": "g",
-      "nl": "Aantal gebouwen"
+      "code": "Provincie",
+      "nl": "Provincie"
     },
     {
-      "code": "w",
-      "nl": "Aantal wooneenheden"
+      "code": "Vlaamse Overheid",
+      "nl": "Vlaamse Overheid"
     },
     {
-      "code": "m2",
-      "nl": "Woonoppervlakte (m²)"
+      "code": "RVVB",
+      "nl": "RVVB"
+    },
+    {
+      "code": "Onbekend",
+      "nl": "Onbekend"
     }
   ]
 }

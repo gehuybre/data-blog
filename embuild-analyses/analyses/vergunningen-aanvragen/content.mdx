@@ -1,8 +1,8 @@
 ---
 title: Vergunningen voor woningen
 date: 2025-12-26
-summary: Analyse van de aanvragen voor vergunningen voor het bouwen of verbouwen van woningen in Vlaanderen, op basis van data uit het Omgevingsloket.
-tags: [vergunningen, bouw, woningen, vlaanderen]
+summary: Analyse van de aanvragen voor vergunningen voor het bouwen, verbouwen of slopen van woningen in Vlaanderen, op basis van data uit het Omgevingsloket.
+tags: [vergunningen, bouw, woningen, vlaanderen, nieuwbouw, renovatie, sloop]
 slug: vergunningen-aanvragen
 sourceProvider: Omgevingsloket Vlaanderen
 sourceTitle: Rapportering bouwen of verbouwen van woningen
@@ -11,12 +11,14 @@ sourceUrl: https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen
 
 import { VergunningenDashboard } from "@/components/analyses/vergunningen-aanvragen/VergunningenDashboard"
 
-Het Omgevingsloket Vlaanderen registreert alle vergunningsaanvragen voor het bouwen of verbouwen van woningen. Deze data geeft een helder beeld van de bouwactiviteit in de Vlaamse residentiële sector.
+Het Omgevingsloket Vlaanderen registreert alle vergunningsaanvragen voor woningen. Deze data biedt inzicht in drie belangrijke categorieën: nieuwbouw, verbouwingen en sloop.
 
-In 2024 werden er bijna 81.500 wooneenheden aangevraagd via vergunningen, een lichte daling van 3% ten opzichte van 2023. Het aantal nieuwbouwprojecten is sterker gedaald (-4%), terwijl verbouwingen stabieler blijven. Dit wijst op een verschuiving van nieuwbouw naar renovatie en hergebruik van bestaande panden.
+**Nieuwbouw** kende een piek in 2019 met bijna 74.000 aangevraagde wooneenheden, maar vertoont sindsdien een dalende trend. In 2024 werden circa 45.000 wooneenheden aangevraagd voor nieuwbouw - een daling van bijna 40% ten opzichte van de piek. Meergezinswoningen domineren de nieuwbouwmarkt qua aantal wooneenheden.
 
-Opvallend is de dominantie van meergezinswoningen: deze vertegenwoordigen het grootste deel van de aangevraagde wooneenheden, ondanks dat eengezinswoningen meer projecten tellen. Dit reflecteert de trend naar verdichting en appartementsbouw in Vlaanderen.
+**Verbouwingen** tonen een stabieler patroon. Het aantal verbouwprojecten steeg gestaag van 2018 tot 2021, en stabiliseerde daarna rond 22.000-23.000 projecten per jaar. Eengezinswoningen vormen het grootste aandeel bij renovaties.
 
-De kwartaalcijfers tonen typische seizoenspatronen: Q4 piekt traditioneel door eindejaarsdossiers, terwijl Q1 lager scoort. De langetermijntrend sinds 2018 toont eerst groei tot 2021, gevolgd door een stabilisatie en recente daling in 2023-2024.
+**Sloop** vertoont schommelingen maar blijft relatief stabiel rond 7-8 miljoen m² gesloopte oppervlakte per jaar. Het merendeel van de sloopvergunningen wordt behandeld op gemeentelijk niveau.
+
+De kwartaalcijfers tonen typische seizoenspatronen: Q4 piekt traditioneel door eindejaarsdossiers, terwijl Q1 doorgaans lager scoort.
 
 <VergunningenDashboard />
