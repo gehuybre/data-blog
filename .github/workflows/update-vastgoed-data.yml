@@ -1,8 +1,8 @@
-name: Update starters-stoppers data
+name: Update vastgoed-verkopen data
 
 on:
   schedule:
-    # At 00:00 on day-of-month 1
+    # At 00:00 on day-of-month 1 (monthly)
     - cron: '0 0 1 * *'
   workflow_dispatch: {}
 
@@ -31,8 +31,8 @@ jobs:
       - name: Check remote metadata (ETag / Last-Modified)
         id: check_remote
         env:
-          INPUT_URL: https://statbel.fgov.be/sites/default/files/files/opendata/TF_VAT_SURVIVAL/TF_VAT_SURVIVALS.zip
-          META_FILE: embuild-analyses/analyses/starters-stoppers/data/.remote_metadata.json
+          INPUT_URL: https://statbel.fgov.be/sites/default/files/files/opendata/immo/vastgoed_2010_9999.zip
+          META_FILE: embuild-analyses/analyses/vastgoed-verkopen/data/.remote_metadata.json
         run: |
           set -e
           mkdir -p "$(dirname "$META_FILE")"
@@ -70,16 +70,16 @@ jobs:
       - name: Run data processor (download & process)
         if: steps.check_remote.outputs.changed == 'true'
         env:
-          INPUT_URL: https://statbel.fgov.be/sites/default/files/files/opendata/TF_VAT_SURVIVAL/TF_VAT_SURVIVALS.zip
+          INPUT_URL: https://statbel.fgov.be/sites/default/files/files/opendata/immo/vastgoed_2010_9999.zip
         run: |
           set -e
-          python embuild-analyses/analyses/starters-stoppers/src/process_data.py
+          python embuild-analyses/analyses/vastgoed-verkopen/src/process_data.py
 
       - name: Update remote metadata and checksum
         if: steps.check_remote.outputs.changed == 'true'
         env:
-          INPUT_URL: https://statbel.fgov.be/sites/default/files/files/opendata/TF_VAT_SURVIVAL/TF_VAT_SURVIVALS.zip
-          META_FILE: embuild-analyses/analyses/starters-stoppers/data/.remote_metadata.json
+          INPUT_URL: https://statbel.fgov.be/sites/default/files/files/opendata/immo/vastgoed_2010_9999.zip
+          META_FILE: embuild-analyses/analyses/vastgoed-verkopen/data/.remote_metadata.json
         run: |
           set -e
           mkdir -p "$(dirname "$META_FILE")"
@@ -88,7 +88,7 @@ jobs:
           REMOTE_LASTMOD=$(printf '%s\n' "$headers" | awk -F': ' '/^Last-Modified:/ {print substr($0,index($0,$2)) }' | tr -d '\r') || true
 
           fname=$(basename "${INPUT_URL}")
-          download_path=embuild-analyses/analyses/starters-stoppers/data/$fname
+          download_path=embuild-analyses/analyses/vastgoed-verkopen/data/$fname
           if [ -f "$download_path" ]; then
             sha=$(sha256sum "$download_path" | cut -d' ' -f1)
           else
@@ -109,17 +109,17 @@ jobs:
       - name: Update publication date from Statbel
         if: steps.check_remote.outputs.changed == 'true'
         run: |
-          python scripts/update_publication_date.py starters-stoppers "https://statbel.fgov.be/nl/themas/ondernemingen/btw-plichtige-ondernemingen/overleven-van-de-btw-plichtige-ondernemingen"
+          python scripts/update_publication_date.py vastgoed-verkopen "https://statbel.fgov.be/nl/themas/bouwen-wonen/vastgoedprijzen"
 
       - name: Commit and push changes if any
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add embuild-analyses/analyses/starters-stoppers/results
-          git add embuild-analyses/analyses/starters-stoppers/data/.remote_metadata.json || true
-          git add embuild-analyses/analyses/starters-stoppers/content.mdx || true
+          git add embuild-analyses/analyses/vastgoed-verkopen/results
+          git add embuild-analyses/analyses/vastgoed-verkopen/content.mdx
+          git add embuild-analyses/analyses/vastgoed-verkopen/data/.remote_metadata.json || true
           if ! git diff --staged --quiet; then
-            git commit -m "chore(data): update starters-stoppers results (auto)"
+            git commit -m "chore(data): update vastgoed-verkopen results (auto)"
             git push origin HEAD:main
           else
             echo "No changes to commit"

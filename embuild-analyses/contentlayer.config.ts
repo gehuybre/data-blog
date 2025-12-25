@@ -11,6 +11,10 @@ export const Analysis = defineDocumentType(() => ({
     summary: { type: 'string', required: true },
     tags: { type: 'list', of: { type: 'string' }, required: false },
     slug: { type: 'string', required: true },
+    sourceProvider: { type: 'string', required: false },
+    sourceTitle: { type: 'string', required: false },
+    sourceUrl: { type: 'string', required: false },
+    sourcePublicationDate: { type: 'date', required: false },
   },
   computedFields: {
     url: {
