@@ -403,11 +403,13 @@ function MainSection({
   code,
   horizonYear,
   onSelectGeo,
+  onHorizonChange,
 }: {
   level: "vlaanderen" | "province" | "municipality"
   code: string | null
   horizonYear: number
   onSelectGeo: (level: "vlaanderen" | "province" | "municipality", code: string | null) => void
+  onHorizonChange: (year: number) => void
 }) {
   const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("chart")
 
@@ -449,6 +451,10 @@ function MainSection({
             <TabsTrigger value="table">Tabel</TabsTrigger>
             <TabsTrigger value="map">Kaart</TabsTrigger>
           </TabsList>
+          <div className="flex items-center gap-2">
+            <GeoFilterInline selectedLevel={level} selectedCode={code} onSelect={onSelectGeo} />
+            <HorizonFilterInline selected={horizonYear} onChange={onHorizonChange} />
+          </div>
         </div>
         <TabsContent value="chart">
           <Card>
@@ -509,9 +515,17 @@ function MainSection({
 function RankingSection({
   horizonYear,
   provinceCode,
+  geoLevel,
+  selectedCode,
+  onSelectGeo,
+  onHorizonChange,
 }: {
   horizonYear: number
   provinceCode: string | null
+  geoLevel: "vlaanderen" | "province" | "municipality"
+  selectedCode: string | null
+  onSelectGeo: (level: "vlaanderen" | "province" | "municipality", code: string | null) => void
+  onHorizonChange: (year: number) => void
 }) {
   const [showDecline, setShowDecline] = React.useState(false)
 
@@ -530,13 +544,17 @@ function RankingSection({
           {showDecline ? "Gemeenten met sterkste afname" : "Snelst groeiende gemeenten"}
           {provinceName && ` in ${provinceName}`}
         </h2>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowDecline(!showDecline)}
-        >
-          {showDecline ? "Toon groei" : "Toon afname"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <GeoFilterInline selectedLevel={geoLevel} selectedCode={selectedCode} onSelect={onSelectGeo} />
+          <HorizonFilterInline selected={horizonYear} onChange={onHorizonChange} />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDecline(!showDecline)}
+          >
+            {showDecline ? "Toon groei" : "Toon afname"}
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -571,10 +589,14 @@ function SizeBreakdownSection({
   level,
   code,
   horizonYear,
+  onSelectGeo,
+  onHorizonChange,
 }: {
   level: "vlaanderen" | "province" | "municipality"
   code: string | null
   horizonYear: number
+  onSelectGeo: (level: "vlaanderen" | "province" | "municipality", code: string | null) => void
+  onHorizonChange: (year: number) => void
 }) {
   const baseData = getSizeBreakdown(level, code, BASE_YEAR)
   const horizonData = getSizeBreakdown(level, code, horizonYear)
@@ -594,7 +616,13 @@ function SizeBreakdownSection({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Samenstelling huishoudens</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Samenstelling huishoudens</h2>
+        <div className="flex items-center gap-2">
+          <GeoFilterInline selectedLevel={level} selectedCode={code} onSelect={onSelectGeo} />
+          <HorizonFilterInline selected={horizonYear} onChange={onHorizonChange} />
+        </div>
+      </div>
 
       <Card>
         <CardHeader>
@@ -650,18 +678,32 @@ function InnerDashboard() {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <GeoFilterInline selectedLevel={geoLevel} selectedCode={selectedCode} onSelect={handleSelectGeo} />
-        <HorizonFilterInline selected={horizonYear} onChange={setHorizonYear} />
-      </div>
-
       <SummaryCards level={geoLevel} code={selectedCode} horizonYear={horizonYear} />
 
-      <MainSection level={geoLevel} code={selectedCode} horizonYear={horizonYear} onSelectGeo={handleSelectGeo} />
+      <MainSection
+        level={geoLevel}
+        code={selectedCode}
+        horizonYear={horizonYear}
+        onSelectGeo={handleSelectGeo}
+        onHorizonChange={setHorizonYear}
+      />
 
-      <SizeBreakdownSection level={geoLevel} code={selectedCode} horizonYear={horizonYear} />
+      <SizeBreakdownSection
+        level={geoLevel}
+        code={selectedCode}
+        horizonYear={horizonYear}
+        onSelectGeo={handleSelectGeo}
+        onHorizonChange={setHorizonYear}
+      />
 
-      <RankingSection horizonYear={horizonYear} provinceCode={geoLevel === "province" ? selectedCode : null} />
+      <RankingSection
+        horizonYear={horizonYear}
+        provinceCode={geoLevel === "province" ? selectedCode : null}
+        geoLevel={geoLevel}
+        selectedCode={selectedCode}
+        onSelectGeo={handleSelectGeo}
+        onHorizonChange={setHorizonYear}
+      />
     </div>
   )
 }
