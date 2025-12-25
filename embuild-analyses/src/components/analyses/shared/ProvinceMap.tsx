@@ -15,6 +15,15 @@ import {
 
 type UnknownRecord = Record<string, any>
 
+interface TooltipState {
+  visible: boolean
+  x: number
+  y: number
+  name: string
+  label: string
+  value: string
+}
+
 interface ProvinceMapProps<TData extends UnknownRecord = UnknownRecord> {
   data: TData[]
   metric?: string
@@ -24,6 +33,8 @@ interface ProvinceMapProps<TData extends UnknownRecord = UnknownRecord> {
   getProvinceCode?: (d: TData) => ProvinceCode | string | null | undefined
   getMetricValue?: (d: TData, metric?: string) => number | null | undefined
   formatValue?: (value: number) => string
+  /** Label for the metric shown in tooltips (e.g., "Aantal starters", "Overlevingskans") */
+  tooltipLabel?: string
 }
 
 const GEO_URL =
@@ -38,9 +49,18 @@ export function ProvinceMap<TData extends UnknownRecord = UnknownRecord>({
   getProvinceCode,
   getMetricValue,
   formatValue,
+  tooltipLabel,
 }: ProvinceMapProps<TData>) {
   const [geoData, setGeoData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [tooltip, setTooltip] = useState<TooltipState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    name: "",
+    label: "",
+    value: "",
+  })
 
   useEffect(() => {
     fetch(GEO_URL)
@@ -118,8 +138,48 @@ export function ProvinceMap<TData extends UnknownRecord = UnknownRecord>({
     )
   }
 
+  const handleMouseMove = (
+    e: React.MouseEvent,
+    name: string,
+    label: string,
+    value: string
+  ) => {
+    const rect = (e.currentTarget as HTMLElement).closest(".relative")?.getBoundingClientRect()
+    if (rect) {
+      setTooltip({
+        visible: true,
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top - 10,
+        name,
+        label,
+        value,
+      })
+    }
+  }
+
+  const handleMouseLeave = () => {
+    setTooltip((prev) => ({ ...prev, visible: false }))
+  }
+
   return (
-    <div className="w-full h-[420px]">
+    <div className="relative w-full h-[420px]">
+      {tooltip.visible && (
+        <div
+          className="absolute z-10 pointer-events-none px-2 py-1 text-xs bg-popover text-popover-foreground border rounded shadow-md whitespace-nowrap"
+          style={{
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: "translate(-50%, -100%)",
+          }}
+        >
+          <div className="font-medium">{tooltip.name}</div>
+          {tooltip.label && (
+            <div className="text-muted-foreground">
+              {tooltip.label}: {tooltip.value}
+            </div>
+          )}
+        </div>
+      )}
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{ center: [4.4, 50.6], scale: 6500 }}
@@ -145,7 +205,7 @@ export function ProvinceMap<TData extends UnknownRecord = UnknownRecord>({
               const provinceName =
                 PROVINCES.find((p) => String(p.code) === provCode)?.name ?? provCode
 
-              const tooltipValue =
+              const formattedValue =
                 value === undefined || !Number.isFinite(value)
                   ? "Geen data"
                   : formatValue
@@ -157,6 +217,10 @@ export function ProvinceMap<TData extends UnknownRecord = UnknownRecord>({
                   key={geo.rsmKey}
                   geography={geo}
                   onClick={() => onSelectProvince?.(provCode as ProvinceCode)}
+                  onMouseMove={(e) =>
+                    handleMouseMove(e, provinceName, tooltipLabel ?? "", formattedValue)
+                  }
+                  onMouseLeave={handleMouseLeave}
                   style={{
                     default: {
                       fill,
@@ -180,9 +244,7 @@ export function ProvinceMap<TData extends UnknownRecord = UnknownRecord>({
                   }}
                   className={cn(isActive ? "drop-shadow-sm" : "")}
                   aria-label={provinceName}
-                >
-                  <title>{`${provinceName}: ${tooltipValue}`}</title>
-                </Geography>
+                />
               )
             })
           }
