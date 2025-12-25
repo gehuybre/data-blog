@@ -35,36 +35,32 @@ export default async function AnalysisPage({ params }: { params: Promise<{ slug:
       </nav>
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-bold mb-2">{analysis.title}</h1>
-        <time dateTime={analysis.date} className="text-muted-foreground">
-          {format(parseISO(analysis.date), 'LLLL d, yyyy')}
+        <time
+          dateTime={analysis.sourcePublicationDate || analysis.date}
+          className="text-muted-foreground"
+        >
+          {analysis.sourcePublicationDate
+            ? `Brondata: ${format(parseISO(analysis.sourcePublicationDate), 'd MMMM yyyy')}`
+            : format(parseISO(analysis.date), 'd MMMM yyyy')
+          }
         </time>
       </div>
       <MDXContent code={analysis.body.code} />
 
       {analysis.sourceProvider && analysis.sourceUrl && (
         <footer className="mt-12 pt-6 border-t not-prose">
-          <div className="text-sm text-muted-foreground space-y-1">
-            <div>
-              <span className="font-medium">Bron:</span>{' '}
-              <a
-                href={analysis.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-primary hover:underline"
-              >
-                {analysis.sourceProvider}
-                {analysis.sourceTitle && ` - ${analysis.sourceTitle}`}
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
-            {analysis.sourcePublicationDate && (
-              <div>
-                <span className="font-medium">Publicatiedatum brondata:</span>{' '}
-                <time dateTime={analysis.sourcePublicationDate}>
-                  {format(parseISO(analysis.sourcePublicationDate), 'd MMMM yyyy')}
-                </time>
-              </div>
-            )}
+          <div className="text-sm text-muted-foreground">
+            <span className="font-medium">Bron:</span>{' '}
+            <a
+              href={analysis.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-primary hover:underline"
+            >
+              {analysis.sourceProvider}
+              {analysis.sourceTitle && ` - ${analysis.sourceTitle}`}
+              <ExternalLink className="h-3 w-3" />
+            </a>
           </div>
         </footer>
       )}

@@ -5,7 +5,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge"
 
 export default function Home() {
-  const analyses = allAnalyses.sort((a, b) => compareDesc(new Date(a.date), new Date(b.date)))
+  const analyses = allAnalyses.sort((a, b) => {
+    const dateA = a.sourcePublicationDate || a.date
+    const dateB = b.sourcePublicationDate || b.date
+    return compareDesc(new Date(dateA), new Date(dateB))
+  })
 
   return (
     <main className="container mx-auto py-10">
@@ -16,7 +20,12 @@ export default function Home() {
             <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <CardTitle>{analysis.title}</CardTitle>
-                <CardDescription>{format(parseISO(analysis.date), 'LLLL d, yyyy')}</CardDescription>
+                <CardDescription>
+                  {analysis.sourcePublicationDate
+                    ? `Brondata: ${format(parseISO(analysis.sourcePublicationDate), 'd MMMM yyyy')}`
+                    : format(parseISO(analysis.date), 'd MMMM yyyy')
+                  }
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">{analysis.summary}</p>
