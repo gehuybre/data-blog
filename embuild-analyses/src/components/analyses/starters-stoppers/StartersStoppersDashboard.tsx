@@ -346,6 +346,8 @@ function MetricSection({
   onSelectRegion,
   onSelectProvince,
   onSelectSector,
+  stopHorizon,
+  onStopHorizonChange,
   slug,
   sectionId,
   dataSource,
@@ -365,6 +367,8 @@ function MetricSection({
   onSelectRegion: (code: RegionCode) => void
   onSelectProvince: (code: ProvinceCode | null) => void
   onSelectSector: (code: string | null) => void
+  stopHorizon?: StopHorizon
+  onStopHorizonChange?: (h: StopHorizon) => void
   slug?: string
   sectionId?: string
   dataSource?: string
@@ -420,6 +424,20 @@ function MetricSection({
               selected={selectedSector}
               onChange={onSelectSector}
             />
+            {stopHorizon !== undefined && onStopHorizonChange && (
+              <Tabs
+                value={String(stopHorizon)}
+                onValueChange={(v) => onStopHorizonChange(Number(v) as StopHorizon)}
+              >
+                <TabsList className="h-9">
+                  <TabsTrigger value="1" className="text-xs px-2">1j</TabsTrigger>
+                  <TabsTrigger value="2" className="text-xs px-2">2j</TabsTrigger>
+                  <TabsTrigger value="3" className="text-xs px-2">3j</TabsTrigger>
+                  <TabsTrigger value="4" className="text-xs px-2">4j</TabsTrigger>
+                  <TabsTrigger value="5" className="text-xs px-2">5j</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            )}
           </div>
         </div>
         <TabsContent value="chart">
@@ -648,51 +666,33 @@ function InnerDashboard() {
         }}
       />
 
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-2xl font-bold">{`Stoppers en overlevingskans (na ${stopHorizon} jaar)`}</h2>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Definitie:</span>
-            <Tabs
-              value={String(stopHorizon)}
-              onValueChange={(v) => setStopHorizon(Number(v) as StopHorizon)}
-            >
-              <TabsList>
-                <TabsTrigger value="1">1j</TabsTrigger>
-                <TabsTrigger value="2">2j</TabsTrigger>
-                <TabsTrigger value="3">3j</TabsTrigger>
-                <TabsTrigger value="4">4j</TabsTrigger>
-                <TabsTrigger value="5">5j</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </div>
-        <MetricSection
-          title={`Aantal stoppers (na ${stopHorizon} jaar)`}
-          label="Aantal"
-          yearSeries={stoppersSeries}
-          mapData={stoppersMap}
-          mapYear={stoppersMapYear}
-          mapLevel={mapLevel}
-          formatValue={formatInt}
-          selectedRegion={selectedRegion}
-          selectedProvince={selectedProvince}
-          selectedSector={selectedNace1}
-          onSelectRegion={selectRegion}
-          onSelectProvince={selectProvince}
-          onSelectSector={setSelectedNace1}
-          slug="starters-stoppers"
-          sectionId="stoppers"
-          dataSource="Statbel - Overlevingsgraad van btw-plichtigen"
-          dataSourceUrl="https://statbel.fgov.be/nl/themas/ondernemingen/overlevingsgraad-van-btw-plichtigen"
-          embedParams={{
-            horizon: stopHorizon,
-            region: selectedRegion !== "1000" ? selectedRegion : null,
-            province: selectedProvince,
-            sector: selectedNace1,
-          }}
-        />
-      </div>
+      <MetricSection
+        title={`Aantal stoppers (na ${stopHorizon} jaar)`}
+        label="Aantal"
+        yearSeries={stoppersSeries}
+        mapData={stoppersMap}
+        mapYear={stoppersMapYear}
+        mapLevel={mapLevel}
+        formatValue={formatInt}
+        selectedRegion={selectedRegion}
+        selectedProvince={selectedProvince}
+        selectedSector={selectedNace1}
+        onSelectRegion={selectRegion}
+        onSelectProvince={selectProvince}
+        onSelectSector={setSelectedNace1}
+        stopHorizon={stopHorizon}
+        onStopHorizonChange={setStopHorizon}
+        slug="starters-stoppers"
+        sectionId="stoppers"
+        dataSource="Statbel - Overlevingsgraad van btw-plichtigen"
+        dataSourceUrl="https://statbel.fgov.be/nl/themas/ondernemingen/overlevingsgraad-van-btw-plichtigen"
+        embedParams={{
+          horizon: stopHorizon,
+          region: selectedRegion !== "1000" ? selectedRegion : null,
+          province: selectedProvince,
+          sector: selectedNace1,
+        }}
+      />
 
       <MetricSection
         title={`Overlevingskans na ${stopHorizon} jaar`}
@@ -708,6 +708,8 @@ function InnerDashboard() {
         onSelectRegion={selectRegion}
         onSelectProvince={selectProvince}
         onSelectSector={setSelectedNace1}
+        stopHorizon={stopHorizon}
+        onStopHorizonChange={setStopHorizon}
         slug="starters-stoppers"
         sectionId="survival"
         dataSource="Statbel - Overlevingsgraad van btw-plichtigen"
