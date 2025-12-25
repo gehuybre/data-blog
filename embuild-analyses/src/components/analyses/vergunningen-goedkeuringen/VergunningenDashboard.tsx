@@ -20,6 +20,8 @@ export function VergunningenDashboard() {
           label="Aantal"
           slug="vergunningen-goedkeuringen"
           sectionId="renovatie"
+          dataSource="Statbel - Bouwvergunningen"
+          dataSourceUrl="https://statbel.fgov.be/nl/themas/bouwen-wonen/bouwvergunningen"
         />
 
         <AnalysisSection
@@ -30,6 +32,8 @@ export function VergunningenDashboard() {
           label="Aantal"
           slug="vergunningen-goedkeuringen"
           sectionId="nieuwbouw"
+          dataSource="Statbel - Bouwvergunningen"
+          dataSourceUrl="https://statbel.fgov.be/nl/themas/bouwen-wonen/bouwvergunningen"
         />
       </div>
     </GeoProviderWithDefaults>

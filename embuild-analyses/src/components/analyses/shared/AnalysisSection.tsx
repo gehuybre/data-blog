@@ -35,6 +35,10 @@ interface AnalysisSectionProps<TData extends UnknownRecord = UnknownRecord> {
   slug?: string
   /** Section ID for embed URLs (e.g., "renovatie") */
   sectionId?: string
+  /** Data source description for CSV metadata */
+  dataSource?: string
+  /** Data source URL for CSV metadata */
+  dataSourceUrl?: string
   getMunicipalityCode?: (d: TData) => number
   getMetricValue?: (d: TData, metric: string) => number
   period?: PeriodConfig<TData>
@@ -55,6 +59,8 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
   label,
   slug,
   sectionId,
+  dataSource,
+  dataSourceUrl,
   getMunicipalityCode,
   getMetricValue,
   period,
@@ -185,6 +191,8 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
             viewType={currentView}
             periodHeaders={periodTable.headers}
             valueLabel={label}
+            dataSource={dataSource}
+            dataSourceUrl={dataSourceUrl}
           />
         )}
       </div>
