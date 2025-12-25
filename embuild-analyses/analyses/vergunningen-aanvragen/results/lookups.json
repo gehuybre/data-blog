@@ -1,0 +1,44 @@
+{
+  "handelingen": [
+    {
+      "code": "nieuwbouw",
+      "nl": "Nieuwbouw"
+    },
+    {
+      "code": "verbouw",
+      "nl": "Verbouwen of hergebruik"
+    }
+  ],
+  "types": [
+    {
+      "code": "eengezins",
+      "nl": "Eengezinswoning"
+    },
+    {
+      "code": "meergezins",
+      "nl": "Meergezinswoning"
+    },
+    {
+      "code": "kamer",
+      "nl": "Kamerwoning"
+    }
+  ],
+  "metrics": [
+    {
+      "code": "p",
+      "nl": "Aantal projecten"
+    },
+    {
+      "code": "g",
+      "nl": "Aantal gebouwen"
+    },
+    {
+      "code": "w",
+      "nl": "Aantal wooneenheden"
+    },
+    {
+      "code": "m2",
+      "nl": "Woonoppervlakte (m²)"
+    }
+  ]
+}
