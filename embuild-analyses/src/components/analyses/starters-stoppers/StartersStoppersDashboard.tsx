@@ -18,7 +18,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { PROVINCES, ProvinceCode, REGIONS, RegionCode } from "@/lib/geo-utils"
 import { GeoProvider, useGeo } from "../shared/GeoContext"
-import { GeoFilter } from "../shared/GeoFilter"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
 import { ExportButtons } from "../shared/ExportButtons"
@@ -75,7 +74,99 @@ function useNaceMainOptions() {
   return items
 }
 
-function SectorFilter({
+// Compact inline geo filter for section-level use
+function GeoFilterInline({
+  selectedRegion,
+  selectedProvince,
+  onSelectRegion,
+  onSelectProvince,
+}: {
+  selectedRegion: RegionCode
+  selectedProvince: ProvinceCode | null
+  onSelectRegion: (code: RegionCode) => void
+  onSelectProvince: (code: ProvinceCode | null) => void
+}) {
+  const [open, setOpen] = React.useState(false)
+
+  const sortedProvinces = React.useMemo(() => {
+    return [...PROVINCES].sort((a, b) => a.name.localeCompare(b.name))
+  }, [])
+
+  const currentLabel = React.useMemo(() => {
+    if (selectedProvince) {
+      return PROVINCES.find((p) => String(p.code) === String(selectedProvince))?.name ?? "Provincie"
+    }
+    if (selectedRegion !== "1000") {
+      return REGIONS.find((r) => r.code === selectedRegion)?.name ?? "Regio"
+    }
+    return "België"
+  }, [selectedRegion, selectedProvince])
+
+  function selectBelgium() {
+    onSelectRegion("1000")
+    onSelectProvince(null)
+    setOpen(false)
+  }
+
+  function selectRegion(code: RegionCode) {
+    onSelectRegion(code)
+    onSelectProvince(null)
+    setOpen(false)
+  }
+
+  function selectProvince(code: ProvinceCode) {
+    onSelectProvince(code)
+    const prov = PROVINCES.find((p) => String(p.code) === String(code))
+    if (prov) onSelectRegion(prov.regionCode)
+    setOpen(false)
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" role="combobox" aria-expanded={open} className="h-9 gap-1 min-w-[120px]">
+          <span className="truncate max-w-[100px]">{currentLabel}</span>
+          <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[220px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Zoek locatie..." />
+          <CommandList>
+            <CommandEmpty>Geen resultaat.</CommandEmpty>
+            <CommandGroup heading="Land">
+              <CommandItem value="België" onSelect={selectBelgium}>
+                <Check className={cn("mr-2 h-4 w-4", selectedRegion === "1000" && !selectedProvince ? "opacity-100" : "opacity-0")} />
+                België
+              </CommandItem>
+            </CommandGroup>
+            <CommandSeparator />
+            <CommandGroup heading="Regio">
+              {REGIONS.filter((r) => r.code !== "1000").map((r) => (
+                <CommandItem key={r.code} value={r.name} onSelect={() => selectRegion(r.code)}>
+                  <Check className={cn("mr-2 h-4 w-4", !selectedProvince && selectedRegion === r.code ? "opacity-100" : "opacity-0")} />
+                  {r.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandSeparator />
+            <CommandGroup heading="Provincie">
+              {sortedProvinces.map((p) => (
+                <CommandItem key={p.code} value={p.name} onSelect={() => selectProvince(p.code)}>
+                  <Check className={cn("mr-2 h-4 w-4", String(selectedProvince) === String(p.code) ? "opacity-100" : "opacity-0")} />
+                  {p.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+// Compact inline sector filter for section-level use
+function SectorFilterInline({
   selected,
   onChange,
 }: {
@@ -87,59 +178,55 @@ function SectorFilter({
 
   const selectedLabel = React.useMemo(() => {
     if (!selected) return "Alle sectoren"
-    return options.find((o) => o.code === selected)?.label ?? selected
+    const opt = options.find((o) => o.code === selected)
+    return opt ? `${opt.code}` : selected
   }, [selected, options])
 
   return (
-    <div className="space-y-3 p-4 border rounded-lg bg-card text-card-foreground shadow-sm border-blue-500">
-      <div className="space-y-2">
-        <label className="text-sm font-medium leading-none">Economische sector</label>
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between font-normal">
-              <span className="truncate">{selectedLabel}</span>
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-            <Command>
-              <CommandInput placeholder="Zoek sector (NACE hoofdcode)..." />
-              <CommandList>
-                <CommandEmpty>Geen resultaat gevonden.</CommandEmpty>
-                <CommandGroup heading="Sector">
-                  <CommandItem
-                    value="Alle sectoren"
-                    onSelect={() => {
-                      onChange(null)
-                      setOpen(false)
-                    }}
-                  >
-                    <Check className={cn("mr-2 h-4 w-4", !selected ? "opacity-100" : "opacity-0")} />
-                    Alle sectoren
-                  </CommandItem>
-                </CommandGroup>
-                <CommandSeparator />
-                <CommandGroup heading="NACE hoofdcode">
-                  {options.map((o) => (
-                    <CommandItem
-                      key={o.code}
-                      value={o.label}
-                      onSelect={() => {
-                        onChange(o.code)
-                        setOpen(false)
-                      }}
-                    >
-                      <Check className={cn("mr-2 h-4 w-4", selected === o.code ? "opacity-100" : "opacity-0")} />
-                      {o.label}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div>
-    </div>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" role="combobox" aria-expanded={open} className="h-9 gap-1 min-w-[120px]">
+          <span className="truncate max-w-[100px]">{selectedLabel}</span>
+          <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[300px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Zoek sector..." />
+          <CommandList>
+            <CommandEmpty>Geen resultaat.</CommandEmpty>
+            <CommandGroup heading="Sector">
+              <CommandItem
+                value="Alle sectoren"
+                onSelect={() => {
+                  onChange(null)
+                  setOpen(false)
+                }}
+              >
+                <Check className={cn("mr-2 h-4 w-4", !selected ? "opacity-100" : "opacity-0")} />
+                Alle sectoren
+              </CommandItem>
+            </CommandGroup>
+            <CommandSeparator />
+            <CommandGroup heading="NACE">
+              {options.map((o) => (
+                <CommandItem
+                  key={o.code}
+                  value={o.label}
+                  onSelect={() => {
+                    onChange(o.code)
+                    setOpen(false)
+                  }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", selected === o.code ? "opacity-100" : "opacity-0")} />
+                  {o.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -255,8 +342,10 @@ function MetricSection({
   formatValue,
   selectedRegion,
   selectedProvince,
+  selectedSector,
   onSelectRegion,
   onSelectProvince,
+  onSelectSector,
   slug,
   sectionId,
   dataSource,
@@ -272,8 +361,10 @@ function MetricSection({
   formatValue: (v: number) => string
   selectedRegion: RegionCode
   selectedProvince: ProvinceCode | null
+  selectedSector: string | null
   onSelectRegion: (code: RegionCode) => void
-  onSelectProvince: (code: ProvinceCode) => void
+  onSelectProvince: (code: ProvinceCode | null) => void
+  onSelectSector: (code: string | null) => void
   slug?: string
   sectionId?: string
   dataSource?: string
@@ -293,7 +384,7 @@ function MetricSection({
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">{title}</h2>
         {slug && sectionId && (
@@ -312,11 +403,25 @@ function MetricSection({
         )}
       </div>
       <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table" | "map")}>
-        <TabsList>
-          <TabsTrigger value="chart">Grafiek</TabsTrigger>
-          <TabsTrigger value="table">Tabel</TabsTrigger>
-          <TabsTrigger value="map">Kaart</TabsTrigger>
-        </TabsList>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <TabsList>
+            <TabsTrigger value="chart">Grafiek</TabsTrigger>
+            <TabsTrigger value="table">Tabel</TabsTrigger>
+            <TabsTrigger value="map">Kaart</TabsTrigger>
+          </TabsList>
+          <div className="flex items-center gap-2">
+            <GeoFilterInline
+              selectedRegion={selectedRegion}
+              selectedProvince={selectedProvince}
+              onSelectRegion={onSelectRegion}
+              onSelectProvince={onSelectProvince}
+            />
+            <SectorFilterInline
+              selected={selectedSector}
+              onChange={onSelectSector}
+            />
+          </div>
+        </div>
         <TabsContent value="chart">
           <Card>
             <CardHeader>
@@ -361,6 +466,7 @@ function MetricSection({
                   getProvinceCode={(d) => (d as any).p}
                   getMetricValue={(d) => (d as any).value}
                   formatValue={formatValue}
+                  tooltipLabel={label}
                 />
               ) : (
                 <RegionMap
@@ -370,12 +476,13 @@ function MetricSection({
                   getRegionCode={(d) => (d as any).r}
                   getMetricValue={(d) => (d as any).value}
                   formatValue={formatValue}
+                  tooltipLabel={label}
                 />
               )}
               <div className="mt-3 text-xs text-muted-foreground">
                 {mapLevel === "province"
-                  ? "Klik op een provincie om de provinciefilter te zetten (België kiezen kan via de locatie-filter bovenaan)."
-                  : "Klik op een regio om de regiofilter te zetten (België kiezen kan via de locatie-filter bovenaan)."}
+                  ? "Klik op een provincie om te filteren, of gebruik de locatie-filter hierboven."
+                  : "Klik op een regio om te filteren, of gebruik de locatie-filter hierboven."}
               </div>
             </CardContent>
           </Card>
@@ -416,7 +523,9 @@ function InnerDashboard() {
   const stoppersMapYear = latestYear(stoppersSeries)
   const survivalMapYear = latestYear(survivalSeries)
 
-  const mapLevel = level === "province" ? "province" : "region"
+  // Map level logic: At Belgium level, show regions. At region level, show provinces.
+  // Province level doesn't need a map (already drilled down to single province).
+  const mapLevel = level === "region" && selectedRegion !== "1000" ? "province" : "region"
 
   const startersMap = React.useMemo(() => {
     if (!startersMapYear) return []
@@ -492,7 +601,12 @@ function InnerDashboard() {
     setLevel("region")
   }
 
-  function selectProvince(code: ProvinceCode) {
+  function selectProvince(code: ProvinceCode | null) {
+    if (code === null) {
+      setSelectedProvince(null)
+      setSelectedMunicipality(null)
+      return
+    }
     setSelectedProvince(code)
     setSelectedMunicipality(null)
     const prov = PROVINCES.find((p) => String(p.code) === String(code))
@@ -500,29 +614,12 @@ function InnerDashboard() {
     setLevel("province")
   }
 
-  const placeLabel = React.useMemo(() => {
-    if (level === "province" && selectedProvince) {
-      return PROVINCES.find((p) => String(p.code) === String(selectedProvince))?.name ?? String(selectedProvince)
-    }
-    if (level === "region" && selectedRegion !== "1000") {
-      return REGIONS.find((r) => String(r.code) === String(selectedRegion))?.name ?? String(selectedRegion)
-    }
-    return "België"
-  }, [level, selectedProvince, selectedRegion])
-
   return (
     <div className="space-y-10">
-      <div className="grid gap-4 md:grid-cols-2">
-        <GeoFilter municipalities={[]} showMunicipalities={false} />
-        <SectorFilter selected={selectedNace1} onChange={setSelectedNace1} />
-      </div>
-
       <div className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
         <p>
           We tonen hier het aantal starters (eerste inschrijvingen), het aantal stoppers (starters die na N jaar niet meer actief zijn),
-          en de overlevingskans na N jaar. Gebruik de toggle om N (1–5 jaar) te kiezen. Selectie:{" "}
-          <span className="font-medium text-foreground">{placeLabel}</span>
-          {selectedNace1 ? <span className="font-medium text-foreground">{` · Sector ${selectedNace1}`}</span> : null}
+          en de overlevingskans na N jaar. Gebruik de toggle om N (1–5 jaar) te kiezen. Gebruik de filters per sectie om de data te filteren.
         </p>
       </div>
 
@@ -536,8 +633,10 @@ function InnerDashboard() {
         formatValue={formatInt}
         selectedRegion={selectedRegion}
         selectedProvince={selectedProvince}
+        selectedSector={selectedNace1}
         onSelectRegion={selectRegion}
         onSelectProvince={selectProvince}
+        onSelectSector={setSelectedNace1}
         slug="starters-stoppers"
         sectionId="starters"
         dataSource="Statbel - Overlevingsgraad van btw-plichtigen"
@@ -578,8 +677,10 @@ function InnerDashboard() {
           formatValue={formatInt}
           selectedRegion={selectedRegion}
           selectedProvince={selectedProvince}
+          selectedSector={selectedNace1}
           onSelectRegion={selectRegion}
           onSelectProvince={selectProvince}
+          onSelectSector={setSelectedNace1}
           slug="starters-stoppers"
           sectionId="stoppers"
           dataSource="Statbel - Overlevingsgraad van btw-plichtigen"
@@ -603,8 +704,10 @@ function InnerDashboard() {
         formatValue={formatPct}
         selectedRegion={selectedRegion}
         selectedProvince={selectedProvince}
+        selectedSector={selectedNace1}
         onSelectRegion={selectRegion}
         onSelectProvince={selectProvince}
+        onSelectSector={setSelectedNace1}
         slug="starters-stoppers"
         sectionId="survival"
         dataSource="Statbel - Overlevingsgraad van btw-plichtigen"
