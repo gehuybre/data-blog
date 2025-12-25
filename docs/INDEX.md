@@ -1,5 +1,16 @@
 # Documentation Index
 
+## Handleidingen
+
+- [Blog Post Structuur](BLOG-POST-STRUCTUUR.md) - Hoe een analyse/blogbericht moet worden opgezet
+
+## Analyses
+
+- **Huishoudensgroei** - Huishoudensvooruitzichten per gemeente in Vlaanderen (2010-2040)
+- **Vastgoed Verkopen** - Vastgoedtransacties en prijzen per type woning
+- **Starters-Stoppers** - Startende en stoppende ondernemingen
+- **Vergunningen Goedkeuringen** - Bouwvergunningen nieuwbouw en renovatie
+
 ## Workflows
 
 - [Project Setup](workflows/WF-project-setup.md)
