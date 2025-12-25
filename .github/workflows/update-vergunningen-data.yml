@@ -110,12 +110,20 @@ jobs:
           	json.dump(meta, open(os.environ.get('META_FILE'), 'w'), indent=2)
           PY
 
+      - name: Update publication date from Statbel
+        if: steps.check_remote.outputs.changed == 'true'
+        run: |
+          python scripts/update_publication_date.py vergunningen-aanvragen "https://statbel.fgov.be/nl/themas/bouwen-wonen/bouwvergunningen"
+          python scripts/update_publication_date.py vergunningen-goedkeuringen "https://statbel.fgov.be/nl/themas/bouwen-wonen/bouwvergunningen"
+
       - name: Commit and push changes if any
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add embuild-analyses/analyses/vergunningen-goedkeuringen/results
           git add embuild-analyses/analyses/vergunningen-goedkeuringen/data/.remote_metadata.json || true
+          git add embuild-analyses/analyses/vergunningen-aanvragen/content.mdx || true
+          git add embuild-analyses/analyses/vergunningen-goedkeuringen/content.mdx || true
           if ! git diff --staged --quiet; then
             git commit -m "chore(data): update vergunningen results (auto)"
             git push origin HEAD:main
