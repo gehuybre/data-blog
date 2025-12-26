@@ -18,3 +18,10 @@ node_modules/
 # Starters-stoppers (Statbel VAT survival) raw downloads
 embuild-analyses/analyses/starters-stoppers/data/TF_VAT_SURVIVALS.zip
 embuild-analyses/analyses/starters-stoppers/data/TF_VAT_SURVIVALS.txt
+
+# Analysis raw downloads are generated in CI; keep the repo lean.
+embuild-analyses/analyses/**/data/*
+!embuild-analyses/analyses/**/data/.remote_metadata.json
+
+# Exception: vergunningen-aanvragen requires manual uploads (no reliable automated download).
+!embuild-analyses/analyses/vergunningen-aanvragen/data/**

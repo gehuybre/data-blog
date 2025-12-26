@@ -1,4 +1,6 @@
 import { defineDocumentType, makeSource } from 'contentlayer/source-files'
+import fs from 'node:fs'
+import path from 'node:path'
 
 export const Analysis = defineDocumentType(() => ({
   name: 'Analysis',
@@ -24,8 +26,29 @@ export const Analysis = defineDocumentType(() => ({
   },
 }))
 
+function listNonContentDirsToExclude(): string[] {
+  const analysesDirAbsolute = path.join(process.cwd(), 'analyses')
+  const excludes: string[] = []
+
+  if (!fs.existsSync(analysesDirAbsolute)) return excludes
+
+  for (const entry of fs.readdirSync(analysesDirAbsolute, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue
+    const analysisSlug = entry.name
+    for (const dirName of ['results', 'data']) {
+      const absolute = path.join(analysesDirAbsolute, analysisSlug, dirName)
+      if (fs.existsSync(absolute) && fs.statSync(absolute).isDirectory()) {
+        excludes.push(`${analysisSlug}/${dirName}`)
+      }
+    }
+  }
+
+  return excludes
+}
+
 export default makeSource({
   contentDirPath: 'analyses',
+  contentDirExclude: listNonContentDirsToExclude(),
   documentTypes: [Analysis],
   disableImportAliasWarning: true,
 })

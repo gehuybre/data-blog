@@ -42,6 +42,21 @@ jobs:
             exit 0
           fi
 
+          # If expected result files are missing, force a re-run even if remote metadata is unchanged.
+          missing_required=false
+          required_files=(
+            "embuild-analyses/analyses/vergunningen-goedkeuringen/results/data_quarterly.json"
+            "embuild-analyses/analyses/vergunningen-goedkeuringen/results/municipalities.json"
+            "embuild-analyses/analyses/vergunningen-goedkeuringen/results/bouwvergunningen.csv"
+            "embuild-analyses/analyses/vergunningen-goedkeuringen/results/metadata.json"
+          )
+          for f in "${required_files[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "Missing required result file: $f"
+              missing_required=true
+            fi
+          done
+
           mkdir -p "$(dirname "$META_FILE")"
           headers=$(curl -sI "${INPUT_URL}" || true)
           REMOTE_ETAG=$(printf '%s\\n' "$headers" | awk -F': ' '/^ETag:/ {print $2}' | tr -d '\\r"') || true
@@ -63,9 +78,9 @@ jobs:
           	print('Changed or no previous metadata, continue')
           PY
           rc=$?
-          if [ "$rc" -eq 2 ]; then
+          if [ "$rc" -eq 2 ] && [ "$missing_required" = "false" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No remote change detected; skipping download and processing."
+            echo "No remote change detected and all required results exist; skipping download and processing."
             exit 0
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -75,7 +90,6 @@ jobs:
         if: steps.check_remote.outputs.changed == 'true'
         env:
           INPUT_URL: https://statbel.fgov.be/sites/default/files/files/opendata/Building%20permits/TF_BUILDING_PERMITS.zip
-          INPUT_FILE_PATH: embuild-analyses/analyses/vergunningen-goedkeuringen/data/BV_opendata_251125_082807.txt
           # Optionally set INPUT_FILENAME to control the downloaded filename
           # INPUT_FILENAME: BV_opendata_latest.txt
         run: |
