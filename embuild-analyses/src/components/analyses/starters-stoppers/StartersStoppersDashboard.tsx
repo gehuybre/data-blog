@@ -21,8 +21,7 @@ import { GeoProvider, useGeo } from "../shared/GeoContext"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
 import { ExportButtons } from "../shared/ExportButtons"
-import { ProvinceMap } from "../shared/ProvinceMap"
-import { RegionMap } from "../shared/RegionMap"
+import { InteractiveMap } from "../shared/InteractiveMap"
 
 import raw from "../../../../analyses/starters-stoppers/results/vat_survivals.json"
 import lookups from "../../../../analyses/starters-stoppers/results/lookups.json"
@@ -48,11 +47,13 @@ type YearPoint = {
 
 type RegionPoint = {
   r: RegionCode
+  y: number
   value: number
 }
 
 type ProvincePoint = {
   p: ProvinceCode
+  y: number
   value: number
 }
 
@@ -298,38 +299,89 @@ function aggregateSurvivalRateByYear(rows: VatSurvivalRow[], yearKey: "s1" | "s2
     .sort((a, b) => a.sortValue - b.sortValue)
 }
 
-function aggregateByRegionForYear(rows: VatSurvivalRow[], year: number, valueFn: (r: VatSurvivalRow) => number | null): RegionPoint[] {
-  const agg = new Map<RegionCode, number>()
+function aggregateByRegionAllYears(rows: VatSurvivalRow[], valueFn: (r: VatSurvivalRow) => number | null): RegionPoint[] {
+  const agg = new Map<string, number>() // key: "year-region"
   for (const r of rows) {
-    if (r.y !== year) continue
-    if (!r.r) continue
+    if (typeof r.y !== "number" || !r.r) continue
     const code = String(r.r) as RegionCode
+    const key = `${r.y}-${code}`
     const v = valueFn(r)
     if (typeof v !== "number" || !Number.isFinite(v)) continue
-    agg.set(code, (agg.get(code) ?? 0) + v)
+    agg.set(key, (agg.get(key) ?? 0) + v)
   }
   return Array.from(agg.entries())
-    .map(([r, value]) => ({ r, value }))
-    .sort((a, b) => a.r.localeCompare(b.r))
+    .map(([key, value]) => {
+      const [y, r] = key.split("-")
+      return { r: r as RegionCode, y: Number(y), value }
+    })
+    .sort((a, b) => a.y - b.y || a.r.localeCompare(b.r))
 }
 
-function aggregateByProvinceForYear(
+function aggregateByProvinceAllYears(
   rows: VatSurvivalRow[],
-  year: number,
   valueFn: (r: VatSurvivalRow) => number | null
 ): ProvincePoint[] {
-  const agg = new Map<string, number>()
+  const agg = new Map<string, number>() // key: "year-province"
   for (const r of rows) {
-    if (r.y !== year) continue
-    if (!r.p) continue
+    if (typeof r.y !== "number" || !r.p) continue
     const code = String(r.p)
+    const key = `${r.y}-${code}`
     const v = valueFn(r)
     if (typeof v !== "number" || !Number.isFinite(v)) continue
-    agg.set(code, (agg.get(code) ?? 0) + v)
+    agg.set(key, (agg.get(key) ?? 0) + v)
   }
   return Array.from(agg.entries())
-    .map(([p, value]) => ({ p, value }))
-    .sort((a, b) => a.p.localeCompare(b.p))
+    .map(([key, value]) => {
+      const [y, p] = key.split("-")
+      return { p, y: Number(y), value }
+    })
+    .sort((a, b) => a.y - b.y || a.p.localeCompare(b.p))
+}
+
+function survivalRateByRegionAllYears(rows: VatSurvivalRow[], key: SurvivalKey): RegionPoint[] {
+  const agg = new Map<string, { fr: number; surv: number }>() // key: "year-region"
+  for (const r of rows) {
+    if (typeof r.y !== "number" || !r.r) continue
+    const surv = (r as any)[key]
+    if (typeof r.fr !== "number" || typeof surv !== "number") continue
+    const code = String(r.r) as RegionCode
+    const mapKey = `${r.y}-${code}`
+    const prev = agg.get(mapKey) ?? { fr: 0, surv: 0 }
+    prev.fr += r.fr
+    prev.surv += surv
+    agg.set(mapKey, prev)
+  }
+  return Array.from(agg.entries()).map(([mapKey, v]) => {
+    const [y, r] = mapKey.split("-")
+    return {
+      r: r as RegionCode,
+      y: Number(y),
+      value: v.fr > 0 ? Math.round(((v.surv / v.fr) * 100) * 10) / 10 : 0,
+    }
+  })
+}
+
+function survivalRateByProvinceAllYears(rows: VatSurvivalRow[], key: SurvivalKey): ProvincePoint[] {
+  const agg = new Map<string, { fr: number; surv: number }>() // key: "year-province"
+  for (const r of rows) {
+    if (typeof r.y !== "number" || !r.p) continue
+    const surv = (r as any)[key]
+    if (typeof r.fr !== "number" || typeof surv !== "number") continue
+    const code = String(r.p)
+    const mapKey = `${r.y}-${code}`
+    const prev = agg.get(mapKey) ?? { fr: 0, surv: 0 }
+    prev.fr += r.fr
+    prev.surv += surv
+    agg.set(mapKey, prev)
+  }
+  return Array.from(agg.entries()).map(([mapKey, v]) => {
+    const [y, p] = mapKey.split("-")
+    return {
+      p,
+      y: Number(y),
+      value: v.fr > 0 ? Math.round(((v.surv / v.fr) * 100) * 10) / 10 : 0,
+    }
+  })
 }
 
 function MetricSection({
@@ -337,7 +389,7 @@ function MetricSection({
   label,
   yearSeries,
   mapData,
-  mapYear,
+  years,
   mapLevel,
   formatValue,
   selectedRegion,
@@ -358,7 +410,7 @@ function MetricSection({
   label: string
   yearSeries: YearPoint[]
   mapData: RegionPoint[] | ProvincePoint[]
-  mapYear: number | null
+  years: number[]
   mapLevel: "region" | "province"
   formatValue: (v: number) => string
   selectedRegion: RegionCode
@@ -469,34 +521,34 @@ function MetricSection({
           <Card>
             <CardHeader>
               <CardTitle>
-                {mapYear
-                  ? `Verdeling per ${mapLevel === "province" ? "provincie" : "regio"} (${mapYear})`
-                  : `Verdeling per ${mapLevel === "province" ? "provincie" : "regio"}`}
+                Verdeling per {mapLevel === "province" ? "provincie" : "regio"}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {mapLevel === "province" ? (
-                <ProvinceMap
-                  data={mapData as ProvincePoint[]}
-                  selectedRegion={selectedRegion}
-                  selectedProvince={selectedProvince}
-                  onSelectProvince={onSelectProvince}
-                  getProvinceCode={(d) => (d as any).p}
-                  getMetricValue={(d) => (d as any).value}
-                  formatValue={formatValue}
-                  tooltipLabel={label}
-                />
-              ) : (
-                <RegionMap
-                  data={mapData as RegionPoint[]}
-                  selectedRegion={selectedRegion}
-                  onSelectRegion={onSelectRegion}
-                  getRegionCode={(d) => (d as any).r}
-                  getMetricValue={(d) => (d as any).value}
-                  formatValue={formatValue}
-                  tooltipLabel={label}
-                />
-              )}
+              <InteractiveMap
+                data={mapData as (RegionPoint | ProvincePoint)[]}
+                level={mapLevel}
+                getGeoCode={(d) => {
+                  const point = d as RegionPoint | ProvincePoint
+                  return "p" in point ? point.p : point.r
+                }}
+                getValue={(d) => (d as RegionPoint | ProvincePoint).value}
+                getPeriod={(d) => (d as RegionPoint | ProvincePoint).y}
+                periods={years}
+                showTimeSlider={true}
+                selectedGeo={mapLevel === "province" ? selectedProvince : (selectedRegion !== "1000" ? selectedRegion : null)}
+                onGeoSelect={(code) => {
+                  if (mapLevel === "province") {
+                    onSelectProvince(code as ProvinceCode | null)
+                  } else {
+                    onSelectRegion(code as RegionCode || "1000")
+                  }
+                }}
+                formatValue={formatValue}
+                tooltipLabel={label}
+                regionFilter={mapLevel === "province" && selectedRegion !== "1000" ? selectedRegion : undefined}
+                height={500}
+              />
               <div className="mt-3 text-xs text-muted-foreground">
                 {mapLevel === "province"
                   ? "Klik op een provincie om te filteren, of gebruik de locatie-filter hierboven."
@@ -532,85 +584,43 @@ function InnerDashboard() {
 
   const mapRows = React.useMemo(() => filterRowsBySector(allRows, selectedNace1), [allRows, selectedNace1])
 
-  function latestYear(series: YearPoint[]): number | null {
-    if (!series.length) return null
-    return series[series.length - 1]?.sortValue ?? null
-  }
-
-  const startersMapYear = latestYear(startersSeries)
-  const stoppersMapYear = latestYear(stoppersSeries)
-  const survivalMapYear = latestYear(survivalSeries)
+  // Extract all years from the data
+  const years = React.useMemo(() => {
+    const yearSet = new Set<number>()
+    for (const r of allRows) {
+      if (typeof r.y === "number") yearSet.add(r.y)
+    }
+    return Array.from(yearSet).sort((a, b) => a - b)
+  }, [allRows])
 
   // Map level logic: At Belgium level, show regions. At region level, show provinces.
   // Province level doesn't need a map (already drilled down to single province).
   const mapLevel = level === "region" && selectedRegion !== "1000" ? "province" : "region"
 
   const startersMap = React.useMemo(() => {
-    if (!startersMapYear) return []
     const val = (r: VatSurvivalRow) => (typeof r.fr === "number" ? r.fr : null)
     return mapLevel === "province"
-      ? aggregateByProvinceForYear(mapRows, startersMapYear, val)
-      : aggregateByRegionForYear(mapRows, startersMapYear, val)
-  }, [mapRows, startersMapYear, mapLevel])
+      ? aggregateByProvinceAllYears(mapRows, val)
+      : aggregateByRegionAllYears(mapRows, val)
+  }, [mapRows, mapLevel])
 
   const stoppersMap = React.useMemo(() => {
-    if (!stoppersMapYear) return []
     const key = survivalKeyForHorizon(stopHorizon)
     const val = (r: VatSurvivalRow) => {
       const surv = (r as any)[key]
       return typeof r.fr === "number" && typeof surv === "number" ? Math.max(0, r.fr - surv) : null
     }
     return mapLevel === "province"
-      ? aggregateByProvinceForYear(mapRows, stoppersMapYear, val)
-      : aggregateByRegionForYear(mapRows, stoppersMapYear, val)
-  }, [mapRows, stoppersMapYear, stopHorizon, mapLevel])
-
-  function survMapByRegion(mapYear: number | null, key: "s1" | "s2" | "s3" | "s4" | "s5"): RegionPoint[] {
-    if (!mapYear) return []
-    const byRegion = new Map<RegionCode, { fr: number; surv: number }>()
-    for (const r of mapRows) {
-      if (r.y !== mapYear) continue
-      if (!r.r) continue
-      const surv = (r as any)[key]
-      if (typeof r.fr !== "number" || typeof surv !== "number") continue
-      const code = String(r.r) as RegionCode
-      const prev = byRegion.get(code) ?? { fr: 0, surv: 0 }
-      prev.fr += r.fr
-      prev.surv += surv
-      byRegion.set(code, prev)
-    }
-    return Array.from(byRegion.entries()).map(([r, v]) => ({
-      r,
-      value: v.fr > 0 ? Math.round(((v.surv / v.fr) * 100) * 10) / 10 : 0,
-    }))
-  }
-
-  function survMapByProvince(mapYear: number | null, key: "s1" | "s2" | "s3" | "s4" | "s5"): ProvincePoint[] {
-    if (!mapYear) return []
-    const byProvince = new Map<string, { fr: number; surv: number }>()
-    for (const r of mapRows) {
-      if (r.y !== mapYear) continue
-      if (!r.p) continue
-      const surv = (r as any)[key]
-      if (typeof r.fr !== "number" || typeof surv !== "number") continue
-      const code = String(r.p)
-      const prev = byProvince.get(code) ?? { fr: 0, surv: 0 }
-      prev.fr += r.fr
-      prev.surv += surv
-      byProvince.set(code, prev)
-    }
-    return Array.from(byProvince.entries()).map(([p, v]) => ({
-      p,
-      value: v.fr > 0 ? Math.round(((v.surv / v.fr) * 100) * 10) / 10 : 0,
-    }))
-  }
+      ? aggregateByProvinceAllYears(mapRows, val)
+      : aggregateByRegionAllYears(mapRows, val)
+  }, [mapRows, stopHorizon, mapLevel])
 
   const survivalMap: RegionPoint[] | ProvincePoint[] = React.useMemo(() => {
     const key = survivalKeyForHorizon(stopHorizon)
     return mapLevel === "province"
-      ? survMapByProvince(survivalMapYear, key)
-      : survMapByRegion(survivalMapYear, key)
-  }, [mapRows, survivalMapYear, stopHorizon, mapLevel])
+      ? survivalRateByProvinceAllYears(mapRows, key)
+      : survivalRateByRegionAllYears(mapRows, key)
+  }, [mapRows, stopHorizon, mapLevel])
 
   function selectRegion(code: RegionCode) {
     setSelectedRegion(code)
@@ -646,7 +656,7 @@ function InnerDashboard() {
         label="Aantal"
         yearSeries={startersSeries}
         mapData={startersMap}
-        mapYear={startersMapYear}
+        years={years}
         mapLevel={mapLevel}
         formatValue={formatInt}
         selectedRegion={selectedRegion}
@@ -671,7 +681,7 @@ function InnerDashboard() {
         label="Aantal"
         yearSeries={stoppersSeries}
         mapData={stoppersMap}
-        mapYear={stoppersMapYear}
+        years={years}
         mapLevel={mapLevel}
         formatValue={formatInt}
         selectedRegion={selectedRegion}
@@ -699,7 +709,7 @@ function InnerDashboard() {
         label="Overlevingskans"
         yearSeries={survivalSeries}
         mapData={survivalMap}
-        mapYear={survivalMapYear}
+        years={years}
         mapLevel={mapLevel}
         formatValue={formatPct}
         selectedRegion={selectedRegion}

@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
 import { ExportButtons } from "../shared/ExportButtons"
-import { ProvinceMap } from "../shared/ProvinceMap"
+import { InteractiveMap } from "../shared/InteractiveMap"
 
 // Import data
 import monthlyConstruction from "../../../../analyses/faillissementen/results/monthly_construction.json"
@@ -27,12 +27,17 @@ import monthlyTotals from "../../../../analyses/faillissementen/results/monthly_
 import yearlyConstruction from "../../../../analyses/faillissementen/results/yearly_construction.json"
 import yearlyTotals from "../../../../analyses/faillissementen/results/yearly_totals.json"
 import yearlyBySector from "../../../../analyses/faillissementen/results/yearly_by_sector.json"
+import yearlyBySectorProvince from "../../../../analyses/faillissementen/results/yearly_by_sector_province.json"
 import provincesConstruction from "../../../../analyses/faillissementen/results/provinces_construction.json"
 import provincesData from "../../../../analyses/faillissementen/results/provinces.json"
 import monthlyProvincesConstruction from "../../../../analyses/faillissementen/results/monthly_provinces_construction.json"
 import monthlyProvinces from "../../../../analyses/faillissementen/results/monthly_provinces.json"
 import lookups from "../../../../analyses/faillissementen/results/lookups.json"
 import metadata from "../../../../analyses/faillissementen/results/metadata.json"
+import yearlyByDurationConstruction from "../../../../analyses/faillissementen/results/yearly_by_duration_construction.json"
+import yearlyByDurationProvinceConstruction from "../../../../analyses/faillissementen/results/yearly_by_duration_province_construction.json"
+import yearlyByWorkersConstruction from "../../../../analyses/faillissementen/results/yearly_by_workers_construction.json"
+import yearlyByWorkersProvinceConstruction from "../../../../analyses/faillissementen/results/yearly_by_workers_province_construction.json"
 
 // Types
 type MonthlyRow = {
@@ -63,6 +68,48 @@ type YearlySectorRow = {
   w: number
 }
 
+type YearlySectorProvinceRow = {
+  y: number
+  s: string
+  p: string
+  n: number
+  w: number
+}
+
+type DurationRow = {
+  y: number
+  d: string
+  ds: string
+  do: number
+  n: number
+  w: number
+}
+
+type DurationProvinceRow = {
+  y: number
+  d: string
+  ds: string
+  do: number
+  p: string
+  n: number
+  w: number
+}
+
+type WorkersRow = {
+  y: number
+  c: string
+  n: number
+  w: number
+}
+
+type WorkersProvinceRow = {
+  y: number
+  c: string
+  p: string
+  n: number
+  w: number
+}
+
 type ProvinceRow = {
   y: number
   p: string
@@ -86,10 +133,6 @@ type ChartPoint = {
   value: number
 }
 
-type ProvincePoint = {
-  p: string
-  value: number
-}
 
 const MONTH_NAMES = [
   "Jan", "Feb", "Mrt", "Apr", "Mei", "Jun",
@@ -353,19 +396,6 @@ function getYearlyData(sector: string, provinceCode: string | null): ChartPoint[
     .sort((a, b) => a.sortValue - b.sortValue)
 }
 
-// Get province map data
-function getProvinceMapData(year: number, sector: string): ProvincePoint[] {
-  const data: ProvinceRow[] = sector === "ALL"
-    ? (provincesData as ProvinceRow[])
-    : (provincesConstruction as ProvinceRow[])
-
-  return data
-    .filter((r) => r.y === year)
-    .map((r) => ({
-      p: r.p,
-      value: r.n,
-    }))
-}
 
 // Header with dynamic date
 function DashboardHeader() {
@@ -492,6 +522,19 @@ function SummaryCards({ sector, provinceCode }: { sector: string; provinceCode: 
   )
 }
 
+// Get all years province data for interactive map
+function getAllYearsProvinceData(sector: string): { p: string; n: number; y: number }[] {
+  const data: ProvinceRow[] = sector === "ALL"
+    ? (provincesData as ProvinceRow[])
+    : (provincesConstruction as ProvinceRow[])
+
+  return data.map((r) => ({
+    p: r.p,
+    n: r.n,
+    y: r.y,
+  }))
+}
+
 // Main evolution section with province filter
 function EvolutionSection({
   sector,
@@ -506,8 +549,6 @@ function EvolutionSection({
 }) {
   const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("chart")
   const [timeRange, setTimeRange] = React.useState<"monthly" | "yearly">("monthly")
-  const currentYear = metadata.max_year
-  const [mapYear, setMapYear] = React.useState(currentYear)
   const years = (lookups as { years: number[] }).years ?? []
 
   const data = React.useMemo(() => {
@@ -516,7 +557,8 @@ function EvolutionSection({
       : getYearlyData(sector, provinceCode)
   }, [sector, provinceCode, timeRange])
 
-  const mapData = React.useMemo(() => getProvinceMapData(mapYear, sector), [mapYear, sector])
+  // All years data for interactive map with time slider
+  const allYearsMapData = React.useMemo(() => getAllYearsProvinceData(sector), [sector])
 
   const exportData = React.useMemo(
     () =>
@@ -573,9 +615,6 @@ function EvolutionSection({
                 </Button>
               </>
             )}
-            {currentView === "map" && (
-              <YearFilter selected={mapYear} onChange={setMapYear} years={years} />
-            )}
           </div>
         </div>
         <TabsContent value="chart">
@@ -613,22 +652,27 @@ function EvolutionSection({
           <Card>
             <CardHeader>
               <CardTitle>
-                {sector === "ALL" ? "Alle sectoren" : "Bouwsector"} - {mapYear}
+                {sector === "ALL" ? "Alle sectoren" : "Bouwsector"} - Faillissementen per provincie
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ProvinceMap
-                data={mapData}
-                selectedRegion="2000"
-                selectedProvince={provinceCode}
-                onSelectProvince={(pCode) => onProvinceChange(pCode === provinceCode ? null : pCode)}
-                getProvinceCode={(d) => (d as ProvincePoint).p}
-                getMetricValue={(d) => (d as ProvincePoint).value}
+              <InteractiveMap
+                data={allYearsMapData}
+                level="province"
+                getGeoCode={(d) => d.p}
+                getValue={(d) => d.n}
+                getPeriod={(d) => d.y}
+                periods={years}
+                showTimeSlider={true}
+                selectedGeo={provinceCode}
+                onGeoSelect={(code) => onProvinceChange(code === provinceCode ? null : code)}
                 formatValue={formatInt}
                 tooltipLabel="Faillissementen"
+                regionFilter="2000"
+                height={500}
               />
               <div className="mt-3 text-xs text-muted-foreground">
-                Klik op een provincie om te filteren.
+                Klik op een provincie om te filteren. Gebruik de tijdsslider om de evolutie te bekijken.
               </div>
             </CardContent>
           </Card>
@@ -638,16 +682,245 @@ function EvolutionSection({
   )
 }
 
+// Company duration section (bedrijfsleeftijd)
+function DurationSection({
+  provinceCode,
+  onProvinceChange,
+}: {
+  provinceCode: string | null
+  onProvinceChange: (code: string | null) => void
+}) {
+  const currentYear = metadata.max_year
+  const [selectedYear, setSelectedYear] = React.useState(currentYear)
+  const years = (lookups as { years: number[] }).years ?? []
+
+  const data = React.useMemo(() => {
+    let durationData: DurationRow[]
+
+    if (provinceCode) {
+      // Filter by province
+      const provData = (yearlyByDurationProvinceConstruction as DurationProvinceRow[])
+        .filter((r) => r.y === selectedYear && r.p === provinceCode)
+      durationData = provData.map((r) => ({
+        y: r.y,
+        d: r.d,
+        ds: r.ds,
+        do: r.do,
+        n: r.n,
+        w: r.w,
+      }))
+    } else {
+      durationData = (yearlyByDurationConstruction as DurationRow[])
+        .filter((r) => r.y === selectedYear)
+    }
+
+    return durationData.sort((a, b) => a.do - b.do)
+  }, [selectedYear, provinceCode])
+
+  const totalBankruptcies = data.reduce((sum, r) => sum + r.n, 0)
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Leeftijd gefailleerde bedrijven</h2>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
+        <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />
+        <YearFilter selected={selectedYear} onChange={setSelectedYear} years={years} />
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Faillissementen bouwsector naar bedrijfsleeftijd ({selectedYear})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {data.map((r) => {
+              const widthPercent = totalBankruptcies > 0 ? (r.n / totalBankruptcies) * 100 : 0
+              const isYoung = r.do <= 4 // < 5 jaar
+
+              return (
+                <div key={r.d} className={cn("py-2", isYoung && "bg-destructive/5 -mx-4 px-4 rounded")}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className={cn("font-medium", isYoung && "text-destructive")}>{r.ds}</span>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="text-muted-foreground">{formatInt(r.w)} werknemers</span>
+                      <span className="font-bold min-w-[60px] text-right">{formatInt(r.n)}</span>
+                      <span className="text-muted-foreground min-w-[50px] text-right">({widthPercent.toFixed(1)}%)</span>
+                    </div>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={cn("h-full rounded-full", isYoung ? "bg-destructive" : "bg-muted-foreground/30")}
+                      style={{ width: `${widthPercent}%` }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
+            <p>Jonge bedrijven (&lt;5 jaar) zijn gemarkeerd. In {selectedYear} faalden {formatInt(data.filter(r => r.do <= 4).reduce((sum, r) => sum + r.n, 0))} jonge bouwbedrijven ({((data.filter(r => r.do <= 4).reduce((sum, r) => sum + r.n, 0) / totalBankruptcies) * 100).toFixed(1)}% van totaal).</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// Workers count section (aantal werknemers)
+function WorkersSection({
+  provinceCode,
+  onProvinceChange,
+}: {
+  provinceCode: string | null
+  onProvinceChange: (code: string | null) => void
+}) {
+  const currentYear = metadata.max_year
+  const [selectedYear, setSelectedYear] = React.useState(currentYear)
+  const years = (lookups as { years: number[] }).years ?? []
+
+  // Sort worker classes logically
+  const workerClassOrder = [
+    "0 - 4 werknemers",
+    "5 - 9 werknemers",
+    "10 - 19 werknemers",
+    "20 - 49 werknemers",
+    "50 - 99 werknemers",
+    "100 - 199 werknemers",
+    "200 - 249 werknemers",
+    "250 - 499 werknemers",
+    "500 - 999 werknemers",
+    "1000 en meer werknemers",
+  ]
+
+  const data = React.useMemo(() => {
+    let workersData: WorkersRow[]
+
+    if (provinceCode) {
+      // Filter by province
+      const provData = (yearlyByWorkersProvinceConstruction as WorkersProvinceRow[])
+        .filter((r) => r.y === selectedYear && r.p === provinceCode)
+      // Aggregate by class
+      const byClass = new Map<string, { n: number; w: number }>()
+      for (const r of provData) {
+        const existing = byClass.get(r.c) ?? { n: 0, w: 0 }
+        byClass.set(r.c, { n: existing.n + r.n, w: existing.w + r.w })
+      }
+      workersData = Array.from(byClass.entries()).map(([c, v]) => ({
+        y: selectedYear,
+        c,
+        n: v.n,
+        w: v.w,
+      }))
+    } else {
+      workersData = (yearlyByWorkersConstruction as WorkersRow[])
+        .filter((r) => r.y === selectedYear)
+    }
+
+    return workersData.sort((a, b) => {
+      const aIdx = workerClassOrder.indexOf(a.c)
+      const bIdx = workerClassOrder.indexOf(b.c)
+      return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx)
+    })
+  }, [selectedYear, provinceCode])
+
+  const totalBankruptcies = data.reduce((sum, r) => sum + r.n, 0)
+  const totalWorkers = data.reduce((sum, r) => sum + r.w, 0)
+  const smallCompanies = data.filter(r => r.c === "0 - 4 werknemers")
+  const smallCompanyCount = smallCompanies.reduce((sum, r) => sum + r.n, 0)
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Bedrijfsgrootte</h2>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
+        <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />
+        <YearFilter selected={selectedYear} onChange={setSelectedYear} years={years} />
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Faillissementen bouwsector naar bedrijfsgrootte ({selectedYear})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {data.map((r) => {
+              const widthPercent = totalBankruptcies > 0 ? (r.n / totalBankruptcies) * 100 : 0
+              const isSmall = r.c === "0 - 4 werknemers"
+
+              return (
+                <div key={r.c} className={cn("py-2", isSmall && "bg-primary/5 -mx-4 px-4 rounded")}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className={cn("font-medium", isSmall && "text-primary")}>{r.c}</span>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="text-muted-foreground">{formatInt(r.w)} werknemers</span>
+                      <span className="font-bold min-w-[60px] text-right">{formatInt(r.n)}</span>
+                      <span className="text-muted-foreground min-w-[50px] text-right">({widthPercent.toFixed(1)}%)</span>
+                    </div>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={cn("h-full rounded-full", isSmall ? "bg-primary" : "bg-muted-foreground/30")}
+                      style={{ width: `${widthPercent}%` }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
+            <p>In {selectedYear} waren {formatInt(smallCompanyCount)} faillissementen ({((smallCompanyCount / totalBankruptcies) * 100).toFixed(1)}%) kleine bedrijven (0-4 werknemers). In totaal verloren {formatInt(totalWorkers)} werknemers hun job.</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
 // Sector comparison section
-function SectorComparisonSection() {
-  const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
+function SectorComparisonSection({
+  provinceCode,
+  onProvinceChange,
+}: {
+  provinceCode: string | null
+  onProvinceChange: (code: string | null) => void
+}) {
   const currentYear = metadata.max_year
   const [selectedYear, setSelectedYear] = React.useState(currentYear)
   const years = (lookups as { years: number[] }).years ?? []
   const sectors = useSectorOptions()
 
   const data = React.useMemo(() => {
-    const sectorData = (yearlyBySector as YearlySectorRow[]).filter((r) => r.y === selectedYear)
+    let sectorData: YearlySectorRow[]
+
+    if (provinceCode) {
+      // Filter by province using yearly sector province data
+      const provData = (yearlyBySectorProvince as YearlySectorProvinceRow[])
+        .filter((r) => r.y === selectedYear && r.p === provinceCode)
+      // Aggregate to sector level
+      const bySector = new Map<string, { n: number; w: number }>()
+      for (const r of provData) {
+        const existing = bySector.get(r.s) ?? { n: 0, w: 0 }
+        bySector.set(r.s, { n: existing.n + r.n, w: existing.w + r.w })
+      }
+      sectorData = Array.from(bySector.entries()).map(([s, v]) => ({
+        y: selectedYear,
+        s,
+        n: v.n,
+        w: v.w,
+      }))
+    } else {
+      sectorData = (yearlyBySector as YearlySectorRow[]).filter((r) => r.y === selectedYear)
+    }
+
     return sectorData
       .map((r) => ({
         sector: r.s,
@@ -657,18 +930,10 @@ function SectorComparisonSection() {
       }))
       .sort((a, b) => b.n - a.n)
       .slice(0, 10)
-  }, [selectedYear, sectors])
+  }, [selectedYear, sectors, provinceCode])
 
   const constructionData = data.find((d) => d.sector === "F")
   const constructionRank = data.findIndex((d) => d.sector === "F") + 1
-
-  const chartData = React.useMemo(() => {
-    return data.map((r, i) => ({
-      sortValue: i,
-      periodCells: [r.name],
-      value: r.n,
-    }))
-  }, [data])
 
   return (
     <div className="space-y-4">
@@ -693,173 +958,50 @@ function SectorComparisonSection() {
         </Card>
       )}
 
-      <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table")}>
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <TabsList>
-            <TabsTrigger value="chart">Grafiek</TabsTrigger>
-            <TabsTrigger value="table">Tabel</TabsTrigger>
-          </TabsList>
-          <YearFilter selected={selectedYear} onChange={setSelectedYear} years={years} />
-        </div>
-        <TabsContent value="chart">
-          <Card>
-            <CardHeader>
-              <CardTitle>Top 10 sectoren met meeste faillissementen ({selectedYear})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {data.map((r, i) => {
-                  const isConstruction = r.sector === "F"
-                  const maxValue = data[0]?.n ?? 1
-                  const widthPercent = (r.n / maxValue) * 100
+      <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
+        <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />
+        <YearFilter selected={selectedYear} onChange={setSelectedYear} years={years} />
+      </div>
 
-                  return (
-                    <div key={r.sector} className={cn("py-2", isConstruction && "bg-primary/5 -mx-4 px-4 rounded")}>
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 text-muted-foreground">{i + 1}.</span>
-                          <span className={cn("font-medium", isConstruction && "text-primary")}>{r.name}</span>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm">
-                          <span className="text-muted-foreground">{formatInt(r.w)} werknemers</span>
-                          <span className="font-bold min-w-[60px] text-right">{formatInt(r.n)}</span>
-                        </div>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className={cn("h-full rounded-full", isConstruction ? "bg-primary" : "bg-muted-foreground/30")}
-                          style={{ width: `${widthPercent}%` }}
-                        />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="table">
-          <Card>
-            <CardHeader>
-              <CardTitle>Data per sector ({selectedYear})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {data.map((r, i) => (
-                  <div key={r.sector} className="flex items-center justify-between py-2 border-b last:border-0">
-                    <div className="flex items-center gap-3">
+      <Card>
+        <CardHeader>
+          <CardTitle>Top 10 sectoren met meeste faillissementen ({selectedYear})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {data.map((r, i) => {
+              const isConstruction = r.sector === "F"
+              const maxValue = data[0]?.n ?? 1
+              const widthPercent = (r.n / maxValue) * 100
+
+              return (
+                <div key={r.sector} className={cn("py-2", isConstruction && "bg-primary/5 -mx-4 px-4 rounded")}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
                       <span className="w-6 text-muted-foreground">{i + 1}.</span>
-                      <span className="font-medium">{r.name}</span>
+                      <span className={cn("font-medium", isConstruction && "text-primary")}>{r.name}</span>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 text-sm">
                       <span className="text-muted-foreground">{formatInt(r.w)} werknemers</span>
                       <span className="font-bold min-w-[60px] text-right">{formatInt(r.n)}</span>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
-  )
-}
-
-// Long-term trend section - now a full section
-function TrendSection({
-  provinceCode,
-  onProvinceChange,
-}: {
-  provinceCode: string | null
-  onProvinceChange: (code: string | null) => void
-}) {
-  const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
-  const years = (lookups as { years: number[] }).years ?? []
-
-  const yearlyData = React.useMemo(() => getYearlyData("F", provinceCode), [provinceCode])
-  const yearlyAllData = React.useMemo(() => getYearlyData("ALL", provinceCode), [provinceCode])
-
-  // Calculate construction share over time
-  const shareData = React.useMemo(() => {
-    const constructionByYear = new Map(yearlyData.map((r) => [r.periodCells[0], r.value]))
-    const totalByYear = new Map(yearlyAllData.map((r) => [r.periodCells[0], r.value]))
-
-    return Array.from(constructionByYear.entries())
-      .map(([year, construction]) => {
-        const total = totalByYear.get(year) ?? 1
-        return {
-          sortValue: year as number,
-          periodCells: [year],
-          value: (construction / (total as number)) * 100,
-        }
-      })
-      .sort((a, b) => a.sortValue - b.sortValue)
-  }, [yearlyData, yearlyAllData])
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Langjarige trend bouwsector</h2>
-      </div>
-
-      <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table")}>
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <TabsList>
-            <TabsTrigger value="chart">Grafiek</TabsTrigger>
-            <TabsTrigger value="table">Tabel</TabsTrigger>
-          </TabsList>
-          <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />
-        </div>
-        <TabsContent value="chart">
-          <div className="grid md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Faillissementen bouwsector (2005-heden)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <FilterableChart
-                  data={yearlyData}
-                  getLabel={(d) => String((d as ChartPoint).periodCells[0])}
-                  getValue={(d) => (d as ChartPoint).value}
-                  getSortValue={(d) => (d as ChartPoint).sortValue}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Aandeel bouwsector in totaal (%)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <FilterableChart
-                  data={shareData}
-                  getLabel={(d) => String((d as ChartPoint).periodCells[0])}
-                  getValue={(d) => (d as ChartPoint).value}
-                  getSortValue={(d) => (d as ChartPoint).sortValue}
-                />
-              </CardContent>
-            </Card>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={cn("h-full rounded-full", isConstruction ? "bg-primary" : "bg-muted-foreground/30")}
+                      style={{ width: `${widthPercent}%` }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
           </div>
-        </TabsContent>
-        <TabsContent value="table">
-          <Card>
-            <CardHeader>
-              <CardTitle>Data bouwsector</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <FilterableTable
-                data={yearlyData}
-                label="Faillissementen"
-                periodHeaders={["Jaar"]}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   )
 }
+
 
 // Main Dashboard Component
 export function FaillissementenDashboard() {
@@ -880,9 +1022,17 @@ export function FaillissementenDashboard() {
         onProvinceChange={setSelectedProvince}
       />
 
-      <SectorComparisonSection />
+      <SectorComparisonSection
+        provinceCode={selectedProvince}
+        onProvinceChange={setSelectedProvince}
+      />
 
-      <TrendSection
+      <DurationSection
+        provinceCode={selectedProvince}
+        onProvinceChange={setSelectedProvince}
+      />
+
+      <WorkersSection
         provinceCode={selectedProvince}
         onProvinceChange={setSelectedProvince}
       />
