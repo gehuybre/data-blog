@@ -1,6 +1,7 @@
 import { allAnalyses } from 'contentlayer/generated'
 import { notFound } from 'next/navigation'
 import { format, parseISO } from 'date-fns'
+import { nl } from 'date-fns/locale'
 import { MDXContent } from '@/components/mdx-content'
 import Link from 'next/link'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
@@ -39,10 +40,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ slug:
           dateTime={analysis.sourcePublicationDate || analysis.date}
           className="text-muted-foreground"
         >
-          {analysis.sourcePublicationDate
-            ? `Brondata: ${format(parseISO(analysis.sourcePublicationDate), 'd MMMM yyyy')}`
-            : format(parseISO(analysis.date), 'd MMMM yyyy')
-          }
+          {format(parseISO(analysis.sourcePublicationDate || analysis.date), 'd MMMM yyyy', { locale: nl })}
         </time>
       </div>
       <MDXContent code={analysis.body.code} />

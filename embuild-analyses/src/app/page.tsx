@@ -1,5 +1,6 @@
 import { allAnalyses } from 'contentlayer/generated'
 import { compareDesc, format, parseISO } from 'date-fns'
+import { nl } from 'date-fns/locale'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -21,10 +22,7 @@ export default function Home() {
               <CardHeader>
                 <CardTitle>{analysis.title}</CardTitle>
                 <CardDescription>
-                  {analysis.sourcePublicationDate
-                    ? `Brondata: ${format(parseISO(analysis.sourcePublicationDate), 'd MMMM yyyy')}`
-                    : format(parseISO(analysis.date), 'd MMMM yyyy')
-                  }
+                  {format(parseISO(analysis.sourcePublicationDate || analysis.date), 'd MMMM yyyy', { locale: nl })}
                 </CardDescription>
               </CardHeader>
               <CardContent>

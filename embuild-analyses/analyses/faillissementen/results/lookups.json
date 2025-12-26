@@ -134,5 +134,85 @@
     2024,
     2025
   ],
-  "construction_sector": "F"
+  "construction_sector": "F",
+  "durations": [
+    {
+      "code": "Minder dan 1 jaar",
+      "short": "<1 jaar"
+    },
+    {
+      "code": "Van 1 jaar tot minder dan 2 jaar",
+      "short": "1-2 jaar"
+    },
+    {
+      "code": "Van 2 jaar tot minder dan 3 jaar",
+      "short": "2-3 jaar"
+    },
+    {
+      "code": "Van 3 jaar tot minder dan 4 jaar",
+      "short": "3-4 jaar"
+    },
+    {
+      "code": "Van 4 jaar tot minder dan 5 jaar",
+      "short": "4-5 jaar"
+    },
+    {
+      "code": "Van 5 jaar tot minder dan 10 jaar",
+      "short": "5-10 jaar"
+    },
+    {
+      "code": "Van 10 jaar tot minder dan 15 jaar",
+      "short": "10-15 jaar"
+    },
+    {
+      "code": "Van 15 jaar tot minder dan 20 jaar",
+      "short": "15-20 jaar"
+    },
+    {
+      "code": "20 jaar of meer",
+      "short": "20+ jaar"
+    }
+  ],
+  "worker_classes": [
+    {
+      "code": "0 - 4 werknemers",
+      "name": "0 - 4 werknemers"
+    },
+    {
+      "code": "10 - 19 werknemers",
+      "name": "10 - 19 werknemers"
+    },
+    {
+      "code": "100 - 199 werknemers",
+      "name": "100 - 199 werknemers"
+    },
+    {
+      "code": "1000 werknemers en meer",
+      "name": "1000 werknemers en meer"
+    },
+    {
+      "code": "20 - 49 werknemers",
+      "name": "20 - 49 werknemers"
+    },
+    {
+      "code": "200 - 249 werknemers",
+      "name": "200 - 249 werknemers"
+    },
+    {
+      "code": "250 - 499 werknemers",
+      "name": "250 - 499 werknemers"
+    },
+    {
+      "code": "5 - 9 werknemers",
+      "name": "5 - 9 werknemers"
+    },
+    {
+      "code": "50 - 99 werknemers",
+      "name": "50 - 99 werknemers"
+    },
+    {
+      "code": "500 - 999 werknemers",
+      "name": "500 - 999 werknemers"
+    }
+  ]
 }
