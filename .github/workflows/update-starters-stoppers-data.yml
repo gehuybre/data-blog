@@ -37,6 +37,21 @@ jobs:
           set -e
           mkdir -p "$(dirname "$META_FILE")"
 
+          # If expected result files are missing, force a re-run even if remote metadata is unchanged.
+          missing_required=false
+          required_files=(
+            "embuild-analyses/analyses/starters-stoppers/results/vat_survivals.json"
+            "embuild-analyses/analyses/starters-stoppers/results/vat_survivals.csv"
+            "embuild-analyses/analyses/starters-stoppers/results/lookups.json"
+            "embuild-analyses/analyses/starters-stoppers/results/metadata.json"
+          )
+          for f in "${required_files[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "Missing required result file: $f"
+              missing_required=true
+            fi
+          done
+
           headers=$(curl -sI "${INPUT_URL}" || true)
           REMOTE_ETAG=$(printf '%s\n' "$headers" | awk -F': ' '/^ETag:/ {print $2}' | tr -d '\r"') || true
           REMOTE_LASTMOD=$(printf '%s\n' "$headers" | awk -F': ' '/^Last-Modified:/ {print substr($0,index($0,$2)) }' | tr -d '\r') || true
@@ -58,9 +73,9 @@ jobs:
           PY
           rc=$?
           set -e
-          if [ "$rc" -eq 2 ]; then
+          if [ "$rc" -eq 2 ] && [ "$missing_required" = "false" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No remote change detected; skipping download and processing."
+            echo "No remote change detected and all required results exist; skipping download and processing."
             exit 0
           elif [ "$rc" -ne 0 ]; then
             exit "$rc"
