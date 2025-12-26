@@ -311,6 +311,54 @@ def process_data(df: pd.DataFrame) -> None:
         json.dump(provinces_all_json, f)
 
     # =========================================================================
+    # AGGREGATE 9: Monthly by province (construction sector)
+    # =========================================================================
+    monthly_prov_bouw = df_bouw_prov.groupby(["CD_YEAR", "CD_MONTH", "CD_PROV_REFNIS"]).agg({
+        "MS_COUNTOF_BANKRUPTCIES": "sum",
+        "MS_COUNTOF_WORKERS": "sum",
+    }).reset_index()
+
+    monthly_prov_bouw_json = [
+        {
+            "y": int(row["CD_YEAR"]),
+            "m": int(row["CD_MONTH"]),
+            "p": str(int(row["CD_PROV_REFNIS"])),
+            "n": int(row["MS_COUNTOF_BANKRUPTCIES"]),
+            "w": int(row["MS_COUNTOF_WORKERS"]),
+        }
+        for _, row in monthly_prov_bouw.iterrows()
+        if int(row["CD_PROV_REFNIS"]) in FLEMISH_PROVINCES
+    ]
+    monthly_prov_bouw_json.sort(key=lambda x: (x["y"], x["m"], x["p"]))
+
+    with open(RESULTS_DIR / "monthly_provinces_construction.json", "w") as f:
+        json.dump(monthly_prov_bouw_json, f)
+
+    # =========================================================================
+    # AGGREGATE 10: Monthly by province (all sectors)
+    # =========================================================================
+    monthly_prov_all = df_vl_prov.groupby(["CD_YEAR", "CD_MONTH", "CD_PROV_REFNIS"]).agg({
+        "MS_COUNTOF_BANKRUPTCIES": "sum",
+        "MS_COUNTOF_WORKERS": "sum",
+    }).reset_index()
+
+    monthly_prov_all_json = [
+        {
+            "y": int(row["CD_YEAR"]),
+            "m": int(row["CD_MONTH"]),
+            "p": str(int(row["CD_PROV_REFNIS"])),
+            "n": int(row["MS_COUNTOF_BANKRUPTCIES"]),
+            "w": int(row["MS_COUNTOF_WORKERS"]),
+        }
+        for _, row in monthly_prov_all.iterrows()
+        if int(row["CD_PROV_REFNIS"]) in FLEMISH_PROVINCES
+    ]
+    monthly_prov_all_json.sort(key=lambda x: (x["y"], x["m"], x["p"]))
+
+    with open(RESULTS_DIR / "monthly_provinces.json", "w") as f:
+        json.dump(monthly_prov_all_json, f)
+
+    # =========================================================================
     # LOOKUPS for UI
     # =========================================================================
     # Get all sectors that appear in the data
