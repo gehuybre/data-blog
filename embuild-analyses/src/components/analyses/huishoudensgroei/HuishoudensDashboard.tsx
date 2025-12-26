@@ -20,7 +20,7 @@ import { GeoProvider } from "../shared/GeoContext"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
 import { ExportButtons } from "../shared/ExportButtons"
-import { ProvinceMap } from "../shared/ProvinceMap"
+import { InteractiveMap } from "../shared/InteractiveMap"
 
 import municipalitiesRaw from "../../../../analyses/huishoudensgroei/results/municipalities.json"
 import provincesRaw from "../../../../analyses/huishoudensgroei/results/provinces.json"
@@ -78,11 +78,6 @@ type HouseholdSize = {
 type YearPoint = {
   sortValue: number
   periodCells: Array<string | number>
-  value: number
-}
-
-type ProvincePoint = {
-  p: string
   value: number
 }
 
@@ -292,13 +287,15 @@ function getSizeBreakdown(
   }))
 }
 
-// Get province map data for a specific year
-function getProvinceMapData(year: number): ProvincePoint[] {
-  const data = (provincesRaw as ProvinceRow[]).filter((r) => r.y === year)
-  return data.map((r) => ({
-    p: r.p,
-    value: r.gr ?? 0,
-  }))
+// Get all province data for interactive map (all years)
+function getAllProvinceMapData(): { p: string; gr: number; y: number }[] {
+  return (provincesRaw as ProvinceRow[])
+    .filter((r) => r.gr !== null)
+    .map((r) => ({
+      p: r.p,
+      gr: r.gr ?? 0,
+      y: r.y,
+    }))
 }
 
 // Get growth ranking for municipalities
@@ -412,10 +409,11 @@ function MainSection({
   onHorizonChange: (year: number) => void
 }) {
   const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("chart")
+  const horizonYears = [2025, 2030, 2033, 2035, 2040]
 
   const yearSeries = React.useMemo(() => getYearSeries(level, code, horizonYear), [level, code, horizonYear])
 
-  const mapData = React.useMemo(() => getProvinceMapData(horizonYear), [horizonYear])
+  const allProvinceData = React.useMemo(() => getAllProvinceMapData(), [])
 
   const exportData = React.useMemo(
     () =>
@@ -487,21 +485,28 @@ function MainSection({
         <TabsContent value="map">
           <Card>
             <CardHeader>
-              <CardTitle>Groei per provincie ({BASE_YEAR} - {horizonYear})</CardTitle>
+              <CardTitle>Groei per provincie ({BASE_YEAR} - horizon)</CardTitle>
             </CardHeader>
             <CardContent>
-              <ProvinceMap
-                data={mapData}
-                selectedRegion="2000"
-                selectedProvince={level === "province" ? code : null}
-                onSelectProvince={(pCode) => onSelectGeo("province", pCode)}
-                getProvinceCode={(d) => (d as ProvincePoint).p}
-                getMetricValue={(d) => (d as ProvincePoint).value}
+              <InteractiveMap
+                data={allProvinceData}
+                level="province"
+                getGeoCode={(d) => d.p}
+                getValue={(d) => d.gr}
+                getPeriod={(d) => d.y}
+                periods={horizonYears}
+                initialPeriod={horizonYear}
+                showTimeSlider={true}
+                selectedGeo={level === "province" ? code : null}
+                onGeoSelect={(pCode) => onSelectGeo("province", pCode)}
                 formatValue={formatPct}
-                tooltipLabel="Groei"
+                tooltipLabel="Groei (%)"
+                regionFilter="2000"
+                colorScheme="green"
+                height={500}
               />
               <div className="mt-3 text-xs text-muted-foreground">
-                Klik op een provincie om te filteren.
+                Klik op een provincie om te filteren. Gebruik de tijdsslider om verschillende horizon-jaren te vergelijken.
               </div>
             </CardContent>
           </Card>

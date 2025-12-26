@@ -6,10 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { FilterableChart } from "./FilterableChart"
 import { FilterableTable } from "./FilterableTable"
-import { MunicipalityMap } from "./MunicipalityMap"
+import { InteractiveMap } from "./InteractiveMap"
 import { ExportButtons } from "./ExportButtons"
+import { GeoFilterInline } from "./GeoFilterInline"
 import { useGeo } from "./GeoContext"
-import { PROVINCES, getProvinceForMunicipality, Municipality, ProvinceCode } from "@/lib/geo-utils"
+import { PROVINCES, getProvinceForMunicipality, Municipality, ProvinceCode, RegionCode } from "@/lib/geo-utils"
 
 type UnknownRecord = Record<string, any>
 
@@ -94,13 +95,7 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
       cells: (d: any) => [d?.y, `Q${d?.q}`],
     } satisfies PeriodTableConfig<any>)
 
-  // 1. Filter raw data based on scope (for Map)
-  // Province-only map: always show all provinces (color scale stays comparable).
-  const mapScopeData = useMemo(() => {
-    return data
-  }, [data])
-
-  // 2. Aggregate data for Chart/Table
+  // Aggregate data for Chart/Table
   const chartData = useMemo(() => {
     // Filter based on exact selection
     let filtered = data
@@ -141,11 +136,73 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
     return (n: number) => new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(n)
   }, [])
 
+  function handleSelectRegion(code: RegionCode) {
+    setSelectedRegion(code)
+    setSelectedProvince(null)
+    setSelectedMunicipality(null)
+    setLevel("region")
+  }
+
+  function handleSelectProvince(code: ProvinceCode | null) {
+    if (code === null) {
+      setSelectedProvince(null)
+      setSelectedMunicipality(null)
+      return
+    }
+    setSelectedProvince(code)
+    setSelectedMunicipality(null)
+    const prov = PROVINCES.find((p) => String(p.code) === String(code))
+    if (prov) setSelectedRegion(prov.regionCode)
+    setLevel("province")
+  }
+
   const latestPeriodLabel = useMemo(() => {
     if (!data?.length) return null
     const latest = data.reduce((prev, cur) => (periodSortGetter(cur) > periodSortGetter(prev) ? cur : prev), data[0])
     return periodLabelGetter(latest)
   }, [data, periodSortGetter, periodLabelGetter])
+
+  // Get all unique periods for time slider
+  const periods = useMemo(() => {
+    const periodSet = new Set<string>()
+    for (const row of data) {
+      periodSet.add(periodKeyGetter(row))
+    }
+    return Array.from(periodSet).sort((a, b) => {
+      const aSort = periodSortGetter(data.find(d => periodKeyGetter(d) === a)!)
+      const bSort = periodSortGetter(data.find(d => periodKeyGetter(d) === b)!)
+      return aSort - bSort
+    })
+  }, [data, periodKeyGetter, periodSortGetter])
+
+  // Aggregate data by province for all periods (for InteractiveMap with time slider)
+  const provinceMapData = useMemo(() => {
+    if (!data?.length) return []
+
+    // Group by period + province
+    const agg = new Map<string, { p: string; period: string; value: number }>()
+
+    for (const row of data) {
+      const mCode = municipalityCodeGetter(row)
+      const numericMunCode = typeof mCode === "string" ? Number.parseInt(mCode, 10) : Number(mCode)
+      if (!Number.isFinite(numericMunCode)) continue
+
+      const provCode = String(getProvinceForMunicipality(numericMunCode))
+      const periodKey = periodKeyGetter(row)
+      const key = `${periodKey}-${provCode}`
+
+      const prev = agg.get(key)
+      const inc = metricGetter(row, metric)
+
+      if (!prev) {
+        agg.set(key, { p: provCode, period: periodKey, value: inc })
+      } else {
+        prev.value += inc
+      }
+    }
+
+    return Array.from(agg.values())
+  }, [data, metric, municipalityCodeGetter, metricGetter, periodKeyGetter])
 
   const provinceValueByCode = useMemo(() => {
     if (!data?.length) return {} as Record<string, number>
@@ -198,11 +255,22 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
       </div>
 
       <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table" | "map")}>
-        <TabsList>
-          <TabsTrigger value="chart">Grafiek</TabsTrigger>
-          <TabsTrigger value="table">Tabel</TabsTrigger>
-          <TabsTrigger value="map">Kaart</TabsTrigger>
-        </TabsList>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <TabsList>
+            <TabsTrigger value="chart">Grafiek</TabsTrigger>
+            <TabsTrigger value="table">Tabel</TabsTrigger>
+            <TabsTrigger value="map">Kaart</TabsTrigger>
+          </TabsList>
+          <div className="flex items-center gap-2">
+            <GeoFilterInline
+              selectedRegion={selectedRegion}
+              selectedProvince={selectedProvince}
+              onSelectRegion={handleSelectRegion}
+              onSelectProvince={handleSelectProvince}
+              showRegions={false}
+            />
+          </div>
+        </div>
         <TabsContent value="chart">
           <Card>
             <CardHeader>
@@ -229,30 +297,32 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
               <CardTitle>Kaart {title}</CardTitle>
             </CardHeader>
             <CardContent>
-              <MunicipalityMap 
-                data={mapScopeData} 
-                metric={metric} 
-                municipalities={municipalities}
+              <InteractiveMap
+                data={provinceMapData}
                 level="province"
-                displayMode="province"
-                selectedRegion={selectedRegion}
-                selectedProvince={selectedProvince}
-                getMunicipalityCode={municipalityCodeGetter}
-                getMetricValue={metricGetter}
-                getPeriodKey={periodKeyGetter}
-                getPeriodSortValue={periodSortGetter}
-                getPeriodLabel={periodLabelGetter}
-                tooltipMetricLabel={title}
-                formatValue={formatInt}
-                onSelectProvince={(code: ProvinceCode) => {
-                  setSelectedProvince(code)
-                  setSelectedMunicipality(null)
-                  const prov = PROVINCES.find((p) => String(p.code) === String(code))
-                  if (prov) setSelectedRegion(prov.regionCode)
-                  setLevel("province")
-                  setPopupProvince(code)
-                  setIsPopupOpen(true)
+                getGeoCode={(d) => d.p}
+                getValue={(d) => d.value}
+                getPeriod={(d) => d.period}
+                periods={periods}
+                showTimeSlider={true}
+                selectedGeo={selectedProvince}
+                onGeoSelect={(code) => {
+                  if (code) {
+                    setSelectedProvince(code as ProvinceCode)
+                    setSelectedMunicipality(null)
+                    const prov = PROVINCES.find((p) => String(p.code) === String(code))
+                    if (prov) setSelectedRegion(prov.regionCode)
+                    setLevel("province")
+                    setPopupProvince(code as ProvinceCode)
+                    setIsPopupOpen(true)
+                  } else {
+                    setSelectedProvince(null)
+                  }
                 }}
+                formatValue={formatInt}
+                tooltipLabel={title}
+                regionFilter="2000"
+                height={500}
               />
             </CardContent>
           </Card>

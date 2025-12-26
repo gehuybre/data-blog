@@ -20,8 +20,7 @@ import { GeoProvider } from "../shared/GeoContext"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
 import { ExportButtons } from "../shared/ExportButtons"
-import { ProvinceMap } from "../shared/ProvinceMap"
-import { RegionMap } from "../shared/RegionMap"
+import { InteractiveMap } from "../shared/InteractiveMap"
 
 import yearlyRaw from "../../../../analyses/vastgoed-verkopen/results/yearly.json"
 import quarterlyRaw from "../../../../analyses/vastgoed-verkopen/results/quarterly.json"
@@ -68,11 +67,13 @@ type YearPoint = {
 
 type RegionPoint = {
   r: string
+  y: number
   value: number
 }
 
 type ProvincePoint = {
   p: string
+  y: number
   value: number
 }
 
@@ -341,18 +342,20 @@ function aggregateByQuarter(rows: QuarterlyRow[], metric: "n" | "p50"): YearPoin
     .sort((a, b) => a.sortValue - b.sortValue)
 }
 
-function aggregateByRegion(rows: YearlyRow[], year: number, metric: "n" | "p50"): RegionPoint[] {
-  const regionRows = rows.filter((r) => r.y === year && r.lvl === 2)
+function aggregateByRegionAllYears(rows: YearlyRow[], metric: "n" | "p50"): RegionPoint[] {
+  const regionRows = rows.filter((r) => r.lvl === 2 && typeof r.y === "number")
   return regionRows.map((r) => ({
     r: mapRegionCode(r.nis),
+    y: r.y,
     value: r[metric],
   }))
 }
 
-function aggregateByProvince(rows: YearlyRow[], year: number, metric: "n" | "p50"): ProvincePoint[] {
-  const provRows = rows.filter((r) => r.y === year && r.lvl === 3)
+function aggregateByProvinceAllYears(rows: YearlyRow[], metric: "n" | "p50"): ProvincePoint[] {
+  const provRows = rows.filter((r) => r.lvl === 3 && typeof r.y === "number")
   return provRows.map((r) => ({
     p: r.nis,
+    y: r.y,
     value: r[metric],
   }))
 }
@@ -363,7 +366,7 @@ function MetricSection({
   label,
   yearSeries,
   mapData,
-  mapYear,
+  years,
   mapLevel,
   formatValue,
   geoLevel,
@@ -381,7 +384,7 @@ function MetricSection({
   label: string
   yearSeries: YearPoint[]
   mapData: RegionPoint[] | ProvincePoint[]
-  mapYear: number | null
+  years: number[]
   mapLevel: "region" | "province"
   formatValue: (v: number) => string
   geoLevel: "belgium" | "region" | "province"
@@ -496,34 +499,35 @@ function MetricSection({
           <Card>
             <CardHeader>
               <CardTitle>
-                {mapYear
-                  ? `Verdeling per ${mapLevel === "province" ? "provincie" : "regio"} (${mapYear})`
-                  : `Verdeling per ${mapLevel === "province" ? "provincie" : "regio"}`}
+                Verdeling per {mapLevel === "province" ? "provincie" : "regio"}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {mapLevel === "province" ? (
-                <ProvinceMap
-                  data={mapData as ProvincePoint[]}
-                  selectedRegion={selectedNis && geoLevel === "region" ? (selectedNis as "2000" | "3000" | "4000" | "1000") : "1000"}
-                  selectedProvince={geoLevel === "province" ? selectedNis : null}
-                  onSelectProvince={(code) => onSelectGeo("province", code)}
-                  getProvinceCode={(d) => (d as ProvincePoint).p}
-                  getMetricValue={(d) => (d as ProvincePoint).value}
-                  formatValue={formatValue}
-                  tooltipLabel={label}
-                />
-              ) : (
-                <RegionMap
-                  data={mapData as RegionPoint[]}
-                  selectedRegion={geoLevel === "region" && selectedNis ? (selectedNis as "2000" | "3000" | "4000" | "1000") : "1000"}
-                  onSelectRegion={(code) => onSelectGeo("region", code)}
-                  getRegionCode={(d) => (d as RegionPoint).r}
-                  getMetricValue={(d) => (d as RegionPoint).value}
-                  formatValue={formatValue}
-                  tooltipLabel={label}
-                />
-              )}
+              <InteractiveMap
+                data={mapData as (RegionPoint | ProvincePoint)[]}
+                level={mapLevel}
+                getGeoCode={(d) => {
+                  const point = d as RegionPoint | ProvincePoint
+                  return "p" in point ? point.p : point.r
+                }}
+                getValue={(d) => (d as RegionPoint | ProvincePoint).value}
+                getPeriod={(d) => (d as RegionPoint | ProvincePoint).y}
+                periods={years}
+                showTimeSlider={true}
+                selectedGeo={mapLevel === "province" ? (geoLevel === "province" ? selectedNis : null) : (geoLevel === "region" ? selectedNis : null)}
+                onGeoSelect={(code) => {
+                  if (mapLevel === "province") {
+                    onSelectGeo("province", code)
+                  } else {
+                    onSelectGeo("region", code)
+                  }
+                }}
+                formatValue={formatValue}
+                tooltipLabel={label}
+                regionFilter={mapLevel === "province" && geoLevel === "region" && selectedNis ? selectedNis as "2000" | "3000" | "4000" : undefined}
+                colorScheme="orange"
+                height={500}
+              />
               <div className="mt-3 text-xs text-muted-foreground">
                 Klik op een {mapLevel === "province" ? "provincie" : "regio"} om te filteren, of gebruik de locatie-filter hierboven.
               </div>
@@ -716,36 +720,35 @@ function InnerDashboard() {
   const quarterlyTransactions = React.useMemo(() => aggregateByQuarter(filteredQuarterly, "n"), [filteredQuarterly])
   const quarterlyPrices = React.useMemo(() => aggregateByQuarter(filteredQuarterly, "p50"), [filteredQuarterly])
 
-  // Get latest year for map
-  const latestYear = React.useMemo(() => {
-    const years = yearlyRows.map((r) => r.y).filter((y) => typeof y === "number")
-    return years.length > 0 ? Math.max(...years) : null
+  // Get all years for time slider
+  const years = React.useMemo(() => {
+    const yearSet = new Set<number>()
+    for (const r of yearlyRows) {
+      if (typeof r.y === "number") yearSet.add(r.y)
+    }
+    return Array.from(yearSet).sort((a, b) => a - b)
   }, [yearlyRows])
 
-  // Map data - filter by selected type
+  // Map data - filter by selected type (all years for time slider)
   const transactionsMapRegion = React.useMemo(() => {
-    if (!latestYear) return []
     const filtered = filterByPropertyType(yearlyRows, selectedType)
-    return aggregateByRegion(filtered, latestYear, "n")
-  }, [yearlyRows, latestYear, selectedType])
+    return aggregateByRegionAllYears(filtered, "n")
+  }, [yearlyRows, selectedType])
 
   const transactionsMapProvince = React.useMemo(() => {
-    if (!latestYear) return []
     const filtered = filterByPropertyType(yearlyRows, selectedType)
-    return aggregateByProvince(filtered, latestYear, "n")
-  }, [yearlyRows, latestYear, selectedType])
+    return aggregateByProvinceAllYears(filtered, "n")
+  }, [yearlyRows, selectedType])
 
   const priceMapRegion = React.useMemo(() => {
-    if (!latestYear) return []
     const filtered = filterByPropertyType(yearlyRows, selectedType)
-    return aggregateByRegion(filtered, latestYear, "p50")
-  }, [yearlyRows, latestYear, selectedType])
+    return aggregateByRegionAllYears(filtered, "p50")
+  }, [yearlyRows, selectedType])
 
   const priceMapProvince = React.useMemo(() => {
-    if (!latestYear) return []
     const filtered = filterByPropertyType(yearlyRows, selectedType)
-    return aggregateByProvince(filtered, latestYear, "p50")
-  }, [yearlyRows, latestYear, selectedType])
+    return aggregateByProvinceAllYears(filtered, "p50")
+  }, [yearlyRows, selectedType])
 
   // Determine map level based on current geo selection
   const mapLevel = geoLevel === "region" && selectedNis ? "province" : "region"
@@ -769,7 +772,7 @@ function InnerDashboard() {
         label="Transacties"
         yearSeries={transactionsSeries}
         mapData={mapLevel === "province" ? transactionsMapProvince : transactionsMapRegion}
-        mapYear={latestYear}
+        years={years}
         mapLevel={mapLevel}
         formatValue={formatInt}
         geoLevel={geoLevel}
@@ -792,7 +795,7 @@ function InnerDashboard() {
         label="Prijs (€)"
         yearSeries={priceSeries}
         mapData={mapLevel === "province" ? priceMapProvince : priceMapRegion}
-        mapYear={latestYear}
+        years={years}
         mapLevel={mapLevel}
         formatValue={formatPrice}
         geoLevel={geoLevel}
