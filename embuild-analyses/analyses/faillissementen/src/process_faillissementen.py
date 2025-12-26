@@ -359,6 +359,192 @@ def process_data(df: pd.DataFrame) -> None:
         json.dump(monthly_prov_all_json, f)
 
     # =========================================================================
+    # AGGREGATE 11: Yearly by sector and province (for geo filter in sector comparison)
+    # =========================================================================
+    yearly_sector_prov = df_vl_prov.groupby(["CD_YEAR", "sector", "CD_PROV_REFNIS"]).agg({
+        "MS_COUNTOF_BANKRUPTCIES": "sum",
+        "MS_COUNTOF_WORKERS": "sum",
+    }).reset_index()
+
+    yearly_sector_prov_json = [
+        {
+            "y": int(row["CD_YEAR"]),
+            "s": row["sector"],
+            "p": str(int(row["CD_PROV_REFNIS"])),
+            "n": int(row["MS_COUNTOF_BANKRUPTCIES"]),
+            "w": int(row["MS_COUNTOF_WORKERS"]),
+        }
+        for _, row in yearly_sector_prov.iterrows()
+        if int(row["CD_PROV_REFNIS"]) in FLEMISH_PROVINCES
+    ]
+    yearly_sector_prov_json.sort(key=lambda x: (x["y"], x["s"], x["p"]))
+
+    with open(RESULTS_DIR / "yearly_by_sector_province.json", "w") as f:
+        json.dump(yearly_sector_prov_json, f)
+
+    # =========================================================================
+    # AGGREGATE 12: By company duration (construction sector)
+    # =========================================================================
+    duration_order = [
+        "Minder dan 1 jaar",
+        "Van 1 jaar tot minder dan 2 jaar",
+        "Van 2 jaar tot minder dan 3 jaar",
+        "Van 3 jaar tot minder dan 4 jaar",
+        "Van 4 jaar tot minder dan 5 jaar",
+        "Van 5 jaar tot minder dan 10 jaar",
+        "Van 10 jaar tot minder dan 15 jaar",
+        "Van 15 jaar tot minder dan 20 jaar",
+        "20 jaar of meer",
+    ]
+    duration_short = {
+        "Minder dan 1 jaar": "<1 jaar",
+        "Van 1 jaar tot minder dan 2 jaar": "1-2 jaar",
+        "Van 2 jaar tot minder dan 3 jaar": "2-3 jaar",
+        "Van 3 jaar tot minder dan 4 jaar": "3-4 jaar",
+        "Van 4 jaar tot minder dan 5 jaar": "4-5 jaar",
+        "Van 5 jaar tot minder dan 10 jaar": "5-10 jaar",
+        "Van 10 jaar tot minder dan 15 jaar": "10-15 jaar",
+        "Van 15 jaar tot minder dan 20 jaar": "15-20 jaar",
+        "20 jaar of meer": "20+ jaar",
+    }
+
+    # Construction by duration
+    duration_bouw = df_bouw.groupby(["CD_YEAR", "TX_COMPANY_DURATION_NL"]).agg({
+        "MS_COUNTOF_BANKRUPTCIES": "sum",
+        "MS_COUNTOF_WORKERS": "sum",
+    }).reset_index()
+
+    duration_bouw_json = [
+        {
+            "y": int(row["CD_YEAR"]),
+            "d": row["TX_COMPANY_DURATION_NL"],
+            "ds": duration_short.get(row["TX_COMPANY_DURATION_NL"], row["TX_COMPANY_DURATION_NL"]),
+            "do": duration_order.index(row["TX_COMPANY_DURATION_NL"]) if row["TX_COMPANY_DURATION_NL"] in duration_order else 99,
+            "n": int(row["MS_COUNTOF_BANKRUPTCIES"]),
+            "w": int(row["MS_COUNTOF_WORKERS"]),
+        }
+        for _, row in duration_bouw.iterrows()
+    ]
+    duration_bouw_json.sort(key=lambda x: (x["y"], x["do"]))
+
+    with open(RESULTS_DIR / "yearly_by_duration_construction.json", "w") as f:
+        json.dump(duration_bouw_json, f)
+
+    # All sectors by duration
+    duration_all = df_vl.groupby(["CD_YEAR", "TX_COMPANY_DURATION_NL"]).agg({
+        "MS_COUNTOF_BANKRUPTCIES": "sum",
+        "MS_COUNTOF_WORKERS": "sum",
+    }).reset_index()
+
+    duration_all_json = [
+        {
+            "y": int(row["CD_YEAR"]),
+            "d": row["TX_COMPANY_DURATION_NL"],
+            "ds": duration_short.get(row["TX_COMPANY_DURATION_NL"], row["TX_COMPANY_DURATION_NL"]),
+            "do": duration_order.index(row["TX_COMPANY_DURATION_NL"]) if row["TX_COMPANY_DURATION_NL"] in duration_order else 99,
+            "n": int(row["MS_COUNTOF_BANKRUPTCIES"]),
+            "w": int(row["MS_COUNTOF_WORKERS"]),
+        }
+        for _, row in duration_all.iterrows()
+    ]
+    duration_all_json.sort(key=lambda x: (x["y"], x["do"]))
+
+    with open(RESULTS_DIR / "yearly_by_duration.json", "w") as f:
+        json.dump(duration_all_json, f)
+
+    # By duration and province (construction)
+    df_bouw_prov_dur = df_bouw[df_bouw["CD_PROV_REFNIS"].notna()].copy()
+    df_bouw_prov_dur["CD_PROV_REFNIS"] = df_bouw_prov_dur["CD_PROV_REFNIS"].astype(int)
+
+    duration_prov_bouw = df_bouw_prov_dur.groupby(["CD_YEAR", "TX_COMPANY_DURATION_NL", "CD_PROV_REFNIS"]).agg({
+        "MS_COUNTOF_BANKRUPTCIES": "sum",
+        "MS_COUNTOF_WORKERS": "sum",
+    }).reset_index()
+
+    duration_prov_bouw_json = [
+        {
+            "y": int(row["CD_YEAR"]),
+            "d": row["TX_COMPANY_DURATION_NL"],
+            "ds": duration_short.get(row["TX_COMPANY_DURATION_NL"], row["TX_COMPANY_DURATION_NL"]),
+            "do": duration_order.index(row["TX_COMPANY_DURATION_NL"]) if row["TX_COMPANY_DURATION_NL"] in duration_order else 99,
+            "p": str(int(row["CD_PROV_REFNIS"])),
+            "n": int(row["MS_COUNTOF_BANKRUPTCIES"]),
+            "w": int(row["MS_COUNTOF_WORKERS"]),
+        }
+        for _, row in duration_prov_bouw.iterrows()
+        if int(row["CD_PROV_REFNIS"]) in FLEMISH_PROVINCES
+    ]
+    duration_prov_bouw_json.sort(key=lambda x: (x["y"], x["do"], x["p"]))
+
+    with open(RESULTS_DIR / "yearly_by_duration_province_construction.json", "w") as f:
+        json.dump(duration_prov_bouw_json, f)
+
+    # =========================================================================
+    # AGGREGATE 13: By worker count class (construction sector)
+    # =========================================================================
+    # Employment class is already in the data as TX_EMPLOYMENT_CLASS_DESCR_NL
+    workers_bouw = df_bouw.groupby(["CD_YEAR", "TX_EMPLOYMENT_CLASS_DESCR_NL"]).agg({
+        "MS_COUNTOF_BANKRUPTCIES": "sum",
+        "MS_COUNTOF_WORKERS": "sum",
+    }).reset_index()
+
+    workers_bouw_json = [
+        {
+            "y": int(row["CD_YEAR"]),
+            "c": row["TX_EMPLOYMENT_CLASS_DESCR_NL"],
+            "n": int(row["MS_COUNTOF_BANKRUPTCIES"]),
+            "w": int(row["MS_COUNTOF_WORKERS"]),
+        }
+        for _, row in workers_bouw.iterrows()
+    ]
+    workers_bouw_json.sort(key=lambda x: (x["y"], x["c"]))
+
+    with open(RESULTS_DIR / "yearly_by_workers_construction.json", "w") as f:
+        json.dump(workers_bouw_json, f)
+
+    # All sectors by worker class
+    workers_all = df_vl.groupby(["CD_YEAR", "TX_EMPLOYMENT_CLASS_DESCR_NL"]).agg({
+        "MS_COUNTOF_BANKRUPTCIES": "sum",
+        "MS_COUNTOF_WORKERS": "sum",
+    }).reset_index()
+
+    workers_all_json = [
+        {
+            "y": int(row["CD_YEAR"]),
+            "c": row["TX_EMPLOYMENT_CLASS_DESCR_NL"],
+            "n": int(row["MS_COUNTOF_BANKRUPTCIES"]),
+            "w": int(row["MS_COUNTOF_WORKERS"]),
+        }
+        for _, row in workers_all.iterrows()
+    ]
+    workers_all_json.sort(key=lambda x: (x["y"], x["c"]))
+
+    with open(RESULTS_DIR / "yearly_by_workers.json", "w") as f:
+        json.dump(workers_all_json, f)
+
+    # By worker class and province (construction)
+    workers_prov_bouw = df_bouw_prov.groupby(["CD_YEAR", "TX_EMPLOYMENT_CLASS_DESCR_NL", "CD_PROV_REFNIS"]).agg({
+        "MS_COUNTOF_BANKRUPTCIES": "sum",
+        "MS_COUNTOF_WORKERS": "sum",
+    }).reset_index()
+
+    workers_prov_bouw_json = [
+        {
+            "y": int(row["CD_YEAR"]),
+            "c": row["TX_EMPLOYMENT_CLASS_DESCR_NL"],
+            "p": str(int(row["CD_PROV_REFNIS"])),
+            "n": int(row["MS_COUNTOF_BANKRUPTCIES"]),
+            "w": int(row["MS_COUNTOF_WORKERS"]),
+        }
+        for _, row in workers_prov_bouw.iterrows()
+        if int(row["CD_PROV_REFNIS"]) in FLEMISH_PROVINCES
+    ]
+    workers_prov_bouw_json.sort(key=lambda x: (x["y"], x["c"], x["p"]))
+
+    with open(RESULTS_DIR / "yearly_by_workers_province_construction.json", "w") as f:
+        json.dump(workers_prov_bouw_json, f)
+
+    # =========================================================================
     # LOOKUPS for UI
     # =========================================================================
     # Get all sectors that appear in the data
@@ -374,11 +560,26 @@ def process_data(df: pd.DataFrame) -> None:
         for code, name in sorted(FLEMISH_PROVINCES.items(), key=lambda x: x[1])
     ]
 
+    # Duration lookup
+    durations_lookup = [
+        {"code": d, "short": duration_short[d]}
+        for d in duration_order
+    ]
+
+    # Worker class lookup (get unique values from data)
+    worker_classes = sorted(df_vl["TX_EMPLOYMENT_CLASS_DESCR_NL"].dropna().unique())
+    worker_classes_lookup = [
+        {"code": c, "name": c}
+        for c in worker_classes
+    ]
+
     lookups = {
         "sectors": sectors_lookup,
         "provinces": provinces_lookup,
         "years": list(range(min_year, max_year + 1)),
         "construction_sector": "F",
+        "durations": durations_lookup,
+        "worker_classes": worker_classes_lookup,
     }
 
     with open(RESULTS_DIR / "lookups.json", "w") as f:

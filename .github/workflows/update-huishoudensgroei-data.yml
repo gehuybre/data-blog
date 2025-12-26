@@ -1,0 +1,128 @@
+name: Update huishoudensgroei data
+
+on:
+  schedule:
+    # At 00:00 on the 1st of every month (data updated annually, monthly check is sufficient)
+    - cron: '0 0 1 * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check remote metadata (ETag / Last-Modified)
+        id: check_remote
+        env:
+          INPUT_URL: https://assets.vlaanderen.be/raw/upload/v1716295326/aantal_huishoudens_naar_huishoudgrootte_zwfmvn.csv
+          META_FILE: embuild-analyses/analyses/huishoudensgroei/data/.remote_metadata.json
+        run: |
+          set -e
+          mkdir -p "$(dirname "$META_FILE")"
+
+          headers=$(curl -sI "${INPUT_URL}" || true)
+          REMOTE_ETAG=$(printf '%s\n' "$headers" | awk -F': ' '/^ETag:/ {print $2}' | tr -d '\r"') || true
+          REMOTE_LASTMOD=$(printf '%s\n' "$headers" | awk -F': ' '/^Last-Modified:/ {print substr($0,index($0,$2)) }' | tr -d '\r') || true
+          export REMOTE_ETAG REMOTE_LASTMOD
+
+          set +e
+          python - <<-PY
+          	import json, os, sys
+          	meta=os.environ.get('META_FILE')
+          	etag=os.environ.get('REMOTE_ETAG') or ''
+          	lm=os.environ.get('REMOTE_LASTMOD') or ''
+          	if meta and os.path.exists(meta):
+          	  j=json.load(open(meta))
+          	  if etag and j.get('etag')==etag:
+          	    sys.exit(2)
+          	  if lm and j.get('last_modified')==lm:
+          	    sys.exit(2)
+          	sys.exit(0)
+          PY
+          rc=$?
+          set -e
+          if [ "$rc" -eq 2 ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No remote change detected; skipping download and processing."
+            exit 0
+          elif [ "$rc" -ne 0 ]; then
+            exit "$rc"
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Download data
+        if: steps.check_remote.outputs.changed == 'true'
+        env:
+          INPUT_URL: https://assets.vlaanderen.be/raw/upload/v1716295326/aantal_huishoudens_naar_huishoudgrootte_zwfmvn.csv
+        run: |
+          set -e
+          mkdir -p embuild-analyses/analyses/huishoudensgroei/data
+          curl -fsSL "${INPUT_URL}" -o embuild-analyses/analyses/huishoudensgroei/data/huishoudens.csv
+          echo "Downloaded data to huishoudens.csv"
+
+      - name: Run data processor
+        if: steps.check_remote.outputs.changed == 'true'
+        run: |
+          set -e
+          python embuild-analyses/analyses/huishoudensgroei/src/process_data.py
+
+      - name: Update remote metadata
+        if: steps.check_remote.outputs.changed == 'true'
+        env:
+          INPUT_URL: https://assets.vlaanderen.be/raw/upload/v1716295326/aantal_huishoudens_naar_huishoudgrootte_zwfmvn.csv
+          META_FILE: embuild-analyses/analyses/huishoudensgroei/data/.remote_metadata.json
+        run: |
+          set -e
+          mkdir -p "$(dirname "$META_FILE")"
+          headers=$(curl -sI "${INPUT_URL}" || true)
+          REMOTE_ETAG=$(printf '%s\n' "$headers" | awk -F': ' '/^ETag:/ {print $2}' | tr -d '\r"') || true
+          REMOTE_LASTMOD=$(printf '%s\n' "$headers" | awk -F': ' '/^Last-Modified:/ {print substr($0,index($0,$2)) }' | tr -d '\r') || true
+
+          # Compute SHA256 of downloaded file
+          download_path=embuild-analyses/analyses/huishoudensgroei/data/huishoudens.csv
+          if [ -f "$download_path" ]; then
+            sha=$(sha256sum "$download_path" | cut -d' ' -f1)
+          else
+            sha=''
+          fi
+
+          REMOTE_ETAG="$REMOTE_ETAG" REMOTE_LASTMOD="$REMOTE_LASTMOD" sha="$sha" python - <<-PY
+          	import json, os
+          	meta={
+          	  'url': os.environ.get('INPUT_URL'),
+          	  'etag': os.environ.get('REMOTE_ETAG') or None,
+          	  'last_modified': os.environ.get('REMOTE_LASTMOD') or None,
+          	  'sha256': os.environ.get('sha') or None
+          	}
+          	json.dump(meta, open(os.environ.get('META_FILE'), 'w'), indent=2)
+          PY
+
+      - name: Commit and push changes if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add embuild-analyses/analyses/huishoudensgroei/results
+          git add embuild-analyses/analyses/huishoudensgroei/data/.remote_metadata.json || true
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(data): update huishoudensgroei results (auto)"
+            git push origin HEAD:main
+          else
+            echo "No changes to commit"
+          fi
