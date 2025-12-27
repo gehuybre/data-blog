@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from "react"
 import { EmbeddableSection } from "@/components/analyses/shared/EmbeddableSection"
 import { StartersStoppersEmbed } from "@/components/analyses/starters-stoppers/StartersStoppersEmbed"
+import { VastgoedVerkopenEmbed } from "@/components/analyses/vastgoed-verkopen/VastgoedVerkopenEmbed"
+import { FaillissementenEmbed } from "@/components/analyses/faillissementen/FaillissementenEmbed"
+import { HuishoudensgroeiEmbed } from "@/components/analyses/huishoudensgroei/HuishoudensgroeiEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig } from "@/lib/embed-config"
 import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
@@ -194,6 +197,77 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
           region={urlParams.region}
           province={urlParams.province}
           sector={urlParams.sector}
+        />
+      )
+    }
+
+    // Handle VastgoedVerkopenEmbed
+    if (config.component === "VastgoedVerkopenEmbed") {
+      const validSections = ["transacties", "prijzen", "transacties-kwartaal", "prijzen-kwartaal"]
+      if (!validSections.includes(section)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}
+            </p>
+          </div>
+        )
+      }
+
+      return (
+        <VastgoedVerkopenEmbed
+          section={section as "transacties" | "prijzen" | "transacties-kwartaal" | "prijzen-kwartaal"}
+          viewType={urlParams.view}
+          geo={urlParams.region}
+          type={urlParams.sector}
+        />
+      )
+    }
+
+    // Handle FaillissementenEmbed
+    if (config.component === "FaillissementenEmbed") {
+      const validSections = ["evolutie", "leeftijd", "bedrijfsgrootte", "sectoren"]
+      if (!validSections.includes(section)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}
+            </p>
+          </div>
+        )
+      }
+
+      return (
+        <FaillissementenEmbed
+          section={section as "evolutie" | "leeftijd" | "bedrijfsgrootte" | "sectoren"}
+          viewType={urlParams.view}
+          sector={urlParams.sector ?? "F"}
+          year={urlParams.horizon}
+          timeRange={(urlParams.view === "table" || urlParams.view === "map") ? "yearly" : "monthly"}
+        />
+      )
+    }
+
+    // Handle HuishoudensgroeiEmbed
+    if (config.component === "HuishoudensgroeiEmbed") {
+      const validSections = ["evolutie", "ranking", "size-breakdown"]
+      if (!validSections.includes(section)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}
+            </p>
+          </div>
+        )
+      }
+
+      return (
+        <HuishoudensgroeiEmbed
+          section={section as "evolutie" | "ranking" | "size-breakdown"}
+          viewType={urlParams.view}
+          geo={urlParams.region}
+          horizonYear={urlParams.horizon ?? 2033}
+          showDecline={urlParams.sector === "decline"}
         />
       )
     }
