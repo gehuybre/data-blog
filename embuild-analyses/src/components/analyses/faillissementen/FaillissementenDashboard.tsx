@@ -38,8 +38,10 @@ import yearlyByDuration from "../../../../analyses/faillissementen/results/yearl
 import yearlyByDurationConstruction from "../../../../analyses/faillissementen/results/yearly_by_duration_construction.json"
 import yearlyByDurationProvinceConstruction from "../../../../analyses/faillissementen/results/yearly_by_duration_province_construction.json"
 import yearlyByWorkers from "../../../../analyses/faillissementen/results/yearly_by_workers.json"
+import yearlyByDuration from "../../../../analyses/faillissementen/results/yearly_by_duration.json"
 import yearlyByWorkersConstruction from "../../../../analyses/faillissementen/results/yearly_by_workers_construction.json"
 import yearlyByWorkersProvinceConstruction from "../../../../analyses/faillissementen/results/yearly_by_workers_province_construction.json"
+import yearlyByWorkers from "../../../../analyses/faillissementen/results/yearly_by_workers.json"
 
 // Types
 type MonthlyRow = {
@@ -760,6 +762,7 @@ function DurationSection({
 }) {
   const currentYear = metadata.max_year
   const [selectedYear, setSelectedYear] = React.useState(currentYear)
+  const [selectedSector, setSelectedSector] = React.useState<string>("F") // Default to construction
   const years = (lookups as { years: number[] }).years ?? []
 
   // When sector changes, reset province since we don't have all-sector province data
@@ -774,6 +777,9 @@ function DurationSection({
 
     if (provinceCode) {
       // Province filter only available for construction sector
+    // Province filter only available for construction sector
+    if (provinceCode && selectedSector === "F") {
+      // Filter by province
       const provData = (yearlyByDurationProvinceConstruction as DurationProvinceRow[])
         .filter((r) => r.y === selectedYear && r.p === provinceCode)
       durationData = provData.map((r) => ({
@@ -788,11 +794,23 @@ function DurationSection({
       durationData = (sector === "ALL"
         ? (yearlyByDuration as DurationRow[])
         : (yearlyByDurationConstruction as DurationRow[])
+      // Use construction or all sectors data based on selection
+      durationData = (selectedSector === "F"
+        ? (yearlyByDurationConstruction as DurationRow[])
+        : (yearlyByDuration as DurationRow[])
       ).filter((r) => r.y === selectedYear)
     }
 
     return durationData.sort((a, b) => a.do - b.do)
   }, [selectedYear, sector, provinceCode])
+  }, [selectedYear, provinceCode, selectedSector])
+
+  // Reset province filter when switching away from construction sector
+  React.useEffect(() => {
+    if (selectedSector !== "F" && provinceCode) {
+      onProvinceChange(null)
+    }
+  }, [selectedSector, provinceCode, onProvinceChange])
 
   const totalBankruptcies = data.reduce((sum, r) => sum + r.n, 0)
   const youngCompanies = data.filter(r => r.do <= 4)
@@ -802,6 +820,10 @@ function DurationSection({
   const sectorLabel = sector === "ALL" ? "alle sectoren" : "bouwsector"
   const sectorLabelNoun = sector === "ALL" ? "bedrijven" : "bouwbedrijven"
 
+  const sectors = useSectorOptions()
+  const sectorName = selectedSector === "ALL"
+    ? "Alle sectoren"
+    : sectors.find((s) => s.code === selectedSector)?.nl ?? "Onbekend"
   const exportData = React.useMemo(
     () =>
       data.map((d) => ({
@@ -832,12 +854,17 @@ function DurationSection({
       <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
         <SectorFilter selected={sector} onChange={onSectorChange} showAll />
         {sector === "F" && <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />}
+        <SectorFilter selected={selectedSector} onChange={setSelectedSector} showAll />
+        {selectedSector === "F" && (
+          <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />
+        )}
         <YearFilter selected={selectedYear} onChange={setSelectedYear} years={years} />
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Faillissementen {sectorLabel} naar bedrijfsleeftijd ({selectedYear})</CardTitle>
+          <CardTitle>Faillissementen {sectorName.toLowerCase()} naar bedrijfsleeftijd ({selectedYear})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -890,6 +917,7 @@ function WorkersSection({
 }) {
   const currentYear = metadata.max_year
   const [selectedYear, setSelectedYear] = React.useState(currentYear)
+  const [selectedSector, setSelectedSector] = React.useState<string>("F") // Default to construction
   const years = (lookups as { years: number[] }).years ?? []
 
   // When sector changes, reset province since we don't have all-sector province data
@@ -911,6 +939,8 @@ function WorkersSection({
     "250 - 499 werknemers",
     "500 - 999 werknemers",
     "1000 werknemers en meer", // This variant exists in all-sector data
+    "1000 en meer werknemers",
+    "1000 werknemers en meer",
   ]
 
   const data = React.useMemo(() => {
@@ -918,6 +948,9 @@ function WorkersSection({
 
     if (provinceCode) {
       // Province filter only available for construction sector
+    // Province filter only available for construction sector
+    if (provinceCode && selectedSector === "F") {
+      // Filter by province
       const provData = (yearlyByWorkersProvinceConstruction as WorkersProvinceRow[])
         .filter((r) => r.y === selectedYear && r.p === provinceCode)
       // Aggregate by class
@@ -936,6 +969,10 @@ function WorkersSection({
       workersData = (sector === "ALL"
         ? (yearlyByWorkers as WorkersRow[])
         : (yearlyByWorkersConstruction as WorkersRow[])
+      // Use construction or all sectors data based on selection
+      workersData = (selectedSector === "F"
+        ? (yearlyByWorkersConstruction as WorkersRow[])
+        : (yearlyByWorkers as WorkersRow[])
       ).filter((r) => r.y === selectedYear)
     }
 
@@ -945,6 +982,14 @@ function WorkersSection({
       return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx)
     })
   }, [selectedYear, sector, provinceCode, workerClassOrder])
+  }, [selectedYear, provinceCode, selectedSector])
+
+  // Reset province filter when switching away from construction sector
+  React.useEffect(() => {
+    if (selectedSector !== "F" && provinceCode) {
+      onProvinceChange(null)
+    }
+  }, [selectedSector, provinceCode, onProvinceChange])
 
   const totalBankruptcies = data.reduce((sum, r) => sum + r.n, 0)
   const totalWorkers = data.reduce((sum, r) => sum + r.w, 0)
@@ -954,6 +999,10 @@ function WorkersSection({
 
   const sectorLabel = sector === "ALL" ? "alle sectoren" : "bouwsector"
 
+  const sectors = useSectorOptions()
+  const sectorName = selectedSector === "ALL"
+    ? "Alle sectoren"
+    : sectors.find((s) => s.code === selectedSector)?.nl ?? "Onbekend"
   const exportData = React.useMemo(
     () =>
       data.map((d) => ({
@@ -984,12 +1033,17 @@ function WorkersSection({
       <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
         <SectorFilter selected={sector} onChange={onSectorChange} showAll />
         {sector === "F" && <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />}
+        <SectorFilter selected={selectedSector} onChange={setSelectedSector} showAll />
+        {selectedSector === "F" && (
+          <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />
+        )}
         <YearFilter selected={selectedYear} onChange={setSelectedYear} years={years} />
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Faillissementen {sectorLabel} naar bedrijfsgrootte ({selectedYear})</CardTitle>
+          <CardTitle>Faillissementen {sectorName.toLowerCase()} naar bedrijfsgrootte ({selectedYear})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
