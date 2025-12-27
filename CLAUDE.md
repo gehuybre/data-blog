@@ -108,68 +108,40 @@ docs/                      # Documentation (see LLM_DOCUMENTATION_PROTOCOL.md)
 3. Add data processing in `src/`, raw data in `data/`
 4. Create corresponding workflow doc in `docs/workflows/`
 
-## Adding Iframe Embeds to Analysis Posts
+## Blog Post Requirements
 
-The centralized iframe embed system allows you to make analysis visualizations embeddable in external websites. See full documentation in `docs/workflows/WF-embed-system.md`.
+Every blog post must include these elements:
 
-### Quick Start: Standard Embed
+### Required Content
+- **Title**: Clear and descriptive title
+- **Publication Date**: Date when the blog post was created
+- **Data Date**: Date of the data (if different from publication date, must be explicitly mentioned)
 
-For simple visualizations with consistent data structure:
+### Sections
+Each section displaying data must include:
 
-1. **Register the embed** in `embuild-analyses/src/lib/embed-config.ts`:
-   ```typescript
-   {
-     slug: "your-analysis-slug",
-     sections: {
-       "section-id": {
-         type: "standard",
-         title: "Section Title",
-         dataPath: "your-analysis-slug/results/data.json",
-         municipalitiesPath: "your-analysis-slug/results/municipalities.json",
-         metric: "metric_key",
-         label: "Metric Label",
-         height: 500  // Optional, defaults to 500px
-       }
-     }
-   }
-   ```
+1. **Data Visualization**: Display data as:
+   - Tables
+   - Charts (using Recharts)
+   - Maps (using RegionMap/ProvinceMap/MunicipalityMap)
 
-2. **Prepare your data files** in `analyses/<slug>/results/`:
-   - `data.json` - Array with structure: `{m: municipalityCode, y: year, q: quarter, [metric]: value}`
-   - `municipalities.json` - Array with structure: `{code: nisCode, name: "Name"}`
+2. **Download CSV Button**: Each section must have a button to download the data as CSV
 
-3. **Add ExportButtons** to your analysis component:
-   ```tsx
-   import { ExportButtons } from "@/components/analyses/shared/ExportButtons"
+3. **Embed Code Button**: Each section must have a button to generate embed code for sharing the visualization on other websites
 
-   <ExportButtons
-     data={yourData}
-     title="Section Title"
-     slug="your-analysis-slug"
-     sectionId="section-id"
-     viewType={currentView}  // "chart" | "table" | "map"
-   />
-   ```
+4. **Filtering (when applicable)**:
+   - Geographic filters: Allow filtering by region, province, or municipality (using GeoFilter component)
+   - Sector filters: Allow filtering by main sector (hoofdsector) when the data includes sector information
 
-4. **Build and deploy** - The embed route is auto-generated at `/embed/your-analysis-slug/section-id`
+### Footer
+- **Data Source**: Include source citation at the bottom of the blog post with a link to the original data
 
-### Advanced: Custom Embed
-
-For complex visualizations requiring custom logic:
-
-1. **Create custom component** at `src/components/analyses/[analysis]/[Component]Embed.tsx`
-2. **Register in config** with `type: "custom"` and `component: "ComponentEmbed"`
-3. **Register component** in `src/app/embed/[slug]/[section]/EmbedClient.tsx`
-
-See `docs/workflows/WF-embed-system.md` for detailed instructions on custom embeds.
-
-### Validation
-
-The build process validates all embed configurations:
-- `npm run build` runs `validate:embeds` script automatically
-- Checks that data paths exist and are correctly formatted
-- Validates against path traversal attacks
-- Ensures all required config fields are present
+### Implementation Notes
+- Use the shared components from `src/components/analyses/shared/`:
+  - `AnalysisSection` for section wrappers
+  - `GeoContext` and `GeoFilter` for geographic filtering
+  - `FilterableChart` for charts with filtering capability
+  - `RegionMap`, `ProvinceMap`, `MunicipalityMap` for geographic visualizations
 
 ## Conventions
 
