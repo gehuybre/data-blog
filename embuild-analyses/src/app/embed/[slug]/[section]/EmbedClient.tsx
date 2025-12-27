@@ -37,15 +37,6 @@ interface UrlParams {
   sector: string | null
 }
 
-/**
- * Props for generic custom embed components
- */
-interface GenericCustomEmbedProps {
-  slug: string
-  section: string
-  urlParams: UrlParams
-}
-
 function getParamsFromUrl(): UrlParams {
   if (typeof window === "undefined") {
     return { view: "chart", horizon: 1, region: null, province: null, sector: null }
@@ -182,29 +173,6 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
 
   // Handle custom embeds
   if (config.type === "custom") {
-    // Registry of known custom components
-    // Using union type to support both specific and generic props
-    const CUSTOM_COMPONENTS: Record<
-      string,
-      React.ComponentType<StartersStoppersEmbedProps> | React.ComponentType<GenericCustomEmbedProps>
-    > = {
-      StartersStoppersEmbed: StartersStoppersEmbed,
-    }
-
-    // Validate component is registered
-    if (!CUSTOM_COMPONENTS[config.component]) {
-      return (
-        <div className="p-8 text-center">
-          <p className="text-red-500">
-            Custom component &quot;{config.component}&quot; not registered
-          </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            Add it to CUSTOM_COMPONENTS in EmbedClient.tsx
-          </p>
-        </div>
-      )
-    }
-
     // Handle StartersStoppersEmbed
     if (config.component === "StartersStoppersEmbed") {
       const validSections: StartersStoppersSection[] = ["starters", "stoppers", "survival"]
@@ -218,9 +186,8 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
         )
       }
 
-      const Component = CUSTOM_COMPONENTS[config.component]
       return (
-        <Component
+        <StartersStoppersEmbed
           section={section as StartersStoppersSection}
           viewType={urlParams.view}
           horizon={urlParams.horizon}
@@ -231,9 +198,17 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
       )
     }
 
-    // Generic fallback for other custom components
-    const Component = CUSTOM_COMPONENTS[config.component] as React.ComponentType<GenericCustomEmbedProps>
-    return <Component slug={slug} section={section} urlParams={urlParams} />
+    // Unknown custom component
+    return (
+      <div className="p-8 text-center">
+        <p className="text-red-500">
+          Custom component &quot;{config.component}&quot; not registered
+        </p>
+        <p className="text-xs text-muted-foreground mt-2">
+          Add handling for this component in EmbedClient.tsx
+        </p>
+      </div>
+    )
   }
 
   // Handle standard embeds
