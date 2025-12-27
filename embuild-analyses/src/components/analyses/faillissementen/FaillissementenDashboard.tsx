@@ -737,11 +737,31 @@ function DurationSection({
   const sectorName = selectedSector === "ALL"
     ? "Alle sectoren"
     : sectors.find((s) => s.code === selectedSector)?.nl ?? "Onbekend"
+  const exportData = React.useMemo(
+    () =>
+      data.map((d) => ({
+        label: d.ds,
+        value: d.n,
+        periodCells: [String(selectedYear), d.ds],
+      })),
+    [data, selectedYear]
+  )
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Leeftijd gefailleerde bedrijven</h2>
+        <ExportButtons
+          data={exportData}
+          title="Bedrijfsleeftijd faillissementen bouwsector"
+          slug="faillissementen"
+          sectionId="leeftijd"
+          viewType="table"
+          periodHeaders={["Jaar", "Bedrijfsleeftijd"]}
+          valueLabel="Faillissementen"
+          dataSource="Statbel - Faillissementen"
+          dataSourceUrl="https://statbel.fgov.be/nl/themas/ondernemingen/faillissementen"
+        />
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
@@ -872,11 +892,31 @@ function WorkersSection({
   const sectorName = selectedSector === "ALL"
     ? "Alle sectoren"
     : sectors.find((s) => s.code === selectedSector)?.nl ?? "Onbekend"
+  const exportData = React.useMemo(
+    () =>
+      data.map((d) => ({
+        label: d.c,
+        value: d.n,
+        periodCells: [String(selectedYear), d.c],
+      })),
+    [data, selectedYear]
+  )
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Bedrijfsgrootte</h2>
+        <ExportButtons
+          data={exportData}
+          title="Bedrijfsgrootte faillissementen bouwsector"
+          slug="faillissementen"
+          sectionId="bedrijfsgrootte"
+          viewType="table"
+          periodHeaders={["Jaar", "Bedrijfsgrootte"]}
+          valueLabel="Faillissementen"
+          dataSource="Statbel - Faillissementen"
+          dataSourceUrl="https://statbel.fgov.be/nl/themas/ondernemingen/faillissementen"
+        />
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
@@ -978,10 +1018,31 @@ function SectorComparisonSection({
   const constructionData = data.find((d) => d.sector === "F")
   const constructionRank = data.findIndex((d) => d.sector === "F") + 1
 
+  const exportData = React.useMemo(
+    () =>
+      data.map((d) => ({
+        label: d.name,
+        value: d.n,
+        periodCells: [String(selectedYear), d.name],
+      })),
+    [data, selectedYear]
+  )
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Sectorvergelijking</h2>
+        <ExportButtons
+          data={exportData}
+          title="Sectorvergelijking faillissementen"
+          slug="faillissementen"
+          sectionId="sectoren"
+          viewType="table"
+          periodHeaders={["Jaar", "Sector"]}
+          valueLabel="Faillissementen"
+          dataSource="Statbel - Faillissementen"
+          dataSourceUrl="https://statbel.fgov.be/nl/themas/ondernemingen/faillissementen"
+        />
       </div>
 
       {constructionData && (
