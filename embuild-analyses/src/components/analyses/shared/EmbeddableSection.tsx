@@ -27,7 +27,7 @@ type AggregatedPoint = {
   periodCells: Array<string | number>
 }
 
-interface EmbeddableSectionProps<TData extends UnknownRecord = UnknownRecord> {
+interface EmbeddableSectionProps<TData extends object = UnknownRecord> {
   title: string
   data: TData[]
   municipalities: Municipality[]
@@ -39,7 +39,7 @@ interface EmbeddableSectionProps<TData extends UnknownRecord = UnknownRecord> {
   period?: PeriodConfig<TData>
 }
 
-export function EmbeddableSection<TData extends UnknownRecord = UnknownRecord>({
+export function EmbeddableSection<TData extends object = UnknownRecord>({
   title,
   data,
   municipalities,

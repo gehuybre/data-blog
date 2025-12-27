@@ -7,8 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Calendar, TrendingUp, Calculator, Download, FileCode } from "lucide-react"
-import { ExportButtons } from "../shared/ExportButtons"
+import { Calendar, TrendingUp, Calculator, Download } from "lucide-react"
 
 // Import data
 import monthlyIndices from "../../../../analyses/prijsherziening-index-i-2021/results/monthly_indices.json"
@@ -96,7 +95,15 @@ export function PrijsherzieningDashboard() {
 
   // Prepare chart data
   const chartData = React.useMemo(() => {
-    const grouped = new Map<string, Record<string, number>>()
+    type ChartRow = {
+      date: string
+      year: number
+      month: number
+      label: string
+      [component: string]: number | string
+    }
+
+    const grouped = new Map<string, ChartRow>()
 
     monthlyData.forEach(row => {
       if (selectedComponents.has(row.component)) {
@@ -123,8 +130,9 @@ export function PrijsherzieningDashboard() {
         Periode: row.label,
       }
       selectedComponents.forEach(comp => {
-        if (row[comp] !== undefined) {
-          result[comp] = row[comp].toFixed(2)
+        const value = row[comp]
+        if (typeof value === "number") {
+          result[comp] = value.toFixed(2)
         }
       })
       return result
@@ -174,6 +182,34 @@ export function PrijsherzieningDashboard() {
 
   // CSV export data
   const csvData = tableData
+
+  const downloadCsv = React.useCallback(
+    (filename: string) => {
+      if (!csvData.length) return
+
+      const columns = ["Periode", ...Array.from(selectedComponents)]
+
+      const escapeCell = (v: unknown) => {
+        const s = v === null || v === undefined ? "" : String(v)
+        return /[",\n]/.test(s) ? `"${s.replaceAll("\"", "\"\"")}"` : s
+      }
+
+      const header = columns.join(",")
+      const rows = csvData.map((row) => columns.map((c) => escapeCell((row as Record<string, unknown>)[c])).join(","))
+      const body = [header, ...rows].join("\n")
+
+      const blob = new Blob([body], { type: "text/csv;charset=utf-8;" })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    },
+    [csvData, selectedComponents]
+  )
 
   return (
     <div className="space-y-6">
@@ -286,11 +322,16 @@ export function PrijsherzieningDashboard() {
             </ResponsiveContainer>
           </div>
           <div className="mt-4">
-            <ExportButtons
-              data={csvData}
-              filename="prijsherziening-index-i-2021"
-              chartId="prijsherziening-chart"
-            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => downloadCsv("prijsherziening-index-i-2021.csv")}
+              disabled={!csvData.length}
+              title="Download CSV"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">CSV</span>
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -329,11 +370,16 @@ export function PrijsherzieningDashboard() {
             </table>
           </div>
           <div className="mt-4">
-            <ExportButtons
-              data={csvData}
-              filename="prijsherziening-index-i-2021-table"
-              chartId="prijsherziening-table"
-            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => downloadCsv("prijsherziening-index-i-2021-table.csv")}
+              disabled={!csvData.length}
+              title="Download CSV"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">CSV</span>
+            </Button>
           </div>
         </CardContent>
       </Card>
