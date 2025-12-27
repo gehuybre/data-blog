@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Check, ChevronsUpDown, RotateCcw } from "lucide-react"
 import { useGeo } from "./GeoContext"
-import { REGIONS, PROVINCES, Municipality, getProvinceForMunicipality } from "@/lib/geo-utils"
+import { REGIONS, PROVINCES, Municipality, getProvinceForMunicipality, RegionCode } from "@/lib/geo-utils"
 import { formatMunicipalityName } from "@/lib/name-utils"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -107,7 +107,7 @@ export function GeoFilter({
     setOpen(false)
   }
 
-  function selectRegion(code: any) {
+  function selectRegion(code: RegionCode) {
     setSelectedRegion(code)
     setSelectedProvince(null)
     setSelectedMunicipality(null)
@@ -219,6 +219,11 @@ export function GeoFilter({
                   <>
                     <CommandSeparator />
                     <CommandGroup heading="Gemeente">
+                      {selectedProvince && !selectedMunicipality && (
+                        <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                          Gemeenten in {selectedProvinceName}
+                        </div>
+                      )}
                       {sortedMunicipalities.map((m) => (
                         <CommandItem
                           key={m.code}
