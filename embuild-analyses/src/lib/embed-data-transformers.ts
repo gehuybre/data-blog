@@ -42,7 +42,7 @@ export function transformToEmbedDataRows(
 
     return {
       label: `${row.y}-Q${row.q}`,
-      value: value,
+      value,
       periodCells: [row.y, row.q],
     }
   })

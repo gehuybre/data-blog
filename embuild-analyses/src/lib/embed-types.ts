@@ -16,8 +16,8 @@ export interface StandardEmbedDataRow {
   m: number // Municipality code
   y: number // Year
   q: number // Quarter
-  // Use a more restrictive index signature with known metric keys
-  // This prevents typos while still allowing iteration over metric values
+  // Runtime validation via getMetricValue() ensures type safety
+  // Note: TypeScript index signature allows any string key for flexibility
   [metric: string]: number // All properties must be numbers (includes m, y, q, and metrics)
 }
 
