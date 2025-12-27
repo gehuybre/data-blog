@@ -75,8 +75,7 @@ woningen_functies = [
     "meergezinswoning",
     "kamerwoning",
     "eengezins- en kamerwoning",
-    "meergezins- en kamerwoning",
-    "eengezins- en meergezinswoning"
+    "meergezins- en kamerwoning"
 ]
 
 # ============================================================================
