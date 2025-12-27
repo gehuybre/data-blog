@@ -221,27 +221,31 @@ function GeoFilterInline({
                 </CommandItem>
               ))}
             </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup heading="Gemeente">
-              {municipalities.slice(0, 100).map((m) => (
-                <CommandItem
-                  key={m.code}
-                  value={m.name}
-                  onSelect={() => {
-                    onSelect("municipality", m.code)
-                    setOpen(false)
-                  }}
-                >
-                  <Check className={cn("mr-2 h-4 w-4", selectedLevel === "municipality" && selectedNis === m.code ? "opacity-100" : "opacity-0")} />
-                  {toTitleCase(m.name)}
-                </CommandItem>
-              ))}
-              {municipalities.length > 100 && (
-                <CommandItem disabled>
-                  <span className="text-xs text-muted-foreground">... en {municipalities.length - 100} meer</span>
-                </CommandItem>
-              )}
-            </CommandGroup>
+            {municipalities.length > 0 && (
+              <>
+                <CommandSeparator />
+                <CommandGroup heading="Gemeente">
+                  {municipalities.slice(0, 100).map((m) => (
+                    <CommandItem
+                      key={m.code}
+                      value={m.name}
+                      onSelect={() => {
+                        onSelect("municipality", m.code)
+                        setOpen(false)
+                      }}
+                    >
+                      <Check className={cn("mr-2 h-4 w-4", selectedLevel === "municipality" && selectedNis === m.code ? "opacity-100" : "opacity-0")} />
+                      {toTitleCase(m.name)}
+                    </CommandItem>
+                  ))}
+                  {municipalities.length > 100 && (
+                    <CommandItem disabled>
+                      <span className="text-xs text-muted-foreground">... en {municipalities.length - 100} meer</span>
+                    </CommandItem>
+                  )}
+                </CommandGroup>
+              </>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
