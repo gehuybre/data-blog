@@ -252,10 +252,10 @@ def process_data() -> None:
     # ============================================================
 
     # 1. Yearly aggregates by property type at different geographic levels
-    # Filter to yearly data only (CD_PERIOD == 'Y') and levels 1-3 (Belgium, Region, Province)
+    # Filter to yearly data only (CD_PERIOD == 'Y') and levels 1-3-5 (Belgium, Region, Province, Municipality)
     yearly_df = df[
         (df["CD_PERIOD"] == "Y") &
-        (df["CD_niveau_refnis"].isin([LEVEL_BELGIUM, LEVEL_REGION, LEVEL_PROVINCE]))
+        (df["CD_niveau_refnis"].isin([LEVEL_BELGIUM, LEVEL_REGION, LEVEL_PROVINCE, LEVEL_MUNICIPALITY]))
     ].copy()
 
     # Aggregate by year, geo level, NIS code, and property type
@@ -282,10 +282,10 @@ def process_data() -> None:
     # Round price to integers
     yearly_agg["p50"] = yearly_agg["p50"].round(0)
 
-    # 2. Quarterly data for all geographic levels (Belgium, Region, Province)
+    # 2. Quarterly data for all geographic levels (Belgium, Region, Province, Municipality)
     quarterly_df = df[
         (df["CD_PERIOD"].str.startswith("Q", na=False)) &
-        (df["CD_niveau_refnis"].isin([LEVEL_BELGIUM, LEVEL_REGION, LEVEL_PROVINCE]))
+        (df["CD_niveau_refnis"].isin([LEVEL_BELGIUM, LEVEL_REGION, LEVEL_PROVINCE, LEVEL_MUNICIPALITY]))
     ].copy()
 
     # Extract quarter number
@@ -321,7 +321,7 @@ def process_data() -> None:
 
     # 3. Create lookups for geographic entities
     geo_lookup = df[
-        df["CD_niveau_refnis"].isin([LEVEL_BELGIUM, LEVEL_REGION, LEVEL_PROVINCE])
+        df["CD_niveau_refnis"].isin([LEVEL_BELGIUM, LEVEL_REGION, LEVEL_PROVINCE, LEVEL_MUNICIPALITY])
     ][["CD_REFNIS", "CD_REFNIS_NL", "CD_niveau_refnis"]].drop_duplicates()
 
     lookups = {
@@ -336,6 +336,10 @@ def process_data() -> None:
         "provinces": [
             {"code": row["CD_REFNIS"], "name": row["CD_REFNIS_NL"]}
             for _, row in geo_lookup[geo_lookup["CD_niveau_refnis"] == LEVEL_PROVINCE].iterrows()
+        ],
+        "municipalities": [
+            {"code": row["CD_REFNIS"], "name": row["CD_REFNIS_NL"]}
+            for _, row in geo_lookup[geo_lookup["CD_niveau_refnis"] == LEVEL_MUNICIPALITY].iterrows()
         ],
     }
 
