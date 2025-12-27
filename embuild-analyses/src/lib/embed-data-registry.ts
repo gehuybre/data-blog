@@ -11,15 +11,16 @@
  * 3. Map the slug/section to the imported data in getEmbedDataModule()
  */
 
-import type { EmbedDataRow, MunicipalityData } from "./embed-types"
+import type { EmbedDataRow, MunicipalityData, StandardEmbedDataRow } from "./embed-types"
+import { validateMunicipalityData } from "./embed-types"
 import {
-  validateEmbedDataRows,
-  validateMunicipalityData,
-} from "./embed-types"
+  transformToEmbedDataRows,
+  validateStandardEmbedDataRow,
+} from "./embed-data-transformers"
 
 // Explicit imports for vergunningen-goedkeuringen
-import vergunningenDataQuarterly from "../../analyses/vergunningen-goedkeuringen/results/data_quarterly.json"
-import vergunningenMunicipalities from "../../analyses/vergunningen-goedkeuringen/results/municipalities.json"
+import vergunningenDataQuarterlyRaw from "../../analyses/vergunningen-goedkeuringen/results/data_quarterly.json"
+import vergunningenMunicipalitiesRaw from "../../analyses/vergunningen-goedkeuringen/results/municipalities.json"
 
 /**
  * Data module type - matches the structure returned by dynamic imports
@@ -30,19 +31,33 @@ export interface EmbedDataModule {
 }
 
 /**
+ * Validate and transform raw quarterly data
+ * This ensures type safety and converts to the correct format for rendering
+ */
+const vergunningenDataQuarterly = validateStandardEmbedDataRow(
+  vergunningenDataQuarterlyRaw as unknown
+) as StandardEmbedDataRow[]
+
+const vergunningenMunicipalities = validateMunicipalityData(
+  vergunningenMunicipalitiesRaw as unknown
+)
+
+/**
  * Registry of all embed data modules
  * Maps "slug/section" to the imported data and municipalities
  *
- * Note: Data is validated at runtime to ensure type safety
+ * Note: Data is validated and transformed at module load time.
+ * Raw data (StandardEmbedDataRow format) is transformed to display format (EmbedDataRow)
+ * using the metric specified in the embed config.
  */
 const EMBED_DATA_REGISTRY: Record<string, EmbedDataModule> = {
   "vergunningen-goedkeuringen/renovatie": {
-    data: validateEmbedDataRows(vergunningenDataQuarterly),
-    municipalities: validateMunicipalityData(vergunningenMunicipalities),
+    data: transformToEmbedDataRows(vergunningenDataQuarterly, "ren"),
+    municipalities: vergunningenMunicipalities,
   },
   "vergunningen-goedkeuringen/nieuwbouw": {
-    data: validateEmbedDataRows(vergunningenDataQuarterly),
-    municipalities: validateMunicipalityData(vergunningenMunicipalities),
+    data: transformToEmbedDataRows(vergunningenDataQuarterly, "new"),
+    municipalities: vergunningenMunicipalities,
   },
 }
 
