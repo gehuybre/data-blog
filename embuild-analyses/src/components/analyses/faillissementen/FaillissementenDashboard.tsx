@@ -34,8 +34,10 @@ import monthlyProvincesConstruction from "../../../../analyses/faillissementen/r
 import monthlyProvinces from "../../../../analyses/faillissementen/results/monthly_provinces.json"
 import lookups from "../../../../analyses/faillissementen/results/lookups.json"
 import metadata from "../../../../analyses/faillissementen/results/metadata.json"
+import yearlyByDuration from "../../../../analyses/faillissementen/results/yearly_by_duration.json"
 import yearlyByDurationConstruction from "../../../../analyses/faillissementen/results/yearly_by_duration_construction.json"
 import yearlyByDurationProvinceConstruction from "../../../../analyses/faillissementen/results/yearly_by_duration_province_construction.json"
+import yearlyByWorkers from "../../../../analyses/faillissementen/results/yearly_by_workers.json"
 import yearlyByWorkersConstruction from "../../../../analyses/faillissementen/results/yearly_by_workers_construction.json"
 import yearlyByWorkersProvinceConstruction from "../../../../analyses/faillissementen/results/yearly_by_workers_province_construction.json"
 
@@ -154,11 +156,31 @@ function formatPct(n: number) {
 }
 
 function useSectorOptions(): Sector[] {
-  return (lookups as { sectors: Sector[] }).sectors ?? []
+  try {
+    const sectors = (lookups as { sectors?: Sector[] }).sectors
+    if (!Array.isArray(sectors)) {
+      console.error("Lookups sectors is not an array")
+      return []
+    }
+    return sectors
+  } catch (error) {
+    console.error("Error loading sector options:", error)
+    return []
+  }
 }
 
 function useProvinceOptions(): Province[] {
-  return (lookups as { provinces: Province[] }).provinces ?? []
+  try {
+    const provinces = (lookups as { provinces?: Province[] }).provinces
+    if (!Array.isArray(provinces)) {
+      console.error("Lookups provinces is not an array")
+      return []
+    }
+    return provinces
+  } catch (error) {
+    console.error("Error loading province options:", error)
+    return []
+  }
 }
 
 // Sector filter dropdown
@@ -338,62 +360,94 @@ function YearFilter({
 
 // Get monthly data for chart with province filter
 function getMonthlyData(sector: string, provinceCode: string | null, months: number = 24): ChartPoint[] {
-  let data: MonthlyRow[]
+  try {
+    let data: MonthlyRow[]
 
-  if (provinceCode) {
-    // Filter by province using monthly province data
-    const provData: MonthlyProvinceRow[] = sector === "ALL"
-      ? (monthlyProvinces as MonthlyProvinceRow[])
-      : (monthlyProvincesConstruction as MonthlyProvinceRow[])
+    if (provinceCode) {
+      // Filter by province using monthly province data
+      const provData: MonthlyProvinceRow[] = sector === "ALL"
+        ? (monthlyProvinces as MonthlyProvinceRow[])
+        : (monthlyProvincesConstruction as MonthlyProvinceRow[])
 
-    const filtered = provData.filter((r) => r.p === provinceCode)
-    data = filtered.map((r) => ({ y: r.y, m: r.m, n: r.n, w: r.w }))
-  } else {
-    data = sector === "ALL"
-      ? (monthlyTotals as MonthlyRow[])
-      : (monthlyConstruction as MonthlyRow[])
+      if (!Array.isArray(provData)) {
+        console.error("Monthly province data is not an array")
+        return []
+      }
+
+      const filtered = provData.filter((r) => r.p === provinceCode)
+      data = filtered.map((r) => ({ y: r.y, m: r.m, n: r.n, w: r.w }))
+    } else {
+      const sourceData = sector === "ALL"
+        ? (monthlyTotals as MonthlyRow[])
+        : (monthlyConstruction as MonthlyRow[])
+
+      if (!Array.isArray(sourceData)) {
+        console.error("Monthly data is not an array")
+        return []
+      }
+      data = sourceData
+    }
+
+    return data
+      .map((r) => ({
+        sortValue: r.y * 100 + r.m,
+        periodCells: [`${MONTH_NAMES[r.m - 1]} ${r.y}`],
+        value: r.n,
+      }))
+      .sort((a, b) => a.sortValue - b.sortValue)
+      .slice(-months)
+  } catch (error) {
+    console.error("Error loading monthly data:", error)
+    return []
   }
-
-  return data
-    .map((r) => ({
-      sortValue: r.y * 100 + r.m,
-      periodCells: [`${MONTH_NAMES[r.m - 1]} ${r.y}`],
-      value: r.n,
-    }))
-    .sort((a, b) => a.sortValue - b.sortValue)
-    .slice(-months)
 }
 
 // Get yearly data for chart with province filter
 function getYearlyData(sector: string, provinceCode: string | null): ChartPoint[] {
-  let data: YearlyRow[]
+  try {
+    let data: YearlyRow[]
 
-  if (provinceCode) {
-    // Aggregate monthly province data to yearly
-    const provData: MonthlyProvinceRow[] = sector === "ALL"
-      ? (monthlyProvinces as MonthlyProvinceRow[])
-      : (monthlyProvincesConstruction as MonthlyProvinceRow[])
+    if (provinceCode) {
+      // Aggregate monthly province data to yearly
+      const provData: MonthlyProvinceRow[] = sector === "ALL"
+        ? (monthlyProvinces as MonthlyProvinceRow[])
+        : (monthlyProvincesConstruction as MonthlyProvinceRow[])
 
-    const filtered = provData.filter((r) => r.p === provinceCode)
-    const byYear = new Map<number, { n: number; w: number }>()
-    for (const r of filtered) {
-      const existing = byYear.get(r.y) ?? { n: 0, w: 0 }
-      byYear.set(r.y, { n: existing.n + r.n, w: existing.w + r.w })
+      if (!Array.isArray(provData)) {
+        console.error("Monthly province data is not an array")
+        return []
+      }
+
+      const filtered = provData.filter((r) => r.p === provinceCode)
+      const byYear = new Map<number, { n: number; w: number }>()
+      for (const r of filtered) {
+        const existing = byYear.get(r.y) ?? { n: 0, w: 0 }
+        byYear.set(r.y, { n: existing.n + r.n, w: existing.w + r.w })
+      }
+      data = Array.from(byYear.entries()).map(([y, v]) => ({ y, n: v.n, w: v.w }))
+    } else {
+      const sourceData = sector === "ALL"
+        ? (yearlyTotals as YearlyRow[])
+        : (yearlyConstruction as YearlyRow[])
+
+      if (!Array.isArray(sourceData)) {
+        console.error("Yearly data is not an array")
+        return []
+      }
+      data = sourceData
     }
-    data = Array.from(byYear.entries()).map(([y, v]) => ({ y, n: v.n, w: v.w }))
-  } else {
-    data = sector === "ALL"
-      ? (yearlyTotals as YearlyRow[])
-      : (yearlyConstruction as YearlyRow[])
-  }
 
-  return data
-    .map((r) => ({
-      sortValue: r.y,
-      periodCells: [r.y],
-      value: r.n,
-    }))
-    .sort((a, b) => a.sortValue - b.sortValue)
+    return data
+      .map((r) => ({
+        sortValue: r.y,
+        periodCells: [r.y],
+        value: r.n,
+      }))
+      .sort((a, b) => a.sortValue - b.sortValue)
+  } catch (error) {
+    console.error("Error loading yearly data:", error)
+    return []
+  }
 }
 
 
@@ -524,15 +578,25 @@ function SummaryCards({ sector, provinceCode }: { sector: string; provinceCode: 
 
 // Get all years province data for interactive map
 function getAllYearsProvinceData(sector: string): { p: string; n: number; y: number }[] {
-  const data: ProvinceRow[] = sector === "ALL"
-    ? (provincesData as ProvinceRow[])
-    : (provincesConstruction as ProvinceRow[])
+  try {
+    const data: ProvinceRow[] = sector === "ALL"
+      ? (provincesData as ProvinceRow[])
+      : (provincesConstruction as ProvinceRow[])
 
-  return data.map((r) => ({
-    p: r.p,
-    n: r.n,
-    y: r.y,
-  }))
+    if (!Array.isArray(data)) {
+      console.error("Province data is not an array")
+      return []
+    }
+
+    return data.map((r) => ({
+      p: r.p,
+      n: r.n,
+      y: r.y,
+    }))
+  } catch (error) {
+    console.error("Error loading province data:", error)
+    return []
+  }
 }
 
 // Main evolution section with province filter
@@ -684,21 +748,32 @@ function EvolutionSection({
 
 // Company duration section (bedrijfsleeftijd)
 function DurationSection({
+  sector,
   provinceCode,
+  onSectorChange,
   onProvinceChange,
 }: {
+  sector: string
   provinceCode: string | null
+  onSectorChange: (code: string) => void
   onProvinceChange: (code: string | null) => void
 }) {
   const currentYear = metadata.max_year
   const [selectedYear, setSelectedYear] = React.useState(currentYear)
   const years = (lookups as { years: number[] }).years ?? []
 
+  // When sector changes, reset province since we don't have all-sector province data
+  React.useEffect(() => {
+    if (sector === "ALL" && provinceCode) {
+      onProvinceChange(null)
+    }
+  }, [sector, provinceCode, onProvinceChange])
+
   const data = React.useMemo(() => {
     let durationData: DurationRow[]
 
     if (provinceCode) {
-      // Filter by province
+      // Province filter only available for construction sector
       const provData = (yearlyByDurationProvinceConstruction as DurationProvinceRow[])
         .filter((r) => r.y === selectedYear && r.p === provinceCode)
       durationData = provData.map((r) => ({
@@ -710,14 +785,22 @@ function DurationSection({
         w: r.w,
       }))
     } else {
-      durationData = (yearlyByDurationConstruction as DurationRow[])
-        .filter((r) => r.y === selectedYear)
+      durationData = (sector === "ALL"
+        ? (yearlyByDuration as DurationRow[])
+        : (yearlyByDurationConstruction as DurationRow[])
+      ).filter((r) => r.y === selectedYear)
     }
 
     return durationData.sort((a, b) => a.do - b.do)
-  }, [selectedYear, provinceCode])
+  }, [selectedYear, sector, provinceCode])
 
   const totalBankruptcies = data.reduce((sum, r) => sum + r.n, 0)
+  const youngCompanies = data.filter(r => r.do <= 4)
+  const youngCompanyCount = youngCompanies.reduce((sum, r) => sum + r.n, 0)
+  const youngCompanyPercent = totalBankruptcies > 0 ? (youngCompanyCount / totalBankruptcies) * 100 : 0
+
+  const sectorLabel = sector === "ALL" ? "alle sectoren" : "bouwsector"
+  const sectorLabelNoun = sector === "ALL" ? "bedrijven" : "bouwbedrijven"
 
   const exportData = React.useMemo(
     () =>
@@ -735,7 +818,7 @@ function DurationSection({
         <h2 className="text-2xl font-bold">Leeftijd gefailleerde bedrijven</h2>
         <ExportButtons
           data={exportData}
-          title="Bedrijfsleeftijd faillissementen bouwsector"
+          title={`Bedrijfsleeftijd faillissementen ${sectorLabel}`}
           slug="faillissementen"
           sectionId="leeftijd"
           viewType="table"
@@ -747,13 +830,14 @@ function DurationSection({
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
-        <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />
+        <SectorFilter selected={sector} onChange={onSectorChange} showAll />
+        {sector === "F" && <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />}
         <YearFilter selected={selectedYear} onChange={setSelectedYear} years={years} />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Faillissementen bouwsector naar bedrijfsleeftijd ({selectedYear})</CardTitle>
+          <CardTitle>Faillissementen {sectorLabel} naar bedrijfsleeftijd ({selectedYear})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -784,7 +868,7 @@ function DurationSection({
             })}
           </div>
           <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
-            <p>Jonge bedrijven (&lt;5 jaar) zijn gemarkeerd. In {selectedYear} faalden {formatInt(data.filter(r => r.do <= 4).reduce((sum, r) => sum + r.n, 0))} jonge bouwbedrijven ({((data.filter(r => r.do <= 4).reduce((sum, r) => sum + r.n, 0) / totalBankruptcies) * 100).toFixed(1)}% van totaal).</p>
+            <p>Jonge bedrijven (&lt;5 jaar) zijn gemarkeerd. In {selectedYear} faalden {formatInt(youngCompanyCount)} jonge {sectorLabelNoun} ({youngCompanyPercent.toFixed(1)}% van totaal).</p>
           </div>
         </CardContent>
       </Card>
@@ -794,17 +878,28 @@ function DurationSection({
 
 // Workers count section (aantal werknemers)
 function WorkersSection({
+  sector,
   provinceCode,
+  onSectorChange,
   onProvinceChange,
 }: {
+  sector: string
   provinceCode: string | null
+  onSectorChange: (code: string) => void
   onProvinceChange: (code: string | null) => void
 }) {
   const currentYear = metadata.max_year
   const [selectedYear, setSelectedYear] = React.useState(currentYear)
   const years = (lookups as { years: number[] }).years ?? []
 
-  // Sort worker classes logically
+  // When sector changes, reset province since we don't have all-sector province data
+  React.useEffect(() => {
+    if (sector === "ALL" && provinceCode) {
+      onProvinceChange(null)
+    }
+  }, [sector, provinceCode, onProvinceChange])
+
+  // Sort worker classes logically - including both variants found in data
   const workerClassOrder = [
     "0 - 4 werknemers",
     "5 - 9 werknemers",
@@ -815,14 +910,14 @@ function WorkersSection({
     "200 - 249 werknemers",
     "250 - 499 werknemers",
     "500 - 999 werknemers",
-    "1000 en meer werknemers",
+    "1000 werknemers en meer", // This variant exists in all-sector data
   ]
 
   const data = React.useMemo(() => {
     let workersData: WorkersRow[]
 
     if (provinceCode) {
-      // Filter by province
+      // Province filter only available for construction sector
       const provData = (yearlyByWorkersProvinceConstruction as WorkersProvinceRow[])
         .filter((r) => r.y === selectedYear && r.p === provinceCode)
       // Aggregate by class
@@ -838,8 +933,10 @@ function WorkersSection({
         w: v.w,
       }))
     } else {
-      workersData = (yearlyByWorkersConstruction as WorkersRow[])
-        .filter((r) => r.y === selectedYear)
+      workersData = (sector === "ALL"
+        ? (yearlyByWorkers as WorkersRow[])
+        : (yearlyByWorkersConstruction as WorkersRow[])
+      ).filter((r) => r.y === selectedYear)
     }
 
     return workersData.sort((a, b) => {
@@ -847,12 +944,15 @@ function WorkersSection({
       const bIdx = workerClassOrder.indexOf(b.c)
       return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx)
     })
-  }, [selectedYear, provinceCode])
+  }, [selectedYear, sector, provinceCode, workerClassOrder])
 
   const totalBankruptcies = data.reduce((sum, r) => sum + r.n, 0)
   const totalWorkers = data.reduce((sum, r) => sum + r.w, 0)
   const smallCompanies = data.filter(r => r.c === "0 - 4 werknemers")
   const smallCompanyCount = smallCompanies.reduce((sum, r) => sum + r.n, 0)
+  const smallCompanyPercent = totalBankruptcies > 0 ? (smallCompanyCount / totalBankruptcies) * 100 : 0
+
+  const sectorLabel = sector === "ALL" ? "alle sectoren" : "bouwsector"
 
   const exportData = React.useMemo(
     () =>
@@ -870,7 +970,7 @@ function WorkersSection({
         <h2 className="text-2xl font-bold">Bedrijfsgrootte</h2>
         <ExportButtons
           data={exportData}
-          title="Bedrijfsgrootte faillissementen bouwsector"
+          title={`Bedrijfsgrootte faillissementen ${sectorLabel}`}
           slug="faillissementen"
           sectionId="bedrijfsgrootte"
           viewType="table"
@@ -882,13 +982,14 @@ function WorkersSection({
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
-        <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />
+        <SectorFilter selected={sector} onChange={onSectorChange} showAll />
+        {sector === "F" && <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />}
         <YearFilter selected={selectedYear} onChange={setSelectedYear} years={years} />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Faillissementen bouwsector naar bedrijfsgrootte ({selectedYear})</CardTitle>
+          <CardTitle>Faillissementen {sectorLabel} naar bedrijfsgrootte ({selectedYear})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -919,7 +1020,7 @@ function WorkersSection({
             })}
           </div>
           <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
-            <p>In {selectedYear} waren {formatInt(smallCompanyCount)} faillissementen ({((smallCompanyCount / totalBankruptcies) * 100).toFixed(1)}%) kleine bedrijven (0-4 werknemers). In totaal verloren {formatInt(totalWorkers)} werknemers hun job.</p>
+            <p>In {selectedYear} waren {formatInt(smallCompanyCount)} faillissementen ({smallCompanyPercent.toFixed(1)}%) kleine bedrijven (0-4 werknemers). In totaal verloren {formatInt(totalWorkers)} werknemers hun job.</p>
           </div>
         </CardContent>
       </Card>
@@ -1072,6 +1173,15 @@ export function FaillissementenDashboard() {
   const [selectedSector, setSelectedSector] = React.useState<string>("F")
   const [selectedProvince, setSelectedProvince] = React.useState<string | null>(null)
 
+  // Stabilize callbacks to prevent unnecessary re-renders
+  const handleSectorChange = React.useCallback((code: string) => {
+    setSelectedSector(code)
+  }, [])
+
+  const handleProvinceChange = React.useCallback((code: string | null) => {
+    setSelectedProvince(code)
+  }, [])
+
   return (
     <div className="space-y-10">
       <DashboardHeader />
@@ -1081,23 +1191,27 @@ export function FaillissementenDashboard() {
       <EvolutionSection
         sector={selectedSector}
         provinceCode={selectedProvince}
-        onSectorChange={setSelectedSector}
-        onProvinceChange={setSelectedProvince}
+        onSectorChange={handleSectorChange}
+        onProvinceChange={handleProvinceChange}
       />
 
       <SectorComparisonSection
         provinceCode={selectedProvince}
-        onProvinceChange={setSelectedProvince}
+        onProvinceChange={handleProvinceChange}
       />
 
       <DurationSection
+        sector={selectedSector}
         provinceCode={selectedProvince}
-        onProvinceChange={setSelectedProvince}
+        onSectorChange={handleSectorChange}
+        onProvinceChange={handleProvinceChange}
       />
 
       <WorkersSection
+        sector={selectedSector}
         provinceCode={selectedProvince}
-        onProvinceChange={setSelectedProvince}
+        onSectorChange={handleSectorChange}
+        onProvinceChange={handleProvinceChange}
       />
     </div>
   )
