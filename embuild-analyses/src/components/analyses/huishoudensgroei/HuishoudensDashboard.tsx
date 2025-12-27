@@ -533,7 +533,7 @@ function RankingSection({
   onHorizonChange: (year: number) => void
 }) {
   const [showDecline, setShowDecline] = React.useState(false)
-  const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("table")
+  const currentView = "table" as const
 
   const ranking = React.useMemo(
     () => getMunicipalityRanking(horizonYear, provinceCode, 10, showDecline),
@@ -548,7 +548,7 @@ function RankingSection({
       ranking.map((r) => ({
         label: r.name,
         value: r.gr,
-        periodCells: [r.name, r.n, r.gr],
+        periodCells: [r.name, formatInt(r.n), formatPct(r.gr)],
       })),
     [ranking]
   )
@@ -625,7 +625,7 @@ function SizeBreakdownSection({
   onSelectGeo: (level: "vlaanderen" | "province" | "municipality", code: string | null) => void
   onHorizonChange: (year: number) => void
 }) {
-  const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("table")
+  const currentView = "table" as const
   const baseData = getSizeBreakdown(level, code, BASE_YEAR)
   const horizonData = getSizeBreakdown(level, code, horizonYear)
 
@@ -647,7 +647,7 @@ function SizeBreakdownSection({
       combined.map((item) => ({
         label: item.label,
         value: item.growth,
-        periodCells: [item.label, item.base, item.horizon, item.growth],
+        periodCells: [item.label, formatInt(item.base), formatInt(item.horizon), formatPct(item.growth)],
       })),
     [combined]
   )
