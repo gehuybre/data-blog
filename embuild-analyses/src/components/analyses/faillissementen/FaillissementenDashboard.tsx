@@ -163,6 +163,47 @@ function isValidLookups(data: unknown): data is Lookups {
   )
 }
 
+// Type guards for runtime validation
+function isMonthlyProvinceRow(item: unknown): item is MonthlyProvinceRow {
+  return (
+    typeof item === 'object' && item !== null &&
+    'y' in item && typeof (item as MonthlyProvinceRow).y === 'number' &&
+    'm' in item && typeof (item as MonthlyProvinceRow).m === 'number' &&
+    'p' in item && typeof (item as MonthlyProvinceRow).p === 'string' &&
+    'n' in item && typeof (item as MonthlyProvinceRow).n === 'number' &&
+    'w' in item && typeof (item as MonthlyProvinceRow).w === 'number'
+  )
+}
+
+function isMonthlyRow(item: unknown): item is MonthlyRow {
+  return (
+    typeof item === 'object' && item !== null &&
+    'y' in item && typeof (item as MonthlyRow).y === 'number' &&
+    'm' in item && typeof (item as MonthlyRow).m === 'number' &&
+    'n' in item && typeof (item as MonthlyRow).n === 'number' &&
+    'w' in item && typeof (item as MonthlyRow).w === 'number'
+  )
+}
+
+function isYearlyRow(item: unknown): item is YearlyRow {
+  return (
+    typeof item === 'object' && item !== null &&
+    'y' in item && typeof (item as YearlyRow).y === 'number' &&
+    'n' in item && typeof (item as YearlyRow).n === 'number' &&
+    'w' in item && typeof (item as YearlyRow).w === 'number'
+  )
+}
+
+function isProvinceRow(item: unknown): item is ProvinceRow {
+  return (
+    typeof item === 'object' && item !== null &&
+    'y' in item && typeof (item as ProvinceRow).y === 'number' &&
+    'p' in item && typeof (item as ProvinceRow).p === 'string' &&
+    'n' in item && typeof (item as ProvinceRow).n === 'number' &&
+    'w' in item && typeof (item as ProvinceRow).w === 'number'
+  )
+}
+
 // Utility function for safe array access with error handling
 function safeArrayAccess<T>(
   data: unknown,
@@ -175,6 +216,16 @@ function safeArrayAccess<T>(
       console.error(`Data validation error: ${arrayName} is not an array`, data)
       return { data: [], error: errorMsg }
     }
+
+    // If validator is provided, filter out invalid items
+    if (validator) {
+      const validData = data.filter(validator)
+      if (validData.length !== data.length) {
+        console.warn(`${arrayName}: ${data.length - validData.length} invalid items filtered out`)
+      }
+      return { data: validData, error: null }
+    }
+
     return { data: data as T[], error: null }
   } catch (error) {
     const errorMsg = `Fout bij laden van ${arrayName}`
@@ -444,7 +495,11 @@ function getMonthlyData(
     if (provinceCode) {
       // Filter by province using monthly province data
       const sourceData = sector === "ALL" ? monthlyProvinces : monthlyProvincesConstruction
-      const validation = safeArrayAccess<MonthlyProvinceRow>(sourceData, 'maandelijkse provinciegegevens')
+      const validation = safeArrayAccess<MonthlyProvinceRow>(
+        sourceData,
+        'maandelijkse provinciegegevens',
+        isMonthlyProvinceRow
+      )
 
       if (validation.error) {
         return { data: [], error: validation.error }
@@ -454,7 +509,11 @@ function getMonthlyData(
       data = filtered.map((r) => ({ y: r.y, m: r.m, n: r.n, w: r.w }))
     } else {
       const sourceData = sector === "ALL" ? monthlyTotals : monthlyConstruction
-      const validation = safeArrayAccess<MonthlyRow>(sourceData, 'maandelijkse gegevens')
+      const validation = safeArrayAccess<MonthlyRow>(
+        sourceData,
+        'maandelijkse gegevens',
+        isMonthlyRow
+      )
 
       if (validation.error) {
         return { data: [], error: validation.error }
@@ -490,7 +549,11 @@ function getYearlyData(
     if (provinceCode) {
       // Aggregate monthly province data to yearly
       const sourceData = sector === "ALL" ? monthlyProvinces : monthlyProvincesConstruction
-      const validation = safeArrayAccess<MonthlyProvinceRow>(sourceData, 'maandelijkse provinciegegevens')
+      const validation = safeArrayAccess<MonthlyProvinceRow>(
+        sourceData,
+        'maandelijkse provinciegegevens',
+        isMonthlyProvinceRow
+      )
 
       if (validation.error) {
         return { data: [], error: validation.error }
@@ -505,7 +568,11 @@ function getYearlyData(
       data = Array.from(byYear.entries()).map(([y, v]) => ({ y, n: v.n, w: v.w }))
     } else {
       const sourceData = sector === "ALL" ? yearlyTotals : yearlyConstruction
-      const validation = safeArrayAccess<YearlyRow>(sourceData, 'jaarlijkse gegevens')
+      const validation = safeArrayAccess<YearlyRow>(
+        sourceData,
+        'jaarlijkse gegevens',
+        isYearlyRow
+      )
 
       if (validation.error) {
         return { data: [], error: validation.error }
@@ -661,7 +728,11 @@ function getAllYearsProvinceData(
 ): { data: { p: string; n: number; y: number }[]; error: string | null } {
   try {
     const sourceData = sector === "ALL" ? provincesData : provincesConstruction
-    const validation = safeArrayAccess<ProvinceRow>(sourceData, 'provinciegegevens')
+    const validation = safeArrayAccess<ProvinceRow>(
+      sourceData,
+      'provinciegegevens',
+      isProvinceRow
+    )
 
     if (validation.error) {
       return { data: [], error: validation.error }
@@ -911,7 +982,7 @@ function DurationSection({
   const youngCompanyCount = youngCompanies.reduce((sum, r) => sum + r.n, 0)
   const youngCompanyPercent = totalBankruptcies > 0 ? (youngCompanyCount / totalBankruptcies) * 100 : 0
 
-  const { sectors } = useSectorOptions()
+  const { sectors, error: sectorsError } = useSectorOptions()
   const sectorName = sector === "ALL"
     ? "Alle sectoren"
     : sectors.find((s) => s.code === sector)?.nl ?? "Onbekend"
@@ -1054,7 +1125,7 @@ function WorkersSection({
   const smallCompanyCount = smallCompanies.reduce((sum, r) => sum + r.n, 0)
   const smallCompanyPercent = totalBankruptcies > 0 ? (smallCompanyCount / totalBankruptcies) * 100 : 0
 
-  const { sectors } = useSectorOptions()
+  const { sectors, error: sectorsError } = useSectorOptions()
   const sectorName = sector === "ALL"
     ? "Alle sectoren"
     : sectors.find((s) => s.code === sector)?.nl ?? "Onbekend"
@@ -1143,7 +1214,7 @@ function SectorComparisonSection({
   const currentYear = metadata.max_year
   const [selectedYear, setSelectedYear] = React.useState(currentYear)
   const years = isValidLookups(lookups) ? lookups.years : []
-  const { sectors } = useSectorOptions()
+  const { sectors, error: sectorsError } = useSectorOptions()
 
   const data = React.useMemo(() => {
     let sectorData: YearlySectorRow[]
