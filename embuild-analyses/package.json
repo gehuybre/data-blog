@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run validate:embeds && next build",
     "start": "next start",
     "lint": "eslint",
+    "validate:embeds": "node scripts/validate-embed-paths.js",
     "check:faillissementen-geo-join": "node scripts/check-faillissementen-geo-join.js"
   },
   "dependencies": {

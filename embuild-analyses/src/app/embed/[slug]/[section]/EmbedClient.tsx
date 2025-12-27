@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { EmbeddableSection } from "@/components/analyses/shared/EmbeddableSection"
 import { StartersStoppersEmbed } from "@/components/analyses/starters-stoppers/StartersStoppersEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig, StandardEmbedConfig } from "@/lib/embed-config"
+import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
 
 type ViewType = "chart" | "table" | "map"
 type StopHorizon = 1 | 2 | 3 | 4 | 5
@@ -67,8 +68,8 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
 
   // State for dynamically loaded data
   const [embedData, setEmbedData] = useState<{
-    data: unknown[] | null
-    municipalities: unknown[] | null
+    data: EmbedDataRow[] | null
+    municipalities: MunicipalityData[] | null
     loading: boolean
     error: string | null
   }>({
@@ -88,6 +89,8 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     if (!config || config.type !== "standard") return
 
     const standardConfig = config as StandardEmbedConfig
+    let isCancelled = false
+
     setEmbedData((prev) => ({ ...prev, loading: true }))
 
     Promise.all([
@@ -95,21 +98,40 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
       import(`../../../../../analyses/${standardConfig.municipalitiesPath}`),
     ])
       .then(([dataModule, municipalitiesModule]) => {
+        // Prevent state update if component unmounted or slug/section changed
+        if (isCancelled) return
+
         setEmbedData({
-          data: dataModule.default as unknown[],
-          municipalities: municipalitiesModule.default as unknown[],
+          data: dataModule.default as EmbedDataRow[],
+          municipalities: municipalitiesModule.default as MunicipalityData[],
           loading: false,
           error: null,
         })
       })
       .catch((err) => {
+        // Prevent state update if component unmounted or slug/section changed
+        if (isCancelled) return
+
+        // More specific error messages
+        let errorMessage = "Failed to load data"
+        if (err.message?.includes("Cannot find module")) {
+          errorMessage = `Data file not found. Please check that the paths in embed-config.ts are correct:\n- ${standardConfig.dataPath}\n- ${standardConfig.municipalitiesPath}`
+        } else if (err.message) {
+          errorMessage = `Failed to load data: ${err.message}`
+        }
+
         setEmbedData({
           data: null,
           municipalities: null,
           loading: false,
-          error: `Failed to load data: ${err.message}`,
+          error: errorMessage,
         })
       })
+
+    // Cleanup function to prevent race conditions
+    return () => {
+      isCancelled = true
+    }
   }, [slug, section])
 
   // Get config
@@ -182,8 +204,8 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     return (
       <EmbeddableSection
         title={config.title}
-        data={embedData.data as Record<string, unknown>[]}
-        municipalities={embedData.municipalities as { code: number; name: string }[]}
+        data={embedData.data}
+        municipalities={embedData.municipalities}
         metric={config.metric}
         label={config.label}
         viewType={urlParams.view}
