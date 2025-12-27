@@ -89,12 +89,56 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
 ]
 
 /**
+ * Validate standard embed configuration paths in development mode
+ */
+function validateStandardConfig(config: StandardEmbedConfig, slug: string, section: string): void {
+  if (process.env.NODE_ENV !== "development") return
+
+  const issues: string[] = []
+
+  // Check that dataPath follows expected pattern
+  if (!config.dataPath.startsWith(`${slug}/`)) {
+    issues.push(`dataPath should start with "${slug}/" but is "${config.dataPath}"`)
+  }
+
+  // Check that municipalitiesPath follows expected pattern
+  if (!config.municipalitiesPath.startsWith(`${slug}/`)) {
+    issues.push(`municipalitiesPath should start with "${slug}/" but is "${config.municipalitiesPath}"`)
+  }
+
+  // Check required fields are present and non-empty
+  if (!config.title || config.title.trim() === "") {
+    issues.push("title is required and must not be empty")
+  }
+
+  if (!config.metric || config.metric.trim() === "") {
+    issues.push("metric is required and must not be empty")
+  }
+
+  // Log validation issues as warnings
+  if (issues.length > 0) {
+    console.warn(
+      `[embed-config] Validation issues for ${slug}/${section}:\n` +
+      issues.map((issue) => `  - ${issue}`).join("\n")
+    )
+  }
+}
+
+/**
  * Get embed configuration for a specific analysis and section
  */
 export function getEmbedConfig(slug: string, section: string): EmbedConfig | null {
   const analysisConfig = EMBED_CONFIGS.find((a) => a.slug === slug)
   if (!analysisConfig) return null
-  return analysisConfig.sections[section] ?? null
+
+  const config = analysisConfig.sections[section] ?? null
+
+  // Validate standard configs in development
+  if (config && config.type === "standard") {
+    validateStandardConfig(config, slug, section)
+  }
+
+  return config
 }
 
 /**

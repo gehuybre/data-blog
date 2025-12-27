@@ -110,6 +110,10 @@ export function ExportButtons({
       ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "")
       : ""
 
+    // URL-encode slug and sectionId for security
+    const encodedSlug = encodeURIComponent(slug)
+    const encodedSectionId = encodeURIComponent(sectionId)
+
     // Build query params including view and any additional embed params
     const params = new URLSearchParams()
     params.set("view", viewType)
@@ -122,13 +126,13 @@ export function ExportButtons({
       }
     }
 
-    const embedUrl = `${baseUrl}/embed/${slug}/${sectionId}/?${params.toString()}`
+    const embedUrl = `${baseUrl}/embed/${encodedSlug}/${encodedSectionId}/?${params.toString()}`
 
     return `<iframe
   src="${embedUrl}"
   width="100%"
   height="500"
-  frameborder="0"
+  style="border: 0;"
   title="${title}"
   loading="lazy"
 ></iframe>`
