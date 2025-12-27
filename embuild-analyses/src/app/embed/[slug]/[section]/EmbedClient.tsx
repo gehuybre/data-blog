@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react"
 import { EmbeddableSection } from "@/components/analyses/shared/EmbeddableSection"
 import { StartersStoppersEmbed } from "@/components/analyses/starters-stoppers/StartersStoppersEmbed"
+import { VergunningenAanvragenEmbed } from "@/components/analyses/vergunningen-aanvragen/VergunningenAanvragenEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig } from "@/lib/embed-config"
 import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
@@ -194,6 +195,27 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
           region={urlParams.region}
           province={urlParams.province}
           sector={urlParams.sector}
+        />
+      )
+    }
+
+    // Handle VergunningenAanvragenEmbed
+    if (config.component === "VergunningenAanvragenEmbed") {
+      const validSections = ["nieuwbouw", "verbouw", "sloop"]
+      if (!validSections.includes(section)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}. Geldige opties: nieuwbouw, verbouw, sloop
+            </p>
+          </div>
+        )
+      }
+
+      return (
+        <VergunningenAanvragenEmbed
+          section={section as "nieuwbouw" | "verbouw" | "sloop"}
+          viewType={urlParams.view}
         />
       )
     }

@@ -92,6 +92,26 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
       },
     },
   },
+  {
+    slug: "vergunningen-aanvragen",
+    sections: {
+      nieuwbouw: {
+        type: "custom",
+        title: "Nieuwbouw vergunningsaanvragen",
+        component: "VergunningenAanvragenEmbed",
+      },
+      verbouw: {
+        type: "custom",
+        title: "Verbouw vergunningsaanvragen",
+        component: "VergunningenAanvragenEmbed",
+      },
+      sloop: {
+        type: "custom",
+        title: "Sloop vergunningsaanvragen",
+        component: "VergunningenAanvragenEmbed",
+      },
+    },
+  },
 ]
 
 /**
