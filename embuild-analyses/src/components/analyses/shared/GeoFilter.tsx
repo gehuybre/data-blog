@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Check, ChevronsUpDown, RotateCcw } from "lucide-react"
 import { useGeo } from "./GeoContext"
-import { REGIONS, PROVINCES, Municipality, getProvinceForMunicipality } from "@/lib/geo-utils"
+import { REGIONS, PROVINCES, Municipality, getProvinceForMunicipality, RegionCode } from "@/lib/geo-utils"
 import { formatMunicipalityName } from "@/lib/name-utils"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -86,8 +86,18 @@ export function GeoFilter({
   }, [])
 
   const sortedMunicipalities = React.useMemo(() => {
-    return [...municipalities].sort((a, b) => a.name.localeCompare(b.name))
-  }, [municipalities])
+    let filtered = [...municipalities]
+
+    // Filter by selected province when a province is selected
+    if (selectedProvince) {
+      filtered = filtered.filter((m) => {
+        const municipalityProvince = getProvinceForMunicipality(m.code)
+        return String(municipalityProvince) === String(selectedProvince)
+      })
+    }
+
+    return filtered.sort((a, b) => a.name.localeCompare(b.name))
+  }, [municipalities, selectedProvince])
 
   function selectBelgium() {
     setSelectedRegion("1000")
@@ -97,7 +107,7 @@ export function GeoFilter({
     setOpen(false)
   }
 
-  function selectRegion(code: any) {
+  function selectRegion(code: RegionCode) {
     setSelectedRegion(code)
     setSelectedProvince(null)
     setSelectedMunicipality(null)
@@ -209,6 +219,13 @@ export function GeoFilter({
                   <>
                     <CommandSeparator />
                     <CommandGroup heading="Gemeente">
+                      {!selectedMunicipality && (
+                        <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                          {selectedProvince
+                            ? `Gemeenten in ${selectedProvinceName}`
+                            : "Alle gemeenten (gebruik zoekfunctie voor snellere selectie)"}
+                        </div>
+                      )}
                       {sortedMunicipalities.map((m) => (
                         <CommandItem
                           key={m.code}
