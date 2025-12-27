@@ -236,6 +236,12 @@ function NieuwbouwSection() {
     return ["Jaar"]
   }, [currentView])
 
+  // Value label based on current view
+  const valueLabel = React.useMemo(() => {
+    if (currentView === "trend") return "Index (2018 = 100)"
+    return METRIC_LABELS[metric]
+  }, [currentView, metric])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -248,7 +254,7 @@ function NieuwbouwSection() {
             slug="vergunningen-aanvragen"
             sectionId="nieuwbouw"
             viewType="chart"
-            valueLabel={METRIC_LABELS[metric]}
+            valueLabel={valueLabel}
             dataSource="Omgevingsloket Vlaanderen"
             dataSourceUrl="https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen"
           />
@@ -458,6 +464,12 @@ function VerbouwSection() {
     return ["Jaar"]
   }, [currentView])
 
+  // Value label based on current view
+  const valueLabel = React.useMemo(() => {
+    if (currentView === "trend") return "Index (2018 = 100)"
+    return METRIC_LABELS[metric]
+  }, [currentView, metric])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -470,7 +482,7 @@ function VerbouwSection() {
             slug="vergunningen-aanvragen"
             sectionId="verbouw"
             viewType="chart"
-            valueLabel={METRIC_LABELS[metric]}
+            valueLabel={valueLabel}
             dataSource="Omgevingsloket Vlaanderen"
             dataSourceUrl="https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen"
           />
@@ -680,6 +692,12 @@ function SloopSection() {
     return ["Jaar"]
   }, [currentView])
 
+  // Value label based on current view
+  const valueLabel = React.useMemo(() => {
+    if (currentView === "trend") return "Index (2018 = 100)"
+    return SLOOP_METRIC_LABELS[metric]
+  }, [currentView, metric])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -692,7 +710,7 @@ function SloopSection() {
             slug="vergunningen-aanvragen"
             sectionId="sloop"
             viewType="chart"
-            valueLabel={SLOOP_METRIC_LABELS[metric]}
+            valueLabel={valueLabel}
             dataSource="Omgevingsloket Vlaanderen"
             dataSourceUrl="https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen"
           />
