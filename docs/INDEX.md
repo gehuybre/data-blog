@@ -6,6 +6,7 @@
 
 ## Analyses
 
+- **Energiekaart Premies** - Energiepremies voor hernieuwbare energiesystemen in Vlaanderen
 - **Huishoudensgroei** - Huishoudensvooruitzichten per gemeente in Vlaanderen (2010-2040)
 - **Vastgoed Verkopen** - Vastgoedtransacties en prijzen per type woning
 - **Starters-Stoppers** - Startende en stoppende ondernemingen
@@ -13,6 +14,7 @@
 
 ## Workflows
 
+- [Energiekaart Premies](workflows/WF-energiekaart-premies.md)
 - [Project Setup](workflows/WF-project-setup.md)
 - [Deploy](workflows/WF-deploy.md)
 - [Vergunningen Goedkeuringen](workflows/WF-vergunningen-goedkeuringen.md)
