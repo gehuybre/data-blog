@@ -92,6 +92,76 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
       },
     },
   },
+  {
+    slug: "vastgoed-verkopen",
+    sections: {
+      transacties: {
+        type: "custom",
+        title: "Aantal transacties",
+        component: "VastgoedVerkopenEmbed",
+      },
+      prijzen: {
+        type: "custom",
+        title: "Mediaanprijs",
+        component: "VastgoedVerkopenEmbed",
+      },
+      "transacties-kwartaal": {
+        type: "custom",
+        title: "Transacties per kwartaal",
+        component: "VastgoedVerkopenEmbed",
+      },
+      "prijzen-kwartaal": {
+        type: "custom",
+        title: "Mediaanprijs per kwartaal",
+        component: "VastgoedVerkopenEmbed",
+      },
+    },
+  },
+  {
+    slug: "faillissementen",
+    sections: {
+      evolutie: {
+        type: "custom",
+        title: "Evolutie faillissementen",
+        component: "FaillissementenEmbed",
+      },
+      leeftijd: {
+        type: "custom",
+        title: "Bedrijfsleeftijd",
+        component: "FaillissementenEmbed",
+      },
+      bedrijfsgrootte: {
+        type: "custom",
+        title: "Bedrijfsgrootte",
+        component: "FaillissementenEmbed",
+      },
+      sectoren: {
+        type: "custom",
+        title: "Sectorvergelijking",
+        component: "FaillissementenEmbed",
+      },
+    },
+  },
+  {
+    slug: "huishoudensgroei",
+    sections: {
+      evolutie: {
+        type: "custom",
+        title: "Evolutie aantal huishoudens",
+        component: "HuishoudensgroeiEmbed",
+      },
+      ranking: {
+        type: "custom",
+        title: "Gemeenten ranking",
+        component: "HuishoudensgroeiEmbed",
+      },
+      "size-breakdown": {
+        type: "custom",
+        title: "Samenstelling huishoudens",
+        component: "HuishoudensgroeiEmbed",
+      },
+    },
+  },
 ]
 
 /**
