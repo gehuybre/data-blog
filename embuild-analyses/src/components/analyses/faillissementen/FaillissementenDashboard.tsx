@@ -273,29 +273,25 @@ function formatPct(n: number) {
 }
 
 function useSectorOptions(): { sectors: Sector[]; error: string | null } {
-  return React.useMemo(() => {
-    if (isValidLookups(lookups)) {
-      return { sectors: lookups.sectors, error: null }
-    }
-    const result = safeArrayAccess<Sector>(
-      (lookups as Record<string, unknown>).sectors,
-      'sectorgegevens'
-    )
-    return { sectors: result.data, error: result.error }
-  }, [])
+  if (isValidLookups(lookups)) {
+    return { sectors: lookups.sectors, error: null }
+  }
+  const { data, error } = safeArrayAccess<Sector>(
+    (lookups as Record<string, unknown>).sectors,
+    'sectorgegevens'
+  )
+  return { sectors: data, error }
 }
 
 function useProvinceOptions(): { provinces: Province[]; error: string | null } {
-  return React.useMemo(() => {
-    if (isValidLookups(lookups)) {
-      return { provinces: lookups.provinces, error: null }
-    }
-    const result = safeArrayAccess<Province>(
-      (lookups as Record<string, unknown>).provinces,
-      'provinciegegevens'
-    )
-    return { provinces: result.data, error: result.error }
-  }, [])
+  if (isValidLookups(lookups)) {
+    return { provinces: lookups.provinces, error: null }
+  }
+  const { data, error } = safeArrayAccess<Province>(
+    (lookups as Record<string, unknown>).provinces,
+    'provinciegegevens'
+  )
+  return { provinces: data, error }
 }
 
 // Sector filter dropdown
