@@ -1,10 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown, TrendingUp, TrendingDown, Building2, Users, Calendar } from "lucide-react"
+import { Check, ChevronsUpDown, TrendingUp, TrendingDown, Building2, Users, Calendar, AlertCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Command,
   CommandEmpty,
@@ -135,6 +136,52 @@ type ChartPoint = {
   value: number
 }
 
+// Lookup data structure with proper typing
+interface Lookups {
+  sectors: Sector[]
+  provinces: Province[]
+  years: number[]
+}
+
+// Type guard for validating lookups data
+function isValidLookups(data: unknown): data is Lookups {
+  if (typeof data !== 'object' || data === null) return false
+  const obj = data as Record<string, unknown>
+  return (
+    Array.isArray(obj.sectors) &&
+    obj.sectors.every((s: unknown) =>
+      typeof s === 'object' && s !== null &&
+      'code' in s && 'nl' in s
+    ) &&
+    Array.isArray(obj.provinces) &&
+    obj.provinces.every((p: unknown) =>
+      typeof p === 'object' && p !== null &&
+      'code' in p && 'name' in p
+    ) &&
+    Array.isArray(obj.years) &&
+    obj.years.every((y: unknown) => typeof y === 'number')
+  )
+}
+
+// Utility function for safe array access with error handling
+function safeArrayAccess<T>(
+  data: unknown,
+  arrayName: string,
+  validator?: (item: unknown) => item is T
+): { data: T[]; error: string | null } {
+  try {
+    if (!Array.isArray(data)) {
+      const errorMsg = `${arrayName} is niet beschikbaar`
+      console.error(`Data validation error: ${arrayName} is not an array`, data)
+      return { data: [], error: errorMsg }
+    }
+    return { data: data as T[], error: null }
+  } catch (error) {
+    const errorMsg = `Fout bij laden van ${arrayName}`
+    console.error(`Error loading ${arrayName}:`, error)
+    return { data: [], error: errorMsg }
+  }
+}
 
 const MONTH_NAMES = [
   "Jan", "Feb", "Mrt", "Apr", "Mei", "Jun",
@@ -146,7 +193,11 @@ const MONTH_NAMES_FULL = [
   "juli", "augustus", "september", "oktober", "november", "december"
 ]
 
-// Worker class order for sorting - includes variants found in data
+// Worker class order for sorting
+// NOTE: Includes two variants for the largest class due to inconsistent naming in Statbel source data:
+// - "1000 werknemers en meer" appears in all-sector data
+// - "1000 en meer werknemers" appears in construction sector data
+// This handles both variants during sorting without data normalization
 const WORKER_CLASS_ORDER = [
   "0 - 4 werknemers",
   "5 - 9 werknemers",
@@ -170,32 +221,24 @@ function formatPct(n: number) {
   return `${sign}${n.toFixed(1)}%`
 }
 
-function useSectorOptions(): Sector[] {
-  try {
-    const sectors = (lookups as { sectors?: Sector[] }).sectors
-    if (!Array.isArray(sectors)) {
-      console.error("Lookups sectors is not an array")
-      return []
-    }
-    return sectors
-  } catch (error) {
-    console.error("Error loading sector options:", error)
-    return []
+function useSectorOptions(): { sectors: Sector[]; error: string | null } {
+  if (isValidLookups(lookups)) {
+    return { sectors: lookups.sectors, error: null }
   }
+  return safeArrayAccess<Sector>(
+    (lookups as Record<string, unknown>).sectors,
+    'sectorgegevens'
+  )
 }
 
-function useProvinceOptions(): Province[] {
-  try {
-    const provinces = (lookups as { provinces?: Province[] }).provinces
-    if (!Array.isArray(provinces)) {
-      console.error("Lookups provinces is not an array")
-      return []
-    }
-    return provinces
-  } catch (error) {
-    console.error("Error loading province options:", error)
-    return []
+function useProvinceOptions(): { provinces: Province[]; error: string | null } {
+  if (isValidLookups(lookups)) {
+    return { provinces: lookups.provinces, error: null }
   }
+  return safeArrayAccess<Province>(
+    (lookups as Record<string, unknown>).provinces,
+    'provinciegegevens'
+  )
 }
 
 // Sector filter dropdown
@@ -209,12 +252,20 @@ function SectorFilter({
   showAll?: boolean
 }) {
   const [open, setOpen] = React.useState(false)
-  const sectors = useSectorOptions()
+  const { sectors, error } = useSectorOptions()
 
   const currentLabel = React.useMemo(() => {
     if (selected === "ALL") return "Alle sectoren"
     return sectors.find((s) => s.code === selected)?.nl ?? "Sector"
   }, [selected, sectors])
+
+  if (error) {
+    return (
+      <Button variant="outline" size="sm" disabled className="h-9 gap-1 min-w-[140px]">
+        <span className="truncate max-w-[180px]">Fout bij laden</span>
+      </Button>
+    )
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -275,12 +326,20 @@ function ProvinceFilter({
   onChange: (code: string | null) => void
 }) {
   const [open, setOpen] = React.useState(false)
-  const provincesLookup = useProvinceOptions()
+  const { provinces: provincesLookup, error } = useProvinceOptions()
 
   const currentLabel = React.useMemo(() => {
     if (!selected) return "Vlaanderen"
     return provincesLookup.find((p) => p.code === selected)?.name ?? "Provincie"
   }, [selected, provincesLookup])
+
+  if (error) {
+    return (
+      <Button variant="outline" size="sm" disabled className="h-9 gap-1 min-w-[120px]">
+        <span className="truncate max-w-[100px]">Fout bij laden</span>
+      </Button>
+    )
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -374,36 +433,37 @@ function YearFilter({
 }
 
 // Get monthly data for chart with province filter
-function getMonthlyData(sector: string, provinceCode: string | null, months: number = 24): ChartPoint[] {
+function getMonthlyData(
+  sector: string,
+  provinceCode: string | null,
+  months: number = 24
+): { data: ChartPoint[]; error: string | null } {
   try {
     let data: MonthlyRow[]
 
     if (provinceCode) {
       // Filter by province using monthly province data
-      const provData: MonthlyProvinceRow[] = sector === "ALL"
-        ? (monthlyProvinces as MonthlyProvinceRow[])
-        : (monthlyProvincesConstruction as MonthlyProvinceRow[])
+      const sourceData = sector === "ALL" ? monthlyProvinces : monthlyProvincesConstruction
+      const validation = safeArrayAccess<MonthlyProvinceRow>(sourceData, 'maandelijkse provinciegegevens')
 
-      if (!Array.isArray(provData)) {
-        console.error("Monthly province data is not an array")
-        return []
+      if (validation.error) {
+        return { data: [], error: validation.error }
       }
 
-      const filtered = provData.filter((r) => r.p === provinceCode)
+      const filtered = validation.data.filter((r) => r.p === provinceCode)
       data = filtered.map((r) => ({ y: r.y, m: r.m, n: r.n, w: r.w }))
     } else {
-      const sourceData = sector === "ALL"
-        ? (monthlyTotals as MonthlyRow[])
-        : (monthlyConstruction as MonthlyRow[])
+      const sourceData = sector === "ALL" ? monthlyTotals : monthlyConstruction
+      const validation = safeArrayAccess<MonthlyRow>(sourceData, 'maandelijkse gegevens')
 
-      if (!Array.isArray(sourceData)) {
-        console.error("Monthly data is not an array")
-        return []
+      if (validation.error) {
+        return { data: [], error: validation.error }
       }
-      data = sourceData
+
+      data = validation.data
     }
 
-    return data
+    const chartData = data
       .map((r) => ({
         sortValue: r.y * 100 + r.m,
         periodCells: [`${MONTH_NAMES[r.m - 1]} ${r.y}`],
@@ -411,29 +471,32 @@ function getMonthlyData(sector: string, provinceCode: string | null, months: num
       }))
       .sort((a, b) => a.sortValue - b.sortValue)
       .slice(-months)
+
+    return { data: chartData, error: null }
   } catch (error) {
     console.error("Error loading monthly data:", error)
-    return []
+    return { data: [], error: 'Fout bij laden van maandelijkse gegevens' }
   }
 }
 
 // Get yearly data for chart with province filter
-function getYearlyData(sector: string, provinceCode: string | null): ChartPoint[] {
+function getYearlyData(
+  sector: string,
+  provinceCode: string | null
+): { data: ChartPoint[]; error: string | null } {
   try {
     let data: YearlyRow[]
 
     if (provinceCode) {
       // Aggregate monthly province data to yearly
-      const provData: MonthlyProvinceRow[] = sector === "ALL"
-        ? (monthlyProvinces as MonthlyProvinceRow[])
-        : (monthlyProvincesConstruction as MonthlyProvinceRow[])
+      const sourceData = sector === "ALL" ? monthlyProvinces : monthlyProvincesConstruction
+      const validation = safeArrayAccess<MonthlyProvinceRow>(sourceData, 'maandelijkse provinciegegevens')
 
-      if (!Array.isArray(provData)) {
-        console.error("Monthly province data is not an array")
-        return []
+      if (validation.error) {
+        return { data: [], error: validation.error }
       }
 
-      const filtered = provData.filter((r) => r.p === provinceCode)
+      const filtered = validation.data.filter((r) => r.p === provinceCode)
       const byYear = new Map<number, { n: number; w: number }>()
       for (const r of filtered) {
         const existing = byYear.get(r.y) ?? { n: 0, w: 0 }
@@ -441,27 +504,28 @@ function getYearlyData(sector: string, provinceCode: string | null): ChartPoint[
       }
       data = Array.from(byYear.entries()).map(([y, v]) => ({ y, n: v.n, w: v.w }))
     } else {
-      const sourceData = sector === "ALL"
-        ? (yearlyTotals as YearlyRow[])
-        : (yearlyConstruction as YearlyRow[])
+      const sourceData = sector === "ALL" ? yearlyTotals : yearlyConstruction
+      const validation = safeArrayAccess<YearlyRow>(sourceData, 'jaarlijkse gegevens')
 
-      if (!Array.isArray(sourceData)) {
-        console.error("Yearly data is not an array")
-        return []
+      if (validation.error) {
+        return { data: [], error: validation.error }
       }
-      data = sourceData
+
+      data = validation.data
     }
 
-    return data
+    const chartData = data
       .map((r) => ({
         sortValue: r.y,
         periodCells: [r.y],
         value: r.n,
       }))
       .sort((a, b) => a.sortValue - b.sortValue)
+
+    return { data: chartData, error: null }
   } catch (error) {
     console.error("Error loading yearly data:", error)
-    return []
+    return { data: [], error: 'Fout bij laden van jaarlijkse gegevens' }
   }
 }
 
@@ -492,7 +556,7 @@ function SummaryCards({ sector, provinceCode }: { sector: string; provinceCode: 
   const currentYear = metadata.max_year
   const currentMonth = metadata.max_month
   const prevYear = currentYear - 1
-  const provincesLookup = useProvinceOptions()
+  const { provinces: provincesLookup } = useProvinceOptions()
   const provinceName = provinceCode
     ? provincesLookup.find((p) => p.code === provinceCode)?.name ?? "Provincie"
     : "Vlaanderen"
@@ -592,25 +656,27 @@ function SummaryCards({ sector, provinceCode }: { sector: string; provinceCode: 
 }
 
 // Get all years province data for interactive map
-function getAllYearsProvinceData(sector: string): { p: string; n: number; y: number }[] {
+function getAllYearsProvinceData(
+  sector: string
+): { data: { p: string; n: number; y: number }[]; error: string | null } {
   try {
-    const data: ProvinceRow[] = sector === "ALL"
-      ? (provincesData as ProvinceRow[])
-      : (provincesConstruction as ProvinceRow[])
+    const sourceData = sector === "ALL" ? provincesData : provincesConstruction
+    const validation = safeArrayAccess<ProvinceRow>(sourceData, 'provinciegegevens')
 
-    if (!Array.isArray(data)) {
-      console.error("Province data is not an array")
-      return []
+    if (validation.error) {
+      return { data: [], error: validation.error }
     }
 
-    return data.map((r) => ({
+    const mapData = validation.data.map((r) => ({
       p: r.p,
       n: r.n,
       y: r.y,
     }))
+
+    return { data: mapData, error: null }
   } catch (error) {
     console.error("Error loading province data:", error)
-    return []
+    return { data: [], error: 'Fout bij laden van provinciegegevens' }
   }
 }
 
@@ -628,16 +694,19 @@ function EvolutionSection({
 }) {
   const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("chart")
   const [timeRange, setTimeRange] = React.useState<"monthly" | "yearly">("monthly")
-  const years = (lookups as { years: number[] }).years ?? []
+  const years = isValidLookups(lookups) ? lookups.years : []
 
-  const data = React.useMemo(() => {
+  const { data, error: dataError } = React.useMemo(() => {
     return timeRange === "monthly"
       ? getMonthlyData(sector, provinceCode, 36)
       : getYearlyData(sector, provinceCode)
   }, [sector, provinceCode, timeRange])
 
   // All years data for interactive map with time slider
-  const allYearsMapData = React.useMemo(() => getAllYearsProvinceData(sector), [sector])
+  const { data: allYearsMapData, error: mapError } = React.useMemo(
+    () => getAllYearsProvinceData(sector),
+    [sector]
+  )
 
   const exportData = React.useMemo(
     () =>
@@ -704,12 +773,20 @@ function EvolutionSection({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <FilterableChart
-                data={data}
-                getLabel={(d) => String((d as ChartPoint).periodCells[0])}
-                getValue={(d) => (d as ChartPoint).value}
-                getSortValue={(d) => (d as ChartPoint).sortValue}
-              />
+              {dataError ? (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Fout bij laden van gegevens</AlertTitle>
+                  <AlertDescription>{dataError}</AlertDescription>
+                </Alert>
+              ) : (
+                <FilterableChart
+                  data={data}
+                  getLabel={(d) => String((d as ChartPoint).periodCells[0])}
+                  getValue={(d) => (d as ChartPoint).value}
+                  getSortValue={(d) => (d as ChartPoint).sortValue}
+                />
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -719,11 +796,19 @@ function EvolutionSection({
               <CardTitle>Data</CardTitle>
             </CardHeader>
             <CardContent>
-              <FilterableTable
-                data={data}
-                label="Faillissementen"
-                periodHeaders={[timeRange === "monthly" ? "Maand" : "Jaar"]}
-              />
+              {dataError ? (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Fout bij laden van gegevens</AlertTitle>
+                  <AlertDescription>{dataError}</AlertDescription>
+                </Alert>
+              ) : (
+                <FilterableTable
+                  data={data}
+                  label="Faillissementen"
+                  periodHeaders={[timeRange === "monthly" ? "Maand" : "Jaar"]}
+                />
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -735,24 +820,34 @@ function EvolutionSection({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <InteractiveMap
-                data={allYearsMapData}
-                level="province"
-                getGeoCode={(d) => d.p}
-                getValue={(d) => d.n}
-                getPeriod={(d) => d.y}
-                periods={years}
-                showTimeSlider={true}
-                selectedGeo={provinceCode}
-                onGeoSelect={(code) => onProvinceChange(code === provinceCode ? null : code)}
-                formatValue={formatInt}
-                tooltipLabel="Faillissementen"
-                regionFilter="2000"
-                height={500}
-              />
-              <div className="mt-3 text-xs text-muted-foreground">
-                Klik op een provincie om te filteren. Gebruik de tijdsslider om de evolutie te bekijken.
-              </div>
+              {mapError ? (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Fout bij laden van kaartgegevens</AlertTitle>
+                  <AlertDescription>{mapError}</AlertDescription>
+                </Alert>
+              ) : (
+                <>
+                  <InteractiveMap
+                    data={allYearsMapData}
+                    level="province"
+                    getGeoCode={(d) => d.p}
+                    getValue={(d) => d.n}
+                    getPeriod={(d) => d.y}
+                    periods={years}
+                    showTimeSlider={true}
+                    selectedGeo={provinceCode}
+                    onGeoSelect={(code) => onProvinceChange(code === provinceCode ? null : code)}
+                    formatValue={formatInt}
+                    tooltipLabel="Faillissementen"
+                    regionFilter="2000"
+                    height={500}
+                  />
+                  <div className="mt-3 text-xs text-muted-foreground">
+                    Klik op een provincie om te filteren. Gebruik de tijdsslider om de evolutie te bekijken.
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -775,14 +870,14 @@ function DurationSection({
 }) {
   const currentYear = metadata.max_year
   const [selectedYear, setSelectedYear] = React.useState(currentYear)
-  const years = (lookups as { years: number[] }).years ?? []
+  const years = isValidLookups(lookups) ? lookups.years : []
 
   // Reset province filter when switching to "Alle sectoren" since we don't have all-sector province data
   React.useEffect(() => {
     if (sector === "ALL" && provinceCode) {
       onProvinceChange(null)
     }
-  }, [sector, provinceCode, onProvinceChange])
+  }, [sector]) // Only depend on sector changes
 
   const data = React.useMemo(() => {
     let durationData: DurationRow[]
@@ -816,7 +911,7 @@ function DurationSection({
   const youngCompanyCount = youngCompanies.reduce((sum, r) => sum + r.n, 0)
   const youngCompanyPercent = totalBankruptcies > 0 ? (youngCompanyCount / totalBankruptcies) * 100 : 0
 
-  const sectors = useSectorOptions()
+  const { sectors } = useSectorOptions()
   const sectorName = sector === "ALL"
     ? "Alle sectoren"
     : sectors.find((s) => s.code === sector)?.nl ?? "Onbekend"
@@ -909,14 +1004,14 @@ function WorkersSection({
 }) {
   const currentYear = metadata.max_year
   const [selectedYear, setSelectedYear] = React.useState(currentYear)
-  const years = (lookups as { years: number[] }).years ?? []
+  const years = isValidLookups(lookups) ? lookups.years : []
 
   // Reset province filter when switching to "Alle sectoren" since we don't have all-sector province data
   React.useEffect(() => {
     if (sector === "ALL" && provinceCode) {
       onProvinceChange(null)
     }
-  }, [sector, provinceCode, onProvinceChange])
+  }, [sector]) // Only depend on sector changes
 
   const data = React.useMemo(() => {
     let workersData: WorkersRow[]
@@ -959,7 +1054,7 @@ function WorkersSection({
   const smallCompanyCount = smallCompanies.reduce((sum, r) => sum + r.n, 0)
   const smallCompanyPercent = totalBankruptcies > 0 ? (smallCompanyCount / totalBankruptcies) * 100 : 0
 
-  const sectors = useSectorOptions()
+  const { sectors } = useSectorOptions()
   const sectorName = sector === "ALL"
     ? "Alle sectoren"
     : sectors.find((s) => s.code === sector)?.nl ?? "Onbekend"
@@ -1047,8 +1142,8 @@ function SectorComparisonSection({
 }) {
   const currentYear = metadata.max_year
   const [selectedYear, setSelectedYear] = React.useState(currentYear)
-  const years = (lookups as { years: number[] }).years ?? []
-  const sectors = useSectorOptions()
+  const years = isValidLookups(lookups) ? lookups.years : []
+  const { sectors } = useSectorOptions()
 
   const data = React.useMemo(() => {
     let sectorData: YearlySectorRow[]
