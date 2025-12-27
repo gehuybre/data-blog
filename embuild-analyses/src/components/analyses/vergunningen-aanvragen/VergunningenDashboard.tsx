@@ -15,6 +15,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { GeoProvider } from "../shared/GeoContext"
+import { ExportButtons } from "../shared/ExportButtons"
 import {
   BarChart,
   Bar,
@@ -141,6 +142,7 @@ function MetricSelector<T extends string>({
 
 function NieuwbouwSection() {
   const [metric, setMetric] = React.useState<MetricCode>("w")
+  const [currentView, setCurrentView] = React.useState<string>("yearly")
 
   // Summary stats
   const currentYear = 2024
@@ -187,11 +189,56 @@ function NieuwbouwSection() {
     }))
   }, [metric])
 
+  // Export data based on current view
+  const exportData = React.useMemo(() => {
+    if (currentView === "yearly") {
+      return yearlyData.map((r) => ({
+        label: String(r.jaar),
+        value: r.waarde,
+        periodCells: [r.jaar],
+      }))
+    } else if (currentView === "quarterly") {
+      return quarterlyData.map((r) => ({
+        label: r.label,
+        value: r.waarde,
+        periodCells: [r.label],
+      }))
+    } else if (currentView === "type") {
+      return typeData.flatMap((r) =>
+        Object.entries(r)
+          .filter(([key]) => key !== "jaar")
+          .map(([type, value]) => ({
+            label: `${r.jaar} - ${type}`,
+            value: value as number,
+            periodCells: [r.jaar, type],
+          }))
+      )
+    } else {
+      return yearlyData.map((r) => ({
+        label: String(r.jaar),
+        value: r.waarde,
+        periodCells: [r.jaar],
+      }))
+    }
+  }, [currentView, yearlyData, quarterlyData, typeData])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Nieuwbouw</h2>
-        <MetricSelector selected={metric} onChange={setMetric} labels={METRIC_LABELS} />
+        <div className="flex items-center gap-2">
+          <ExportButtons
+            data={exportData}
+            title="Nieuwbouw vergunningen"
+            slug="vergunningen-aanvragen"
+            sectionId="nieuwbouw"
+            viewType="chart"
+            valueLabel={METRIC_LABELS[metric]}
+            dataSource="Omgevingsloket Vlaanderen"
+            dataSourceUrl="https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen"
+          />
+          <MetricSelector selected={metric} onChange={setMetric} labels={METRIC_LABELS} />
+        </div>
       </div>
 
       {/* Summary cards */}
@@ -221,7 +268,7 @@ function NieuwbouwSection() {
       </div>
 
       {/* Charts in tabs */}
-      <Tabs defaultValue="yearly">
+      <Tabs defaultValue="yearly" onValueChange={setCurrentView}>
         <TabsList className="mb-4">
           <TabsTrigger value="yearly">Per jaar</TabsTrigger>
           <TabsTrigger value="quarterly">Per kwartaal</TabsTrigger>
@@ -313,6 +360,7 @@ function NieuwbouwSection() {
 
 function VerbouwSection() {
   const [metric, setMetric] = React.useState<MetricCode>("w")
+  const [currentView, setCurrentView] = React.useState<string>("yearly")
 
   const currentYear = 2024
   const current = (verbouwYearly as YearlyRow[]).find((r) => r.y === currentYear)
@@ -348,11 +396,56 @@ function VerbouwSection() {
     }))
   }, [metric])
 
+  // Export data based on current view
+  const exportData = React.useMemo(() => {
+    if (currentView === "yearly") {
+      return yearlyData.map((r) => ({
+        label: String(r.jaar),
+        value: r.waarde,
+        periodCells: [r.jaar],
+      }))
+    } else if (currentView === "quarterly") {
+      return quarterlyData.map((r) => ({
+        label: r.label,
+        value: r.waarde,
+        periodCells: [r.label],
+      }))
+    } else if (currentView === "type") {
+      return typeData.flatMap((r) =>
+        Object.entries(r)
+          .filter(([key]) => key !== "jaar")
+          .map(([type, value]) => ({
+            label: `${r.jaar} - ${type}`,
+            value: value as number,
+            periodCells: [r.jaar, type],
+          }))
+      )
+    } else {
+      return yearlyData.map((r) => ({
+        label: String(r.jaar),
+        value: r.waarde,
+        periodCells: [r.jaar],
+      }))
+    }
+  }, [currentView, yearlyData, quarterlyData, typeData])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Verbouwen</h2>
-        <MetricSelector selected={metric} onChange={setMetric} labels={METRIC_LABELS} />
+        <div className="flex items-center gap-2">
+          <ExportButtons
+            data={exportData}
+            title="Verbouw vergunningen"
+            slug="vergunningen-aanvragen"
+            sectionId="verbouw"
+            viewType="chart"
+            valueLabel={METRIC_LABELS[metric]}
+            dataSource="Omgevingsloket Vlaanderen"
+            dataSourceUrl="https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen"
+          />
+          <MetricSelector selected={metric} onChange={setMetric} labels={METRIC_LABELS} />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -380,7 +473,7 @@ function VerbouwSection() {
         </Card>
       </div>
 
-      <Tabs defaultValue="yearly">
+      <Tabs defaultValue="yearly" onValueChange={setCurrentView}>
         <TabsList className="mb-4">
           <TabsTrigger value="yearly">Per jaar</TabsTrigger>
           <TabsTrigger value="quarterly">Per kwartaal</TabsTrigger>
@@ -472,6 +565,7 @@ function VerbouwSection() {
 
 function SloopSection() {
   const [metric, setMetric] = React.useState<SloopMetricCode>("m2")
+  const [currentView, setCurrentView] = React.useState<string>("yearly")
 
   const currentYear = 2024
   const current = (sloopYearly as SloopYearlyRow[]).find((r) => r.y === currentYear)
@@ -509,11 +603,56 @@ function SloopSection() {
     }))
   }, [metric])
 
+  // Export data based on current view
+  const exportData = React.useMemo(() => {
+    if (currentView === "yearly") {
+      return yearlyData.map((r) => ({
+        label: String(r.jaar),
+        value: r.waarde,
+        periodCells: [r.jaar],
+      }))
+    } else if (currentView === "quarterly") {
+      return quarterlyData.map((r) => ({
+        label: r.label,
+        value: r.waarde,
+        periodCells: [r.label],
+      }))
+    } else if (currentView === "besluit") {
+      return besluitData.flatMap((r) =>
+        Object.entries(r)
+          .filter(([key]) => key !== "jaar")
+          .map(([besluit, value]) => ({
+            label: `${r.jaar} - ${besluit}`,
+            value: value as number,
+            periodCells: [r.jaar, besluit],
+          }))
+      )
+    } else {
+      return yearlyData.map((r) => ({
+        label: String(r.jaar),
+        value: r.waarde,
+        periodCells: [r.jaar],
+      }))
+    }
+  }, [currentView, yearlyData, quarterlyData, besluitData])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Sloop</h2>
-        <MetricSelector selected={metric} onChange={setMetric} labels={SLOOP_METRIC_LABELS} />
+        <div className="flex items-center gap-2">
+          <ExportButtons
+            data={exportData}
+            title="Sloop vergunningen"
+            slug="vergunningen-aanvragen"
+            sectionId="sloop"
+            viewType="chart"
+            valueLabel={SLOOP_METRIC_LABELS[metric]}
+            dataSource="Omgevingsloket Vlaanderen"
+            dataSourceUrl="https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen"
+          />
+          <MetricSelector selected={metric} onChange={setMetric} labels={SLOOP_METRIC_LABELS} />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -541,7 +680,7 @@ function SloopSection() {
         </Card>
       </div>
 
-      <Tabs defaultValue="yearly">
+      <Tabs defaultValue="yearly" onValueChange={setCurrentView}>
         <TabsList className="mb-4">
           <TabsTrigger value="yearly">Per jaar</TabsTrigger>
           <TabsTrigger value="quarterly">Per kwartaal</TabsTrigger>
