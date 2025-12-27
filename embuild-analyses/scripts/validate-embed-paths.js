@@ -13,30 +13,13 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Check if tsx is available
-const hasTsx = (() => {
-  try {
-    require.resolve('tsx');
-    return true;
-  } catch {
-    return false;
-  }
-})();
-
-if (hasTsx) {
-  // Use tsx to import TypeScript directly
-  validateWithTsx();
-} else {
-  // Fallback to regex-based validation with a warning
-  console.warn('⚠️  tsx not found - using fallback regex validation');
-  console.warn('   Install tsx for more robust validation: npm install -D tsx\n');
-  validateWithRegex();
-}
+validateWithTsx();
 
 function validateWithTsx() {
   const validatorScript = path.join(__dirname, 'validate-embed-paths-tsx.mjs');
   const scriptContent = `
 import { EMBED_CONFIGS } from '../src/lib/embed-config.ts';
+import { hasEmbedData } from '../src/lib/embed-data-registry.ts';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -44,9 +27,10 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const analysesDir = path.join(__dirname, '../analyses');
 const errors = [];
+const warnings = [];
 let validatedCount = 0;
 
-console.log('🔍 Validating embed configuration paths...\\n');
+console.log('🔍 Validating embed configuration...\\n');
 
 for (const analysis of EMBED_CONFIGS) {
   for (const [sectionId, config] of Object.entries(analysis.sections)) {
@@ -90,6 +74,11 @@ for (const analysis of EMBED_CONFIGS) {
       if (!municipalitiesPath.startsWith(\`\${analysis.slug}/\`)) {
         errors.push(\`⚠️  [\${analysis.slug}/\${sectionId}] Municipalities path doesn't start with analysis slug: \${municipalitiesPath}\`);
       }
+
+      // Validate that data is registered in the data registry
+      if (!hasEmbedData(analysis.slug, sectionId)) {
+        errors.push(\`❌ [\${analysis.slug}/\${sectionId}] Data not registered in EMBED_DATA_REGISTRY (embed-data-registry.ts)\`);
+      }
     }
   }
 }
@@ -97,16 +86,24 @@ for (const analysis of EMBED_CONFIGS) {
 // Report results
 console.log(\`\\n📊 Validation Summary:\`);
 console.log(\`   Validated: \${validatedCount} file(s)\`);
+console.log(\`   Warnings: \${warnings.length}\`);
 console.log(\`   Errors: \${errors.length}\`);
+
+if (warnings.length > 0) {
+  console.warn('\\n⚠️  Warnings:\\n');
+  warnings.forEach(warning => console.warn(\`   \${warning}\`));
+}
 
 if (errors.length > 0) {
   console.error('\\n❌ Validation failed with the following errors:\\n');
   errors.forEach(error => console.error(\`   \${error}\`));
-  console.error('\\n💡 Fix these issues in src/lib/embed-config.ts\\n');
+  console.error('\\n💡 Fix these issues in:');
+  console.error('   - src/lib/embed-config.ts (configuration)');
+  console.error('   - src/lib/embed-data-registry.ts (data imports)\\n');
   process.exit(1);
 }
 
-console.log('\\n✅ All embed configuration paths are valid!\\n');
+console.log('\\n✅ All embed configuration is valid!\\n');
 `;
 
   // Write temporary validator script
@@ -130,8 +127,9 @@ console.log('\\n✅ All embed configuration paths are valid!\\n');
   });
 
   tsx.on('error', (err) => {
-    console.error('Failed to run tsx:', err);
-    console.warn('Falling back to regex validation...\n');
+    console.error('❌ Failed to run tsx:', err);
+    console.error('\n💡 Make sure tsx is installed:');
+    console.error('   npm install -D tsx\n');
 
     // Clean up temp script
     try {
@@ -140,70 +138,6 @@ console.log('\\n✅ All embed configuration paths are valid!\\n');
       // Ignore cleanup errors
     }
 
-    validateWithRegex();
-  });
-}
-
-function validateWithRegex() {
-  const configPath = path.join(__dirname, '../src/lib/embed-config.ts');
-  const configContent = fs.readFileSync(configPath, 'utf-8');
-
-  // Extract EMBED_CONFIGS array using regex
-  const embedConfigsMatch = configContent.match(/export const EMBED_CONFIGS.*?=\s*\[([\s\S]*?)\n\]/);
-
-  if (!embedConfigsMatch) {
-    console.error('❌ Could not find EMBED_CONFIGS in embed-config.ts');
     process.exit(1);
-  }
-
-  // Parse the configuration manually
-  const configText = embedConfigsMatch[1];
-  const dataPathMatches = [...configText.matchAll(/dataPath:\s*["']([^"']+)["']/g)];
-  const municipalitiesPathMatches = [...configText.matchAll(/municipalitiesPath:\s*["']([^"']+)["']/g)];
-
-  const analysesDir = path.join(__dirname, '../analyses');
-  const errors = [];
-  let validatedCount = 0;
-
-  console.log('🔍 Validating embed configuration paths...\n');
-
-  // Validate data paths
-  dataPathMatches.forEach((match) => {
-    const dataPath = match[1];
-    const fullPath = path.join(analysesDir, dataPath);
-
-    if (!fs.existsSync(fullPath)) {
-      errors.push(`❌ Data file not found: ${dataPath}`);
-    } else {
-      console.log(`✅ ${dataPath}`);
-      validatedCount++;
-    }
   });
-
-  // Validate municipalities paths
-  municipalitiesPathMatches.forEach((match) => {
-    const municipalitiesPath = match[1];
-    const fullPath = path.join(analysesDir, municipalitiesPath);
-
-    if (!fs.existsSync(fullPath)) {
-      errors.push(`❌ Municipalities file not found: ${municipalitiesPath}`);
-    } else {
-      console.log(`✅ ${municipalitiesPath}`);
-      validatedCount++;
-    }
-  });
-
-  // Report results
-  console.log(`\n📊 Validation Summary:`);
-  console.log(`   Validated: ${validatedCount} file(s)`);
-  console.log(`   Errors: ${errors.length}`);
-
-  if (errors.length > 0) {
-    console.error('\n❌ Validation failed with the following errors:\n');
-    errors.forEach(error => console.error(`   ${error}`));
-    console.error('\n💡 Fix these issues in src/lib/embed-config.ts\n');
-    process.exit(1);
-  }
-
-  console.log('\n✅ All embed configuration paths are valid!\n');
 }
