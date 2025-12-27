@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import React, { useEffect, useState } from "react"
 import { EmbeddableSection } from "@/components/analyses/shared/EmbeddableSection"
 import { StartersStoppersEmbed } from "@/components/analyses/starters-stoppers/StartersStoppersEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
@@ -91,6 +91,21 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     const standardConfig = config as StandardEmbedConfig
     let isCancelled = false
 
+    // Validate paths don't escape analyses directory
+    // This is a defense-in-depth measure. The actual security is ensured by:
+    // 1. Config is hardcoded in source code (not from external sources)
+    // 2. Build-time validation ensures paths exist
+    // 3. Next.js static export validates paths at build time
+    if (standardConfig.dataPath.includes('..') || standardConfig.municipalitiesPath.includes('..')) {
+      setEmbedData({
+        data: null,
+        municipalities: null,
+        loading: false,
+        error: 'Invalid data path configuration',
+      })
+      return
+    }
+
     setEmbedData((prev) => ({ ...prev, loading: true }))
 
     Promise.all([
@@ -150,29 +165,56 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     )
   }
 
-  // Handle custom embeds (starters-stoppers)
-  if (config.type === "custom" && config.component === "StartersStoppersEmbed") {
-    const validSections: StartersStoppersSection[] = ["starters", "stoppers", "survival"]
-    if (!validSections.includes(section as StartersStoppersSection)) {
+  // Handle custom embeds
+  if (config.type === "custom") {
+    // Registry of known custom components
+    const CUSTOM_COMPONENTS: Record<string, React.ComponentType<any>> = {
+      StartersStoppersEmbed: StartersStoppersEmbed,
+    }
+
+    // Validate component is registered
+    if (!CUSTOM_COMPONENTS[config.component]) {
       return (
         <div className="p-8 text-center">
-          <p className="text-muted-foreground">
-            Ongeldige sectie: {section}. Geldige opties: starters, stoppers, survival
+          <p className="text-red-500">
+            Custom component &quot;{config.component}&quot; not registered
+          </p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Add it to CUSTOM_COMPONENTS in EmbedClient.tsx
           </p>
         </div>
       )
     }
 
-    return (
-      <StartersStoppersEmbed
-        section={section as StartersStoppersSection}
-        viewType={urlParams.view}
-        horizon={urlParams.horizon}
-        region={urlParams.region}
-        province={urlParams.province}
-        sector={urlParams.sector}
-      />
-    )
+    // Handle StartersStoppersEmbed
+    if (config.component === "StartersStoppersEmbed") {
+      const validSections: StartersStoppersSection[] = ["starters", "stoppers", "survival"]
+      if (!validSections.includes(section as StartersStoppersSection)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}. Geldige opties: starters, stoppers, survival
+            </p>
+          </div>
+        )
+      }
+
+      const Component = CUSTOM_COMPONENTS[config.component]
+      return (
+        <Component
+          section={section as StartersStoppersSection}
+          viewType={urlParams.view}
+          horizon={urlParams.horizon}
+          region={urlParams.region}
+          province={urlParams.province}
+          sector={urlParams.sector}
+        />
+      )
+    }
+
+    // Generic fallback for other custom components
+    const Component = CUSTOM_COMPONENTS[config.component]
+    return <Component slug={slug} section={section} urlParams={urlParams} />
   }
 
   // Handle standard embeds
@@ -188,7 +230,7 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     if (embedData.error) {
       return (
         <div className="p-8 text-center">
-          <p className="text-red-500">{embedData.error}</p>
+          <p className="text-red-500 whitespace-pre-wrap">{embedData.error}</p>
         </div>
       )
     }
