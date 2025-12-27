@@ -9,6 +9,22 @@
  * 1. Add the config to EMBED_CONFIGS in embed-config.ts
  * 2. Add the data imports to this registry
  * 3. Map the slug/section to the imported data in getEmbedDataModule()
+ *
+ * ## Bundle Size Considerations
+ *
+ * All embed data is currently bundled synchronously for simplicity and reliability.
+ * For the current scale (2 embeds), this is reasonable. If bundle size becomes a concern:
+ *
+ * 1. Monitor bundle size: Add size tracking to CI/CD pipeline
+ * 2. Set thresholds: Alert when embed bundle exceeds reasonable limits (e.g., 500KB)
+ * 3. Consider code splitting: Move to dynamic imports if needed:
+ *    ```typescript
+ *    const module = await import(`../../analyses/${slug}/results/${dataFile}.json`)
+ *    ```
+ *
+ * Trade-offs:
+ * - Synchronous imports: Simple, reliable, all data visible to bundler
+ * - Dynamic imports: Smaller initial bundle, but requires careful path handling
  */
 
 import type { EmbedDataRow, MunicipalityData, StandardEmbedDataRow } from "./embed-types"

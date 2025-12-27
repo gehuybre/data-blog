@@ -6,6 +6,7 @@
  */
 
 import type { StandardEmbedDataRow, EmbedDataRow } from "./embed-types"
+import { getMetricValue } from "./embed-types"
 
 /**
  * Transform standard data rows to display format
@@ -35,15 +36,9 @@ export function transformToEmbedDataRows(
   metric: string
 ): EmbedDataRow[] {
   return rawData.map((row) => {
-    const value = row[metric]
-
-    // Validate that the metric exists and is a number
-    if (typeof value !== "number") {
-      throw new Error(
-        `Metric "${metric}" not found or invalid in row. ` +
-        `Available metrics: ${Object.keys(row).filter(k => k !== "m" && k !== "y" && k !== "q").join(", ")}`
-      )
-    }
+    // Use type-safe helper to extract metric value
+    // This validates the metric key and throws helpful errors
+    const value = getMetricValue(row, metric)
 
     return {
       label: `${row.y}-Q${row.q}`,

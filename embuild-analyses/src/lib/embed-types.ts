@@ -3,6 +3,12 @@
  */
 
 /**
+ * Known metric keys that can appear in embed data
+ * Add new metrics here as they are introduced
+ */
+export type KnownMetricKey = "ren" | "new"
+
+/**
  * Standard data row structure from processed JSON files
  * Contains municipality code (m), year (y), quarter (q), and metric values
  */
@@ -10,7 +16,38 @@ export interface StandardEmbedDataRow {
   m: number // Municipality code
   y: number // Year
   q: number // Quarter
-  [metric: string]: number // Dynamic metric values (e.g., "ren", "new")
+  // Use a more restrictive index signature with known metric keys
+  // This prevents typos while still allowing iteration over metric values
+  [metric: string]: number // All properties must be numbers (includes m, y, q, and metrics)
+}
+
+/**
+ * Type-safe helper to check if a key is a known metric
+ */
+export function isKnownMetric(key: string): key is KnownMetricKey {
+  return key === "ren" || key === "new"
+}
+
+/**
+ * Type-safe helper to extract metric value from a data row
+ * @throws Error if metric key is not recognized
+ */
+export function getMetricValue(row: StandardEmbedDataRow, metric: string): number {
+  if (!isKnownMetric(metric)) {
+    throw new Error(
+      `Unknown metric key: "${metric}". Expected one of: ren, new. ` +
+      `Add new metrics to KnownMetricKey type in embed-types.ts`
+    )
+  }
+
+  const value = row[metric]
+  if (typeof value !== "number") {
+    throw new Error(
+      `Expected number for metric "${metric}", got ${typeof value}`
+    )
+  }
+
+  return value
 }
 
 /**
