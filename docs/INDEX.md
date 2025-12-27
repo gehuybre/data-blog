@@ -15,6 +15,7 @@
 
 - [Project Setup](workflows/WF-project-setup.md)
 - [Deploy](workflows/WF-deploy.md)
+- [Embed System](workflows/WF-embed-system.md) - Iframe embed configuration and usage
 - [Vergunningen Goedkeuringen](workflows/WF-vergunningen-goedkeuringen.md)
 - [Update Vergunningen Data](workflows/WF-update-vergunningen-data.md)
 - [Update Starters-Stoppers Data](workflows/WF-update-starters-stoppers-data.md)
@@ -41,4 +42,5 @@
 - [ExportButtons.tsx](files/embuild-analyses/src/components/analyses/shared/ExportButtons.tsx.md) - CSV download and embed code generation
 - [EmbeddableSection.tsx](files/embuild-analyses/src/components/analyses/shared/EmbeddableSection.tsx.md) - Standalone section for iframe embeds
 - [Embed Route](files/embuild-analyses/src/app/embed/README.md) - Iframe embedding endpoint
+- [embed-config.ts](files/embuild-analyses/src/lib/embed-config.ts.md) - Centralized embed configuration
 - [geo-utils.ts](files/embuild-analyses/src/lib/geo-utils.ts.md)
