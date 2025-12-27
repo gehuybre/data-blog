@@ -4,11 +4,9 @@ import React, { useEffect, useState } from "react"
 import { EmbeddableSection } from "@/components/analyses/shared/EmbeddableSection"
 import { StartersStoppersEmbed } from "@/components/analyses/starters-stoppers/StartersStoppersEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
-import { getEmbedConfig, StandardEmbedConfig } from "@/lib/embed-config"
+import { getEmbedConfig } from "@/lib/embed-config"
 import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
-
-// Base path for dynamic imports (relative to this file)
-const ANALYSES_BASE_PATH = "../../../../../analyses/"
+import { getEmbedDataModule } from "@/lib/embed-data-registry"
 
 type ViewType = "chart" | "table" | "map"
 type StopHorizon = 1 | 2 | 3 | 4 | 5
@@ -86,86 +84,62 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     setUrlParams(getParamsFromUrl())
   }, [])
 
-  // Load data dynamically for standard embeds
+  // Load data from registry for standard embeds
   useEffect(() => {
     const config = getEmbedConfig(slug, section)
     if (!config || config.type !== "standard") return
 
-    const standardConfig = config as StandardEmbedConfig
-    const abortController = new AbortController()
-
-    // Validate paths don't escape analyses directory
-    // This is a defense-in-depth measure. The actual security is ensured by:
-    // 1. Config is hardcoded in source code (not from external sources)
-    // 2. Build-time validation ensures paths exist
-    // 3. Next.js static export validates paths at build time
-    if (standardConfig.dataPath.includes('..') || standardConfig.municipalitiesPath.includes('..')) {
-      setEmbedData({
-        data: null,
-        municipalities: null,
-        loading: false,
-        error: 'Invalid data path configuration',
-      })
-      return
-    }
-
     setEmbedData((prev) => ({ ...prev, loading: true }))
 
-    // Dynamic imports with template literals
-    // Note: These paths are constructed from hardcoded config, not user input.
-    // Webpack/Vite may have limitations with very dynamic paths - they work best
-    // when the path has a static prefix (like ANALYSES_BASE_PATH).
-    // If imports fail, check that:
-    // 1. Paths are relative to this file
-    // 2. Paths don't use variables that are too dynamic
-    // 3. Files exist at build time (validated by validate-embed-paths.js)
-    Promise.all([
-      import(`${ANALYSES_BASE_PATH}${standardConfig.dataPath}`),
-      import(`${ANALYSES_BASE_PATH}${standardConfig.municipalitiesPath}`),
-    ])
-      .then(([dataModule, municipalitiesModule]) => {
-        // Prevent state update if component unmounted or slug/section changed
-        if (abortController.signal.aborted) return
+    try {
+      // Use synchronous registry lookup instead of dynamic imports
+      // This makes all data paths explicit for the bundler (webpack/vite)
+      const dataModule = getEmbedDataModule(slug, section)
 
-        setEmbedData({
-          data: dataModule.default as EmbedDataRow[],
-          municipalities: municipalitiesModule.default as MunicipalityData[],
-          loading: false,
-          error: null,
-        })
-      })
-      .catch((err) => {
-        // Prevent state update if component unmounted or slug/section changed
-        if (abortController.signal.aborted) return
-
-        // Log error for debugging
-        console.error('[EmbedClient] Failed to load data:', {
+      if (!dataModule) {
+        // Developer error: config exists but data not registered
+        console.error("[EmbedClient] Data not found in registry:", {
           slug,
           section,
-          dataPath: standardConfig.dataPath,
-          municipalitiesPath: standardConfig.municipalitiesPath,
-          error: err,
+          hint: "Add this embed to EMBED_DATA_REGISTRY in embed-data-registry.ts",
         })
-
-        // More specific error messages
-        let errorMessage = "Failed to load data"
-        if (err.message?.includes("Cannot find module")) {
-          errorMessage = `Data file not found. Please check that the paths in embed-config.ts are correct:\n- ${standardConfig.dataPath}\n- ${standardConfig.municipalitiesPath}`
-        } else if (err.message) {
-          errorMessage = `Failed to load data: ${err.message}`
-        }
 
         setEmbedData({
           data: null,
           municipalities: null,
           loading: false,
-          error: errorMessage,
+          error: "Data niet beschikbaar. Neem contact op met de beheerder.",
         })
+        return
+      }
+
+      // Data is already validated in the registry
+      setEmbedData({
+        data: dataModule.data,
+        municipalities: dataModule.municipalities,
+        loading: false,
+        error: null,
+      })
+    } catch (err) {
+      // Log error for debugging
+      console.error("[EmbedClient] Failed to load data:", {
+        slug,
+        section,
+        error: err,
       })
 
-    // Cleanup function to prevent race conditions
-    return () => {
-      abortController.abort()
+      // User-friendly error message (Dutch)
+      const errorMessage =
+        err instanceof Error
+          ? `Fout bij laden van data: ${err.message}`
+          : "Er is een fout opgetreden bij het laden van de data."
+
+      setEmbedData({
+        data: null,
+        municipalities: null,
+        loading: false,
+        error: errorMessage,
+      })
     }
   }, [slug, section])
 
