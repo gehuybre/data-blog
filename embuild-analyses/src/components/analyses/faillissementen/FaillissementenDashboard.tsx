@@ -877,7 +877,7 @@ function DurationSection({
     if (sector === "ALL" && provinceCode) {
       onProvinceChange(null)
     }
-  }, [sector]) // Only depend on sector changes
+  }, [sector, provinceCode, onProvinceChange])
 
   const data = React.useMemo(() => {
     let durationData: DurationRow[]
@@ -1011,7 +1011,7 @@ function WorkersSection({
     if (sector === "ALL" && provinceCode) {
       onProvinceChange(null)
     }
-  }, [sector]) // Only depend on sector changes
+  }, [sector, provinceCode, onProvinceChange])
 
   const data = React.useMemo(() => {
     let workersData: WorkersRow[]
