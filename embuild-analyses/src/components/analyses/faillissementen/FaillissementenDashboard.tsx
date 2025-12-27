@@ -1,10 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown, TrendingUp, TrendingDown, Building2, Users, Calendar } from "lucide-react"
+import { Check, ChevronsUpDown, TrendingUp, TrendingDown, Building2, Users, Calendar, AlertCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Command,
   CommandEmpty,
@@ -34,12 +35,12 @@ import monthlyProvincesConstruction from "../../../../analyses/faillissementen/r
 import monthlyProvinces from "../../../../analyses/faillissementen/results/monthly_provinces.json"
 import lookups from "../../../../analyses/faillissementen/results/lookups.json"
 import metadata from "../../../../analyses/faillissementen/results/metadata.json"
+import yearlyByDuration from "../../../../analyses/faillissementen/results/yearly_by_duration.json"
 import yearlyByDurationConstruction from "../../../../analyses/faillissementen/results/yearly_by_duration_construction.json"
 import yearlyByDurationProvinceConstruction from "../../../../analyses/faillissementen/results/yearly_by_duration_province_construction.json"
-import yearlyByDuration from "../../../../analyses/faillissementen/results/yearly_by_duration.json"
+import yearlyByWorkers from "../../../../analyses/faillissementen/results/yearly_by_workers.json"
 import yearlyByWorkersConstruction from "../../../../analyses/faillissementen/results/yearly_by_workers_construction.json"
 import yearlyByWorkersProvinceConstruction from "../../../../analyses/faillissementen/results/yearly_by_workers_province_construction.json"
-import yearlyByWorkers from "../../../../analyses/faillissementen/results/yearly_by_workers.json"
 
 // Types
 type MonthlyRow = {
@@ -135,6 +136,103 @@ type ChartPoint = {
   value: number
 }
 
+// Lookup data structure with proper typing
+interface Lookups {
+  sectors: Sector[]
+  provinces: Province[]
+  years: number[]
+}
+
+// Type guard for validating lookups data
+function isValidLookups(data: unknown): data is Lookups {
+  if (typeof data !== 'object' || data === null) return false
+  const obj = data as Record<string, unknown>
+  return (
+    Array.isArray(obj.sectors) &&
+    obj.sectors.every((s: unknown) =>
+      typeof s === 'object' && s !== null &&
+      'code' in s && 'nl' in s
+    ) &&
+    Array.isArray(obj.provinces) &&
+    obj.provinces.every((p: unknown) =>
+      typeof p === 'object' && p !== null &&
+      'code' in p && 'name' in p
+    ) &&
+    Array.isArray(obj.years) &&
+    obj.years.every((y: unknown) => typeof y === 'number')
+  )
+}
+
+// Type guards for runtime validation
+function isMonthlyProvinceRow(item: unknown): item is MonthlyProvinceRow {
+  return (
+    typeof item === 'object' && item !== null &&
+    'y' in item && typeof (item as MonthlyProvinceRow).y === 'number' &&
+    'm' in item && typeof (item as MonthlyProvinceRow).m === 'number' &&
+    'p' in item && typeof (item as MonthlyProvinceRow).p === 'string' &&
+    'n' in item && typeof (item as MonthlyProvinceRow).n === 'number' &&
+    'w' in item && typeof (item as MonthlyProvinceRow).w === 'number'
+  )
+}
+
+function isMonthlyRow(item: unknown): item is MonthlyRow {
+  return (
+    typeof item === 'object' && item !== null &&
+    'y' in item && typeof (item as MonthlyRow).y === 'number' &&
+    'm' in item && typeof (item as MonthlyRow).m === 'number' &&
+    'n' in item && typeof (item as MonthlyRow).n === 'number' &&
+    'w' in item && typeof (item as MonthlyRow).w === 'number'
+  )
+}
+
+function isYearlyRow(item: unknown): item is YearlyRow {
+  return (
+    typeof item === 'object' && item !== null &&
+    'y' in item && typeof (item as YearlyRow).y === 'number' &&
+    'n' in item && typeof (item as YearlyRow).n === 'number' &&
+    'w' in item && typeof (item as YearlyRow).w === 'number'
+  )
+}
+
+function isProvinceRow(item: unknown): item is ProvinceRow {
+  return (
+    typeof item === 'object' && item !== null &&
+    'y' in item && typeof (item as ProvinceRow).y === 'number' &&
+    'p' in item && typeof (item as ProvinceRow).p === 'string' &&
+    'n' in item && typeof (item as ProvinceRow).n === 'number' &&
+    'w' in item && typeof (item as ProvinceRow).w === 'number'
+  )
+}
+
+// Utility function for safe array access with error handling
+function safeArrayAccess<T>(
+  data: unknown,
+  arrayName: string,
+  validator?: (item: unknown) => item is T
+): { data: T[]; error: string | null } {
+  try {
+    if (!Array.isArray(data)) {
+      const errorMsg = `${arrayName} is niet beschikbaar`
+      console.error(`Data validation error: ${arrayName} is not an array`, data)
+      return { data: [], error: errorMsg }
+    }
+
+    // If validator is provided, filter out invalid items
+    if (validator) {
+      const validData = data.filter(validator)
+      if (validData.length !== data.length) {
+        console.warn(`${arrayName}: ${data.length - validData.length} invalid items filtered out`)
+      }
+      return { data: validData, error: null }
+    }
+
+    return { data: data as T[], error: null }
+  } catch (error) {
+    const errorMsg = `Fout bij laden van ${arrayName}`
+    console.error(`Error loading ${arrayName}:`, error)
+    return { data: [], error: errorMsg }
+  }
+}
 
 const MONTH_NAMES = [
   "Jan", "Feb", "Mrt", "Apr", "Mei", "Jun",
@@ -146,6 +244,25 @@ const MONTH_NAMES_FULL = [
   "juli", "augustus", "september", "oktober", "november", "december"
 ]
 
+// Worker class order for sorting
+// NOTE: Includes two variants for the largest class due to inconsistent naming in Statbel source data:
+// - "1000 werknemers en meer" appears in all-sector data
+// - "1000 en meer werknemers" appears in construction sector data
+// This handles both variants during sorting without data normalization
+const WORKER_CLASS_ORDER = [
+  "0 - 4 werknemers",
+  "5 - 9 werknemers",
+  "10 - 19 werknemers",
+  "20 - 49 werknemers",
+  "50 - 99 werknemers",
+  "100 - 199 werknemers",
+  "200 - 249 werknemers",
+  "250 - 499 werknemers",
+  "500 - 999 werknemers",
+  "1000 werknemers en meer",
+  "1000 en meer werknemers",
+]
+
 function formatInt(n: number) {
   return new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(n)
 }
@@ -155,12 +272,26 @@ function formatPct(n: number) {
   return `${sign}${n.toFixed(1)}%`
 }
 
-function useSectorOptions(): Sector[] {
-  return (lookups as { sectors: Sector[] }).sectors ?? []
+function useSectorOptions(): { sectors: Sector[]; error: string | null } {
+  if (isValidLookups(lookups)) {
+    return { sectors: lookups.sectors, error: null }
+  }
+  const { data, error } = safeArrayAccess<Sector>(
+    (lookups as Record<string, unknown>).sectors,
+    'sectorgegevens'
+  )
+  return { sectors: data, error }
 }
 
-function useProvinceOptions(): Province[] {
-  return (lookups as { provinces: Province[] }).provinces ?? []
+function useProvinceOptions(): { provinces: Province[]; error: string | null } {
+  if (isValidLookups(lookups)) {
+    return { provinces: lookups.provinces, error: null }
+  }
+  const { data, error } = safeArrayAccess<Province>(
+    (lookups as Record<string, unknown>).provinces,
+    'provinciegegevens'
+  )
+  return { provinces: data, error }
 }
 
 // Sector filter dropdown
@@ -174,12 +305,20 @@ function SectorFilter({
   showAll?: boolean
 }) {
   const [open, setOpen] = React.useState(false)
-  const sectors = useSectorOptions()
+  const { sectors, error } = useSectorOptions()
 
   const currentLabel = React.useMemo(() => {
     if (selected === "ALL") return "Alle sectoren"
     return sectors.find((s) => s.code === selected)?.nl ?? "Sector"
   }, [selected, sectors])
+
+  if (error) {
+    return (
+      <Button variant="outline" size="sm" disabled className="h-9 gap-1 min-w-[140px]">
+        <span className="truncate max-w-[180px]">Fout bij laden</span>
+      </Button>
+    )
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -240,12 +379,20 @@ function ProvinceFilter({
   onChange: (code: string | null) => void
 }) {
   const [open, setOpen] = React.useState(false)
-  const provincesLookup = useProvinceOptions()
+  const { provinces: provincesLookup, error } = useProvinceOptions()
 
   const currentLabel = React.useMemo(() => {
     if (!selected) return "Vlaanderen"
     return provincesLookup.find((p) => p.code === selected)?.name ?? "Provincie"
   }, [selected, provincesLookup])
+
+  if (error) {
+    return (
+      <Button variant="outline" size="sm" disabled className="h-9 gap-1 min-w-[120px]">
+        <span className="truncate max-w-[100px]">Fout bij laden</span>
+      </Button>
+    )
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -339,63 +486,116 @@ function YearFilter({
 }
 
 // Get monthly data for chart with province filter
-function getMonthlyData(sector: string, provinceCode: string | null, months: number = 24): ChartPoint[] {
-  let data: MonthlyRow[]
+function getMonthlyData(
+  sector: string,
+  provinceCode: string | null,
+  months: number = 24
+): { data: ChartPoint[]; error: string | null } {
+  try {
+    let data: MonthlyRow[]
 
-  if (provinceCode) {
-    // Filter by province using monthly province data
-    const provData: MonthlyProvinceRow[] = sector === "ALL"
-      ? (monthlyProvinces as MonthlyProvinceRow[])
-      : (monthlyProvincesConstruction as MonthlyProvinceRow[])
+    if (provinceCode) {
+      // Filter by province using monthly province data
+      const sourceData = sector === "ALL" ? monthlyProvinces : monthlyProvincesConstruction
+      const validation = safeArrayAccess<MonthlyProvinceRow>(
+        sourceData,
+        'maandelijkse provinciegegevens',
+        isMonthlyProvinceRow
+      )
 
-    const filtered = provData.filter((r) => r.p === provinceCode)
-    data = filtered.map((r) => ({ y: r.y, m: r.m, n: r.n, w: r.w }))
-  } else {
-    data = sector === "ALL"
-      ? (monthlyTotals as MonthlyRow[])
-      : (monthlyConstruction as MonthlyRow[])
+      if (validation.error) {
+        return { data: [], error: validation.error }
+      }
+
+      const filtered = validation.data.filter((r) => r.p === provinceCode)
+      data = filtered.map((r) => ({ y: r.y, m: r.m, n: r.n, w: r.w }))
+    } else {
+      const sourceData = sector === "ALL" ? monthlyTotals : monthlyConstruction
+      const validation = safeArrayAccess<MonthlyRow>(
+        sourceData,
+        'maandelijkse gegevens',
+        isMonthlyRow
+      )
+
+      if (validation.error) {
+        return { data: [], error: validation.error }
+      }
+
+      data = validation.data
+    }
+
+    const chartData = data
+      .map((r) => ({
+        sortValue: r.y * 100 + r.m,
+        periodCells: [`${MONTH_NAMES[r.m - 1]} ${r.y}`],
+        value: r.n,
+      }))
+      .sort((a, b) => a.sortValue - b.sortValue)
+      .slice(-months)
+
+    return { data: chartData, error: null }
+  } catch (error) {
+    console.error("Error loading monthly data:", error)
+    return { data: [], error: 'Fout bij laden van maandelijkse gegevens' }
   }
-
-  return data
-    .map((r) => ({
-      sortValue: r.y * 100 + r.m,
-      periodCells: [`${MONTH_NAMES[r.m - 1]} ${r.y}`],
-      value: r.n,
-    }))
-    .sort((a, b) => a.sortValue - b.sortValue)
-    .slice(-months)
 }
 
 // Get yearly data for chart with province filter
-function getYearlyData(sector: string, provinceCode: string | null): ChartPoint[] {
-  let data: YearlyRow[]
+function getYearlyData(
+  sector: string,
+  provinceCode: string | null
+): { data: ChartPoint[]; error: string | null } {
+  try {
+    let data: YearlyRow[]
 
-  if (provinceCode) {
-    // Aggregate monthly province data to yearly
-    const provData: MonthlyProvinceRow[] = sector === "ALL"
-      ? (monthlyProvinces as MonthlyProvinceRow[])
-      : (monthlyProvincesConstruction as MonthlyProvinceRow[])
+    if (provinceCode) {
+      // Aggregate monthly province data to yearly
+      const sourceData = sector === "ALL" ? monthlyProvinces : monthlyProvincesConstruction
+      const validation = safeArrayAccess<MonthlyProvinceRow>(
+        sourceData,
+        'maandelijkse provinciegegevens',
+        isMonthlyProvinceRow
+      )
 
-    const filtered = provData.filter((r) => r.p === provinceCode)
-    const byYear = new Map<number, { n: number; w: number }>()
-    for (const r of filtered) {
-      const existing = byYear.get(r.y) ?? { n: 0, w: 0 }
-      byYear.set(r.y, { n: existing.n + r.n, w: existing.w + r.w })
+      if (validation.error) {
+        return { data: [], error: validation.error }
+      }
+
+      const filtered = validation.data.filter((r) => r.p === provinceCode)
+      const byYear = new Map<number, { n: number; w: number }>()
+      for (const r of filtered) {
+        const existing = byYear.get(r.y) ?? { n: 0, w: 0 }
+        byYear.set(r.y, { n: existing.n + r.n, w: existing.w + r.w })
+      }
+      data = Array.from(byYear.entries()).map(([y, v]) => ({ y, n: v.n, w: v.w }))
+    } else {
+      const sourceData = sector === "ALL" ? yearlyTotals : yearlyConstruction
+      const validation = safeArrayAccess<YearlyRow>(
+        sourceData,
+        'jaarlijkse gegevens',
+        isYearlyRow
+      )
+
+      if (validation.error) {
+        return { data: [], error: validation.error }
+      }
+
+      data = validation.data
     }
-    data = Array.from(byYear.entries()).map(([y, v]) => ({ y, n: v.n, w: v.w }))
-  } else {
-    data = sector === "ALL"
-      ? (yearlyTotals as YearlyRow[])
-      : (yearlyConstruction as YearlyRow[])
-  }
 
-  return data
-    .map((r) => ({
-      sortValue: r.y,
-      periodCells: [r.y],
-      value: r.n,
-    }))
-    .sort((a, b) => a.sortValue - b.sortValue)
+    const chartData = data
+      .map((r) => ({
+        sortValue: r.y,
+        periodCells: [r.y],
+        value: r.n,
+      }))
+      .sort((a, b) => a.sortValue - b.sortValue)
+
+    return { data: chartData, error: null }
+  } catch (error) {
+    console.error("Error loading yearly data:", error)
+    return { data: [], error: 'Fout bij laden van jaarlijkse gegevens' }
+  }
 }
 
 
@@ -425,7 +625,7 @@ function SummaryCards({ sector, provinceCode }: { sector: string; provinceCode: 
   const currentYear = metadata.max_year
   const currentMonth = metadata.max_month
   const prevYear = currentYear - 1
-  const provincesLookup = useProvinceOptions()
+  const { provinces: provincesLookup } = useProvinceOptions()
   const provinceName = provinceCode
     ? provincesLookup.find((p) => p.code === provinceCode)?.name ?? "Provincie"
     : "Vlaanderen"
@@ -525,16 +725,32 @@ function SummaryCards({ sector, provinceCode }: { sector: string; provinceCode: 
 }
 
 // Get all years province data for interactive map
-function getAllYearsProvinceData(sector: string): { p: string; n: number; y: number }[] {
-  const data: ProvinceRow[] = sector === "ALL"
-    ? (provincesData as ProvinceRow[])
-    : (provincesConstruction as ProvinceRow[])
+function getAllYearsProvinceData(
+  sector: string
+): { data: { p: string; n: number; y: number }[]; error: string | null } {
+  try {
+    const sourceData = sector === "ALL" ? provincesData : provincesConstruction
+    const validation = safeArrayAccess<ProvinceRow>(
+      sourceData,
+      'provinciegegevens',
+      isProvinceRow
+    )
 
-  return data.map((r) => ({
-    p: r.p,
-    n: r.n,
-    y: r.y,
-  }))
+    if (validation.error) {
+      return { data: [], error: validation.error }
+    }
+
+    const mapData = validation.data.map((r) => ({
+      p: r.p,
+      n: r.n,
+      y: r.y,
+    }))
+
+    return { data: mapData, error: null }
+  } catch (error) {
+    console.error("Error loading province data:", error)
+    return { data: [], error: 'Fout bij laden van provinciegegevens' }
+  }
 }
 
 // Main evolution section with province filter
@@ -551,16 +767,19 @@ function EvolutionSection({
 }) {
   const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("chart")
   const [timeRange, setTimeRange] = React.useState<"monthly" | "yearly">("monthly")
-  const years = (lookups as { years: number[] }).years ?? []
+  const years = isValidLookups(lookups) ? lookups.years : []
 
-  const data = React.useMemo(() => {
+  const { data, error: dataError } = React.useMemo(() => {
     return timeRange === "monthly"
       ? getMonthlyData(sector, provinceCode, 36)
       : getYearlyData(sector, provinceCode)
   }, [sector, provinceCode, timeRange])
 
   // All years data for interactive map with time slider
-  const allYearsMapData = React.useMemo(() => getAllYearsProvinceData(sector), [sector])
+  const { data: allYearsMapData, error: mapError } = React.useMemo(
+    () => getAllYearsProvinceData(sector),
+    [sector]
+  )
 
   const exportData = React.useMemo(
     () =>
@@ -627,12 +846,20 @@ function EvolutionSection({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <FilterableChart
-                data={data}
-                getLabel={(d) => String((d as ChartPoint).periodCells[0])}
-                getValue={(d) => (d as ChartPoint).value}
-                getSortValue={(d) => (d as ChartPoint).sortValue}
-              />
+              {dataError ? (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Fout bij laden van gegevens</AlertTitle>
+                  <AlertDescription>{dataError}</AlertDescription>
+                </Alert>
+              ) : (
+                <FilterableChart
+                  data={data}
+                  getLabel={(d) => String((d as ChartPoint).periodCells[0])}
+                  getValue={(d) => (d as ChartPoint).value}
+                  getSortValue={(d) => (d as ChartPoint).sortValue}
+                />
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -642,11 +869,19 @@ function EvolutionSection({
               <CardTitle>Data</CardTitle>
             </CardHeader>
             <CardContent>
-              <FilterableTable
-                data={data}
-                label="Faillissementen"
-                periodHeaders={[timeRange === "monthly" ? "Maand" : "Jaar"]}
-              />
+              {dataError ? (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Fout bij laden van gegevens</AlertTitle>
+                  <AlertDescription>{dataError}</AlertDescription>
+                </Alert>
+              ) : (
+                <FilterableTable
+                  data={data}
+                  label="Faillissementen"
+                  periodHeaders={[timeRange === "monthly" ? "Maand" : "Jaar"]}
+                />
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -658,24 +893,34 @@ function EvolutionSection({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <InteractiveMap
-                data={allYearsMapData}
-                level="province"
-                getGeoCode={(d) => d.p}
-                getValue={(d) => d.n}
-                getPeriod={(d) => d.y}
-                periods={years}
-                showTimeSlider={true}
-                selectedGeo={provinceCode}
-                onGeoSelect={(code) => onProvinceChange(code === provinceCode ? null : code)}
-                formatValue={formatInt}
-                tooltipLabel="Faillissementen"
-                regionFilter="2000"
-                height={500}
-              />
-              <div className="mt-3 text-xs text-muted-foreground">
-                Klik op een provincie om te filteren. Gebruik de tijdsslider om de evolutie te bekijken.
-              </div>
+              {mapError ? (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Fout bij laden van kaartgegevens</AlertTitle>
+                  <AlertDescription>{mapError}</AlertDescription>
+                </Alert>
+              ) : (
+                <>
+                  <InteractiveMap
+                    data={allYearsMapData}
+                    level="province"
+                    getGeoCode={(d) => d.p}
+                    getValue={(d) => d.n}
+                    getPeriod={(d) => d.y}
+                    periods={years}
+                    showTimeSlider={true}
+                    selectedGeo={provinceCode}
+                    onGeoSelect={(code) => onProvinceChange(code === provinceCode ? null : code)}
+                    formatValue={formatInt}
+                    tooltipLabel="Faillissementen"
+                    regionFilter="2000"
+                    height={500}
+                  />
+                  <div className="mt-3 text-xs text-muted-foreground">
+                    Klik op een provincie om te filteren. Gebruik de tijdsslider om de evolutie te bekijken.
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -686,22 +931,32 @@ function EvolutionSection({
 
 // Company duration section (bedrijfsleeftijd)
 function DurationSection({
+  sector,
   provinceCode,
+  onSectorChange,
   onProvinceChange,
 }: {
+  sector: string
   provinceCode: string | null
+  onSectorChange: (code: string) => void
   onProvinceChange: (code: string | null) => void
 }) {
   const currentYear = metadata.max_year
   const [selectedYear, setSelectedYear] = React.useState(currentYear)
-  const [selectedSector, setSelectedSector] = React.useState<string>("F") // Default to construction
-  const years = (lookups as { years: number[] }).years ?? []
+  const years = isValidLookups(lookups) ? lookups.years : []
+
+  // Reset province filter when switching to "Alle sectoren" since we don't have all-sector province data
+  React.useEffect(() => {
+    if (sector === "ALL" && provinceCode) {
+      onProvinceChange(null)
+    }
+  }, [sector, provinceCode, onProvinceChange])
 
   const data = React.useMemo(() => {
     let durationData: DurationRow[]
 
     // Province filter only available for construction sector
-    if (provinceCode && selectedSector === "F") {
+    if (provinceCode && sector === "F") {
       // Filter by province
       const provData = (yearlyByDurationProvinceConstruction as DurationProvinceRow[])
         .filter((r) => r.y === selectedYear && r.p === provinceCode)
@@ -715,28 +970,25 @@ function DurationSection({
       }))
     } else {
       // Use construction or all sectors data based on selection
-      durationData = (selectedSector === "F"
+      durationData = (sector === "F"
         ? (yearlyByDurationConstruction as DurationRow[])
         : (yearlyByDuration as DurationRow[])
       ).filter((r) => r.y === selectedYear)
     }
 
     return durationData.sort((a, b) => a.do - b.do)
-  }, [selectedYear, provinceCode, selectedSector])
-
-  // Reset province filter when switching away from construction sector
-  React.useEffect(() => {
-    if (selectedSector !== "F" && provinceCode) {
-      onProvinceChange(null)
-    }
-  }, [selectedSector, provinceCode, onProvinceChange])
+  }, [selectedYear, provinceCode, sector])
 
   const totalBankruptcies = data.reduce((sum, r) => sum + r.n, 0)
+  const youngCompanies = data.filter(r => r.do <= 4)
+  const youngCompanyCount = youngCompanies.reduce((sum, r) => sum + r.n, 0)
+  const youngCompanyPercent = totalBankruptcies > 0 ? (youngCompanyCount / totalBankruptcies) * 100 : 0
 
-  const sectors = useSectorOptions()
-  const sectorName = selectedSector === "ALL"
+  const { sectors, error: sectorsError } = useSectorOptions()
+  const sectorName = sector === "ALL"
     ? "Alle sectoren"
-    : sectors.find((s) => s.code === selectedSector)?.nl ?? "Onbekend"
+    : sectors.find((s) => s.code === sector)?.nl ?? "Onbekend"
+  const sectorLabelNoun = sector === "ALL" ? "bedrijven" : "bouwbedrijven"
   const exportData = React.useMemo(
     () =>
       data.map((d) => ({
@@ -753,7 +1005,7 @@ function DurationSection({
         <h2 className="text-2xl font-bold">Leeftijd gefailleerde bedrijven</h2>
         <ExportButtons
           data={exportData}
-          title="Bedrijfsleeftijd faillissementen bouwsector"
+          title={`Bedrijfsleeftijd faillissementen ${sectorName.toLowerCase()}`}
           slug="faillissementen"
           sectionId="leeftijd"
           viewType="table"
@@ -765,10 +1017,8 @@ function DurationSection({
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
-        <SectorFilter selected={selectedSector} onChange={setSelectedSector} showAll />
-        {selectedSector === "F" && (
-          <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />
-        )}
+        <SectorFilter selected={sector} onChange={onSectorChange} showAll />
+        {sector === "F" && <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />}
         <YearFilter selected={selectedYear} onChange={setSelectedYear} years={years} />
       </div>
 
@@ -805,7 +1055,7 @@ function DurationSection({
             })}
           </div>
           <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
-            <p>Jonge bedrijven (&lt;5 jaar) zijn gemarkeerd. In {selectedYear} faalden {formatInt(data.filter(r => r.do <= 4).reduce((sum, r) => sum + r.n, 0))} jonge bouwbedrijven ({((data.filter(r => r.do <= 4).reduce((sum, r) => sum + r.n, 0) / totalBankruptcies) * 100).toFixed(1)}% van totaal).</p>
+            <p>Jonge bedrijven (&lt;5 jaar) zijn gemarkeerd. In {selectedYear} faalden {formatInt(youngCompanyCount)} jonge {sectorLabelNoun} ({youngCompanyPercent.toFixed(1)}% van totaal).</p>
           </div>
         </CardContent>
       </Card>
@@ -815,37 +1065,32 @@ function DurationSection({
 
 // Workers count section (aantal werknemers)
 function WorkersSection({
+  sector,
   provinceCode,
+  onSectorChange,
   onProvinceChange,
 }: {
+  sector: string
   provinceCode: string | null
+  onSectorChange: (code: string) => void
   onProvinceChange: (code: string | null) => void
 }) {
   const currentYear = metadata.max_year
   const [selectedYear, setSelectedYear] = React.useState(currentYear)
-  const [selectedSector, setSelectedSector] = React.useState<string>("F") // Default to construction
-  const years = (lookups as { years: number[] }).years ?? []
+  const years = isValidLookups(lookups) ? lookups.years : []
 
-  // Sort worker classes logically
-  const workerClassOrder = [
-    "0 - 4 werknemers",
-    "5 - 9 werknemers",
-    "10 - 19 werknemers",
-    "20 - 49 werknemers",
-    "50 - 99 werknemers",
-    "100 - 199 werknemers",
-    "200 - 249 werknemers",
-    "250 - 499 werknemers",
-    "500 - 999 werknemers",
-    "1000 en meer werknemers",
-    "1000 werknemers en meer",
-  ]
+  // Reset province filter when switching to "Alle sectoren" since we don't have all-sector province data
+  React.useEffect(() => {
+    if (sector === "ALL" && provinceCode) {
+      onProvinceChange(null)
+    }
+  }, [sector, provinceCode, onProvinceChange])
 
   const data = React.useMemo(() => {
     let workersData: WorkersRow[]
 
     // Province filter only available for construction sector
-    if (provinceCode && selectedSector === "F") {
+    if (provinceCode && sector === "F") {
       // Filter by province
       const provData = (yearlyByWorkersProvinceConstruction as WorkersProvinceRow[])
         .filter((r) => r.y === selectedYear && r.p === provinceCode)
@@ -863,35 +1108,29 @@ function WorkersSection({
       }))
     } else {
       // Use construction or all sectors data based on selection
-      workersData = (selectedSector === "F"
+      workersData = (sector === "F"
         ? (yearlyByWorkersConstruction as WorkersRow[])
         : (yearlyByWorkers as WorkersRow[])
       ).filter((r) => r.y === selectedYear)
     }
 
     return workersData.sort((a, b) => {
-      const aIdx = workerClassOrder.indexOf(a.c)
-      const bIdx = workerClassOrder.indexOf(b.c)
+      const aIdx = WORKER_CLASS_ORDER.indexOf(a.c)
+      const bIdx = WORKER_CLASS_ORDER.indexOf(b.c)
       return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx)
     })
-  }, [selectedYear, provinceCode, selectedSector])
-
-  // Reset province filter when switching away from construction sector
-  React.useEffect(() => {
-    if (selectedSector !== "F" && provinceCode) {
-      onProvinceChange(null)
-    }
-  }, [selectedSector, provinceCode, onProvinceChange])
+  }, [selectedYear, provinceCode, sector])
 
   const totalBankruptcies = data.reduce((sum, r) => sum + r.n, 0)
   const totalWorkers = data.reduce((sum, r) => sum + r.w, 0)
   const smallCompanies = data.filter(r => r.c === "0 - 4 werknemers")
   const smallCompanyCount = smallCompanies.reduce((sum, r) => sum + r.n, 0)
+  const smallCompanyPercent = totalBankruptcies > 0 ? (smallCompanyCount / totalBankruptcies) * 100 : 0
 
-  const sectors = useSectorOptions()
-  const sectorName = selectedSector === "ALL"
+  const { sectors, error: sectorsError } = useSectorOptions()
+  const sectorName = sector === "ALL"
     ? "Alle sectoren"
-    : sectors.find((s) => s.code === selectedSector)?.nl ?? "Onbekend"
+    : sectors.find((s) => s.code === sector)?.nl ?? "Onbekend"
   const exportData = React.useMemo(
     () =>
       data.map((d) => ({
@@ -908,7 +1147,7 @@ function WorkersSection({
         <h2 className="text-2xl font-bold">Bedrijfsgrootte</h2>
         <ExportButtons
           data={exportData}
-          title="Bedrijfsgrootte faillissementen bouwsector"
+          title={`Bedrijfsgrootte faillissementen ${sectorName.toLowerCase()}`}
           slug="faillissementen"
           sectionId="bedrijfsgrootte"
           viewType="table"
@@ -920,10 +1159,8 @@ function WorkersSection({
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
-        <SectorFilter selected={selectedSector} onChange={setSelectedSector} showAll />
-        {selectedSector === "F" && (
-          <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />
-        )}
+        <SectorFilter selected={sector} onChange={onSectorChange} showAll />
+        {sector === "F" && <ProvinceFilter selected={provinceCode} onChange={onProvinceChange} />}
         <YearFilter selected={selectedYear} onChange={setSelectedYear} years={years} />
       </div>
 
@@ -960,7 +1197,7 @@ function WorkersSection({
             })}
           </div>
           <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
-            <p>In {selectedYear} waren {formatInt(smallCompanyCount)} faillissementen ({((smallCompanyCount / totalBankruptcies) * 100).toFixed(1)}%) kleine bedrijven (0-4 werknemers). In totaal verloren {formatInt(totalWorkers)} werknemers hun job.</p>
+            <p>In {selectedYear} waren {formatInt(smallCompanyCount)} faillissementen ({smallCompanyPercent.toFixed(1)}%) kleine bedrijven (0-4 werknemers). In totaal verloren {formatInt(totalWorkers)} werknemers hun job.</p>
           </div>
         </CardContent>
       </Card>
@@ -978,8 +1215,8 @@ function SectorComparisonSection({
 }) {
   const currentYear = metadata.max_year
   const [selectedYear, setSelectedYear] = React.useState(currentYear)
-  const years = (lookups as { years: number[] }).years ?? []
-  const sectors = useSectorOptions()
+  const years = isValidLookups(lookups) ? lookups.years : []
+  const { sectors, error: sectorsError } = useSectorOptions()
 
   const data = React.useMemo(() => {
     let sectorData: YearlySectorRow[]
@@ -1113,6 +1350,15 @@ export function FaillissementenDashboard() {
   const [selectedSector, setSelectedSector] = React.useState<string>("F")
   const [selectedProvince, setSelectedProvince] = React.useState<string | null>(null)
 
+  // Stabilize callbacks to prevent unnecessary re-renders
+  const handleSectorChange = React.useCallback((code: string) => {
+    setSelectedSector(code)
+  }, [])
+
+  const handleProvinceChange = React.useCallback((code: string | null) => {
+    setSelectedProvince(code)
+  }, [])
+
   return (
     <div className="space-y-10">
       <DashboardHeader />
@@ -1122,23 +1368,27 @@ export function FaillissementenDashboard() {
       <EvolutionSection
         sector={selectedSector}
         provinceCode={selectedProvince}
-        onSectorChange={setSelectedSector}
-        onProvinceChange={setSelectedProvince}
+        onSectorChange={handleSectorChange}
+        onProvinceChange={handleProvinceChange}
       />
 
       <SectorComparisonSection
         provinceCode={selectedProvince}
-        onProvinceChange={setSelectedProvince}
+        onProvinceChange={handleProvinceChange}
       />
 
       <DurationSection
+        sector={selectedSector}
         provinceCode={selectedProvince}
-        onProvinceChange={setSelectedProvince}
+        onSectorChange={handleSectorChange}
+        onProvinceChange={handleProvinceChange}
       />
 
       <WorkersSection
+        sector={selectedSector}
         provinceCode={selectedProvince}
-        onProvinceChange={setSelectedProvince}
+        onSectorChange={handleSectorChange}
+        onProvinceChange={handleProvinceChange}
       />
     </div>
   )
