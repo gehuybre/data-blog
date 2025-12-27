@@ -13,27 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 
-// Paths
-const ANALYSIS_DIR = path.join(__dirname, '../analyses/faillissementen');
-const RESULTS_DIR = path.join(ANALYSIS_DIR, 'results');
-const SHARED_DATA_DIR = path.join(__dirname, '../shared-data');
-const ALLOWLIST_PATH = path.join(__dirname, 'faillissementen-geo-join-allowlist.json');
-
-// Belgian province codes (matching the Python script)
-const BELGIAN_PROVINCES = {
-  '10000': 'Antwerpen',
-  '20001': 'Vlaams-Brabant',
-  '30000': 'West-Vlaanderen',
-  '40000': 'Oost-Vlaanderen',
-  '70000': 'Limburg',
-  '20002': 'Waals-Brabant',
-  '50000': 'Henegouwen',
-  '60000': 'Luik',
-  '80000': 'Luxemburg',
-  '90000': 'Namen',
-  '21000': 'Brussel',
-};
-
+// Helper function to load JSON files
 function loadJSON(filepath) {
   try {
     const content = fs.readFileSync(filepath, 'utf8');
@@ -43,6 +23,16 @@ function loadJSON(filepath) {
     process.exit(1);
   }
 }
+
+// Paths
+const ANALYSIS_DIR = path.join(__dirname, '../analyses/faillissementen');
+const RESULTS_DIR = path.join(ANALYSIS_DIR, 'results');
+const SHARED_DATA_DIR = path.join(__dirname, '../shared-data');
+const ALLOWLIST_PATH = path.join(__dirname, 'faillissementen-geo-join-allowlist.json');
+
+// Load Belgian province codes from shared JSON file
+// Note: Brussels (21000) is an arrondissement treated as province-equivalent for visualization
+const BELGIAN_PROVINCES = loadJSON(path.join(SHARED_DATA_DIR, 'belgian-provinces.json'));
 
 function loadAllowlist() {
   if (fs.existsSync(ALLOWLIST_PATH)) {

@@ -52,23 +52,13 @@ SECTOR_NAMES = {
     "?": "Onbekend",
 }
 
-# Belgian province codes (all provinces including Flanders, Wallonia, and Brussels)
-BELGIAN_PROVINCES = {
-    # Flemish provinces
-    10000: "Antwerpen",
-    20001: "Vlaams-Brabant",
-    30000: "West-Vlaanderen",
-    40000: "Oost-Vlaanderen",
-    70000: "Limburg",
-    # Walloon provinces
-    20002: "Waals-Brabant",
-    50000: "Henegouwen",
-    60000: "Luik",
-    80000: "Luxemburg",
-    90000: "Namen",
-    # Brussels
-    21000: "Brussel",
-}
+# Load Belgian province codes from shared JSON file
+# Note: Brussels (21000) is technically an arrondissement, not a province, but is treated
+# as a province-equivalent for visualization purposes since Brussels Capital Region has no
+# province-level administrative division in the NIS hierarchy.
+SHARED_DATA_DIR = SCRIPT_DIR.parent.parent.parent / "shared-data"
+with open(SHARED_DATA_DIR / "belgian-provinces.json", "r") as f:
+    BELGIAN_PROVINCES = {int(k): v for k, v in json.load(f).items()}
 
 
 def download_data() -> pd.DataFrame:
