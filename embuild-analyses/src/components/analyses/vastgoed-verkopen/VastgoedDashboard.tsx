@@ -128,7 +128,8 @@ function useProvinceOptions(): GeoEntity[] {
 }
 
 function useMunicipalityOptions(): GeoEntity[] {
-  return (lookups as { municipalities: GeoEntity[] }).municipalities ?? []
+  // Municipalities are not currently available in lookups
+  return []
 }
 
 // Geo filter inline component
