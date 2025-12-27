@@ -213,6 +213,12 @@ function NieuwbouwSection() {
             periodCells: [r.jaar, type],
           }))
       )
+    } else if (currentView === "trend") {
+      return trendData.map((r) => ({
+        label: String(r.jaar),
+        value: r.index,
+        periodCells: [r.jaar],
+      }))
     } else {
       return yearlyData.map((r) => ({
         label: String(r.jaar),
@@ -220,7 +226,7 @@ function NieuwbouwSection() {
         periodCells: [r.jaar],
       }))
     }
-  }, [currentView, yearlyData, quarterlyData, typeData])
+  }, [currentView, yearlyData, quarterlyData, typeData, trendData])
 
   return (
     <div className="space-y-6">
@@ -420,6 +426,12 @@ function VerbouwSection() {
             periodCells: [r.jaar, type],
           }))
       )
+    } else if (currentView === "trend") {
+      return trendData.map((r) => ({
+        label: String(r.jaar),
+        value: r.index,
+        periodCells: [r.jaar],
+      }))
     } else {
       return yearlyData.map((r) => ({
         label: String(r.jaar),
@@ -427,7 +439,7 @@ function VerbouwSection() {
         periodCells: [r.jaar],
       }))
     }
-  }, [currentView, yearlyData, quarterlyData, typeData])
+  }, [currentView, yearlyData, quarterlyData, typeData, trendData])
 
   return (
     <div className="space-y-6">
@@ -627,6 +639,12 @@ function SloopSection() {
             periodCells: [r.jaar, besluit],
           }))
       )
+    } else if (currentView === "trend") {
+      return trendData.map((r) => ({
+        label: String(r.jaar),
+        value: r.index,
+        periodCells: [r.jaar],
+      }))
     } else {
       return yearlyData.map((r) => ({
         label: String(r.jaar),
@@ -634,7 +652,7 @@ function SloopSection() {
         periodCells: [r.jaar],
       }))
     }
-  }, [currentView, yearlyData, quarterlyData, besluitData])
+  }, [currentView, yearlyData, quarterlyData, besluitData, trendData])
 
   return (
     <div className="space-y-6">
