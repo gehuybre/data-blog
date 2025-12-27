@@ -14,6 +14,7 @@ import { getEmbedDataModule } from "@/lib/embed-data-registry"
 type ViewType = "chart" | "table" | "map"
 type StopHorizon = 1 | 2 | 3 | 4 | 5
 type StartersStoppersSection = "starters" | "stoppers" | "survival"
+type ChartOrTableViewType = "chart" | "table"
 
 interface EmbedClientProps {
   slug: string
@@ -71,6 +72,10 @@ function getParamsFromUrl(): UrlParams {
   const sector = params.get("sector") || null
 
   return { view: viewType, horizon, region, province, sector }
+}
+
+function toChartOrTableViewType(viewType: ViewType): ChartOrTableViewType {
+  return viewType === "table" ? "table" : "chart"
 }
 
 export function EmbedClient({ slug, section }: EmbedClientProps) {
@@ -217,7 +222,7 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
       return (
         <VastgoedVerkopenEmbed
           section={section as "transacties" | "prijzen" | "transacties-kwartaal" | "prijzen-kwartaal"}
-          viewType={urlParams.view}
+          viewType={toChartOrTableViewType(urlParams.view)}
           geo={urlParams.region}
           type={urlParams.sector}
         />
@@ -240,7 +245,7 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
       return (
         <FaillissementenEmbed
           section={section as "evolutie" | "leeftijd" | "bedrijfsgrootte" | "sectoren"}
-          viewType={urlParams.view}
+          viewType={toChartOrTableViewType(urlParams.view)}
           sector={urlParams.sector ?? "F"}
           year={urlParams.horizon}
           timeRange={(urlParams.view === "table" || urlParams.view === "map") ? "yearly" : "monthly"}
@@ -264,7 +269,7 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
       return (
         <HuishoudensgroeiEmbed
           section={section as "evolutie" | "ranking" | "size-breakdown"}
-          viewType={urlParams.view}
+          viewType={toChartOrTableViewType(urlParams.view)}
           geo={urlParams.region}
           horizonYear={urlParams.horizon ?? 2033}
           showDecline={urlParams.sector === "decline"}
@@ -327,7 +332,7 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
   return (
     <div className="p-8 text-center">
       <p className="text-muted-foreground">
-        Onbekend embed type: {config.type}
+        Onbekend embed type voor: {slug}/{section}
       </p>
     </div>
   )
