@@ -1,0 +1,141 @@
+name: Update prijsherziening data
+
+on:
+  schedule:
+    # At 00:00 on day-of-month 1 (monthly, when new data is typically available)
+    - cron: '0 0 1 * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install openpyxl  # For reading Excel files
+
+      - name: Check remote metadata (ETag / Last-Modified)
+        id: check_remote
+        env:
+          INPUT_URL: https://economie.fgov.be/sites/default/files/Files/Entreprises/prix-construction-Indice-I-2021.xlsx
+          META_FILE: embuild-analyses/analyses/prijsherziening-index-i-2021/data/.remote_metadata.json
+        run: |
+          set -e
+          mkdir -p "$(dirname "$META_FILE")"
+
+          # If expected result files are missing, force a re-run even if remote metadata is unchanged.
+          missing_required=false
+          required_files=(
+            "embuild-analyses/analyses/prijsherziening-index-i-2021/results/monthly_indices.json"
+            "embuild-analyses/analyses/prijsherziening-index-i-2021/results/components.json"
+            "embuild-analyses/analyses/prijsherziening-index-i-2021/results/metadata.json"
+          )
+          for f in "${required_files[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "Missing required result file: $f"
+              missing_required=true
+            fi
+          done
+
+          headers=$(curl -sI "${INPUT_URL}" || true)
+          REMOTE_ETAG=$(printf '%s\n' "$headers" | awk -F': ' '/^ETag:/ {print $2}' | tr -d '\r"') || true
+          REMOTE_LASTMOD=$(printf '%s\n' "$headers" | awk -F': ' '/^Last-Modified:/ {print substr($0,index($0,$2)) }' | tr -d '\r') || true
+          export REMOTE_ETAG REMOTE_LASTMOD
+
+          set +e
+          python - <<-PY
+          	import json, os, sys
+          	meta=os.environ.get('META_FILE')
+          	etag=os.environ.get('REMOTE_ETAG') or ''
+          	lm=os.environ.get('REMOTE_LASTMOD') or ''
+          	if meta and os.path.exists(meta):
+          	  j=json.load(open(meta))
+          	  if etag and j.get('etag')==etag:
+          	    sys.exit(2)
+          	  if lm and j.get('last_modified')==lm:
+          	    sys.exit(2)
+          	sys.exit(0)
+          PY
+          rc=$?
+          set -e
+          if [ "$rc" -eq 2 ] && [ "$missing_required" = "false" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No remote change detected and all required results exist; skipping download and processing."
+            exit 0
+          elif [ "$rc" -ne 0 ]; then
+            exit "$rc"
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Run data processor (download & process)
+        if: steps.check_remote.outputs.changed == 'true'
+        env:
+          INPUT_URL: https://economie.fgov.be/sites/default/files/Files/Entreprises/prix-construction-Indice-I-2021.xlsx
+        run: |
+          set -e
+          python embuild-analyses/analyses/prijsherziening-index-i-2021/src/process_prijsherziening.py
+
+      - name: Update remote metadata and checksum
+        if: steps.check_remote.outputs.changed == 'true'
+        env:
+          INPUT_URL: https://economie.fgov.be/sites/default/files/Files/Entreprises/prix-construction-Indice-I-2021.xlsx
+          META_FILE: embuild-analyses/analyses/prijsherziening-index-i-2021/data/.remote_metadata.json
+        run: |
+          set -e
+          mkdir -p "$(dirname "$META_FILE")"
+          headers=$(curl -sI "${INPUT_URL}" || true)
+          REMOTE_ETAG=$(printf '%s\n' "$headers" | awk -F': ' '/^ETag:/ {print $2}' | tr -d '\r"') || true
+          REMOTE_LASTMOD=$(printf '%s\n' "$headers" | awk -F': ' '/^Last-Modified:/ {print substr($0,index($0,$2)) }' | tr -d '\r') || true
+
+          # Find downloaded Excel file
+          download_path=embuild-analyses/analyses/prijsherziening-index-i-2021/data/prix-construction-Indice-I-2021.xlsx
+          if [ -f "$download_path" ]; then
+            sha=$(sha256sum "$download_path" | cut -d' ' -f1)
+          else
+            sha=''
+          fi
+
+          REMOTE_ETAG="$REMOTE_ETAG" REMOTE_LASTMOD="$REMOTE_LASTMOD" sha="$sha" python - <<-PY
+          	import json, os
+          	meta={
+          	  'url': os.environ.get('INPUT_URL'),
+          	  'etag': os.environ.get('REMOTE_ETAG') or None,
+          	  'last_modified': os.environ.get('REMOTE_LASTMOD') or None,
+          	  'sha256': os.environ.get('sha') or None
+          	}
+          	json.dump(meta, open(os.environ.get('META_FILE'), 'w'), indent=2)
+          PY
+
+      - name: Update publication date
+        if: steps.check_remote.outputs.changed == 'true'
+        run: |
+          python scripts/update_publication_date.py prijsherziening-index-i-2021 "https://economie.fgov.be/nl/themas/ondernemingen/specifieke-sectoren/bouw/prijsherzieningsindexen/mercuriale-index-i-2021"
+
+      - name: Commit and push changes if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add embuild-analyses/analyses/prijsherziening-index-i-2021/results
+          git add embuild-analyses/analyses/prijsherziening-index-i-2021/content.mdx || true
+          git add embuild-analyses/analyses/prijsherziening-index-i-2021/data/.remote_metadata.json || true
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(data): update prijsherziening results (auto)"
+            git push origin HEAD:main
+          else
+            echo "No changes to commit"
+          fi
