@@ -173,25 +173,6 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
 
   // Handle custom embeds
   if (config.type === "custom") {
-    // Registry of known custom components with their proper types
-    const CUSTOM_COMPONENTS: Record<string, React.ComponentType<StartersStoppersEmbedProps>> = {
-      StartersStoppersEmbed: StartersStoppersEmbed,
-    }
-
-    // Validate component is registered
-    if (!CUSTOM_COMPONENTS[config.component]) {
-      return (
-        <div className="p-8 text-center">
-          <p className="text-red-500">
-            Custom component &quot;{config.component}&quot; not registered
-          </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            Add it to CUSTOM_COMPONENTS in EmbedClient.tsx
-          </p>
-        </div>
-      )
-    }
-
     // Handle StartersStoppersEmbed
     if (config.component === "StartersStoppersEmbed") {
       const validSections: StartersStoppersSection[] = ["starters", "stoppers", "survival"]
@@ -205,9 +186,8 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
         )
       }
 
-      const Component = CUSTOM_COMPONENTS[config.component]
       return (
-        <Component
+        <StartersStoppersEmbed
           section={section as StartersStoppersSection}
           viewType={urlParams.view}
           horizon={urlParams.horizon}
@@ -218,9 +198,17 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
       )
     }
 
-    // Generic fallback for other custom components
-    const Component = CUSTOM_COMPONENTS[config.component]
-    return <Component slug={slug} section={section} urlParams={urlParams} />
+    // Unknown custom component
+    return (
+      <div className="p-8 text-center">
+        <p className="text-red-500">
+          Custom component &quot;{config.component}&quot; not registered
+        </p>
+        <p className="text-xs text-muted-foreground mt-2">
+          Add handling for this component in EmbedClient.tsx
+        </p>
+      </div>
+    )
   }
 
   // Handle standard embeds
