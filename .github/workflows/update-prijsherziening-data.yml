@@ -59,17 +59,17 @@ jobs:
 
           set +e
           python - <<-PY
-          	import json, os, sys
-          	meta=os.environ.get('META_FILE')
-          	etag=os.environ.get('REMOTE_ETAG') or ''
-          	lm=os.environ.get('REMOTE_LASTMOD') or ''
-          	if meta and os.path.exists(meta):
-          	  j=json.load(open(meta))
-          	  if etag and j.get('etag')==etag:
-          	    sys.exit(2)
-          	  if lm and j.get('last_modified')==lm:
-          	    sys.exit(2)
-          	sys.exit(0)
+            import json, os, sys
+            meta=os.environ.get('META_FILE')
+            etag=os.environ.get('REMOTE_ETAG') or ''
+            lm=os.environ.get('REMOTE_LASTMOD') or ''
+            if meta and os.path.exists(meta):
+              j=json.load(open(meta))
+              if etag and j.get('etag')==etag:
+                sys.exit(2)
+              if lm and j.get('last_modified')==lm:
+                sys.exit(2)
+            sys.exit(0)
           PY
           rc=$?
           set -e
@@ -111,14 +111,14 @@ jobs:
           fi
 
           REMOTE_ETAG="$REMOTE_ETAG" REMOTE_LASTMOD="$REMOTE_LASTMOD" sha="$sha" python - <<-PY
-          	import json, os
-          	meta={
-          	  'url': os.environ.get('INPUT_URL'),
-          	  'etag': os.environ.get('REMOTE_ETAG') or None,
-          	  'last_modified': os.environ.get('REMOTE_LASTMOD') or None,
-          	  'sha256': os.environ.get('sha') or None
-          	}
-          	json.dump(meta, open(os.environ.get('META_FILE'), 'w'), indent=2)
+            import json, os
+            meta={
+              'url': os.environ.get('INPUT_URL'),
+              'etag': os.environ.get('REMOTE_ETAG') or None,
+              'last_modified': os.environ.get('REMOTE_LASTMOD') or None,
+              'sha256': os.environ.get('sha') or None
+            }
+            json.dump(meta, open(os.environ.get('META_FILE'), 'w'), indent=2)
           PY
 
       - name: Update publication date
