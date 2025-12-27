@@ -80,8 +80,8 @@ def process_data(excel_path: str) -> None:
     xl_file = pd.ExcelFile(excel_path)
     print(f"Excel sheets: {xl_file.sheet_names}")
 
-    # Read the first sheet (assuming it contains the data)
-    df = pd.read_excel(excel_path, sheet_name=0)
+    # Read the Dutch data sheet (I_2021 (Nl))
+    df = pd.read_excel(excel_path, sheet_name='I_2021 (Nl)')
     print(f"Loaded {len(df)} rows, {len(df.columns)} columns")
     print(f"Columns: {df.columns.tolist()}")
 
