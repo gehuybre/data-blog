@@ -127,19 +127,24 @@ function useProvinceOptions(): GeoEntity[] {
   return (lookups as { provinces: GeoEntity[] }).provinces ?? []
 }
 
+function useMunicipalityOptions(): GeoEntity[] {
+  return (lookups as { municipalities: GeoEntity[] }).municipalities ?? []
+}
+
 // Geo filter inline component
 function GeoFilterInline({
   selectedLevel,
   selectedNis,
   onSelect,
 }: {
-  selectedLevel: "belgium" | "region" | "province"
+  selectedLevel: "belgium" | "region" | "province" | "municipality"
   selectedNis: string | null
-  onSelect: (level: "belgium" | "region" | "province", nis: string | null) => void
+  onSelect: (level: "belgium" | "region" | "province" | "municipality", nis: string | null) => void
 }) {
   const [open, setOpen] = React.useState(false)
   const regions = useRegionOptions()
   const provinces = useProvinceOptions()
+  const municipalities = useMunicipalityOptions()
 
   const currentLabel = React.useMemo(() => {
     if (selectedLevel === "belgium" || !selectedNis) return "België"
@@ -151,8 +156,12 @@ function GeoFilterInline({
       const name = provinces.find((p) => p.code === selectedNis)?.name ?? "Provincie"
       return toTitleCase(name)
     }
+    if (selectedLevel === "municipality") {
+      const name = municipalities.find((m) => m.code === selectedNis)?.name ?? "Gemeente"
+      return toTitleCase(name)
+    }
     return "België"
-  }, [selectedLevel, selectedNis, regions, provinces])
+  }, [selectedLevel, selectedNis, regions, provinces, municipalities])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -210,6 +219,27 @@ function GeoFilterInline({
                   {toTitleCase(p.name)}
                 </CommandItem>
               ))}
+            </CommandGroup>
+            <CommandSeparator />
+            <CommandGroup heading="Gemeente">
+              {municipalities.slice(0, 100).map((m) => (
+                <CommandItem
+                  key={m.code}
+                  value={m.name}
+                  onSelect={() => {
+                    onSelect("municipality", m.code)
+                    setOpen(false)
+                  }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", selectedLevel === "municipality" && selectedNis === m.code ? "opacity-100" : "opacity-0")} />
+                  {toTitleCase(m.name)}
+                </CommandItem>
+              ))}
+              {municipalities.length > 100 && (
+                <CommandItem disabled>
+                  <span className="text-xs text-muted-foreground">... en {municipalities.length - 100} meer</span>
+                </CommandItem>
+              )}
             </CommandGroup>
           </CommandList>
         </Command>
@@ -270,7 +300,7 @@ function PropertyTypeFilterInline({
 }
 
 // Filter functions
-function filterYearlyByGeo(rows: YearlyRow[], level: "belgium" | "region" | "province", nis: string | null): YearlyRow[] {
+function filterYearlyByGeo(rows: YearlyRow[], level: "belgium" | "region" | "province" | "municipality", nis: string | null): YearlyRow[] {
   if (level === "belgium") {
     return rows.filter((r) => r.lvl === 1)
   }
@@ -281,6 +311,9 @@ function filterYearlyByGeo(rows: YearlyRow[], level: "belgium" | "region" | "pro
   }
   if (level === "province" && nis) {
     return rows.filter((r) => r.lvl === 3 && r.nis === nis)
+  }
+  if (level === "municipality" && nis) {
+    return rows.filter((r) => r.lvl === 5 && r.nis === nis)
   }
   return rows.filter((r) => r.lvl === 1)
 }
@@ -293,7 +326,7 @@ function filterQuarterlyByType(rows: QuarterlyRow[], type: string): QuarterlyRow
   return rows.filter((r) => r.type === type)
 }
 
-function filterQuarterlyByGeo(rows: QuarterlyRow[], level: "belgium" | "region" | "province", nis: string | null): QuarterlyRow[] {
+function filterQuarterlyByGeo(rows: QuarterlyRow[], level: "belgium" | "region" | "province" | "municipality", nis: string | null): QuarterlyRow[] {
   if (level === "belgium") {
     return rows.filter((r) => r.lvl === 1)
   }
@@ -303,6 +336,9 @@ function filterQuarterlyByGeo(rows: QuarterlyRow[], level: "belgium" | "region" 
   }
   if (level === "province" && nis) {
     return rows.filter((r) => r.lvl === 3 && r.nis === nis)
+  }
+  if (level === "municipality" && nis) {
+    return rows.filter((r) => r.lvl === 5 && r.nis === nis)
   }
   return rows.filter((r) => r.lvl === 1)
 }
@@ -360,6 +396,21 @@ function aggregateByProvinceAllYears(rows: YearlyRow[], metric: "n" | "p50"): Pr
   }))
 }
 
+type MunicipalityPoint = {
+  m: string
+  y: number
+  value: number
+}
+
+function aggregateByMunicipalityAllYears(rows: YearlyRow[], metric: "n" | "p50"): MunicipalityPoint[] {
+  const munRows = rows.filter((r) => r.lvl === 5 && typeof r.y === "number")
+  return munRows.map((r) => ({
+    m: r.nis,
+    y: r.y,
+    value: r[metric],
+  }))
+}
+
 // Metric Section Component
 function MetricSection({
   title,
@@ -383,14 +434,14 @@ function MetricSection({
   title: string
   label: string
   yearSeries: YearPoint[]
-  mapData: RegionPoint[] | ProvincePoint[]
+  mapData: RegionPoint[] | ProvincePoint[] | MunicipalityPoint[]
   years: number[]
-  mapLevel: "region" | "province"
+  mapLevel: "region" | "province" | "municipality"
   formatValue: (v: number) => string
-  geoLevel: "belgium" | "region" | "province"
+  geoLevel: "belgium" | "region" | "province" | "municipality"
   selectedNis: string | null
   selectedType: string
-  onSelectGeo: (level: "belgium" | "region" | "province", nis: string | null) => void
+  onSelectGeo: (level: "belgium" | "region" | "province" | "municipality", nis: string | null) => void
   onSelectType: (code: string) => void
   slug?: string
   sectionId?: string
@@ -499,24 +550,32 @@ function MetricSection({
           <Card>
             <CardHeader>
               <CardTitle>
-                Verdeling per {mapLevel === "province" ? "provincie" : "regio"}
+                Verdeling per {mapLevel === "municipality" ? "gemeente" : mapLevel === "province" ? "provincie" : "regio"}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <InteractiveMap
-                data={mapData as (RegionPoint | ProvincePoint)[]}
+                data={mapData as (RegionPoint | ProvincePoint | MunicipalityPoint)[]}
                 level={mapLevel}
                 getGeoCode={(d) => {
-                  const point = d as RegionPoint | ProvincePoint
-                  return "p" in point ? point.p : point.r
+                  const point = d as RegionPoint | ProvincePoint | MunicipalityPoint
+                  if ("m" in point) return point.m
+                  if ("p" in point) return point.p
+                  return point.r
                 }}
-                getValue={(d) => (d as RegionPoint | ProvincePoint).value}
-                getPeriod={(d) => (d as RegionPoint | ProvincePoint).y}
+                getValue={(d) => (d as RegionPoint | ProvincePoint | MunicipalityPoint).value}
+                getPeriod={(d) => (d as RegionPoint | ProvincePoint | MunicipalityPoint).y}
                 periods={years}
                 showTimeSlider={true}
-                selectedGeo={mapLevel === "province" ? (geoLevel === "province" ? selectedNis : null) : (geoLevel === "region" ? selectedNis : null)}
+                selectedGeo={
+                  mapLevel === "municipality" ? (geoLevel === "municipality" ? selectedNis : null) :
+                  mapLevel === "province" ? (geoLevel === "province" ? selectedNis : null) :
+                  (geoLevel === "region" ? selectedNis : null)
+                }
                 onGeoSelect={(code) => {
-                  if (mapLevel === "province") {
+                  if (mapLevel === "municipality") {
+                    onSelectGeo("municipality", code)
+                  } else if (mapLevel === "province") {
                     onSelectGeo("province", code)
                   } else {
                     onSelectGeo("region", code)
@@ -529,7 +588,7 @@ function MetricSection({
                 height={500}
               />
               <div className="mt-3 text-xs text-muted-foreground">
-                Klik op een {mapLevel === "province" ? "provincie" : "regio"} om te filteren, of gebruik de locatie-filter hierboven.
+                Klik op een {mapLevel === "municipality" ? "gemeente" : mapLevel === "province" ? "provincie" : "regio"} om te filteren, of gebruik de locatie-filter hierboven.
               </div>
             </CardContent>
           </Card>
@@ -560,10 +619,10 @@ function QuarterlyMetricSection({
   label: string
   quarterlySeries: YearPoint[]
   formatValue: (v: number) => string
-  geoLevel: "belgium" | "region" | "province"
+  geoLevel: "belgium" | "region" | "province" | "municipality"
   selectedNis: string | null
   selectedType: string
-  onSelectGeo: (level: "belgium" | "region" | "province", nis: string | null) => void
+  onSelectGeo: (level: "belgium" | "region" | "province" | "municipality", nis: string | null) => void
   onSelectType: (code: string) => void
   slug?: string
   sectionId?: string
@@ -696,7 +755,7 @@ function QuarterlyMetricSection({
 
 // Main Dashboard Component
 function InnerDashboard() {
-  const [geoLevel, setGeoLevel] = React.useState<"belgium" | "region" | "province">("belgium")
+  const [geoLevel, setGeoLevel] = React.useState<"belgium" | "region" | "province" | "municipality">("belgium")
   const [selectedNis, setSelectedNis] = React.useState<string | null>(null)
   const [selectedType, setSelectedType] = React.useState<string>("alle_huizen")
 
@@ -750,10 +809,23 @@ function InnerDashboard() {
     return aggregateByProvinceAllYears(filtered, "p50")
   }, [yearlyRows, selectedType])
 
-  // Determine map level based on current geo selection
-  const mapLevel = geoLevel === "region" && selectedNis ? "province" : "region"
+  const transactionsMapMunicipality = React.useMemo(() => {
+    const filtered = filterByPropertyType(yearlyRows, selectedType)
+    return aggregateByMunicipalityAllYears(filtered, "n")
+  }, [yearlyRows, selectedType])
 
-  function handleSelectGeo(level: "belgium" | "region" | "province", nis: string | null) {
+  const priceMapMunicipality = React.useMemo(() => {
+    const filtered = filterByPropertyType(yearlyRows, selectedType)
+    return aggregateByMunicipalityAllYears(filtered, "p50")
+  }, [yearlyRows, selectedType])
+
+  // Determine map level based on current geo selection
+  const mapLevel =
+    geoLevel === "province" && selectedNis ? "municipality" :
+    geoLevel === "region" && selectedNis ? "province" :
+    "region"
+
+  function handleSelectGeo(level: "belgium" | "region" | "province" | "municipality", nis: string | null) {
     setGeoLevel(level)
     setSelectedNis(nis)
   }
@@ -771,7 +843,11 @@ function InnerDashboard() {
         title="Aantal transacties"
         label="Transacties"
         yearSeries={transactionsSeries}
-        mapData={mapLevel === "province" ? transactionsMapProvince : transactionsMapRegion}
+        mapData={
+          mapLevel === "municipality" ? transactionsMapMunicipality :
+          mapLevel === "province" ? transactionsMapProvince :
+          transactionsMapRegion
+        }
         years={years}
         mapLevel={mapLevel}
         formatValue={formatInt}
@@ -794,7 +870,11 @@ function InnerDashboard() {
         title="Mediaanprijs"
         label="Prijs (€)"
         yearSeries={priceSeries}
-        mapData={mapLevel === "province" ? priceMapProvince : priceMapRegion}
+        mapData={
+          mapLevel === "municipality" ? priceMapMunicipality :
+          mapLevel === "province" ? priceMapProvince :
+          priceMapRegion
+        }
         years={years}
         mapLevel={mapLevel}
         formatValue={formatPrice}
