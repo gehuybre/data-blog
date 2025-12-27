@@ -108,6 +108,41 @@ docs/                      # Documentation (see LLM_DOCUMENTATION_PROTOCOL.md)
 3. Add data processing in `src/`, raw data in `data/`
 4. Create corresponding workflow doc in `docs/workflows/`
 
+## Blog Post Requirements
+
+Every blog post must include these elements:
+
+### Required Content
+- **Title**: Clear and descriptive title
+- **Publication Date**: Date when the blog post was created
+- **Data Date**: Date of the data (if different from publication date, must be explicitly mentioned)
+
+### Sections
+Each section displaying data must include:
+
+1. **Data Visualization**: Display data as:
+   - Tables
+   - Charts (using Recharts)
+   - Maps (using RegionMap/ProvinceMap/MunicipalityMap)
+
+2. **Download CSV Button**: Each section must have a button to download the data as CSV
+
+3. **Embed Code Button**: Each section must have a button to generate embed code for sharing the visualization on other websites
+
+4. **Filtering (when applicable)**:
+   - Geographic filters: Allow filtering by region, province, or municipality (using GeoFilter component)
+   - Sector filters: Allow filtering by main sector (hoofdsector) when the data includes sector information
+
+### Footer
+- **Data Source**: Include source citation at the bottom of the blog post with a link to the original data
+
+### Implementation Notes
+- Use the shared components from `src/components/analyses/shared/`:
+  - `AnalysisSection` for section wrappers
+  - `GeoContext` and `GeoFilter` for geographic filtering
+  - `FilterableChart` for charts with filtering capability
+  - `RegionMap`, `ProvinceMap`, `MunicipalityMap` for geographic visualizations
+
 ## Conventions
 
 - Use absolute imports: `@/` (configured in tsconfig.json)
