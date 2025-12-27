@@ -208,6 +208,41 @@ This is handled in:
 
 All embed routes must be defined at build time via `generateStaticParams()`. This is why centralized configuration is critical - it ensures all routes are discovered during the build process.
 
+### Bundle Size & Data Loading Strategy
+
+**Current Approach: Synchronous Registry**
+
+The embed system uses a **synchronous data registry** (`embed-data-registry.ts`) with explicit imports rather than dynamic imports. This design decision prioritizes:
+
+1. **Build-time validation**: All data paths are validated by the bundler at compile time
+2. **Type safety**: TypeScript can verify data structures during development
+3. **Reliability**: No runtime import failures due to misconfigured paths
+4. **Next.js static export compatibility**: Works seamlessly with static site generation
+
+**Trade-offs:**
+
+- **Pros**:
+  - Bundler (webpack/vite) can properly analyze and optimize the dependency graph
+  - No runtime failures from dynamic import path construction
+  - Better tree-shaking opportunities
+  - Simpler error handling (errors occur at build time, not runtime)
+
+- **Cons**:
+  - All embed data is included in the initial JavaScript bundle
+  - Bundle size grows proportionally with number of embeds
+  - No lazy loading of individual embed data
+
+**When to Reconsider:**
+
+If the number of embeds grows significantly (>20 sections) or individual data files become very large (>500KB), consider:
+
+1. **Code splitting by analysis**: Create separate bundles per analysis slug
+2. **True dynamic imports**: Use dynamic imports with explicit path allowlists for the bundler
+3. **Server-side rendering**: Move away from static export to enable runtime data fetching
+4. **External data storage**: Host large JSON files separately and fetch via HTTP
+
+For the current scale (2-5 analyses, modest data files), the synchronous registry approach is the optimal balance of reliability, maintainability, and performance.
+
 ### Cross-Origin Considerations
 
 Iframes work cross-origin by default. Key considerations:

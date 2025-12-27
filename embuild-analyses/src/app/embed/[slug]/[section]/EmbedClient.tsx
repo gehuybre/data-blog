@@ -17,6 +17,18 @@ interface EmbedClientProps {
   section: string
 }
 
+/**
+ * Props for StartersStoppersEmbed custom component
+ */
+interface StartersStoppersEmbedProps {
+  section: StartersStoppersSection
+  viewType: ViewType
+  horizon: StopHorizon
+  region: RegionCode | null
+  province: ProvinceCode | null
+  sector: string | null
+}
+
 interface UrlParams {
   view: ViewType
   horizon: StopHorizon
@@ -161,8 +173,8 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
 
   // Handle custom embeds
   if (config.type === "custom") {
-    // Registry of known custom components
-    const CUSTOM_COMPONENTS: Record<string, React.ComponentType<any>> = {
+    // Registry of known custom components with their proper types
+    const CUSTOM_COMPONENTS: Record<string, React.ComponentType<StartersStoppersEmbedProps>> = {
       StartersStoppersEmbed: StartersStoppersEmbed,
     }
 

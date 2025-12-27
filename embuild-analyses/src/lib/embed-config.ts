@@ -7,6 +7,8 @@
  * 2. The system will automatically generate routes and handle data loading
  */
 
+import { validateEmbedPath } from "./embed-path-validation"
+
 export type EmbedType = "standard" | "custom"
 
 export interface StandardEmbedConfig {
@@ -93,21 +95,27 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
 ]
 
 /**
- * Validate standard embed configuration paths in development mode
+ * Validate standard embed configuration in development mode
  */
 function validateStandardConfig(config: StandardEmbedConfig, slug: string, section: string): void {
   if (process.env.NODE_ENV !== "development") return
 
   const issues: string[] = []
 
-  // Check that dataPath follows expected pattern
-  if (!config.dataPath.startsWith(`${slug}/`)) {
-    issues.push(`dataPath should start with "${slug}/" but is "${config.dataPath}"`)
+  // Validate dataPath
+  const dataPathResult = validateEmbedPath(config.dataPath, "dataPath", slug)
+  if (!dataPathResult.valid) {
+    issues.push(...dataPathResult.errors)
   }
 
-  // Check that municipalitiesPath follows expected pattern
-  if (!config.municipalitiesPath.startsWith(`${slug}/`)) {
-    issues.push(`municipalitiesPath should start with "${slug}/" but is "${config.municipalitiesPath}"`)
+  // Validate municipalitiesPath
+  const municipalitiesPathResult = validateEmbedPath(
+    config.municipalitiesPath,
+    "municipalitiesPath",
+    slug
+  )
+  if (!municipalitiesPathResult.valid) {
+    issues.push(...municipalitiesPathResult.errors)
   }
 
   // Check required fields are present and non-empty
