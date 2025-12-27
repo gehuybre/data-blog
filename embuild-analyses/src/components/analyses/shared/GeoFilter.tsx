@@ -86,8 +86,18 @@ export function GeoFilter({
   }, [])
 
   const sortedMunicipalities = React.useMemo(() => {
-    return [...municipalities].sort((a, b) => a.name.localeCompare(b.name))
-  }, [municipalities])
+    let filtered = [...municipalities]
+
+    // Filter by selected province when a province is selected
+    if (selectedProvince) {
+      filtered = filtered.filter((m) => {
+        const municipalityProvince = getProvinceForMunicipality(m.code)
+        return String(municipalityProvince) === String(selectedProvince)
+      })
+    }
+
+    return filtered.sort((a, b) => a.name.localeCompare(b.name))
+  }, [municipalities, selectedProvince])
 
   function selectBelgium() {
     setSelectedRegion("1000")
