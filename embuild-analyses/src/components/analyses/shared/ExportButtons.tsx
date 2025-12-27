@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Download, Code, Check, Copy } from "lucide-react"
+import { isEmbeddable, getEmbedConfig } from "@/lib/embed-config"
 
 type ExportData = {
   label: string
@@ -97,11 +98,26 @@ export function ExportButtons({
     URL.revokeObjectURL(url)
   }, [data, title, slug, sectionId, periodHeaders, valueLabel, dataSource, dataSourceUrl])
 
-  const getEmbedCode = useCallback(() => {
+  const getEmbedCode = useCallback((): string => {
+    // Type guard: validate that this section is embeddable
+    if (!isEmbeddable(slug, sectionId)) {
+      // Return an HTML comment instead of throwing to avoid breaking the UI
+      return `<!-- Embed not available for ${slug}/${sectionId} -->
+<!-- To make this section embeddable, add it to EMBED_CONFIGS in src/lib/embed-config.ts -->`
+    }
+
+    // Get embed config to access height setting
+    const config = getEmbedConfig(slug, sectionId)
+    const height = config?.height ?? 500 // Default to 500px if not configured
+
     // Get the base URL - in production this will be the GitHub Pages URL
     const baseUrl = typeof window !== "undefined"
       ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "")
       : ""
+
+    // URL-encode slug and sectionId for security
+    const encodedSlug = encodeURIComponent(slug)
+    const encodedSectionId = encodeURIComponent(sectionId)
 
     // Build query params including view and any additional embed params
     const params = new URLSearchParams()
@@ -115,13 +131,13 @@ export function ExportButtons({
       }
     }
 
-    const embedUrl = `${baseUrl}/embed/${slug}/${sectionId}/?${params.toString()}`
+    const embedUrl = `${baseUrl}/embed/${encodedSlug}/${encodedSectionId}/?${params.toString()}`
 
     return `<iframe
   src="${embedUrl}"
   width="100%"
-  height="500"
-  frameborder="0"
+  height="${height}"
+  style="border: 0;"
   title="${title}"
   loading="lazy"
 ></iframe>`

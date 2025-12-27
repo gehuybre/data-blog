@@ -1,16 +1,10 @@
 import { EmbedClient } from "./EmbedClient"
+import { getAllEmbedParams } from "@/lib/embed-config"
+import { EmbedErrorBoundary } from "@/components/EmbedErrorBoundary"
 
-// Define all embeddable sections statically for static export
+// Auto-generate all embeddable sections from centralized config
 export function generateStaticParams() {
-  return [
-    // vergunningen-goedkeuringen analysis
-    { slug: "vergunningen-goedkeuringen", section: "renovatie" },
-    { slug: "vergunningen-goedkeuringen", section: "nieuwbouw" },
-    // starters-stoppers analysis
-    { slug: "starters-stoppers", section: "starters" },
-    { slug: "starters-stoppers", section: "stoppers" },
-    { slug: "starters-stoppers", section: "survival" },
-  ]
+  return getAllEmbedParams()
 }
 
 export default async function EmbedPage({
@@ -21,5 +15,10 @@ export default async function EmbedPage({
   const { slug, section } = await params
 
   // View type and filters are handled client-side via URL query params
-  return <EmbedClient slug={slug} section={section} />
+  // Wrap in error boundary to catch and display rendering failures gracefully
+  return (
+    <EmbedErrorBoundary>
+      <EmbedClient slug={slug} section={section} />
+    </EmbedErrorBoundary>
+  )
 }

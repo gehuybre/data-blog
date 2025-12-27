@@ -1,13 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { EmbeddableSection } from "@/components/analyses/shared/EmbeddableSection"
 import { StartersStoppersEmbed } from "@/components/analyses/starters-stoppers/StartersStoppersEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
-
-// Import data for each analysis
-import vergunningenData from "../../../../../analyses/vergunningen-goedkeuringen/results/data_quarterly.json"
-import vergunningenMunicipalities from "../../../../../analyses/vergunningen-goedkeuringen/results/municipalities.json"
+import { getEmbedConfig } from "@/lib/embed-config"
+import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
+import { getEmbedDataModule } from "@/lib/embed-data-registry"
 
 type ViewType = "chart" | "table" | "map"
 type StopHorizon = 1 | 2 | 3 | 4 | 5
@@ -18,28 +17,16 @@ interface EmbedClientProps {
   section: string
 }
 
-// Configuration for vergunningen embeddable sections
-const VERGUNNINGEN_CONFIGS: Record<string, {
-  title: string
-  data: unknown[]
-  municipalities: unknown[]
-  metric: string
-  label?: string
-}> = {
-  renovatie: {
-    title: "Renovatie (Gebouwen)",
-    data: vergunningenData,
-    municipalities: vergunningenMunicipalities,
-    metric: "ren",
-    label: "Aantal",
-  },
-  nieuwbouw: {
-    title: "Nieuwbouw (Gebouwen)",
-    data: vergunningenData,
-    municipalities: vergunningenMunicipalities,
-    metric: "new",
-    label: "Aantal",
-  },
+/**
+ * Props for StartersStoppersEmbed custom component
+ */
+interface StartersStoppersEmbedProps {
+  section: StartersStoppersSection
+  viewType: ViewType
+  horizon: StopHorizon
+  region: RegionCode | null
+  province: ProvinceCode | null
+  sector: string | null
 }
 
 interface UrlParams {
@@ -92,45 +79,172 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     sector: null,
   })
 
+  // State for dynamically loaded data
+  const [embedData, setEmbedData] = useState<{
+    data: EmbedDataRow[] | null
+    municipalities: MunicipalityData[] | null
+    loading: boolean
+    error: string | null
+  }>({
+    data: null,
+    municipalities: null,
+    loading: false,
+    error: null,
+  })
+
   useEffect(() => {
     setUrlParams(getParamsFromUrl())
   }, [])
 
-  // Handle starters-stoppers separately
-  if (slug === "starters-stoppers") {
-    const validSections: StartersStoppersSection[] = ["starters", "stoppers", "survival"]
-    if (!validSections.includes(section as StartersStoppersSection)) {
+  // Load data from registry for standard embeds
+  useEffect(() => {
+    const config = getEmbedConfig(slug, section)
+    if (!config || config.type !== "standard") return
+
+    setEmbedData((prev) => ({ ...prev, loading: true }))
+
+    try {
+      // Use synchronous registry lookup instead of dynamic imports
+      // This makes all data paths explicit for the bundler (webpack/vite)
+      const dataModule = getEmbedDataModule(slug, section)
+
+      if (!dataModule) {
+        // Developer error: config exists but data not registered
+        console.error("[EmbedClient] Data not found in registry:", {
+          slug,
+          section,
+          hint: "Add this embed to EMBED_DATA_REGISTRY in embed-data-registry.ts",
+        })
+
+        setEmbedData({
+          data: null,
+          municipalities: null,
+          loading: false,
+          error: "Data niet beschikbaar. Neem contact op met de beheerder.",
+        })
+        return
+      }
+
+      // Data is already validated in the registry
+      setEmbedData({
+        data: dataModule.data,
+        municipalities: dataModule.municipalities,
+        loading: false,
+        error: null,
+      })
+    } catch (err) {
+      // Log error for debugging
+      console.error("[EmbedClient] Failed to load data:", {
+        slug,
+        section,
+        error: err,
+      })
+
+      // User-friendly error message (Dutch)
+      const errorMessage =
+        err instanceof Error
+          ? `Fout bij laden van data: ${err.message}`
+          : "Er is een fout opgetreden bij het laden van de data."
+
+      setEmbedData({
+        data: null,
+        municipalities: null,
+        loading: false,
+        error: errorMessage,
+      })
+    }
+  }, [slug, section])
+
+  // Get config
+  const config = getEmbedConfig(slug, section)
+
+  if (!config) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-muted-foreground">
+          Embed niet gevonden: {slug}/{section}
+        </p>
+        <p className="text-xs text-muted-foreground mt-2">
+          Deze combinatie van analyse en sectie is niet beschikbaar voor embedding.
+        </p>
+      </div>
+    )
+  }
+
+  // Handle custom embeds
+  if (config.type === "custom") {
+    // Registry of known custom components with their proper types
+    const CUSTOM_COMPONENTS: Record<string, React.ComponentType<StartersStoppersEmbedProps>> = {
+      StartersStoppersEmbed: StartersStoppersEmbed,
+    }
+
+    // Validate component is registered
+    if (!CUSTOM_COMPONENTS[config.component]) {
       return (
         <div className="p-8 text-center">
-          <p className="text-muted-foreground">
-            Ongeldige sectie: {section}. Geldige opties: starters, stoppers, survival
+          <p className="text-red-500">
+            Custom component &quot;{config.component}&quot; not registered
+          </p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Add it to CUSTOM_COMPONENTS in EmbedClient.tsx
           </p>
         </div>
       )
     }
 
-    return (
-      <StartersStoppersEmbed
-        section={section as StartersStoppersSection}
-        viewType={urlParams.view}
-        horizon={urlParams.horizon}
-        region={urlParams.region}
-        province={urlParams.province}
-        sector={urlParams.sector}
-      />
-    )
+    // Handle StartersStoppersEmbed
+    if (config.component === "StartersStoppersEmbed") {
+      const validSections: StartersStoppersSection[] = ["starters", "stoppers", "survival"]
+      if (!validSections.includes(section as StartersStoppersSection)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}. Geldige opties: starters, stoppers, survival
+            </p>
+          </div>
+        )
+      }
+
+      const Component = CUSTOM_COMPONENTS[config.component]
+      return (
+        <Component
+          section={section as StartersStoppersSection}
+          viewType={urlParams.view}
+          horizon={urlParams.horizon}
+          region={urlParams.region}
+          province={urlParams.province}
+          sector={urlParams.sector}
+        />
+      )
+    }
+
+    // Generic fallback for other custom components
+    const Component = CUSTOM_COMPONENTS[config.component]
+    return <Component slug={slug} section={section} urlParams={urlParams} />
   }
 
-  // Handle vergunningen-goedkeuringen
-  if (slug === "vergunningen-goedkeuringen") {
-    const config = VERGUNNINGEN_CONFIGS[section]
-
-    if (!config) {
+  // Handle standard embeds
+  if (config.type === "standard") {
+    if (embedData.loading) {
       return (
         <div className="p-8 text-center">
-          <p className="text-muted-foreground">
-            Embed niet gevonden: {slug}/{section}
-          </p>
+          <p className="text-muted-foreground">Laden...</p>
+        </div>
+      )
+    }
+
+    if (embedData.error) {
+      return (
+        <div className="p-8 text-center">
+          <p className="text-red-500 whitespace-pre-wrap">{embedData.error}</p>
+        </div>
+      )
+    }
+
+    if (!embedData.data || !embedData.municipalities) {
+      return (
+        <div className="p-8 text-center">
+          <p className="text-muted-foreground">Geen data beschikbaar</p>
         </div>
       )
     }
@@ -138,8 +252,8 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     return (
       <EmbeddableSection
         title={config.title}
-        data={config.data as Record<string, unknown>[]}
-        municipalities={config.municipalities as { code: number; name: string }[]}
+        data={embedData.data}
+        municipalities={embedData.municipalities}
         metric={config.metric}
         label={config.label}
         viewType={urlParams.view}
@@ -147,11 +261,11 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     )
   }
 
-  // Unknown slug
+  // Unsupported custom component
   return (
     <div className="p-8 text-center">
       <p className="text-muted-foreground">
-        Embed niet gevonden: {slug}/{section}
+        Onbekend embed type: {config.type}
       </p>
     </div>
   )
