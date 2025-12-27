@@ -219,9 +219,11 @@ export function GeoFilter({
                   <>
                     <CommandSeparator />
                     <CommandGroup heading="Gemeente">
-                      {selectedProvince && !selectedMunicipality && (
+                      {!selectedMunicipality && (
                         <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                          Gemeenten in {selectedProvinceName}
+                          {selectedProvince
+                            ? `Gemeenten in ${selectedProvinceName}`
+                            : "Alle gemeenten (gebruik zoekfunctie voor snellere selectie)"}
                         </div>
                       )}
                       {sortedMunicipalities.map((m) => (
