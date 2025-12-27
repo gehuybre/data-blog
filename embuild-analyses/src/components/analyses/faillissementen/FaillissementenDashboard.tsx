@@ -276,20 +276,22 @@ function useSectorOptions(): { sectors: Sector[]; error: string | null } {
   if (isValidLookups(lookups)) {
     return { sectors: lookups.sectors, error: null }
   }
-  return safeArrayAccess<Sector>(
+  const result = safeArrayAccess<Sector>(
     (lookups as Record<string, unknown>).sectors,
     'sectorgegevens'
   )
+  return { sectors: result.data, error: result.error }
 }
 
 function useProvinceOptions(): { provinces: Province[]; error: string | null } {
   if (isValidLookups(lookups)) {
     return { provinces: lookups.provinces, error: null }
   }
-  return safeArrayAccess<Province>(
+  const result = safeArrayAccess<Province>(
     (lookups as Record<string, unknown>).provinces,
     'provinciegegevens'
   )
+  return { provinces: result.data, error: result.error }
 }
 
 // Sector filter dropdown
