@@ -74,11 +74,9 @@ def download_data() -> pd.DataFrame:
         print(f"Using INPUT_URL: {input_url}")
         urls_to_try = [input_url]
     else:
-        # Try current year, then previous year
-        current_year = datetime.now().year
+        # Use the static Statbel URL (no year parameter needed)
         urls_to_try = [
-            f"{BASE_URL}/TF_BANKRUPTCIES({current_year}).zip",
-            f"{BASE_URL}/TF_BANKRUPTCIES({current_year - 1}).zip",
+            f"{BASE_URL}/TF_BANKRUPTCIES.zip",
         ]
 
     for url in urls_to_try:
@@ -258,7 +256,7 @@ def process_data(df: pd.DataFrame) -> None:
         json.dump(monthly_sector_json, f)
 
     # =========================================================================
-    # AGGREGATE 7: By province (Flemish provinces only, construction sector)
+    # AGGREGATE 7: By province (construction sector)
     # =========================================================================
     df_bouw_prov = df_bouw[df_bouw["CD_PROV_REFNIS"].notna()].copy()
     df_bouw_prov["CD_PROV_REFNIS"] = df_bouw_prov["CD_PROV_REFNIS"].astype(int)
