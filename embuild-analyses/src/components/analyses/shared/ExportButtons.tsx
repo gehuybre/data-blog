@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Download, Code, Check, Copy } from "lucide-react"
+import { isEmbeddable } from "@/lib/embed-config"
 
 type ExportData = {
   label: string
@@ -98,6 +99,12 @@ export function ExportButtons({
   }, [data, title, slug, sectionId, periodHeaders, valueLabel, dataSource, dataSourceUrl])
 
   const getEmbedCode = useCallback(() => {
+    // Validate that this section is embeddable
+    if (!isEmbeddable(slug, sectionId)) {
+      return `<!-- Embed not available for ${slug}/${sectionId} -->
+<!-- To make this section embeddable, add it to EMBED_CONFIGS in src/lib/embed-config.ts -->`
+    }
+
     // Get the base URL - in production this will be the GitHub Pages URL
     const baseUrl = typeof window !== "undefined"
       ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "")

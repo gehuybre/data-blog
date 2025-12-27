@@ -1,16 +1,9 @@
 import { EmbedClient } from "./EmbedClient"
+import { getAllEmbedParams } from "@/lib/embed-config"
 
-// Define all embeddable sections statically for static export
+// Auto-generate all embeddable sections from centralized config
 export function generateStaticParams() {
-  return [
-    // vergunningen-goedkeuringen analysis
-    { slug: "vergunningen-goedkeuringen", section: "renovatie" },
-    { slug: "vergunningen-goedkeuringen", section: "nieuwbouw" },
-    // starters-stoppers analysis
-    { slug: "starters-stoppers", section: "starters" },
-    { slug: "starters-stoppers", section: "stoppers" },
-    { slug: "starters-stoppers", section: "survival" },
-  ]
+  return getAllEmbedParams()
 }
 
 export default async function EmbedPage({
