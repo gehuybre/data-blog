@@ -1,0 +1,13 @@
+{
+  "last_updated": "2025-12-27T00:00:00",
+  "data_source": "https://economie.fgov.be/sites/default/files/Files/Entreprises/prix-construction-Indice-I-2021.xlsx",
+  "latest_data_date": null,
+  "total_records": 0,
+  "components": [],
+  "date_range": {
+    "min_year": 2021,
+    "max_year": 2025,
+    "min_month": 1,
+    "max_month": 12
+  }
+}
