@@ -52,13 +52,22 @@ SECTOR_NAMES = {
     "?": "Onbekend",
 }
 
-# Flemish province codes
-FLEMISH_PROVINCES = {
+# Belgian province codes (all provinces including Flanders, Wallonia, and Brussels)
+BELGIAN_PROVINCES = {
+    # Flemish provinces
     10000: "Antwerpen",
     20001: "Vlaams-Brabant",
     30000: "West-Vlaanderen",
     40000: "Oost-Vlaanderen",
     70000: "Limburg",
+    # Walloon provinces
+    20002: "Waals-Brabant",
+    50000: "Henegouwen",
+    60000: "Luik",
+    80000: "Luxemburg",
+    90000: "Namen",
+    # Brussels
+    21000: "Brussel",
 }
 
 
@@ -112,23 +121,23 @@ def download_data() -> pd.DataFrame:
 def process_data(df: pd.DataFrame) -> None:
     """Process bankruptcy data and save aggregated results."""
 
-    # Filter for Flanders only
-    df_vl = df[df["TX_RGN_DESCR_NL"] == "Vlaams Gewest"].copy()
-    print(f"Filtered to {len(df_vl)} Flemish records")
+    # Use all Belgian data (no region filter)
+    df_be = df.copy()
+    print(f"Processing {len(df_be)} Belgian records")
 
     # Clean up sector code
-    df_vl["sector"] = df_vl["TX_NACE_REV2_SECTION"].fillna("?")
+    df_be["sector"] = df_be["TX_NACE_REV2_SECTION"].fillna("?")
 
     # Get year range
-    min_year = int(df_vl["CD_YEAR"].min())
-    max_year = int(df_vl["CD_YEAR"].max())
-    max_month = int(df_vl[df_vl["CD_YEAR"] == max_year]["CD_MONTH"].max())
+    min_year = int(df_be["CD_YEAR"].min())
+    max_year = int(df_be["CD_YEAR"].max())
+    max_month = int(df_be[df_be["CD_YEAR"] == max_year]["CD_MONTH"].max())
     print(f"Data range: {min_year} - {max_year}/{max_month}")
 
     # =========================================================================
     # AGGREGATE 1: Monthly totals for ALL sectors
     # =========================================================================
-    monthly_all = df_vl.groupby(["CD_YEAR", "CD_MONTH"]).agg({
+    monthly_all = df_be.groupby(["CD_YEAR", "CD_MONTH"]).agg({
         "MS_COUNTOF_BANKRUPTCIES": "sum",
         "MS_COUNTOF_WORKERS": "sum",
     }).reset_index()
@@ -150,7 +159,7 @@ def process_data(df: pd.DataFrame) -> None:
     # =========================================================================
     # AGGREGATE 2: Monthly totals for CONSTRUCTION sector only
     # =========================================================================
-    df_bouw = df_vl[df_vl["sector"] == "F"]
+    df_bouw = df_be[df_be["sector"] == "F"]
 
     monthly_bouw = df_bouw.groupby(["CD_YEAR", "CD_MONTH"]).agg({
         "MS_COUNTOF_BANKRUPTCIES": "sum",
@@ -174,7 +183,7 @@ def process_data(df: pd.DataFrame) -> None:
     # =========================================================================
     # AGGREGATE 3: Yearly totals for ALL sectors
     # =========================================================================
-    yearly_all = df_vl.groupby(["CD_YEAR"]).agg({
+    yearly_all = df_be.groupby(["CD_YEAR"]).agg({
         "MS_COUNTOF_BANKRUPTCIES": "sum",
         "MS_COUNTOF_WORKERS": "sum",
     }).reset_index()
@@ -216,7 +225,7 @@ def process_data(df: pd.DataFrame) -> None:
     # =========================================================================
     # AGGREGATE 5: Yearly by sector (for sector comparison)
     # =========================================================================
-    yearly_by_sector = df_vl.groupby(["CD_YEAR", "sector"]).agg({
+    yearly_by_sector = df_be.groupby(["CD_YEAR", "sector"]).agg({
         "MS_COUNTOF_BANKRUPTCIES": "sum",
         "MS_COUNTOF_WORKERS": "sum",
     }).reset_index()
@@ -238,7 +247,7 @@ def process_data(df: pd.DataFrame) -> None:
     # =========================================================================
     # AGGREGATE 6: Monthly by sector (for sector comparison charts)
     # =========================================================================
-    monthly_by_sector = df_vl.groupby(["CD_YEAR", "CD_MONTH", "sector"]).agg({
+    monthly_by_sector = df_be.groupby(["CD_YEAR", "CD_MONTH", "sector"]).agg({
         "MS_COUNTOF_BANKRUPTCIES": "sum",
         "MS_COUNTOF_WORKERS": "sum",
     }).reset_index()
@@ -277,7 +286,7 @@ def process_data(df: pd.DataFrame) -> None:
             "w": int(row["MS_COUNTOF_WORKERS"]),
         }
         for _, row in provinces_yearly.iterrows()
-        if int(row["CD_PROV_REFNIS"]) in FLEMISH_PROVINCES
+        if int(row["CD_PROV_REFNIS"]) in BELGIAN_PROVINCES
     ]
     provinces_json.sort(key=lambda x: (x["y"], x["p"]))
 
@@ -287,10 +296,10 @@ def process_data(df: pd.DataFrame) -> None:
     # =========================================================================
     # AGGREGATE 8: By province (all sectors)
     # =========================================================================
-    df_vl_prov = df_vl[df_vl["CD_PROV_REFNIS"].notna()].copy()
-    df_vl_prov["CD_PROV_REFNIS"] = df_vl_prov["CD_PROV_REFNIS"].astype(int)
+    df_be_prov = df_be[df_be["CD_PROV_REFNIS"].notna()].copy()
+    df_be_prov["CD_PROV_REFNIS"] = df_be_prov["CD_PROV_REFNIS"].astype(int)
 
-    provinces_all_yearly = df_vl_prov.groupby(["CD_YEAR", "CD_PROV_REFNIS"]).agg({
+    provinces_all_yearly = df_be_prov.groupby(["CD_YEAR", "CD_PROV_REFNIS"]).agg({
         "MS_COUNTOF_BANKRUPTCIES": "sum",
         "MS_COUNTOF_WORKERS": "sum",
     }).reset_index()
@@ -303,7 +312,7 @@ def process_data(df: pd.DataFrame) -> None:
             "w": int(row["MS_COUNTOF_WORKERS"]),
         }
         for _, row in provinces_all_yearly.iterrows()
-        if int(row["CD_PROV_REFNIS"]) in FLEMISH_PROVINCES
+        if int(row["CD_PROV_REFNIS"]) in BELGIAN_PROVINCES
     ]
     provinces_all_json.sort(key=lambda x: (x["y"], x["p"]))
 
@@ -327,7 +336,7 @@ def process_data(df: pd.DataFrame) -> None:
             "w": int(row["MS_COUNTOF_WORKERS"]),
         }
         for _, row in monthly_prov_bouw.iterrows()
-        if int(row["CD_PROV_REFNIS"]) in FLEMISH_PROVINCES
+        if int(row["CD_PROV_REFNIS"]) in BELGIAN_PROVINCES
     ]
     monthly_prov_bouw_json.sort(key=lambda x: (x["y"], x["m"], x["p"]))
 
@@ -337,7 +346,7 @@ def process_data(df: pd.DataFrame) -> None:
     # =========================================================================
     # AGGREGATE 10: Monthly by province (all sectors)
     # =========================================================================
-    monthly_prov_all = df_vl_prov.groupby(["CD_YEAR", "CD_MONTH", "CD_PROV_REFNIS"]).agg({
+    monthly_prov_all = df_be_prov.groupby(["CD_YEAR", "CD_MONTH", "CD_PROV_REFNIS"]).agg({
         "MS_COUNTOF_BANKRUPTCIES": "sum",
         "MS_COUNTOF_WORKERS": "sum",
     }).reset_index()
@@ -351,7 +360,7 @@ def process_data(df: pd.DataFrame) -> None:
             "w": int(row["MS_COUNTOF_WORKERS"]),
         }
         for _, row in monthly_prov_all.iterrows()
-        if int(row["CD_PROV_REFNIS"]) in FLEMISH_PROVINCES
+        if int(row["CD_PROV_REFNIS"]) in BELGIAN_PROVINCES
     ]
     monthly_prov_all_json.sort(key=lambda x: (x["y"], x["m"], x["p"]))
 
@@ -361,7 +370,7 @@ def process_data(df: pd.DataFrame) -> None:
     # =========================================================================
     # AGGREGATE 11: Yearly by sector and province (for geo filter in sector comparison)
     # =========================================================================
-    yearly_sector_prov = df_vl_prov.groupby(["CD_YEAR", "sector", "CD_PROV_REFNIS"]).agg({
+    yearly_sector_prov = df_be_prov.groupby(["CD_YEAR", "sector", "CD_PROV_REFNIS"]).agg({
         "MS_COUNTOF_BANKRUPTCIES": "sum",
         "MS_COUNTOF_WORKERS": "sum",
     }).reset_index()
@@ -375,7 +384,7 @@ def process_data(df: pd.DataFrame) -> None:
             "w": int(row["MS_COUNTOF_WORKERS"]),
         }
         for _, row in yearly_sector_prov.iterrows()
-        if int(row["CD_PROV_REFNIS"]) in FLEMISH_PROVINCES
+        if int(row["CD_PROV_REFNIS"]) in BELGIAN_PROVINCES
     ]
     yearly_sector_prov_json.sort(key=lambda x: (x["y"], x["s"], x["p"]))
 
@@ -431,7 +440,7 @@ def process_data(df: pd.DataFrame) -> None:
         json.dump(duration_bouw_json, f)
 
     # All sectors by duration
-    duration_all = df_vl.groupby(["CD_YEAR", "TX_COMPANY_DURATION_NL"]).agg({
+    duration_all = df_be.groupby(["CD_YEAR", "TX_COMPANY_DURATION_NL"]).agg({
         "MS_COUNTOF_BANKRUPTCIES": "sum",
         "MS_COUNTOF_WORKERS": "sum",
     }).reset_index()
@@ -472,7 +481,7 @@ def process_data(df: pd.DataFrame) -> None:
             "w": int(row["MS_COUNTOF_WORKERS"]),
         }
         for _, row in duration_prov_bouw.iterrows()
-        if int(row["CD_PROV_REFNIS"]) in FLEMISH_PROVINCES
+        if int(row["CD_PROV_REFNIS"]) in BELGIAN_PROVINCES
     ]
     duration_prov_bouw_json.sort(key=lambda x: (x["y"], x["do"], x["p"]))
 
@@ -503,7 +512,7 @@ def process_data(df: pd.DataFrame) -> None:
         json.dump(workers_bouw_json, f)
 
     # All sectors by worker class
-    workers_all = df_vl.groupby(["CD_YEAR", "TX_EMPLOYMENT_CLASS_DESCR_NL"]).agg({
+    workers_all = df_be.groupby(["CD_YEAR", "TX_EMPLOYMENT_CLASS_DESCR_NL"]).agg({
         "MS_COUNTOF_BANKRUPTCIES": "sum",
         "MS_COUNTOF_WORKERS": "sum",
     }).reset_index()
@@ -537,7 +546,7 @@ def process_data(df: pd.DataFrame) -> None:
             "w": int(row["MS_COUNTOF_WORKERS"]),
         }
         for _, row in workers_prov_bouw.iterrows()
-        if int(row["CD_PROV_REFNIS"]) in FLEMISH_PROVINCES
+        if int(row["CD_PROV_REFNIS"]) in BELGIAN_PROVINCES
     ]
     workers_prov_bouw_json.sort(key=lambda x: (x["y"], x["c"], x["p"]))
 
@@ -548,7 +557,7 @@ def process_data(df: pd.DataFrame) -> None:
     # LOOKUPS for UI
     # =========================================================================
     # Get all sectors that appear in the data
-    sectors_in_data = sorted(df_vl["sector"].unique())
+    sectors_in_data = sorted(df_be["sector"].unique())
     sectors_lookup = [
         {"code": s, "nl": SECTOR_NAMES.get(s, s)}
         for s in sectors_in_data
@@ -557,7 +566,7 @@ def process_data(df: pd.DataFrame) -> None:
 
     provinces_lookup = [
         {"code": str(code), "name": name}
-        for code, name in sorted(FLEMISH_PROVINCES.items(), key=lambda x: x[1])
+        for code, name in sorted(BELGIAN_PROVINCES.items(), key=lambda x: x[1])
     ]
 
     # Duration lookup
@@ -567,7 +576,7 @@ def process_data(df: pd.DataFrame) -> None:
     ]
 
     # Worker class lookup (get unique values from data)
-    worker_classes = sorted(df_vl["TX_EMPLOYMENT_CLASS_DESCR_NL"].dropna().unique())
+    worker_classes = sorted(df_be["TX_EMPLOYMENT_CLASS_DESCR_NL"].dropna().unique())
     worker_classes_lookup = [
         {"code": c, "name": c}
         for c in worker_classes
@@ -593,7 +602,7 @@ def process_data(df: pd.DataFrame) -> None:
         "max_year": max_year,
         "max_month": max_month,
         "last_updated": datetime.now().isoformat(),
-        "total_records": len(df_vl),
+        "total_records": len(df_be),
         "construction_records": len(df_bouw),
         "source_url": "https://statbel.fgov.be/nl/themas/ondernemingen/faillissementen",
     }
@@ -603,7 +612,7 @@ def process_data(df: pd.DataFrame) -> None:
 
     print(f"\nProcessing complete!")
     print(f"Data range: {min_year} - {max_year}/{max_month}")
-    print(f"Total Flemish records: {len(df_vl)}")
+    print(f"Total Belgian records: {len(df_be)}")
     print(f"Construction sector records: {len(df_bouw)}")
     print(f"Output files saved to: {RESULTS_DIR}")
 
