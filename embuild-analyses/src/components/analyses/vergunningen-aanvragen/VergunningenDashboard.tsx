@@ -228,6 +228,14 @@ function NieuwbouwSection() {
     }
   }, [currentView, yearlyData, quarterlyData, typeData, trendData])
 
+  // Period headers based on current view
+  const periodHeaders = React.useMemo(() => {
+    if (currentView === "yearly" || currentView === "trend") return ["Jaar"]
+    if (currentView === "quarterly") return ["Periode"]
+    if (currentView === "type") return ["Jaar", "Type"]
+    return ["Jaar"]
+  }, [currentView])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -235,6 +243,7 @@ function NieuwbouwSection() {
         <div className="flex items-center gap-2">
           <ExportButtons
             data={exportData}
+            periodHeaders={periodHeaders}
             title="Nieuwbouw vergunningen"
             slug="vergunningen-aanvragen"
             sectionId="nieuwbouw"
@@ -441,6 +450,14 @@ function VerbouwSection() {
     }
   }, [currentView, yearlyData, quarterlyData, typeData, trendData])
 
+  // Period headers based on current view
+  const periodHeaders = React.useMemo(() => {
+    if (currentView === "yearly" || currentView === "trend") return ["Jaar"]
+    if (currentView === "quarterly") return ["Periode"]
+    if (currentView === "type") return ["Jaar", "Type"]
+    return ["Jaar"]
+  }, [currentView])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -448,6 +465,7 @@ function VerbouwSection() {
         <div className="flex items-center gap-2">
           <ExportButtons
             data={exportData}
+            periodHeaders={periodHeaders}
             title="Verbouw vergunningen"
             slug="vergunningen-aanvragen"
             sectionId="verbouw"
@@ -654,6 +672,14 @@ function SloopSection() {
     }
   }, [currentView, yearlyData, quarterlyData, besluitData, trendData])
 
+  // Period headers based on current view
+  const periodHeaders = React.useMemo(() => {
+    if (currentView === "yearly" || currentView === "trend") return ["Jaar"]
+    if (currentView === "quarterly") return ["Periode"]
+    if (currentView === "besluit") return ["Jaar", "Besluit"]
+    return ["Jaar"]
+  }, [currentView])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -661,6 +687,7 @@ function SloopSection() {
         <div className="flex items-center gap-2">
           <ExportButtons
             data={exportData}
+            periodHeaders={periodHeaders}
             title="Sloop vergunningen"
             slug="vergunningen-aanvragen"
             sectionId="sloop"
