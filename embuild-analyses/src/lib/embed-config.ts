@@ -21,6 +21,8 @@ export interface StandardEmbedConfig {
   metric: string
   /** Label for the metric (e.g., "Aantal") */
   label?: string
+  /** Height of the iframe in pixels (default: 500) */
+  height?: number
 }
 
 export interface CustomEmbedConfig {
@@ -29,6 +31,8 @@ export interface CustomEmbedConfig {
   title: string
   /** Component name to render (must be registered in EmbedClient) */
   component: string
+  /** Height of the iframe in pixels (default: 500) */
+  height?: number
 }
 
 export type EmbedConfig = StandardEmbedConfig | CustomEmbedConfig
