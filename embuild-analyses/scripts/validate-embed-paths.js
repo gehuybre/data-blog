@@ -73,6 +73,15 @@ for (const analysis of EMBED_CONFIGS) {
         validatedCount++;
       }
 
+      // Validate path traversal (security check)
+      if (dataPath.includes('..') || dataPath.includes('~')) {
+        errors.push(\`⚠️  [\${analysis.slug}/\${sectionId}] Path traversal detected in dataPath: \${dataPath}\`);
+      }
+
+      if (municipalitiesPath.includes('..') || municipalitiesPath.includes('~')) {
+        errors.push(\`⚠️  [\${analysis.slug}/\${sectionId}] Path traversal detected in municipalitiesPath: \${municipalitiesPath}\`);
+      }
+
       // Validate path consistency (path should start with analysis slug)
       if (!dataPath.startsWith(\`\${analysis.slug}/\`)) {
         errors.push(\`⚠️  [\${analysis.slug}/\${sectionId}] Data path doesn't start with analysis slug: \${dataPath}\`);

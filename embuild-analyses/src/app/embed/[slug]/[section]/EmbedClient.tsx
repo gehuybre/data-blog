@@ -7,6 +7,9 @@ import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig, StandardEmbedConfig } from "@/lib/embed-config"
 import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
 
+// Base path for dynamic imports (relative to this file)
+const ANALYSES_BASE_PATH = "../../../../../analyses/"
+
 type ViewType = "chart" | "table" | "map"
 type StopHorizon = 1 | 2 | 3 | 4 | 5
 type StartersStoppersSection = "starters" | "stoppers" | "survival"
@@ -89,7 +92,7 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     if (!config || config.type !== "standard") return
 
     const standardConfig = config as StandardEmbedConfig
-    let isCancelled = false
+    const abortController = new AbortController()
 
     // Validate paths don't escape analyses directory
     // This is a defense-in-depth measure. The actual security is ensured by:
@@ -108,13 +111,21 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
 
     setEmbedData((prev) => ({ ...prev, loading: true }))
 
+    // Dynamic imports with template literals
+    // Note: These paths are constructed from hardcoded config, not user input.
+    // Webpack/Vite may have limitations with very dynamic paths - they work best
+    // when the path has a static prefix (like ANALYSES_BASE_PATH).
+    // If imports fail, check that:
+    // 1. Paths are relative to this file
+    // 2. Paths don't use variables that are too dynamic
+    // 3. Files exist at build time (validated by validate-embed-paths.js)
     Promise.all([
-      import(`../../../../../analyses/${standardConfig.dataPath}`),
-      import(`../../../../../analyses/${standardConfig.municipalitiesPath}`),
+      import(`${ANALYSES_BASE_PATH}${standardConfig.dataPath}`),
+      import(`${ANALYSES_BASE_PATH}${standardConfig.municipalitiesPath}`),
     ])
       .then(([dataModule, municipalitiesModule]) => {
         // Prevent state update if component unmounted or slug/section changed
-        if (isCancelled) return
+        if (abortController.signal.aborted) return
 
         setEmbedData({
           data: dataModule.default as EmbedDataRow[],
@@ -125,7 +136,16 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
       })
       .catch((err) => {
         // Prevent state update if component unmounted or slug/section changed
-        if (isCancelled) return
+        if (abortController.signal.aborted) return
+
+        // Log error for debugging
+        console.error('[EmbedClient] Failed to load data:', {
+          slug,
+          section,
+          dataPath: standardConfig.dataPath,
+          municipalitiesPath: standardConfig.municipalitiesPath,
+          error: err,
+        })
 
         // More specific error messages
         let errorMessage = "Failed to load data"
@@ -145,7 +165,7 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
 
     // Cleanup function to prevent race conditions
     return () => {
-      isCancelled = true
+      abortController.abort()
     }
   }, [slug, section])
 
