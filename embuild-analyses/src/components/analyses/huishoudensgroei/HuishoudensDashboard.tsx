@@ -533,6 +533,7 @@ function RankingSection({
   onHorizonChange: (year: number) => void
 }) {
   const [showDecline, setShowDecline] = React.useState(false)
+  const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("table")
 
   const ranking = React.useMemo(
     () => getMunicipalityRanking(horizonYear, provinceCode, 10, showDecline),
@@ -542,6 +543,16 @@ function RankingSection({
   const provinces = useProvinceOptions()
   const provinceName = provinceCode ? provinces.find((p) => p.code === provinceCode)?.name : null
 
+  const exportData = React.useMemo(
+    () =>
+      ranking.map((r) => ({
+        label: r.name,
+        value: r.gr,
+        periodCells: [r.name, r.n, r.gr],
+      })),
+    [ranking]
+  )
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -549,17 +560,28 @@ function RankingSection({
           {showDecline ? "Gemeenten met sterkste afname" : "Snelst groeiende gemeenten"}
           {provinceName && ` in ${provinceName}`}
         </h2>
-        <div className="flex items-center gap-2">
-          <GeoFilterInline selectedLevel={geoLevel} selectedCode={selectedCode} onSelect={onSelectGeo} />
-          <HorizonFilterInline selected={horizonYear} onChange={onHorizonChange} />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDecline(!showDecline)}
-          >
-            {showDecline ? "Toon groei" : "Toon afname"}
-          </Button>
-        </div>
+        <ExportButtons
+          data={exportData}
+          title={`${showDecline ? "Gemeenten met sterkste afname" : "Snelst groeiende gemeenten"}${provinceName ? ` in ${provinceName}` : ""}`}
+          slug="huishoudensgroei"
+          sectionId="ranking"
+          viewType={currentView}
+          periodHeaders={["Gemeente", "Huishoudens", "Groei (%)"]}
+          valueLabel="Groei (%)"
+          dataSource="Statistiek Vlaanderen - Huishoudensvooruitzichten"
+          dataSourceUrl="https://www.vlaanderen.be/statistiek-vlaanderen/bevolking/huishoudensvooruitzichten-aantal-en-groei"
+        />
+      </div>
+      <div className="flex items-center gap-2 flex-wrap">
+        <GeoFilterInline selectedLevel={geoLevel} selectedCode={selectedCode} onSelect={onSelectGeo} />
+        <HorizonFilterInline selected={horizonYear} onChange={onHorizonChange} />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowDecline(!showDecline)}
+        >
+          {showDecline ? "Toon groei" : "Toon afname"}
+        </Button>
       </div>
 
       <Card>
@@ -603,6 +625,7 @@ function SizeBreakdownSection({
   onSelectGeo: (level: "vlaanderen" | "province" | "municipality", code: string | null) => void
   onHorizonChange: (year: number) => void
 }) {
+  const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("table")
   const baseData = getSizeBreakdown(level, code, BASE_YEAR)
   const horizonData = getSizeBreakdown(level, code, horizonYear)
 
@@ -619,14 +642,35 @@ function SizeBreakdownSection({
     })
   }, [baseData, horizonData])
 
+  const exportData = React.useMemo(
+    () =>
+      combined.map((item) => ({
+        label: item.label,
+        value: item.growth,
+        periodCells: [item.label, item.base, item.horizon, item.growth],
+      })),
+    [combined]
+  )
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Samenstelling huishoudens</h2>
-        <div className="flex items-center gap-2">
-          <GeoFilterInline selectedLevel={level} selectedCode={code} onSelect={onSelectGeo} />
-          <HorizonFilterInline selected={horizonYear} onChange={onHorizonChange} />
-        </div>
+        <ExportButtons
+          data={exportData}
+          title="Samenstelling huishoudens"
+          slug="huishoudensgroei"
+          sectionId="size-breakdown"
+          viewType={currentView}
+          periodHeaders={["Huishoudgrootte", `${BASE_YEAR}`, `${horizonYear}`, "Groei (%)"]}
+          valueLabel="Groei (%)"
+          dataSource="Statistiek Vlaanderen - Huishoudensvooruitzichten"
+          dataSourceUrl="https://www.vlaanderen.be/statistiek-vlaanderen/bevolking/huishoudensvooruitzichten-aantal-en-groei"
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <GeoFilterInline selectedLevel={level} selectedCode={code} onSelect={onSelectGeo} />
+        <HorizonFilterInline selected={horizonYear} onChange={onHorizonChange} />
       </div>
 
       <Card>
