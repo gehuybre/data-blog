@@ -6,7 +6,6 @@ import { StartersStoppersEmbed } from "@/components/analyses/starters-stoppers/S
 import { VastgoedVerkopenEmbed } from "@/components/analyses/vastgoed-verkopen/VastgoedVerkopenEmbed"
 import { FaillissementenEmbed } from "@/components/analyses/faillissementen/FaillissementenEmbed"
 import { HuishoudensgroeiEmbed } from "@/components/analyses/huishoudensgroei/HuishoudensgroeiEmbed"
-import { EnergiekaartPremiesEmbed } from "@/components/analyses/energiekaart-premies/EnergiekaartPremiesEmbed"
 import { VergunningenAanvragenEmbed } from "@/components/analyses/vergunningen-aanvragen/VergunningenAanvragenEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig } from "@/lib/embed-config"
@@ -41,11 +40,14 @@ interface UrlParams {
   region: RegionCode | null
   province: ProvinceCode | null
   sector: string | null
+  metric: string | null
+  timeRange: string | null
+  subView: string | null
 }
 
 function getParamsFromUrl(): UrlParams {
   if (typeof window === "undefined") {
-    return { view: "chart", horizon: 1, region: null, province: null, sector: null }
+    return { view: "chart", horizon: 1, region: null, province: null, sector: null, metric: null, timeRange: null, subView: null }
   }
 
   const params = new URLSearchParams(window.location.search)
@@ -73,7 +75,16 @@ function getParamsFromUrl(): UrlParams {
   // Sector (NACE code)
   const sector = params.get("sector") || null
 
-  return { view: viewType, horizon, region, province, sector }
+  // Metric (for vergunningen-aanvragen)
+  const metric = params.get("metric") || null
+
+  // Time Range (for vergunningen-aanvragen)
+  const timeRange = params.get("timeRange") || null
+
+  // Sub View (for vergunningen-aanvragen)
+  const subView = params.get("subView") || null
+
+  return { view: viewType, horizon, region, province, sector, metric, timeRange, subView }
 }
 
 function toChartOrTableViewType(viewType: ViewType): ChartOrTableViewType {
@@ -87,6 +98,9 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     region: null,
     province: null,
     sector: null,
+    metric: null,
+    timeRange: null,
+    subView: null,
   })
 
   // State for dynamically loaded data
@@ -279,30 +293,6 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
       )
     }
 
-    // Handle EnergiekaartPremiesEmbed
-    if (config.component === "EnergiekaartPremiesEmbed") {
-      const validSections = ["aantal-premies", "bedrag-premies", "aantal-beschermd", "bedrag-beschermd"]
-      if (!validSections.includes(section)) {
-        return (
-          <div className="p-8 text-center">
-            <p className="text-muted-foreground">
-              Ongeldige sectie: {section}
-            </p>
-          </div>
-        )
-      }
-
-      // Get measure from URL params (defaults to "Totaal")
-      const measure = urlParams.sector || "Totaal"
-
-      return (
-        <EnergiekaartPremiesEmbed
-          section={section as "aantal-premies" | "bedrag-premies" | "aantal-beschermd" | "bedrag-beschermd"}
-          measure={measure}
-        />
-      )
-    }
-
     // Handle VergunningenAanvragenEmbed
     if (config.component === "VergunningenAanvragenEmbed") {
       const validSections = ["nieuwbouw", "verbouw", "sloop"]
@@ -317,13 +307,13 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
       }
 
       // Parse metric from URL params (defaults to "w" for wooneenheden)
-      const metric = urlParams.sector || "w"
+      const metric = urlParams.metric || "w"
 
       // Parse timeRange from URL params (defaults to "yearly")
-      const timeRange = urlParams.region as "quarterly" | "yearly" | null || "yearly"
+      const timeRange = (urlParams.timeRange as "quarterly" | "yearly") || "yearly"
 
       // Parse subView from URL params (defaults to "total")
-      const subView = urlParams.province as "total" | "type" | "besluit" | null || "total"
+      const subView = (urlParams.subView as "total" | "type" | "besluit") || "total"
 
       return (
         <VergunningenAanvragenEmbed

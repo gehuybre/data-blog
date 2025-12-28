@@ -48,6 +48,7 @@ type ChartPoint = {
   sortValue: number
   periodCells: Array<string | number>
   value: number
+  formattedValue?: string
 }
 
 type SectionType = "nieuwbouw" | "verbouw" | "sloop"
@@ -70,28 +71,38 @@ function getNieuwbouwData(
     return years.flatMap((year) =>
       ["eengezins", "meergezins", "kamer"].map((t) => {
         const found = (nieuwbouwByType as TypeRow[]).find((r) => r.y === year && r.t === t)
+        const value = found ? found[metric] : 0
         return {
           sortValue: year * 10 + ["eengezins", "meergezins", "kamer"].indexOf(t),
           periodCells: [year, TYPE_LABELS[t]],
-          value: found ? found[metric] : 0,
+          value,
+          formattedValue: formatInt(value),
         }
       })
     )
   }
 
   if (timeRange === "yearly") {
-    return (nieuwbouwYearly as YearlyRow[]).map((r) => ({
-      sortValue: r.y,
-      periodCells: [r.y],
-      value: r[metric],
-    }))
+    return (nieuwbouwYearly as YearlyRow[]).map((r) => {
+      const value = r[metric]
+      return {
+        sortValue: r.y,
+        periodCells: [r.y],
+        value,
+        formattedValue: formatInt(value),
+      }
+    })
   }
 
-  return (nieuwbouwQuarterly as QuarterlyRow[]).map((r) => ({
-    sortValue: r.y * 10 + r.q,
-    periodCells: [`${r.y} Q${r.q}`],
-    value: r[metric],
-  }))
+  return (nieuwbouwQuarterly as QuarterlyRow[]).map((r) => {
+    const value = r[metric]
+    return {
+      sortValue: r.y * 10 + r.q,
+      periodCells: [`${r.y} Q${r.q}`],
+      value,
+      formattedValue: formatInt(value),
+    }
+  })
 }
 
 // Verbouw data functions
@@ -105,28 +116,38 @@ function getVerbouwData(
     return years.flatMap((year) =>
       ["eengezins", "meergezins", "kamer"].map((t) => {
         const found = (verbouwByType as TypeRow[]).find((r) => r.y === year && r.t === t)
+        const value = found ? found[metric] : 0
         return {
           sortValue: year * 10 + ["eengezins", "meergezins", "kamer"].indexOf(t),
           periodCells: [year, TYPE_LABELS[t]],
-          value: found ? found[metric] : 0,
+          value,
+          formattedValue: formatInt(value),
         }
       })
     )
   }
 
   if (timeRange === "yearly") {
-    return (verbouwYearly as YearlyRow[]).map((r) => ({
-      sortValue: r.y,
-      periodCells: [r.y],
-      value: r[metric],
-    }))
+    return (verbouwYearly as YearlyRow[]).map((r) => {
+      const value = r[metric]
+      return {
+        sortValue: r.y,
+        periodCells: [r.y],
+        value,
+        formattedValue: formatInt(value),
+      }
+    })
   }
 
-  return (verbouwQuarterly as QuarterlyRow[]).map((r) => ({
-    sortValue: r.y * 10 + r.q,
-    periodCells: [`${r.y} Q${r.q}`],
-    value: r[metric],
-  }))
+  return (verbouwQuarterly as QuarterlyRow[]).map((r) => {
+    const value = r[metric]
+    return {
+      sortValue: r.y * 10 + r.q,
+      periodCells: [`${r.y} Q${r.q}`],
+      value,
+      formattedValue: formatInt(value),
+    }
+  })
 }
 
 // Sloop data functions
@@ -140,28 +161,38 @@ function getSloopData(
     return years.flatMap((year) =>
       ["Gemeente", "Provincie", "Onbekend"].map((b, idx) => {
         const found = (sloopByBesluit as SloopBesluitRow[]).find((r) => r.y === year && r.b === b)
+        const value = found ? found[metric] : 0
         return {
           sortValue: year * 10 + idx,
           periodCells: [year, b],
-          value: found ? found[metric] : 0,
+          value,
+          formattedValue: formatInt(value),
         }
       })
     )
   }
 
   if (timeRange === "yearly") {
-    return (sloopYearly as SloopYearlyRow[]).map((r) => ({
-      sortValue: r.y,
-      periodCells: [r.y],
-      value: r[metric],
-    }))
+    return (sloopYearly as SloopYearlyRow[]).map((r) => {
+      const value = r[metric]
+      return {
+        sortValue: r.y,
+        periodCells: [r.y],
+        value,
+        formattedValue: formatInt(value),
+      }
+    })
   }
 
-  return (sloopQuarterly as SloopQuarterlyRow[]).map((r) => ({
-    sortValue: r.y * 10 + r.q,
-    periodCells: [`${r.y} Q${r.q}`],
-    value: r[metric],
-  }))
+  return (sloopQuarterly as SloopQuarterlyRow[]).map((r) => {
+    const value = r[metric]
+    return {
+      sortValue: r.y * 10 + r.q,
+      periodCells: [`${r.y} Q${r.q}`],
+      value,
+      formattedValue: formatInt(value),
+    }
+  })
 }
 
 interface VergunningenAanvragenEmbedProps {
