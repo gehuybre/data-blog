@@ -1,10 +1,12 @@
 """
 Generate province-level GeoJSON from municipality-level data.
-This script aggregates municipality geometries by province.
+This script aggregates municipality geometries by province using proper
+topological operations via geopandas.
 """
 import json
 from pathlib import Path
-from collections import defaultdict
+import geopandas as gpd
+from shapely.geometry import shape
 
 # Province mapping (NIS code first 2 digits -> province info)
 PROVINCE_MAPPING = {
@@ -66,26 +68,6 @@ def get_province_for_municipality(nis_code: str) -> dict:
     return PROVINCE_MAPPING.get(prefix, {"code": "unknown", "name": "Unknown", "nuts_id": ""})
 
 
-def dissolve_geometries(geometries):
-    """
-    Simple geometry dissolve - combines multiple polygons.
-    For proper topology, you'd use shapely/geopandas, but this works for visualization.
-    """
-    # Group all coordinates
-    all_coords = []
-    for geom in geometries:
-        if geom["type"] == "Polygon":
-            all_coords.append(geom["coordinates"])
-        elif geom["type"] == "MultiPolygon":
-            all_coords.extend(geom["coordinates"])
-
-    # If we have just one polygon, return Polygon, otherwise MultiPolygon
-    if len(all_coords) == 1:
-        return {"type": "Polygon", "coordinates": all_coords[0]}
-    else:
-        return {"type": "MultiPolygon", "coordinates": all_coords}
-
-
 def main():
     # Paths
     project_root = Path(__file__).parent.parent
@@ -94,62 +76,53 @@ def main():
 
     print(f"Reading municipalities from: {input_file}")
 
-    # Read municipality data
-    with open(input_file, "r", encoding="utf-8") as f:
-        muni_data = json.load(f)
+    # Read municipality GeoJSON using geopandas
+    gdf = gpd.read_file(input_file)
 
-    # Group by province
-    province_geoms = defaultdict(list)
-    for feature in muni_data["features"]:
-        nis_code = str(feature["properties"].get("code", ""))
-        if not nis_code:
-            continue
+    # Add province information to each municipality
+    gdf["province_code"] = gdf["code"].astype(str).str[:2].map(
+        lambda x: PROVINCE_MAPPING.get(x, {"code": "unknown"})["code"]
+    )
+    gdf["province_name"] = gdf["code"].astype(str).str[:2].map(
+        lambda x: PROVINCE_MAPPING.get(x, {"name": "Unknown"})["name"]
+    )
+    gdf["province_nuts_id"] = gdf["code"].astype(str).str[:2].map(
+        lambda x: PROVINCE_MAPPING.get(x, {"nuts_id": ""})["nuts_id"]
+    )
 
-        province_info = get_province_for_municipality(nis_code)
-        province_code = province_info["code"]
+    # Filter out unknown provinces
+    gdf = gdf[gdf["province_code"] != "unknown"]
 
-        if province_code != "unknown":
-            province_geoms[province_code].append({
-                "geometry": feature["geometry"],
-                "info": province_info,
-            })
+    print(f"Dissolving {len(gdf)} municipalities into provinces...")
 
-    # Create province features
-    features = []
-    for province_code, geom_list in province_geoms.items():
-        # Get province info from first item
-        province_info = geom_list[0]["info"]
-
-        # Dissolve all municipality geometries for this province
-        geometries = [item["geometry"] for item in geom_list]
-        dissolved = dissolve_geometries(geometries)
-
-        feature = {
-            "type": "Feature",
-            "properties": {
-                "code": province_code,
-                "name": province_info["name"],
-                "nuts_id": province_info["nuts_id"],
-            },
-            "geometry": dissolved,
+    # Dissolve geometries by province using geopandas
+    # This properly merges adjacent polygons and handles topology
+    provinces_gdf = gdf.dissolve(
+        by="province_code",
+        aggfunc={
+            "province_name": "first",
+            "province_nuts_id": "first",
         }
-        features.append(feature)
+    ).reset_index()
 
-    # Create output GeoJSON
-    output_data = {
-        "type": "FeatureCollection",
-        "features": features,
-    }
+    # Rename columns to match expected output
+    provinces_gdf = provinces_gdf.rename(columns={
+        "province_code": "code",
+        "province_name": "name",
+        "province_nuts_id": "nuts_id",
+    })
 
-    # Write output
-    print(f"Writing {len(features)} provinces to: {output_file}")
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(output_data, f, ensure_ascii=False)
+    # Select only needed columns
+    provinces_gdf = provinces_gdf[["code", "name", "nuts_id", "geometry"]]
+
+    # Write output as GeoJSON
+    print(f"Writing {len(provinces_gdf)} provinces to: {output_file}")
+    provinces_gdf.to_file(output_file, driver="GeoJSON")
 
     print("✓ Province map generated successfully!")
     print(f"\nProvinces created:")
-    for feature in sorted(features, key=lambda x: x["properties"]["name"]):
-        print(f"  - {feature['properties']['name']} ({feature['properties']['code']})")
+    for _, row in provinces_gdf.sort_values("name").iterrows():
+        print(f"  - {row['name']} ({row['code']})")
 
 
 if __name__ == "__main__":
