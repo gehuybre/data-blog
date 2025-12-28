@@ -6,8 +6,8 @@ concurrency:
 
 on:
   schedule:
-    # At 00:00 on the 1st of every month (data updated annually, monthly check is sufficient)
-    - cron: '0 0 1 * *'
+    # Monthly on day-of-month 1 (UTC)
+    - cron: '40 0 1 * *'
   workflow_dispatch: {}
 
 permissions:

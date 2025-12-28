@@ -2,8 +2,8 @@ name: Update energiekaart-premies data
 
 on:
   schedule:
-    # Run daily at 02:00 UTC
-    - cron: '0 2 * * *'
+    # Monthly on day-of-month 1 (UTC)
+    - cron: '0 1 1 * *'
   workflow_dispatch: {}
 
 permissions:
