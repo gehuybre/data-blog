@@ -58,15 +58,6 @@ type ViewType = "chart" | "table"
 
 const BASE_YEAR = 2023
 
-function formatInt(n: number) {
-  return new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(n)
-}
-
-function formatPct(n: number) {
-  const sign = n >= 0 ? "+" : ""
-  return `${sign}${n.toFixed(1)}%`
-}
-
 function getYearSeries(
   level: "vlaanderen" | "province" | "municipality",
   code: string | null,
@@ -200,6 +191,13 @@ export function HuishoudensgroeiEmbed({
           getValue={(d) => (d as YearPoint).value}
           getSortValue={(d) => (d as YearPoint).sortValue}
         />
+      )}
+
+      {viewType === "chart" && section !== "evolutie" && (
+        <div className="p-8 text-center text-muted-foreground">
+          <p>Grafiekweergave is alleen beschikbaar voor de evolutie-sectie.</p>
+          <p className="text-sm mt-2">Schakel over naar tabelweergave om de data te bekijken.</p>
+        </div>
       )}
 
       {viewType === "table" && (
