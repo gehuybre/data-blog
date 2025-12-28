@@ -150,3 +150,48 @@ Each section displaying data must include:
 - Use lucide-react for icons
 - Geographic data uses Belgian NIS codes (regions, provinces, municipalities)
 - Production build uses basePath `/data-blog` for GitHub Pages
+- 
+## Commands (Allowed Tools for Claude Code)
+
+allowed_tools:
+  Read,
+  Edit,
+  Write,
+  Glob,
+  Grep,
+  Bash(git *),
+  Bash(npm *),
+  Bash(pip *),
+  Bash(python *),
+  Bash(ls *),
+  Bash(cat *),
+  Bash(mkdir *),
+  Bash(rm *),
+  Bash(curl *),
+  Bash(gh *),
+  Bash(gh pr *),
+  Bash(gh workflow *),
+  Bash(gh secret *),
+  Bash(gh api *),
+  Bash(npx *),
+  Bash(timeout *),
+
+## Usage Patterns
+
+### Development
+Start de dev server, run builds en linters:
+- `Bash(npm run dev *)`
+- `Bash(npm run build *)`
+- `Bash(npm run lint *)`
+- `Bash(npm run test *)`
+
+### Python Data Processing
+- `Bash(pip install *)`
+- `Bash(python run_blog.py*)`
+- `Bash(python scripts/*)`
+
+### GitHub Actions
+Allow Claude to inspect en run workflows:
+- `Bash(gh workflow run *)`
+- `Bash(gh pr create *)`
+- `Bash(gh pr edit *)`
