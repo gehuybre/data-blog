@@ -16,7 +16,7 @@ import {
 } from "@/lib/geo-utils"
 import { MapLevelToggle, MapDisplayLevel } from "./MapLevelToggle"
 
-type UnknownRecord = Record<string, any>
+type UnknownRecord = Record<string, unknown>
 
 interface GeoJsonFeature {
   type: string
@@ -53,6 +53,7 @@ const STROKE_WIDTHS = {
 // Map center and scale for Belgium
 const BELGIUM_MAP_CENTER: [number, number] = [4.4, 50.6]
 const BELGIUM_MAP_SCALE = 6500
+const BELGIUM_CODE = "1000" as const
 
 interface UnifiedMapProps<TData extends UnknownRecord = UnknownRecord> {
   data: TData[]
@@ -86,7 +87,7 @@ const MAP_URLS = {
 export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
   data,
   metric,
-  selectedRegion = "1000",
+  selectedRegion = BELGIUM_CODE,
   selectedProvince = null,
   selectedMunicipality = null,
   onSelectRegion,
@@ -131,10 +132,11 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
 
   // Load appropriate map data based on display level
   useEffect(() => {
+    const controller = new AbortController()
     setLoading(true)
     const url = MAP_URLS[displayLevel]
 
-    fetch(url)
+    fetch(url, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(`Failed to fetch map data from ${url}`)
         return res.json()
@@ -144,31 +146,36 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
         setLoading(false)
       })
       .catch((err) => {
-        console.error("Failed to load map data", err)
-        setLoading(false)
+        if (err.name !== 'AbortError') {
+          console.error("Failed to load map data", err)
+          setLoading(false)
+        }
       })
+
+    return () => controller.abort()
   }, [displayLevel])
 
   // Data getters with defaults - memoized to ensure stable references
   const getRegionCodeMemo = useMemo(
-    () => getRegionCode ?? ((d: any) => d?.r),
+    () => getRegionCode ?? ((d: TData) => (d as Record<string, unknown>)?.r as RegionCode | string | null | undefined),
     [getRegionCode]
   )
   const getProvinceCodeMemo = useMemo(
-    () => getProvinceCode ?? ((d: any) => d?.p),
+    () => getProvinceCode ?? ((d: TData) => (d as Record<string, unknown>)?.p as ProvinceCode | string | null | undefined),
     [getProvinceCode]
   )
   const getMunicipalityCodeMemo = useMemo(
-    () => getMunicipalityCode ?? ((d: any) => d?.m),
+    () => getMunicipalityCode ?? ((d: TData) => (d as Record<string, unknown>)?.m as MunicipalityCode | string | number | null | undefined),
     [getMunicipalityCode]
   )
   const getMetricValueMemo = useMemo(
     () =>
       getMetricValue ??
-      ((d: any, m?: string) => {
-        if (typeof d?.value === "number") return d.value
-        if (m) return typeof d?.[m] === "number" ? d[m] : Number(d?.[m] ?? 0)
-        return typeof d?.value === "number" ? d.value : Number(d?.value ?? 0)
+      ((d: TData, m?: string) => {
+        const record = d as Record<string, unknown>
+        if (typeof record?.value === "number") return record.value
+        if (m) return typeof record?.[m] === "number" ? record[m] as number : Number(record?.[m] ?? 0)
+        return typeof record?.value === "number" ? record.value : Number(record?.value ?? 0)
       }),
     [getMetricValue]
   )
@@ -216,7 +223,7 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
 
     // For region level, filter by selected region (or show all if Belgium selected)
     if (displayLevel === "region") {
-      if (selectedRegion === "1000") return geoData
+      if (selectedRegion === BELGIUM_CODE) return geoData
       const filtered = geoData.features.filter(
         (f) => String(f?.properties?.code) === String(selectedRegion)
       )
@@ -231,7 +238,7 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
 
     // For province level, filter by selected region
     if (displayLevel === "province") {
-      if (selectedRegion === "1000") return geoData
+      if (selectedRegion === BELGIUM_CODE) return geoData
       const filtered = geoData.features.filter((f) => {
         const provCode = String(f?.properties?.code)
         const prov = PROVINCES.find((p) => String(p.code) === provCode)
@@ -254,7 +261,7 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
 
     // For municipality level, filter by selected province or region
     if (displayLevel === "municipality") {
-      if (selectedRegion === "1000") return geoData
+      if (selectedRegion === BELGIUM_CODE) return geoData
 
       const filtered = geoData.features.filter((f) => {
         const raw = f?.properties?.code
@@ -432,7 +439,7 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
                     REGIONS.find((r) => String(r.code) === code)?.name ??
                     geo.properties?.name ??
                     code
-                  isActive = selectedRegion !== "1000" && String(selectedRegion) === code
+                  isActive = selectedRegion !== BELGIUM_CODE && String(selectedRegion) === code
                   onClick = onSelectRegion ? () => onSelectRegion(code as RegionCode) : undefined
                 } else if (displayLevel === "province") {
                   code = String(geo.properties?.code ?? "")
