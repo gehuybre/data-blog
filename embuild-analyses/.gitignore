@@ -43,6 +43,11 @@ next-env.d.ts
 # contentlayer
 .contentlayer
 
+# playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
 # Large geodata (ignored due to size)
 # Use Git LFS if you need to track large files instead of committing them directly
 shared-data/geo/LAU_RG_01M_2024_4326.gpkg
