@@ -39,18 +39,6 @@ type YearPoint = {
 type SectionType = "transacties" | "prijzen" | "transacties-kwartaal" | "prijzen-kwartaal"
 type ViewType = "chart" | "table"
 
-function formatInt(n: number) {
-  return new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(n)
-}
-
-function formatPrice(n: number) {
-  return new Intl.NumberFormat("nl-BE", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(n)
-}
-
 function aggregateTransactionsByYear(rows: YearlyRow[]): YearPoint[] {
   const agg = new Map<number, number>()
   for (const r of rows) {
@@ -87,14 +75,12 @@ function aggregateByQuarter(rows: QuarterlyRow[], metric: "n" | "p50"): YearPoin
 interface VastgoedVerkopenEmbedProps {
   section: SectionType
   viewType: ViewType
-  geo?: string | null
   type?: string | null
 }
 
 export function VastgoedVerkopenEmbed({
   section,
   viewType,
-  geo = null,
   type = "alle_huizen",
 }: VastgoedVerkopenEmbedProps) {
   const yearlyRows = useMemo(() => yearlyRaw as YearlyRow[], [])
@@ -142,7 +128,6 @@ export function VastgoedVerkopenEmbed({
   const isQuarterly = section.includes("kwartaal")
   const isPriceMetric = section.includes("prijzen")
   const label = isPriceMetric ? "Prijs (€)" : "Transacties"
-  const formatValue = isPriceMetric ? formatPrice : formatInt
   const periodHeaders = isQuarterly ? ["Jaar", "Kwartaal"] : ["Jaar"]
 
   return (

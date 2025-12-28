@@ -162,6 +162,58 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
       },
     },
   },
+  {
+    slug: "energiekaart-premies",
+    sections: {
+      "aantal-premies": {
+        type: "custom",
+        title: "Aantal toegekende premies",
+        component: "EnergiekaartPremiesEmbed",
+        height: 700,
+      },
+      "bedrag-premies": {
+        type: "custom",
+        title: "Totaal bedrag premies",
+        component: "EnergiekaartPremiesEmbed",
+        height: 700,
+      },
+      "aantal-beschermd": {
+        type: "custom",
+        title: "Aantal premies beschermde afnemers",
+        component: "EnergiekaartPremiesEmbed",
+        height: 700,
+      },
+      "bedrag-beschermd": {
+        type: "custom",
+        title: "Bedrag premies beschermde afnemers",
+        component: "EnergiekaartPremiesEmbed",
+        height: 700,
+      },
+    },
+  },
+  {
+    slug: "vergunningen-aanvragen",
+    sections: {
+      nieuwbouw: {
+        type: "custom",
+        title: "Nieuwbouw vergunningen",
+        component: "VergunningenAanvragenEmbed",
+        height: 600,
+      },
+      verbouw: {
+        type: "custom",
+        title: "Verbouw vergunningen",
+        component: "VergunningenAanvragenEmbed",
+        height: 600,
+      },
+      sloop: {
+        type: "custom",
+        title: "Sloop vergunningen",
+        component: "VergunningenAanvragenEmbed",
+        height: 600,
+      },
+    },
+  },
 ]
 
 /**
@@ -241,4 +293,13 @@ export function getAllEmbedParams(): Array<{ slug: string; section: string }> {
  */
 export function isEmbeddable(slug: string, section: string): boolean {
   return getEmbedConfig(slug, section) !== null
+}
+
+/**
+ * Get all valid section names for a specific analysis
+ */
+export function getValidSections(slug: string): string[] {
+  const analysisConfig = EMBED_CONFIGS.find((a) => a.slug === slug)
+  if (!analysisConfig) return []
+  return Object.keys(analysisConfig.sections)
 }
