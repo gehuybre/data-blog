@@ -27,15 +27,15 @@ export const REGIONS: Region[] = [
 
 export const PROVINCES: Province[] = [
   { code: '10000', name: 'Antwerpen', regionCode: '2000' },
-  { code: '40000', name: 'Limburg', regionCode: '2000' },
-  { code: '30000', name: 'Oost-Vlaanderen', regionCode: '2000' },
+  { code: '70000', name: 'Limburg', regionCode: '2000' },
+  { code: '40000', name: 'Oost-Vlaanderen', regionCode: '2000' },
   { code: '20001', name: 'Vlaams-Brabant', regionCode: '2000' },
-  { code: '25000', name: 'West-Vlaanderen', regionCode: '2000' },
+  { code: '30000', name: 'West-Vlaanderen', regionCode: '2000' },
   { code: '20002', name: 'Waals-Brabant', regionCode: '3000' },
   { code: '50000', name: 'Henegouwen', regionCode: '3000' },
   { code: '60000', name: 'Luik', regionCode: '3000' },
-  { code: '70000', name: 'Luxemburg', regionCode: '3000' },
-  { code: '80000', name: 'Namen', regionCode: '3000' },
+  { code: '80000', name: 'Luxemburg', regionCode: '3000' },
+  { code: '90000', name: 'Namen', regionCode: '3000' },
   { code: '21000', name: 'Brussel', regionCode: '4000' },
 ];
 
@@ -51,15 +51,15 @@ export function getProvinceForMunicipality(municipalityCode: number): ProvinceCo
   const prefix2 = code.substring(0, 2);
 
   if (prefix === '1') return '10000'; // Antwerpen
-  if (prefix === '4') return '40000'; // Limburg
-  if (prefix === '3') return '30000'; // Oost-Vlaanderen
-  if (prefix === '2' && prefix2 === '25') return '25000'; // West-Vlaanderen
+  if (prefix === '7') return '70000'; // Limburg
+  if (prefix === '4') return '40000'; // Oost-Vlaanderen
+  if (prefix === '3') return '30000'; // West-Vlaanderen
   if (prefix2 === '23' || prefix2 === '24') return '20001'; // Vlaams-Brabant
-  if (prefix === '9') return '20002'; // Waals-Brabant
+  if (prefix === '2') return '20002'; // Waals-Brabant
   if (prefix === '5') return '50000'; // Henegouwen
   if (prefix === '6') return '60000'; // Luik
-  if (prefix === '7') return '70000'; // Luxemburg
-  if (prefix === '8') return '80000'; // Namen
+  if (prefix === '8') return '80000'; // Luxemburg
+  if (prefix === '9') return '90000'; // Namen
 
   return '10000'; // Default fallback
 }
