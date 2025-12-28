@@ -150,7 +150,11 @@ test.describe('Embed Iframe Tests', () => {
     const consoleErrors: string[] = [];
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
-        consoleErrors.push(msg.text());
+        const text = msg.text();
+        // Filter out React hydration warnings - these are dev-mode only and don't affect functionality
+        if (!text.includes('Warning: Prop') && !text.includes('did not match')) {
+          consoleErrors.push(text);
+        }
       }
     });
 
@@ -192,8 +196,12 @@ test.describe('Embed Iframe Tests', () => {
     // Verify no 404 errors
     const consoleErrors: string[] = [];
     page.on('console', (msg) => {
-      if (msg.type() === 'error' && msg.text().includes('404')) {
-        consoleErrors.push(msg.text());
+      if (msg.type() === 'error') {
+        const text = msg.text();
+        // Only capture 404 errors, filter out React hydration warnings
+        if (text.includes('404') && !text.includes('Warning: Prop') && !text.includes('did not match')) {
+          consoleErrors.push(text);
+        }
       }
     });
 

@@ -69,11 +69,27 @@ jobs:
             echo "All required analysis result files already present."
           fi
 
-      - name: Build Next.js
-        run: npm run build
+      - name: Build Next.js (production mode with basePath)
+        run: NODE_ENV=production npm run build
+        env:
+          NODE_ENV: production
 
-      - name: Run Playwright tests
-        run: npm test
+      - name: Install serve (for serving static files)
+        run: npm install -g serve
+
+      - name: Start production server with basePath
+        run: |
+          # Serve the out directory at /data-blog path
+          serve out -l 3000 &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+          # Wait for server to be ready
+          npx wait-on http://localhost:3000 --timeout 30000
+
+      - name: Run Playwright tests against production build
+        run: BASE_URL=http://localhost:3000/data-blog npm test
+        env:
+          CI: true
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4

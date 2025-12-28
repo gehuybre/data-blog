@@ -8,12 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "test": "playwright test",
-    "validate:embeds": "node scripts/validate-embed-paths.js",
-    "check:faillissementen-geo-join": "node scripts/check-faillissementen-geo-join.js",
-    "test": "playwright test",
+    "test:e2e": "playwright test",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "validate:embeds": "node scripts/validate-embed-paths.js",
+    "check:faillissementen-geo-join": "node scripts/check-faillissementen-geo-join.js"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.2",

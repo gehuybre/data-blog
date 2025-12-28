@@ -244,10 +244,11 @@ export function FaillissementenEmbed({
 
       <div className="mt-4 text-xs text-muted-foreground text-center">
         <a
-          href={typeof window !== "undefined" ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "") : ""}
+          href={typeof window !== "undefined" ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "") : "#"}
           target="_blank"
           rel="noopener noreferrer"
           className="hover:underline"
+          suppressHydrationWarning
         >
           Data Blog
         </a>
