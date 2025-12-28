@@ -6,6 +6,8 @@ import { StartersStoppersEmbed } from "@/components/analyses/starters-stoppers/S
 import { VastgoedVerkopenEmbed } from "@/components/analyses/vastgoed-verkopen/VastgoedVerkopenEmbed"
 import { FaillissementenEmbed } from "@/components/analyses/faillissementen/FaillissementenEmbed"
 import { HuishoudensgroeiEmbed } from "@/components/analyses/huishoudensgroei/HuishoudensgroeiEmbed"
+import { EnergiekaartPremiesEmbed } from "@/components/analyses/energiekaart-premies/EnergiekaartPremiesEmbed"
+import { VergunningenAanvragenEmbed } from "@/components/analyses/vergunningen-aanvragen/VergunningenAanvragenEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig } from "@/lib/embed-config"
 import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
@@ -273,6 +275,63 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
           geo={urlParams.region}
           horizonYear={urlParams.horizon ?? 2033}
           showDecline={urlParams.sector === "decline"}
+        />
+      )
+    }
+
+    // Handle EnergiekaartPremiesEmbed
+    if (config.component === "EnergiekaartPremiesEmbed") {
+      const validSections = ["aantal-premies", "bedrag-premies", "aantal-beschermd", "bedrag-beschermd"]
+      if (!validSections.includes(section)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}
+            </p>
+          </div>
+        )
+      }
+
+      // Get measure from URL params (defaults to "Totaal")
+      const measure = urlParams.sector || "Totaal"
+
+      return (
+        <EnergiekaartPremiesEmbed
+          section={section as "aantal-premies" | "bedrag-premies" | "aantal-beschermd" | "bedrag-beschermd"}
+          measure={measure}
+        />
+      )
+    }
+
+    // Handle VergunningenAanvragenEmbed
+    if (config.component === "VergunningenAanvragenEmbed") {
+      const validSections = ["nieuwbouw", "verbouw", "sloop"]
+      if (!validSections.includes(section)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}
+            </p>
+          </div>
+        )
+      }
+
+      // Parse metric from URL params (defaults to "w" for wooneenheden)
+      const metric = urlParams.sector || "w"
+
+      // Parse timeRange from URL params (defaults to "yearly")
+      const timeRange = urlParams.region as "quarterly" | "yearly" | null || "yearly"
+
+      // Parse subView from URL params (defaults to "total")
+      const subView = urlParams.province as "total" | "type" | "besluit" | null || "total"
+
+      return (
+        <VergunningenAanvragenEmbed
+          section={section as "nieuwbouw" | "verbouw" | "sloop"}
+          viewType={toChartOrTableViewType(urlParams.view)}
+          metric={metric}
+          timeRange={timeRange}
+          subView={subView}
         />
       )
     }
