@@ -212,49 +212,107 @@ docs/                      # Documentation (see LLM_DOCUMENTATION_PROTOCOL.md)
 3. Add data processing in `src/`, raw data in `data/`
 4. Create corresponding workflow doc in `docs/workflows/`
 
-## Blog Post Requirements
+# Blog post en analyse requirements 
 
-Every blog post must include these elements:
 
-### Required Content
-- **Title**: Clear and descriptive title
-- **Publication Date**: Date when the blog post was created
-- **Data Date**: Date of the data (if different from publication date, must be explicitly mentioned)
+## 1. content.mdx structuur
 
-### Sections
-Each section displaying data must include:
+Maak een nieuwe analyse in `embuild-analyses/analyses/<slug>/content.mdx`.
 
-1. **Data Visualization**: Display data as:
-   - Tables
-   - Charts (using Recharts)
-   - Maps (using RegionMap/ProvinceMap/MunicipalityMap)
+Voorbeeld:
 
-2. **Download CSV Button**: Each section must have a button to download the data as CSV
+```mdx
+---
+title: Jouw titel
+date: 2025-01-01
+summary: Korte uitleg (1–2 zinnen) die onder de titel komt.
+tags: [tag1, tag2]
+slug: jouw-slug
+sourceProvider: Bronorganisatie
+sourceTitle: Titel van de bronpagina/dataset
+sourceUrl: https://...
+sourcePublicationDate: 2025-01-01
+---
 
-3. **Embed Code Button**: Each section must have a button to generate embed code for sharing the visualization on other websites
+import { JouwDashboard } from "@/components/analyses/jouw-slug/JouwDashboard"
 
-4. **Filtering (when applicable)**:
-   - Geographic filters: Allow filtering by region, province, or municipality (using GeoFilter component)
-   - Sector filters: Allow filtering by main sector (hoofdsector) when the data includes sector information
+Korte introtekst (optioneel).
 
-### Footer
-- **Data Source**: Include source citation at the bottom of the blog post with a link to the original data
+<JouwDashboard />
+```
 
-### Implementation Notes
-- Use the shared components from `src/components/analyses/shared/`:
-  - `AnalysisSection` for section wrappers
-  - `GeoContext` and `GeoFilter` for geographic filtering
-  - `FilterableChart` for charts with filtering capability
-  - `RegionMap`, `ProvinceMap`, `MunicipalityMap` for geographic visualizations
+Afspraken:
+- Zet geen `# H1` in de MDX. De pagina-layout rendert de titel al.
+- De footer “Bron: …” komt automatisch uit `sourceProvider`, `sourceUrl`, `sourceTitle`, `sourcePublicationDate`.
+- Publicatiedatum van de analyse is `date` in frontmatter.
+- Data date blijft verplicht als concept. Als die verschilt van `date`, vermeld je dat expliciet in de intro of in de relevante sectie.
 
-## Conventions
+## 2. Verplichte elementen per analysepagina
 
-- Use absolute imports: `@/` (configured in tsconfig.json)
-- Use shadcn/ui components from `src/components/ui`
-- Use lucide-react for icons
-- Geographic data uses Belgian NIS codes (regions, provinces, municipalities)
-- Production build uses basePath `/data-blog` for GitHub Pages
-- 
+Elke analysepagina moet bevatten:
+- Titel (via frontmatter): duidelijk en beschrijvend.
+- Publication date (via frontmatter `date`): datum waarop de analyse gemaakt is.
+- Data date: datum van de data. Als die verschilt van publication date, expliciet vermelden.
+- Footer met bronvermelding (automatisch via frontmatter).
+
+## 3. Verplichte elementen per datasectie
+
+Elke sectie die data toont moet bevatten:
+- Data visualisatie als minstens één van:
+  - Tabel
+  - Chart (Recharts)
+  - Kaart (RegionMap, ProvinceMap, MunicipalityMap)
+- Een knop om de data als CSV te downloaden.
+- Een knop om embed code te genereren om de visualisatie op andere websites te delen.
+
+## 4. Consistente UI-plaatsing voor knoppen en filters
+
+Doel is overal dezelfde look & feel:
+- Rechtsboven in de sectie: CSV + Embed.
+- Onder de sectietitel: tabs of selector links, filters en extra controls rechts.
+
+Gebruik bij voorkeur gedeelde componenten uit `src/components/analyses/shared/`.
+
+### 4.1 Geo + grafiek/tabel/kaart
+
+Gebruik `AnalysisSection`:
+- Bestand: `embuild-analyses/src/components/analyses/shared/AnalysisSection.tsx`
+- UI: tabs (Grafiek, Tabel, Kaart) + geo-filters + export
+
+Gebruik voor geo-filtering:
+- `GeoContext` en `GeoFilter`
+
+Gebruik voor kaarten:
+- `RegionMap`, `ProvinceMap`, `MunicipalityMap`
+
+Geografische data gebruikt Belgische NIS-codes voor regio’s, provincies en gemeenten.
+
+### 4.2 Time series zonder geo
+
+Gebruik `TimeSeriesSection`:
+- Bestand: `embuild-analyses/src/components/analyses/shared/TimeSeriesSection.tsx`
+- UI: sectietitel + export, en daaronder tabs links + extra controls rechts (bv. metriek-selector)
+
+## 5. Filtering (wanneer van toepassing)
+
+- Geografische filters: filter op regio, provincie of gemeente met `GeoFilter` wanneer de data geo-dimensies heeft.
+- Sectorfilters: filter op hoofdsector wanneer de data sectorinformatie bevat.
+- Combineer filters wanneer zowel geo als sector aanwezig is, zonder af te wijken van de vaste UI-plaatsing.
+
+Voor charts met filtering capability gebruik je `FilterableChart` waar passend.
+
+## 6. Embed en CSV afspraken
+
+- Geef altijd `slug` en `sectionId` door aan `AnalysisSection` of `TimeSeriesSection` zodat `ExportButtons` correcte embed-URL’s kan genereren.
+- Als een sectie embed moet ondersteunen, voeg ze toe aan `embuild-analyses/src/lib/embed-config.ts`.
+
+## 7. Codeconventies
+
+- Gebruik absolute imports met `@/` (tsconfig).
+- Gebruik shadcn/ui componenten uit `src/components/ui`.
+- Gebruik `lucide-react` voor icons.
+- Production build gebruikt basePath `/data-blog` voor GitHub Pages. Vermijd hardcoded paden die hiermee botsen.
+
 ## Commands (Allowed Tools for Claude Code)
 
 allowed_tools:
