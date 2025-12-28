@@ -67,12 +67,12 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
   period,
 }: AnalysisSectionProps<TData>) {
   const {
-    level,
     setLevel,
     selectedRegion,
     setSelectedRegion,
     selectedProvince,
     setSelectedProvince,
+    selectedMunicipality,
     setSelectedMunicipality,
   } = useGeo()
 
@@ -97,10 +97,23 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
 
   // Aggregate data for Chart/Table
   const chartData = useMemo(() => {
-    // Filter based on exact selection
+    // Filter hierarchically: municipality > province > region
     let filtered = data
-    if (level === "province" && selectedProvince) {
+
+    if (selectedMunicipality) {
+      // Filter by specific municipality
+      filtered = data.filter((d) => municipalityCodeGetter(d) === Number(selectedMunicipality))
+    } else if (selectedProvince) {
+      // Filter by province
       filtered = data.filter((d) => getProvinceForMunicipality(municipalityCodeGetter(d)) === selectedProvince)
+    } else if (selectedRegion && selectedRegion !== '1000') {
+      // Filter by region (only if not Belgium)
+      filtered = data.filter((d) => {
+        const munCode = municipalityCodeGetter(d)
+        const province = getProvinceForMunicipality(munCode)
+        const prov = PROVINCES.find(p => p.code === province)
+        return prov?.regionCode === selectedRegion
+      })
     }
 
     const agg = new Map<string, AggregatedPoint>()
@@ -123,13 +136,16 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
     return Array.from(agg.values()).sort((a, b) => a.sortValue - b.sortValue)
   }, [
     data,
-    level,
     selectedRegion,
     selectedProvince,
+    selectedMunicipality,
     metric,
-    getMunicipalityCode,
-    getMetricValue,
-    period,
+    municipalityCodeGetter,
+    metricGetter,
+    periodKeyGetter,
+    periodLabelGetter,
+    periodSortGetter,
+    periodTable,
   ])
 
   const formatInt = useMemo(() => {
@@ -267,7 +283,7 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
               selectedProvince={selectedProvince}
               onSelectRegion={handleSelectRegion}
               onSelectProvince={handleSelectProvince}
-              showRegions={false}
+              showRegions={true}
             />
           </div>
         </div>
