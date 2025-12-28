@@ -7,8 +7,13 @@
     "build": "npm run validate:embeds && next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "playwright test",
     "validate:embeds": "node scripts/validate-embed-paths.js",
-    "check:faillissementen-geo-join": "node scripts/check-faillissementen-geo-join.js"
+    "check:faillissementen-geo-join": "node scripts/check-faillissementen-geo-join.js",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:report": "playwright show-report"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.2",
@@ -37,6 +42,7 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.1",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.19",
     "@types/mdx": "^2.0.13",

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { Calendar, TrendingUp, Calculator, Check, ChevronsUpDown } from "lucide-react"
+import { Calculator, Check, ChevronsUpDown } from "lucide-react"
 import { ExportButtons } from "../shared/ExportButtons"
 
 // Import data
@@ -67,6 +67,7 @@ const COMPONENT_COLORS: Record<string, string> = {
   "Hout": "#84cc16",
   "Lonen": "#06b6d4",
   "Index I": "#ec4899",
+  "Index I-2021": "#ec4899",
 }
 
 function formatMonth(year: number, month: number): string {
@@ -76,8 +77,15 @@ function formatMonth(year: number, month: number): string {
 
 function formatDate(dateString: string | null): string {
   if (!dateString) return "Onbekend"
-  const date = new Date(dateString)
+  // Parse as local date parts (YYYY-MM-DD) to avoid timezone shifting
+  const [year, month, day] = dateString.split('-').map(Number)
+  const date = new Date(year, month - 1, day) // month is 0-indexed
   return date.toLocaleDateString("nl-BE", { year: "numeric", month: "long", day: "numeric" })
+}
+
+function formatPct(n: number): string {
+  const sign = n >= 0 ? "+" : ""
+  return `${sign}${n.toFixed(1)}%`
 }
 
 export function PrijsherzieningDashboard() {
@@ -110,8 +118,10 @@ export function PrijsherzieningDashboard() {
 
   // Price revision calculator state
   const [initialPrice, setInitialPrice] = React.useState<string>("100000")
-  const [initialIndex, setInitialIndex] = React.useState<string>("")
-  const [currentIndex, setCurrentIndex] = React.useState<string>("")
+  const [initialLaborIndex, setInitialLaborIndex] = React.useState<string>("")
+  const [currentLaborIndex, setCurrentLaborIndex] = React.useState<string>("")
+  const [initialMaterialIndex, setInitialMaterialIndex] = React.useState<string>("")
+  const [currentMaterialIndex, setCurrentMaterialIndex] = React.useState<string>("")
   const [laborShare, setLaborShare] = React.useState<string>("0.40")
   const [materialShare, setMaterialShare] = React.useState<string>("0.40")
   const [fixedShare, setFixedShare] = React.useState<string>("0.20")
@@ -161,7 +171,7 @@ export function PrijsherzieningDashboard() {
   // Prepare table data
   const tableData = React.useMemo(() => {
     return chartData.map(row => {
-      const result: Record<string, any> = {
+      const result: Record<string, string> = {
         Periode: row.label,
       }
       selectedComponentList.forEach(comp => {
@@ -211,20 +221,23 @@ export function PrijsherzieningDashboard() {
   // Calculate revised price
   const calculateRevisedPrice = () => {
     const P0 = parseFloat(initialPrice)
-    const S = parseFloat(initialIndex)
-    const s = parseFloat(currentIndex)
+    const S = parseFloat(initialLaborIndex)
+    const s = parseFloat(currentLaborIndex)
+    const I = parseFloat(initialMaterialIndex)
+    const i = parseFloat(currentMaterialIndex)
     const lShare = parseFloat(laborShare)
     const mShare = parseFloat(materialShare)
     const fShare = parseFloat(fixedShare)
 
-    if (isNaN(P0) || isNaN(S) || isNaN(s) || isNaN(lShare) || isNaN(mShare) || isNaN(fShare)) {
+    if (isNaN(P0) || isNaN(S) || isNaN(s) || isNaN(I) || isNaN(i) || isNaN(lShare) || isNaN(mShare) || isNaN(fShare)) {
       return null
     }
 
     // P = P₀ × (lShare × s/S + mShare × i/I + fShare)
-    // For simplicity, assuming both labor and material use the same index ratio
-    const indexRatio = s / S
-    const P = P0 * (lShare * indexRatio + mShare * indexRatio + fShare)
+    // Officiële formule met aparte indices voor lonen en materialen
+    const laborRatio = s / S
+    const materialRatio = i / I
+    const P = P0 * (lShare * laborRatio + mShare * materialRatio + fShare)
 
     return {
       revisedPrice: P,
@@ -235,61 +248,134 @@ export function PrijsherzieningDashboard() {
 
   const revisedPriceResult = calculateRevisedPrice()
 
+  // Calculate year-over-year changes for each component
+  const componentChanges = React.useMemo(() => {
+    const changes: Array<{ component: string; change: number; latest: number; year: number; month: number }> = []
+
+    componentsData.forEach(comp => {
+      const latest = latestValues.get(comp.code)
+      if (!latest) return
+
+      // Find value from 12 months ago (same month, previous year)
+      const compareYear = latest.year - 1
+      const compareMonth = latest.month
+
+      const prevValue = monthlyData.find(
+        d => d.component === comp.code && d.year === compareYear && d.month === compareMonth
+      )
+
+      if (prevValue) {
+        const change = ((latest.value - prevValue.value) / prevValue.value) * 100
+        changes.push({
+          component: comp.code,
+          change,
+          latest: latest.value,
+          year: latest.year,
+          month: latest.month,
+        })
+      }
+    })
+
+    return changes
+  }, [latestValues])
+
+  const biggestRiser = React.useMemo(() => {
+    if (componentChanges.length === 0) {
+      return { component: "Geen data", change: 0, latest: 0, year: 0, month: 0 }
+    }
+    return componentChanges.reduce((max, curr) =>
+      curr.change > max.change ? curr : max
+    , componentChanges[0])
+  }, [componentChanges])
+
+  const biggestFaller = React.useMemo(() => {
+    if (componentChanges.length === 0) {
+      return { component: "Geen data", change: 0, latest: 0, year: 0, month: 0 }
+    }
+    return componentChanges.reduce((min, curr) =>
+      curr.change < min.change ? curr : min
+    , componentChanges[0])
+  }, [componentChanges])
+
+  const indexI2021Latest = React.useMemo(() => {
+    return latestValues.get("Index I-2021")
+  }, [latestValues])
+
   return (
     <div className="space-y-6">
-      {/* Last updated info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Laatste update
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Data laatst bijgewerkt op: {formatDate(metadataData.last_updated)}
-          </p>
-          {metadataData.latest_data_date && (
-            <p className="text-sm text-muted-foreground">
-              Recentste data: {formatDate(metadataData.latest_data_date)}
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Latest values cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {selectedComponentList.map(comp => {
-          const latest = latestValues.get(comp)
-          if (!latest) return null
-
-          return (
-            <Card key={comp}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{comp}</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{latest.value.toFixed(2)}</div>
-                <p className="text-xs text-muted-foreground">
-                  {formatMonth(latest.year, latest.month)}
-                </p>
-              </CardContent>
-            </Card>
-          )
-        })}
+      {/* Date info under title (no card) */}
+      <div className="text-sm text-muted-foreground space-y-1">
+        {metadataData.latest_data_date && (
+          <p>Recentste data: {formatDate(metadataData.latest_data_date)}</p>
+        )}
+        <p>Data laatst bijgewerkt op: {formatDate(metadataData.last_updated)}</p>
       </div>
 
-      {/* Component selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Componenten selectie</CardTitle>
-          <CardDescription>
-            Selecteer via dropdown welke indexcomponenten je wilt weergeven in de grafiek en tabel
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap items-center gap-2">
+      {/* Summary cards: biggest riser, biggest faller, overall index */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="pt-4">
+            <div className="text-sm text-muted-foreground">Grootste stijger</div>
+            <div className="text-2xl font-bold">{biggestRiser.component}</div>
+            <div className="text-lg text-green-600 font-semibold">
+              {formatPct(biggestRiser.change)}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="text-sm text-muted-foreground">Grootste daler</div>
+            <div className="text-2xl font-bold">{biggestFaller.component}</div>
+            <div className="text-lg text-red-600 font-semibold">
+              {formatPct(biggestFaller.change)}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="col-span-2 md:col-span-1">
+          <CardContent className="pt-4">
+            <div className="text-sm text-muted-foreground">Index I-2021</div>
+            <div className="text-2xl font-bold">
+              {indexI2021Latest ? indexI2021Latest.value.toFixed(2) : "-"}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {indexI2021Latest ? formatMonth(indexI2021Latest.year, indexI2021Latest.month) : ""}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Chart */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Evolutie prijsherzieningsindex</h2>
+          <div className="flex items-center gap-2">
+            <ExportButtons
+              data={chartData.map((row) => {
+                // For single component, use value field; for multiple, set to 0 (CSV export uses all columns)
+                const value = selectedComponentList.length === 1
+                  ? (row[selectedComponentList[0]] as number) || 0
+                  : 0
+
+                return {
+                  label: row.label,
+                  value: value,
+                  periodCells: [row.label],
+                  // Add dynamic component columns
+                  ...selectedComponentList.reduce((acc, comp) => {
+                    acc[comp] = (row[comp] as number) || 0
+                    return acc
+                  }, {} as Record<string, number>)
+                }
+              })}
+              periodHeaders={["Periode"]}
+              title="Prijsherzieningsindex I-2021"
+              slug="prijsherziening-index-i-2021"
+              sectionId="evolutie"
+              viewType="chart"
+              valueLabel={selectedComponentList.length === 1 ? selectedComponentList[0] : "Index"}
+              dataSource="FOD Economie - Prijsherzieningsindexen"
+              dataSourceUrl="https://economie.fgov.be/nl/themas/ondernemingen/specifieke-sectoren/bouw/prijsherzieningsindexen/mercuriale-index-i-2021"
+            />
             <Popover open={componentsOpen} onOpenChange={setComponentsOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -297,13 +383,13 @@ export function PrijsherzieningDashboard() {
                   size="sm"
                   role="combobox"
                   aria-expanded={componentsOpen}
-                  className="h-9 gap-1 min-w-[180px]"
+                  className="h-8 gap-1 min-w-[130px]"
                 >
-                  <span className="truncate max-w-[160px]">{componentTriggerLabel}</span>
+                  <span className="truncate">{componentTriggerLabel}</span>
                   <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[360px] p-0" align="start">
+              <PopoverContent className="w-[360px] p-0" align="end">
                 <Command>
                   <CommandInput placeholder="Zoek component..." />
                   <CommandList>
@@ -376,60 +462,45 @@ export function PrijsherzieningDashboard() {
               </PopoverContent>
             </Popover>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Evolutie prijsherzieningsindex</CardTitle>
-          <CardDescription>
-            Maandelijkse evolutie van de geselecteerde indexcomponenten
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="label"
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                  interval="preserveStartEnd"
-                />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                {selectedComponentList.map(comp => (
-                  <Line
-                    key={comp}
-                    type="monotone"
-                    dataKey={comp}
-                    stroke={COMPONENT_COLORS[comp] || "#888888"}
-                    strokeWidth={2}
-                    dot={false}
+        <Card>
+          <CardHeader>
+            <CardDescription>
+              Maandelijkse evolutie van de geselecteerde indexcomponenten
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="label"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    interval="preserveStartEnd"
                   />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-4">
-            <ExportButtons
-              data={exportData}
-              title="Evolutie prijsherzieningsindex"
-              slug="prijsherziening-index-i-2021"
-              sectionId="chart"
-              viewType="chart"
-              periodHeaders={["Jaar", "Maand", "Component"]}
-              valueLabel="Index"
-              dataSource="Statbel"
-              dataSourceUrl="https://statbel.fgov.be/"
-            />
-          </div>
-        </CardContent>
-      </Card>
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  {selectedComponentList.map(comp => (
+                    <Line
+                      key={comp}
+                      type="monotone"
+                      dataKey={comp}
+                      stroke={COMPONENT_COLORS[comp] || "#888888"}
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Data table */}
       <Card>
@@ -464,19 +535,6 @@ export function PrijsherzieningDashboard() {
               </tbody>
             </table>
           </div>
-          <div className="mt-4">
-            <ExportButtons
-              data={exportData}
-              title="Indexwaarden per maand"
-              slug="prijsherziening-index-i-2021"
-              sectionId="table"
-              viewType="table"
-              periodHeaders={["Jaar", "Maand", "Component"]}
-              valueLabel="Index"
-              dataSource="Statbel"
-              dataSourceUrl="https://statbel.fgov.be/"
-            />
-          </div>
         </CardContent>
       </Card>
 
@@ -493,7 +551,7 @@ export function PrijsherzieningDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-1">
               <div className="space-y-2">
                 <Label htmlFor="initialPrice">Initiële contractprijs (P₀)</Label>
                 <Input
@@ -504,26 +562,51 @@ export function PrijsherzieningDashboard() {
                   placeholder="100000"
                 />
               </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="initialIndex">Index bij aanvang contract (S of I)</Label>
+                <Label htmlFor="initialLaborIndex">Loonindex bij aanvang (S)</Label>
                 <Input
-                  id="initialIndex"
+                  id="initialLaborIndex"
                   type="number"
                   step="0.01"
-                  value={initialIndex}
-                  onChange={(e) => setInitialIndex(e.target.value)}
+                  value={initialLaborIndex}
+                  onChange={(e) => setInitialLaborIndex(e.target.value)}
                   placeholder="Bijv. 150.25"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="currentIndex">Huidige index (s of i)</Label>
+                <Label htmlFor="currentLaborIndex">Huidige loonindex (s)</Label>
                 <Input
-                  id="currentIndex"
+                  id="currentLaborIndex"
                   type="number"
                   step="0.01"
-                  value={currentIndex}
-                  onChange={(e) => setCurrentIndex(e.target.value)}
+                  value={currentLaborIndex}
+                  onChange={(e) => setCurrentLaborIndex(e.target.value)}
                   placeholder="Bijv. 165.80"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="initialMaterialIndex">Materiaalprijsindex bij aanvang (I)</Label>
+                <Input
+                  id="initialMaterialIndex"
+                  type="number"
+                  step="0.01"
+                  value={initialMaterialIndex}
+                  onChange={(e) => setInitialMaterialIndex(e.target.value)}
+                  placeholder="Bijv. 142.50"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="currentMaterialIndex">Huidige materiaalprijsindex (i)</Label>
+                <Input
+                  id="currentMaterialIndex"
+                  type="number"
+                  step="0.01"
+                  value={currentMaterialIndex}
+                  onChange={(e) => setCurrentMaterialIndex(e.target.value)}
+                  placeholder="Bijv. 158.30"
                 />
               </div>
             </div>
@@ -588,9 +671,14 @@ export function PrijsherzieningDashboard() {
                 P = P₀ × ({laborShare} × s/S + {materialShare} × i/I + {fixedShare})
               </p>
               <p className="text-muted-foreground mt-2 text-xs">
-                Waarbij s/S en i/I de verhoudingen zijn tussen de indices bij herziening en bij aanvang.
-                Voor deze vereenvoudigde calculator wordt dezelfde indexverhouding gebruikt voor beide.
+                Waarbij:
               </p>
+              <ul className="text-muted-foreground text-xs list-disc list-inside mt-1 space-y-1">
+                <li><strong>s/S</strong> = verhouding loonindex (huidige/bij aanvang)</li>
+                <li><strong>i/I</strong> = verhouding materiaalprijsindex (huidige/bij aanvang)</li>
+                <li><strong>P₀</strong> = oorspronkelijke contractprijs</li>
+                <li><strong>P</strong> = herziene contractprijs</li>
+              </ul>
             </div>
           </div>
         </CardContent>

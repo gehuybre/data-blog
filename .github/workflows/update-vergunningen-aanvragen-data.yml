@@ -5,6 +5,9 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  schedule:
+    # Monthly on day-of-month 1 (UTC)
+    - cron: '10 1 1 * *'
   workflow_dispatch: {}
   push:
     paths:
@@ -51,4 +54,3 @@ jobs:
           else
             echo "No changes to commit"
           fi
-
