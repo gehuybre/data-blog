@@ -30,6 +30,9 @@ function listNonContentDirsToExclude(): string[] {
   const analysesDirAbsolute = path.join(process.cwd(), 'analyses')
   const excludes: string[] = []
 
+  // Exclude non-content helper files that live alongside analyses.
+  excludes.push('**/README.md', '**/readme.md', '**/*.yml', '**/*.yaml')
+
   if (!fs.existsSync(analysesDirAbsolute)) return excludes
 
   for (const entry of fs.readdirSync(analysesDirAbsolute, { withFileTypes: true })) {

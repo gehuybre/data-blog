@@ -3,11 +3,21 @@
 import * as React from "react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Calendar, TrendingUp, Calculator, Download } from "lucide-react"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+import { Calendar, TrendingUp, Calculator, Download, Check, ChevronsUpDown } from "lucide-react"
 
 // Import data
 import monthlyIndices from "../../../../analyses/prijsherziening-index-i-2021/results/monthly_indices.json"
@@ -70,10 +80,32 @@ function formatDate(dateString: string | null): string {
 }
 
 export function PrijsherzieningDashboard() {
+  const defaultSelected = React.useMemo(() => {
+    const preferred = new Set(["Index I-2021", "Cement"])
+    const availablePreferred = componentsData.filter((c) => preferred.has(c.code)).map((c) => c.code)
+    return new Set(availablePreferred.length ? availablePreferred : componentsData.map((c) => c.code))
+  }, [])
+
   // Component selection
-  const [selectedComponents, setSelectedComponents] = React.useState<Set<string>>(
-    new Set(componentsData.map(c => c.code))
+  const [selectedComponents, setSelectedComponents] = React.useState<Set<string>>(defaultSelected)
+  const [componentsOpen, setComponentsOpen] = React.useState(false)
+  const allComponentCodes = React.useMemo(() => componentsData.map((c) => c.code), [])
+  const selectedComponentList = React.useMemo(
+    () => componentsData.filter((c) => selectedComponents.has(c.code)).map((c) => c.code),
+    [selectedComponents]
   )
+  const componentTriggerLabel = React.useMemo(() => {
+    if (selectedComponents.size === 0) return "Selecteer componenten"
+    if (selectedComponents.size === allComponentCodes.length) return "Alle componenten"
+
+    const selectedNames = componentsData
+      .filter((c) => selectedComponents.has(c.code))
+      .map((c) => c.name)
+      .slice(0, 2)
+
+    if (selectedComponents.size <= 2) return selectedNames.join(", ")
+    return `${selectedComponents.size} geselecteerd`
+  }, [allComponentCodes.length, selectedComponents])
 
   // Price revision calculator state
   const [initialPrice, setInitialPrice] = React.useState<string>("100000")
@@ -84,13 +116,15 @@ export function PrijsherzieningDashboard() {
   const [fixedShare, setFixedShare] = React.useState<string>("0.20")
 
   const toggleComponent = (component: string) => {
-    const newSelected = new Set(selectedComponents)
-    if (newSelected.has(component)) {
-      newSelected.delete(component)
-    } else {
-      newSelected.add(component)
-    }
-    setSelectedComponents(newSelected)
+    setSelectedComponents((prev) => {
+      const next = new Set(prev)
+      if (next.has(component)) {
+        next.delete(component)
+      } else {
+        next.add(component)
+      }
+      return next
+    })
   }
 
   // Prepare chart data
@@ -129,7 +163,7 @@ export function PrijsherzieningDashboard() {
       const result: Record<string, any> = {
         Periode: row.label,
       }
-      selectedComponents.forEach(comp => {
+      selectedComponentList.forEach(comp => {
         const value = row[comp]
         if (typeof value === "number") {
           result[comp] = value.toFixed(2)
@@ -137,7 +171,7 @@ export function PrijsherzieningDashboard() {
       })
       return result
     })
-  }, [chartData, selectedComponents])
+  }, [chartData, selectedComponentList])
 
   // Calculate latest values
   const latestValues = React.useMemo(() => {
@@ -187,7 +221,7 @@ export function PrijsherzieningDashboard() {
     (filename: string) => {
       if (!csvData.length) return
 
-      const columns = ["Periode", ...Array.from(selectedComponents)]
+      const columns = ["Periode", ...selectedComponentList]
 
       const escapeCell = (v: unknown) => {
         const s = v === null || v === undefined ? "" : String(v)
@@ -208,7 +242,7 @@ export function PrijsherzieningDashboard() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
     },
-    [csvData, selectedComponents]
+    [csvData, selectedComponentList]
   )
 
   return (
@@ -235,7 +269,7 @@ export function PrijsherzieningDashboard() {
 
       {/* Latest values cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from(selectedComponents).map(comp => {
+        {selectedComponentList.map(comp => {
           const latest = latestValues.get(comp)
           if (!latest) return null
 
@@ -261,26 +295,96 @@ export function PrijsherzieningDashboard() {
         <CardHeader>
           <CardTitle>Componenten selectie</CardTitle>
           <CardDescription>
-            Selecteer welke indexcomponenten je wilt weergeven in de grafiek en tabel
+            Selecteer via dropdown welke indexcomponenten je wilt weergeven in de grafiek en tabel
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {componentsData.map(comp => (
-              <div key={comp.code} className="flex items-center space-x-2">
-                <Checkbox
-                  id={comp.code}
-                  checked={selectedComponents.has(comp.code)}
-                  onCheckedChange={() => toggleComponent(comp.code)}
-                />
-                <Label
-                  htmlFor={comp.code}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+          <div className="flex flex-wrap items-center gap-2">
+            <Popover open={componentsOpen} onOpenChange={setComponentsOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  role="combobox"
+                  aria-expanded={componentsOpen}
+                  className="h-9 gap-1 min-w-[180px]"
                 >
-                  {comp.name}
-                </Label>
-              </div>
-            ))}
+                  <span className="truncate max-w-[160px]">{componentTriggerLabel}</span>
+                  <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[360px] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Zoek component..." />
+                  <CommandList>
+                    <CommandEmpty>Geen resultaat.</CommandEmpty>
+                    <CommandGroup heading="Selectie">
+                      <CommandItem
+                        value="Alle componenten"
+                        onSelect={() => {
+                          setSelectedComponents(new Set(allComponentCodes))
+                          setComponentsOpen(false)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedComponents.size === allComponentCodes.length ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        Alle componenten
+                      </CommandItem>
+                      <CommandItem
+                        value="Standaard selectie"
+                        onSelect={() => {
+                          setSelectedComponents(new Set(defaultSelected))
+                          setComponentsOpen(false)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedComponents.size === defaultSelected.size &&
+                              Array.from(defaultSelected).every((c) => selectedComponents.has(c))
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        Standaard selectie
+                      </CommandItem>
+                      <CommandItem
+                        value="Wis selectie"
+                        onSelect={() => {
+                          setSelectedComponents(new Set())
+                          setComponentsOpen(false)
+                        }}
+                      >
+                        <Check className={cn("mr-2 h-4 w-4", selectedComponents.size === 0 ? "opacity-100" : "opacity-0")} />
+                        Wis selectie
+                      </CommandItem>
+                    </CommandGroup>
+                    <CommandSeparator />
+                    <CommandGroup heading="Component">
+                      {componentsData.map((comp) => (
+                        <CommandItem
+                          key={comp.code}
+                          value={`${comp.code} ${comp.name} ${comp.original ?? ""}`.trim()}
+                          onSelect={() => toggleComponent(comp.code)}
+                        >
+                          <Check className={cn("mr-2 h-4 w-4", selectedComponents.has(comp.code) ? "opacity-100" : "opacity-0")} />
+                          <span className="flex flex-col">
+                            <span>{comp.name}</span>
+                            {comp.original && comp.original !== comp.name ? (
+                              <span className="text-xs text-muted-foreground">{comp.original}</span>
+                            ) : null}
+                          </span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardContent>
       </Card>
@@ -308,7 +412,7 @@ export function PrijsherzieningDashboard() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                {Array.from(selectedComponents).map(comp => (
+                {selectedComponentList.map(comp => (
                   <Line
                     key={comp}
                     type="monotone"
@@ -350,7 +454,7 @@ export function PrijsherzieningDashboard() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left p-2">Periode</th>
-                  {Array.from(selectedComponents).map(comp => (
+                  {selectedComponentList.map(comp => (
                     <th key={comp} className="text-right p-2">{comp}</th>
                   ))}
                 </tr>
@@ -359,7 +463,7 @@ export function PrijsherzieningDashboard() {
                 {tableData.slice(-24).reverse().map((row, idx) => (
                   <tr key={idx} className="border-b">
                     <td className="p-2">{row.Periode}</td>
-                    {Array.from(selectedComponents).map(comp => (
+                    {selectedComponentList.map(comp => (
                       <td key={comp} className="text-right p-2">
                         {row[comp] || "-"}
                       </td>

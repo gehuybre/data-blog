@@ -7,14 +7,14 @@
  * instead of runtime.
  *
  * Uses tsx to directly import the TypeScript config for robust parsing.
- * The actual validation logic is in validate-embed-paths.mjs for better
+ * The actual validation logic is in validate-embed-paths.ts for better
  * maintainability and testability.
  */
 
 const { spawn } = require('child_process');
 const path = require('path');
 
-const validatorScript = path.join(__dirname, 'validate-embed-paths.mjs');
+const validatorScript = path.join(__dirname, 'validate-embed-paths.ts');
 
 // Run with tsx
 const tsx = spawn('npx', ['tsx', validatorScript], {
