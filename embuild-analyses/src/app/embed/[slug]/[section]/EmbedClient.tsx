@@ -8,7 +8,7 @@ import { FaillissementenEmbed } from "@/components/analyses/faillissementen/Fail
 import { HuishoudensgroeiEmbed } from "@/components/analyses/huishoudensgroei/HuishoudensgroeiEmbed"
 import { VergunningenAanvragenEmbed } from "@/components/analyses/vergunningen-aanvragen/VergunningenAanvragenEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
-import { getEmbedConfig } from "@/lib/embed-config"
+import { getEmbedConfig, getValidSections } from "@/lib/embed-config"
 import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
 import { getEmbedDataModule } from "@/lib/embed-data-registry"
 
@@ -43,11 +43,12 @@ interface UrlParams {
   metric: string | null
   timeRange: string | null
   subView: string | null
+  showDecline: boolean
 }
 
 function getParamsFromUrl(): UrlParams {
   if (typeof window === "undefined") {
-    return { view: "chart", horizon: 1, region: null, province: null, sector: null, metric: null, timeRange: null, subView: null }
+    return { view: "chart", horizon: 1, region: null, province: null, sector: null, metric: null, timeRange: null, subView: null, showDecline: false }
   }
 
   const params = new URLSearchParams(window.location.search)
@@ -84,7 +85,10 @@ function getParamsFromUrl(): UrlParams {
   // Sub View (for vergunningen-aanvragen)
   const subView = params.get("subView") || null
 
-  return { view: viewType, horizon, region, province, sector, metric, timeRange, subView }
+  // Show Decline (for huishoudensgroei)
+  const showDecline = params.get("showDecline") === "true"
+
+  return { view: viewType, horizon, region, province, sector, metric, timeRange, subView, showDecline }
 }
 
 function toChartOrTableViewType(viewType: ViewType): ChartOrTableViewType {
@@ -101,6 +105,7 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     metric: null,
     timeRange: null,
     subView: null,
+    showDecline: false,
   })
 
   // State for dynamically loaded data
@@ -199,12 +204,12 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
   if (config.type === "custom") {
     // Handle StartersStoppersEmbed
     if (config.component === "StartersStoppersEmbed") {
-      const validSections: StartersStoppersSection[] = ["starters", "stoppers", "survival"]
-      if (!validSections.includes(section as StartersStoppersSection)) {
+      const validSections = getValidSections(slug)
+      if (!validSections.includes(section)) {
         return (
           <div className="p-8 text-center">
             <p className="text-muted-foreground">
-              Ongeldige sectie: {section}. Geldige opties: starters, stoppers, survival
+              Ongeldige sectie: {section}. Geldige opties: {validSections.join(", ")}
             </p>
           </div>
         )
@@ -224,12 +229,12 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
 
     // Handle VastgoedVerkopenEmbed
     if (config.component === "VastgoedVerkopenEmbed") {
-      const validSections = ["transacties", "prijzen", "transacties-kwartaal", "prijzen-kwartaal"]
+      const validSections = getValidSections(slug)
       if (!validSections.includes(section)) {
         return (
           <div className="p-8 text-center">
             <p className="text-muted-foreground">
-              Ongeldige sectie: {section}
+              Ongeldige sectie: {section}. Geldige opties: {validSections.join(", ")}
             </p>
           </div>
         )
@@ -239,7 +244,6 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
         <VastgoedVerkopenEmbed
           section={section as "transacties" | "prijzen" | "transacties-kwartaal" | "prijzen-kwartaal"}
           viewType={toChartOrTableViewType(urlParams.view)}
-          geo={urlParams.region}
           type={urlParams.sector}
         />
       )
@@ -247,12 +251,12 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
 
     // Handle FaillissementenEmbed
     if (config.component === "FaillissementenEmbed") {
-      const validSections = ["evolutie", "leeftijd", "bedrijfsgrootte", "sectoren"]
+      const validSections = getValidSections(slug)
       if (!validSections.includes(section)) {
         return (
           <div className="p-8 text-center">
             <p className="text-muted-foreground">
-              Ongeldige sectie: {section}
+              Ongeldige sectie: {section}. Geldige opties: {validSections.join(", ")}
             </p>
           </div>
         )
@@ -271,12 +275,12 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
 
     // Handle HuishoudensgroeiEmbed
     if (config.component === "HuishoudensgroeiEmbed") {
-      const validSections = ["evolutie", "ranking", "size-breakdown"]
+      const validSections = getValidSections(slug)
       if (!validSections.includes(section)) {
         return (
           <div className="p-8 text-center">
             <p className="text-muted-foreground">
-              Ongeldige sectie: {section}
+              Ongeldige sectie: {section}. Geldige opties: {validSections.join(", ")}
             </p>
           </div>
         )
@@ -288,19 +292,19 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
           viewType={toChartOrTableViewType(urlParams.view)}
           geo={urlParams.region}
           horizonYear={urlParams.horizon ?? 2033}
-          showDecline={urlParams.sector === "decline"}
+          showDecline={urlParams.showDecline}
         />
       )
     }
 
     // Handle VergunningenAanvragenEmbed
     if (config.component === "VergunningenAanvragenEmbed") {
-      const validSections = ["nieuwbouw", "verbouw", "sloop"]
+      const validSections = getValidSections(slug)
       if (!validSections.includes(section)) {
         return (
           <div className="p-8 text-center">
             <p className="text-muted-foreground">
-              Ongeldige sectie: {section}
+              Ongeldige sectie: {section}. Geldige opties: {validSections.join(", ")}
             </p>
           </div>
         )
