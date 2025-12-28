@@ -121,8 +121,10 @@ export function PrijsherzieningDashboard() {
 
   // Price revision calculator state
   const [initialPrice, setInitialPrice] = React.useState<string>("100000")
-  const [initialIndex, setInitialIndex] = React.useState<string>("")
-  const [currentIndex, setCurrentIndex] = React.useState<string>("")
+  const [initialLaborIndex, setInitialLaborIndex] = React.useState<string>("")
+  const [currentLaborIndex, setCurrentLaborIndex] = React.useState<string>("")
+  const [initialMaterialIndex, setInitialMaterialIndex] = React.useState<string>("")
+  const [currentMaterialIndex, setCurrentMaterialIndex] = React.useState<string>("")
   const [laborShare, setLaborShare] = React.useState<string>("0.40")
   const [materialShare, setMaterialShare] = React.useState<string>("0.40")
   const [fixedShare, setFixedShare] = React.useState<string>("0.20")
@@ -202,20 +204,23 @@ export function PrijsherzieningDashboard() {
   // Calculate revised price
   const calculateRevisedPrice = () => {
     const P0 = parseFloat(initialPrice)
-    const S = parseFloat(initialIndex)
-    const s = parseFloat(currentIndex)
+    const S = parseFloat(initialLaborIndex)
+    const s = parseFloat(currentLaborIndex)
+    const I = parseFloat(initialMaterialIndex)
+    const i = parseFloat(currentMaterialIndex)
     const lShare = parseFloat(laborShare)
     const mShare = parseFloat(materialShare)
     const fShare = parseFloat(fixedShare)
 
-    if (isNaN(P0) || isNaN(S) || isNaN(s) || isNaN(lShare) || isNaN(mShare) || isNaN(fShare)) {
+    if (isNaN(P0) || isNaN(S) || isNaN(s) || isNaN(I) || isNaN(i) || isNaN(lShare) || isNaN(mShare) || isNaN(fShare)) {
       return null
     }
 
     // P = P₀ × (lShare × s/S + mShare × i/I + fShare)
-    // For simplicity, assuming both labor and material use the same index ratio
-    const indexRatio = s / S
-    const P = P0 * (lShare * indexRatio + mShare * indexRatio + fShare)
+    // Officiële formule met aparte indices voor lonen en materialen
+    const laborRatio = s / S
+    const materialRatio = i / I
+    const P = P0 * (lShare * laborRatio + mShare * materialRatio + fShare)
 
     return {
       revisedPrice: P,
@@ -525,7 +530,7 @@ export function PrijsherzieningDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-1">
               <div className="space-y-2">
                 <Label htmlFor="initialPrice">Initiële contractprijs (P₀)</Label>
                 <Input
@@ -536,26 +541,51 @@ export function PrijsherzieningDashboard() {
                   placeholder="100000"
                 />
               </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="initialIndex">Index bij aanvang contract (S of I)</Label>
+                <Label htmlFor="initialLaborIndex">Loonindex bij aanvang (S)</Label>
                 <Input
-                  id="initialIndex"
+                  id="initialLaborIndex"
                   type="number"
                   step="0.01"
-                  value={initialIndex}
-                  onChange={(e) => setInitialIndex(e.target.value)}
+                  value={initialLaborIndex}
+                  onChange={(e) => setInitialLaborIndex(e.target.value)}
                   placeholder="Bijv. 150.25"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="currentIndex">Huidige index (s of i)</Label>
+                <Label htmlFor="currentLaborIndex">Huidige loonindex (s)</Label>
                 <Input
-                  id="currentIndex"
+                  id="currentLaborIndex"
                   type="number"
                   step="0.01"
-                  value={currentIndex}
-                  onChange={(e) => setCurrentIndex(e.target.value)}
+                  value={currentLaborIndex}
+                  onChange={(e) => setCurrentLaborIndex(e.target.value)}
                   placeholder="Bijv. 165.80"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="initialMaterialIndex">Materiaalprijsindex bij aanvang (I)</Label>
+                <Input
+                  id="initialMaterialIndex"
+                  type="number"
+                  step="0.01"
+                  value={initialMaterialIndex}
+                  onChange={(e) => setInitialMaterialIndex(e.target.value)}
+                  placeholder="Bijv. 142.50"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="currentMaterialIndex">Huidige materiaalprijsindex (i)</Label>
+                <Input
+                  id="currentMaterialIndex"
+                  type="number"
+                  step="0.01"
+                  value={currentMaterialIndex}
+                  onChange={(e) => setCurrentMaterialIndex(e.target.value)}
+                  placeholder="Bijv. 158.30"
                 />
               </div>
             </div>
@@ -620,9 +650,14 @@ export function PrijsherzieningDashboard() {
                 P = P₀ × ({laborShare} × s/S + {materialShare} × i/I + {fixedShare})
               </p>
               <p className="text-muted-foreground mt-2 text-xs">
-                Waarbij s/S en i/I de verhoudingen zijn tussen de indices bij herziening en bij aanvang.
-                Voor deze vereenvoudigde calculator wordt dezelfde indexverhouding gebruikt voor beide.
+                Waarbij:
               </p>
+              <ul className="text-muted-foreground text-xs list-disc list-inside mt-1 space-y-1">
+                <li><strong>s/S</strong> = verhouding loonindex (huidige/bij aanvang)</li>
+                <li><strong>i/I</strong> = verhouding materiaalprijsindex (huidige/bij aanvang)</li>
+                <li><strong>P₀</strong> = oorspronkelijke contractprijs</li>
+                <li><strong>P</strong> = herziene contractprijs</li>
+              </ul>
             </div>
           </div>
         </CardContent>
