@@ -2,8 +2,8 @@ name: Update starters-stoppers data
 
 on:
   schedule:
-    # At 00:00 on day-of-month 1
-    - cron: '0 0 1 * *'
+    # Monthly on day-of-month 1 (UTC)
+    - cron: '30 0 1 * *'
   workflow_dispatch: {}
 
 permissions:
