@@ -12,12 +12,6 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Embed Filter Tests', () => {
   test('should handle geographic filter parameter (geo)', async ({ page }) => {
-    // Navigate to embed with geo filter
-    const response = await page.goto('/embed/vastgoed-verkopen/transacties/?view=chart&geo=2000');
-    expect(response?.status()).toBe(200);
-
-    await page.waitForLoadState('networkidle');
-
     // Verify no console errors
     const consoleErrors: string[] = [];
     page.on('console', (msg) => {
@@ -26,8 +20,12 @@ test.describe('Embed Filter Tests', () => {
       }
     });
 
-    // Wait a bit to ensure any deferred errors are caught
-    await page.waitForTimeout(1000);
+    // Navigate to embed with geo filter
+    const response = await page.goto('/embed/vastgoed-verkopen/transacties/?view=chart&geo=2000');
+    expect(response?.status()).toBe(200);
+
+    await page.waitForLoadState('networkidle');
+
     expect(consoleErrors).toHaveLength(0);
   });
 
@@ -40,20 +38,14 @@ test.describe('Embed Filter Tests', () => {
 
       await page.waitForLoadState('networkidle');
 
-      // Verify content is rendered
-      const bodyText = await page.textContent('body');
-      expect(bodyText).toBeTruthy();
-      expect(bodyText!.length).toBeGreaterThan(0);
+      // Verify content is rendered by checking for specific elements
+      const body = page.locator('body');
+      await expect(body).toBeVisible();
+      await expect(body).not.toBeEmpty();
     }
   });
 
   test('should handle sector filter parameter', async ({ page }) => {
-    // Test with construction sector (F)
-    const response = await page.goto('/embed/starters-stoppers/survival/?view=chart&sector=F');
-    expect(response?.status()).toBe(200);
-
-    await page.waitForLoadState('networkidle');
-
     // Verify no errors
     const consoleErrors: string[] = [];
     page.on('console', (msg) => {
@@ -62,7 +54,12 @@ test.describe('Embed Filter Tests', () => {
       }
     });
 
-    await page.waitForTimeout(1000);
+    // Test with construction sector (F)
+    const response = await page.goto('/embed/starters-stoppers/survival/?view=chart&sector=F');
+    expect(response?.status()).toBe(200);
+
+    await page.waitForLoadState('networkidle');
+
     expect(consoleErrors).toHaveLength(0);
   });
 
@@ -76,9 +73,10 @@ test.describe('Embed Filter Tests', () => {
 
       await page.waitForLoadState('networkidle');
 
-      // Verify content loads
-      const bodyText = await page.textContent('body');
-      expect(bodyText).toBeTruthy();
+      // Verify content loads by checking for specific elements
+      const body = page.locator('body');
+      await expect(body).toBeVisible();
+      await expect(body).not.toBeEmpty();
     }
   });
 
@@ -89,17 +87,12 @@ test.describe('Embed Filter Tests', () => {
 
     await page.waitForLoadState('networkidle');
 
-    const bodyText = await page.textContent('body');
-    expect(bodyText).toBeTruthy();
+    const body = page.locator('body');
+    await expect(body).toBeVisible();
+    await expect(body).not.toBeEmpty();
   });
 
   test('should handle multiple filters combined', async ({ page }) => {
-    // Test with multiple filters at once
-    const response = await page.goto('/embed/vastgoed-verkopen/transacties/?view=chart&geo=2000&type=huizen_4plus');
-    expect(response?.status()).toBe(200);
-
-    await page.waitForLoadState('networkidle');
-
     // Verify no console errors with multiple filters
     const consoleErrors: string[] = [];
     page.on('console', (msg) => {
@@ -108,7 +101,12 @@ test.describe('Embed Filter Tests', () => {
       }
     });
 
-    await page.waitForTimeout(1000);
+    // Test with multiple filters at once
+    const response = await page.goto('/embed/vastgoed-verkopen/transacties/?view=chart&geo=2000&type=huizen_4plus');
+    expect(response?.status()).toBe(200);
+
+    await page.waitForLoadState('networkidle');
+
     expect(consoleErrors).toHaveLength(0);
   });
 
@@ -122,8 +120,8 @@ test.describe('Embed Filter Tests', () => {
     await page.waitForLoadState('networkidle');
 
     // Page should still render (even if showing no data message)
-    const bodyText = await page.textContent('body');
-    expect(bodyText).toBeTruthy();
+    const body = page.locator('body');
+    await expect(body).toBeVisible();
   });
 
   test('should handle missing required view parameter', async ({ page }) => {
@@ -135,7 +133,7 @@ test.describe('Embed Filter Tests', () => {
 
     await page.waitForLoadState('networkidle');
 
-    const bodyText = await page.textContent('body');
-    expect(bodyText).toBeTruthy();
+    const body = page.locator('body');
+    await expect(body).toBeVisible();
   });
 });

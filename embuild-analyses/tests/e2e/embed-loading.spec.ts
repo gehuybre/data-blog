@@ -80,9 +80,9 @@ test.describe('Embed Loading Tests', () => {
       expect(pageErrors).toHaveLength(0);
 
       // Verify the page has rendered content (not a blank page)
-      const bodyText = await page.textContent('body');
-      expect(bodyText).toBeTruthy();
-      expect(bodyText!.length).toBeGreaterThan(0);
+      const body = page.locator('body');
+      await expect(body).toBeVisible();
+      await expect(body).not.toBeEmpty();
     });
   });
 
@@ -96,8 +96,9 @@ test.describe('Embed Loading Tests', () => {
     await page.waitForLoadState('networkidle');
 
     // Verify content is visible
-    const bodyText = await page.textContent('body');
-    expect(bodyText).toBeTruthy();
+    const body = page.locator('body');
+    await expect(body).toBeVisible();
+    await expect(body).not.toBeEmpty();
   });
 
   test('should handle navigation timeout gracefully', async ({ page }) => {
