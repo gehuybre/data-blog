@@ -6,6 +6,7 @@ import { StartersStoppersEmbed } from "@/components/analyses/starters-stoppers/S
 import { VastgoedVerkopenEmbed } from "@/components/analyses/vastgoed-verkopen/VastgoedVerkopenEmbed"
 import { FaillissementenEmbed } from "@/components/analyses/faillissementen/FaillissementenEmbed"
 import { HuishoudensgroeiEmbed } from "@/components/analyses/huishoudensgroei/HuishoudensgroeiEmbed"
+import { VergunningenAanvragenEmbed } from "@/components/analyses/vergunningen-aanvragen/VergunningenAanvragenEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig } from "@/lib/embed-config"
 import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
@@ -39,11 +40,14 @@ interface UrlParams {
   region: RegionCode | null
   province: ProvinceCode | null
   sector: string | null
+  metric: string | null
+  timeRange: string | null
+  subView: string | null
 }
 
 function getParamsFromUrl(): UrlParams {
   if (typeof window === "undefined") {
-    return { view: "chart", horizon: 1, region: null, province: null, sector: null }
+    return { view: "chart", horizon: 1, region: null, province: null, sector: null, metric: null, timeRange: null, subView: null }
   }
 
   const params = new URLSearchParams(window.location.search)
@@ -71,7 +75,16 @@ function getParamsFromUrl(): UrlParams {
   // Sector (NACE code)
   const sector = params.get("sector") || null
 
-  return { view: viewType, horizon, region, province, sector }
+  // Metric (for vergunningen-aanvragen)
+  const metric = params.get("metric") || null
+
+  // Time Range (for vergunningen-aanvragen)
+  const timeRange = params.get("timeRange") || null
+
+  // Sub View (for vergunningen-aanvragen)
+  const subView = params.get("subView") || null
+
+  return { view: viewType, horizon, region, province, sector, metric, timeRange, subView }
 }
 
 function toChartOrTableViewType(viewType: ViewType): ChartOrTableViewType {
@@ -85,6 +98,9 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     region: null,
     province: null,
     sector: null,
+    metric: null,
+    timeRange: null,
+    subView: null,
   })
 
   // State for dynamically loaded data
@@ -273,6 +289,39 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
           geo={urlParams.region}
           horizonYear={urlParams.horizon ?? 2033}
           showDecline={urlParams.sector === "decline"}
+        />
+      )
+    }
+
+    // Handle VergunningenAanvragenEmbed
+    if (config.component === "VergunningenAanvragenEmbed") {
+      const validSections = ["nieuwbouw", "verbouw", "sloop"]
+      if (!validSections.includes(section)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}
+            </p>
+          </div>
+        )
+      }
+
+      // Parse metric from URL params (defaults to "w" for wooneenheden)
+      const metric = urlParams.metric || "w"
+
+      // Parse timeRange from URL params (defaults to "yearly")
+      const timeRange = (urlParams.timeRange as "quarterly" | "yearly") || "yearly"
+
+      // Parse subView from URL params (defaults to "total")
+      const subView = (urlParams.subView as "total" | "type" | "besluit") || "total"
+
+      return (
+        <VergunningenAanvragenEmbed
+          section={section as "nieuwbouw" | "verbouw" | "sloop"}
+          viewType={toChartOrTableViewType(urlParams.view)}
+          metric={metric}
+          timeRange={timeRange}
+          subView={subView}
         />
       )
     }
