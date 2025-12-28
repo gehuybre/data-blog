@@ -67,7 +67,6 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
   period,
 }: AnalysisSectionProps<TData>) {
   const {
-    level,
     setLevel,
     selectedRegion,
     setSelectedRegion,
@@ -97,9 +96,9 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
 
   // Aggregate data for Chart/Table
   const chartData = useMemo(() => {
-    // Filter based on exact selection
+    // Filter based on what is selected (province takes precedence)
     let filtered = data
-    if (level === "province" && selectedProvince) {
+    if (selectedProvince) {
       filtered = data.filter((d) => getProvinceForMunicipality(municipalityCodeGetter(d)) === selectedProvince)
     }
 
@@ -123,13 +122,14 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
     return Array.from(agg.values()).sort((a, b) => a.sortValue - b.sortValue)
   }, [
     data,
-    level,
-    selectedRegion,
     selectedProvince,
     metric,
-    getMunicipalityCode,
-    getMetricValue,
-    period,
+    municipalityCodeGetter,
+    metricGetter,
+    periodKeyGetter,
+    periodLabelGetter,
+    periodSortGetter,
+    periodTable,
   ])
 
   const formatInt = useMemo(() => {
@@ -267,7 +267,7 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
               selectedProvince={selectedProvince}
               onSelectRegion={handleSelectRegion}
               onSelectProvince={handleSelectProvince}
-              showRegions={false}
+              showRegions={true}
             />
           </div>
         </div>
