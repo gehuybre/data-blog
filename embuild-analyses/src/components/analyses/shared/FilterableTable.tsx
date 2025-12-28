@@ -63,11 +63,12 @@ export function FilterableTable<TData = UnknownRecord>({
                 </>
               )}
               <TableCell className="text-right">
-                {typeof (d as any)?.value === "number"
-                  ? (d as any).value
-                  : metric
-                    ? (d as any)?.[metric]
-                    : (d as any)?.value}
+                {(d as any)?.formattedValue ??
+                  (typeof (d as any)?.value === "number"
+                    ? (d as any).value
+                    : metric
+                      ? (d as any)?.[metric]
+                      : (d as any)?.value)}
               </TableCell>
             </TableRow>
           ))}
