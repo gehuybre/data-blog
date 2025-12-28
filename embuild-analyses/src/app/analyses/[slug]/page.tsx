@@ -1,4 +1,4 @@
-import { allAnalyses } from 'contentlayer/generated'
+import { allAnalyses } from '../../../../.contentlayer/generated'
 import { notFound } from 'next/navigation'
 import { format, parseISO } from 'date-fns'
 import { nl } from 'date-fns/locale'

@@ -1,4 +1,4 @@
-import { allAnalyses } from 'contentlayer/generated'
+import { allAnalyses } from '../../.contentlayer/generated'
 import { compareDesc, format, parseISO } from 'date-fns'
 import { nl } from 'date-fns/locale'
 import Link from 'next/link'
