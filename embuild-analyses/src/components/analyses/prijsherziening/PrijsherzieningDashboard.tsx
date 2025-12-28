@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { Calendar, TrendingUp, Calculator, Download, Check, ChevronsUpDown } from "lucide-react"
+import { Calculator, Check, ChevronsUpDown } from "lucide-react"
+import { ExportButtons } from "../shared/ExportButtons"
 
 // Import data
 import monthlyIndices from "../../../../analyses/prijsherziening-index-i-2021/results/monthly_indices.json"
@@ -77,6 +78,11 @@ function formatDate(dateString: string | null): string {
   if (!dateString) return "Onbekend"
   const date = new Date(dateString)
   return date.toLocaleDateString("nl-BE", { year: "numeric", month: "long", day: "numeric" })
+}
+
+function formatPct(n: number) {
+  const sign = n >= 0 ? "+" : ""
+  return `${sign}${n.toFixed(1)}%`
 }
 
 export function PrijsherzieningDashboard() {
@@ -214,92 +220,118 @@ export function PrijsherzieningDashboard() {
 
   const revisedPriceResult = calculateRevisedPrice()
 
-  // CSV export data
-  const csvData = tableData
+  // Calculate year-over-year changes for each component
+  const componentChanges = React.useMemo(() => {
+    const changes: Array<{ component: string; change: number; latest: number; year: number; month: number }> = []
 
-  const downloadCsv = React.useCallback(
-    (filename: string) => {
-      if (!csvData.length) return
+    componentsData.forEach(comp => {
+      const latest = latestValues.get(comp.code)
+      if (!latest) return
 
-      const columns = ["Periode", ...selectedComponentList]
+      // Find value from 12 months ago
+      const prevYear = latest.year
+      const prevMonth = latest.month
+      const compareYear = latest.month === 12 ? prevYear : prevYear - 1
+      const compareMonth = latest.month === 12 ? 12 : latest.month
 
-      const escapeCell = (v: unknown) => {
-        const s = v === null || v === undefined ? "" : String(v)
-        return /[",\n]/.test(s) ? `"${s.replaceAll("\"", "\"\"")}"` : s
+      const prevValue = monthlyData.find(
+        d => d.component === comp.code && d.year === compareYear && d.month === compareMonth
+      )
+
+      if (prevValue) {
+        const change = ((latest.value - prevValue.value) / prevValue.value) * 100
+        changes.push({
+          component: comp.code,
+          change,
+          latest: latest.value,
+          year: latest.year,
+          month: latest.month,
+        })
       }
+    })
 
-      const header = columns.join(",")
-      const rows = csvData.map((row) => columns.map((c) => escapeCell((row as Record<string, unknown>)[c])).join(","))
-      const body = [header, ...rows].join("\n")
+    return changes
+  }, [latestValues])
 
-      const blob = new Blob([body], { type: "text/csv;charset=utf-8;" })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
-    },
-    [csvData, selectedComponentList]
-  )
+  const biggestRiser = React.useMemo(() => {
+    return componentChanges.reduce((max, curr) =>
+      curr.change > max.change ? curr : max
+    , componentChanges[0] || { component: "N/A", change: 0, latest: 0, year: 0, month: 0 })
+  }, [componentChanges])
+
+  const biggestFaller = React.useMemo(() => {
+    return componentChanges.reduce((min, curr) =>
+      curr.change < min.change ? curr : min
+    , componentChanges[0] || { component: "N/A", change: 0, latest: 0, year: 0, month: 0 })
+  }, [componentChanges])
+
+  const indexI2021Latest = React.useMemo(() => {
+    return latestValues.get("Index I-2021")
+  }, [latestValues])
 
   return (
     <div className="space-y-6">
-      {/* Last updated info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Laatste update
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Data laatst bijgewerkt op: {formatDate(metadataData.last_updated)}
-          </p>
-          {metadataData.latest_data_date && (
-            <p className="text-sm text-muted-foreground">
-              Recentste data: {formatDate(metadataData.latest_data_date)}
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Latest values cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {selectedComponentList.map(comp => {
-          const latest = latestValues.get(comp)
-          if (!latest) return null
-
-          return (
-            <Card key={comp}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{comp}</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{latest.value.toFixed(2)}</div>
-                <p className="text-xs text-muted-foreground">
-                  {formatMonth(latest.year, latest.month)}
-                </p>
-              </CardContent>
-            </Card>
-          )
-        })}
+      {/* Date info under title (no card) */}
+      <div className="text-sm text-muted-foreground space-y-1">
+        <p>Data laatst bijgewerkt op: {formatDate(metadataData.last_updated)}</p>
+        {metadataData.latest_data_date && (
+          <p>Recentste data: {formatDate(metadataData.latest_data_date)}</p>
+        )}
       </div>
 
-      {/* Component selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Componenten selectie</CardTitle>
-          <CardDescription>
-            Selecteer via dropdown welke indexcomponenten je wilt weergeven in de grafiek en tabel
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap items-center gap-2">
+      {/* Summary cards: biggest riser, biggest faller, overall index */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="pt-4">
+            <div className="text-sm text-muted-foreground">Grootste stijger</div>
+            <div className="text-2xl font-bold">{biggestRiser.component}</div>
+            <div className="text-lg text-green-600 font-semibold">
+              {formatPct(biggestRiser.change)}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="text-sm text-muted-foreground">Grootste daler</div>
+            <div className="text-2xl font-bold">{biggestFaller.component}</div>
+            <div className="text-lg text-red-600 font-semibold">
+              {formatPct(biggestFaller.change)}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="col-span-2 md:col-span-1">
+          <CardContent className="pt-4">
+            <div className="text-sm text-muted-foreground">Index I-2021</div>
+            <div className="text-2xl font-bold">
+              {indexI2021Latest ? indexI2021Latest.value.toFixed(2) : "-"}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {indexI2021Latest ? formatMonth(indexI2021Latest.year, indexI2021Latest.month) : ""}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Chart */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Evolutie prijsherzieningsindex</h2>
+          <div className="flex items-center gap-2">
+            <ExportButtons
+              data={chartData.map((row) => ({
+                label: row.label,
+                value: 0, // Not used for multi-component export
+                periodCells: [row.label],
+              }))}
+              periodHeaders={["Periode"]}
+              title="Prijsherzieningsindex I-2021"
+              slug="prijsherziening-index-i-2021"
+              sectionId="evolutie"
+              viewType="chart"
+              valueLabel="Index"
+              dataSource="FOD Economie - Prijsherzieningsindexen"
+              dataSourceUrl="https://economie.fgov.be/nl/themas/ondernemingen/specifieke-sectoren/bouw/prijsherzieningsindexen/mercuriale-index-i-2021"
+            />
             <Popover open={componentsOpen} onOpenChange={setComponentsOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -307,13 +339,13 @@ export function PrijsherzieningDashboard() {
                   size="sm"
                   role="combobox"
                   aria-expanded={componentsOpen}
-                  className="h-9 gap-1 min-w-[180px]"
+                  className="h-8 gap-1 min-w-[130px]"
                 >
-                  <span className="truncate max-w-[160px]">{componentTriggerLabel}</span>
+                  <span className="truncate">{componentTriggerLabel}</span>
                   <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[360px] p-0" align="start">
+              <PopoverContent className="w-[360px] p-0" align="end">
                 <Command>
                   <CommandInput placeholder="Zoek component..." />
                   <CommandList>
@@ -386,59 +418,45 @@ export function PrijsherzieningDashboard() {
               </PopoverContent>
             </Popover>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Evolutie prijsherzieningsindex</CardTitle>
-          <CardDescription>
-            Maandelijkse evolutie van de geselecteerde indexcomponenten
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="label"
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                  interval="preserveStartEnd"
-                />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                {selectedComponentList.map(comp => (
-                  <Line
-                    key={comp}
-                    type="monotone"
-                    dataKey={comp}
-                    stroke={COMPONENT_COLORS[comp] || "#888888"}
-                    strokeWidth={2}
-                    dot={false}
+        <Card>
+          <CardHeader>
+            <CardDescription>
+              Maandelijkse evolutie van de geselecteerde indexcomponenten
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="label"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    interval="preserveStartEnd"
                   />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => downloadCsv("prijsherziening-index-i-2021.csv")}
-              disabled={!csvData.length}
-              title="Download CSV"
-            >
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">CSV</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  {selectedComponentList.map(comp => (
+                    <Line
+                      key={comp}
+                      type="monotone"
+                      dataKey={comp}
+                      stroke={COMPONENT_COLORS[comp] || "#888888"}
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Data table */}
       <Card>
@@ -472,18 +490,6 @@ export function PrijsherzieningDashboard() {
                 ))}
               </tbody>
             </table>
-          </div>
-          <div className="mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => downloadCsv("prijsherziening-index-i-2021-table.csv")}
-              disabled={!csvData.length}
-              title="Download CSV"
-            >
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">CSV</span>
-            </Button>
           </div>
         </CardContent>
       </Card>
