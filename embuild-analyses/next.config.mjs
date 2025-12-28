@@ -1,4 +1,5 @@
 import { withContentlayer } from 'next-contentlayer'
+import path from 'node:path'
 
 const isProd = process.env.NODE_ENV === 'production';
 const repoName = 'data-blog';
@@ -10,6 +11,13 @@ const nextConfig = {
   trailingSlash: true,
   basePath: isProd ? `/${repoName}` : '',
   assetPrefix: isProd ? `/${repoName}/` : '',
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      'contentlayer/generated': path.join(process.cwd(), '.contentlayer', 'generated'),
+    }
+    return config
+  },
 };
 
 export default withContentlayer(nextConfig);
