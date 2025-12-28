@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed Code Test - Data Blog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .intro {
+            color: #666;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 6px;
+            border-left: 4px solid #0066cc;
+        }
+
+        .test-section h2 {
+            color: #0066cc;
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+
+        .test-section p {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .embed-container {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        iframe {
+            display: block;
+            border: 0;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .test-controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 4px;
+        }
+
+        .test-controls label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .test-controls select,
+        .test-controls input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .test-controls button {
+            padding: 8px 16px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .test-controls button:hover {
+            background: #0052a3;
+        }
+
+        details {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 500;
+            color: #0066cc;
+            padding: 5px;
+        }
+
+        summary:hover {
+            color: #0052a3;
+        }
+
+        .legend {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 4px;
+            border: 1px solid #0066cc;
+        }
+
+        .legend h3 {
+            color: #0066cc;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .legend ul {
+            margin-left: 20px;
+        }
+
+        .legend li {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .env-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 4px;
+            border: 1px solid #0066cc;
+        }
+
+        .env-info .url {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Embed Code Test Suite</h1>
+        <p class="intro">
+            Deze testpagina simuleert hoe embed codes werken wanneer ze op externe websites worden geplakt.
+            Alle embeds hieronder gebruiken de volledige iframe embed code zoals die gegenereerd wordt door de "Embed" knop.
+            <br><br>
+            <strong>Doel:</strong> Controleren dat embeds correct laden, interacties werken, en ze responsive zijn.
+        </p>
+
+        <div class="env-info">
+            <h3>🌐 Omgeving Detectie</h3>
+            <p>
+                <strong>Gedetecteerde base URL:</strong> <span class="url" id="detectedBaseUrl">...</span><br>
+                <strong>Environment:</strong> <span id="detectedEnv">...</span>
+            </p>
+        </div>
+
+        <div class="legend">
+            <h3>📋 Wat wordt getest?</h3>
+            <ul>
+                <li><strong>Laden:</strong> Controleert of de iframe correct laadt zonder errors</li>
+                <li><strong>Filters:</strong> Test geografische filters (regio, provincie, gemeente) en andere filters</li>
+                <li><strong>Views:</strong> Test verschillende weergaves (chart, table, map)</li>
+                <li><strong>Responsiveness:</strong> Controleert of embeds correct schalen op verschillende schermformaten</li>
+                <li><strong>Cross-origin:</strong> Verifieert dat embeds werken op externe domeinen (zoals deze testpagina)</li>
+            </ul>
+        </div>
+
+        <!-- Test 1: Vergunningen Goedkeuringen - Renovatie -->
+        <div class="test-section">
+            <h2>Test 1: Vergunningen & Goedkeuringen - Renovatie (Chart)</h2>
+            <p>Test embed voor renovatievergunningen met standaard chart weergave.</p>
+
+            <details>
+                <summary>Toon embed code</summary>
+                <div class="code-block" id="code1"><!-- Will be populated by JS --></div>
+            </details>
+
+            <div class="embed-container">
+                <iframe
+                    id="test1"
+                    data-path="/embed/vergunningen-goedkeuringen/renovatie/?view=chart"
+                    width="100%"
+                    height="500"
+                    style="border: 0;"
+                    title="Renovatie (Gebouwen)"
+                    loading="lazy"
+                ></iframe>
+            </div>
+            <div class="status loading" id="status1">⏳ Laden...</div>
+        </div>
+
+        <!-- Test 2: Vergunningen Goedkeuringen - Nieuwbouw (Table) -->
+        <div class="test-section">
+            <h2>Test 2: Vergunningen & Goedkeuringen - Nieuwbouw (Table)</h2>
+            <p>Test embed voor nieuwbouwvergunningen met tabel weergave.</p>
+
+            <details>
+                <summary>Toon embed code</summary>
+                <div class="code-block" id="code2"><!-- Will be populated by JS --></div>
+            </details>
+
+            <div class="embed-container">
+                <iframe
+                    id="test2"
+                    data-path="/embed/vergunningen-goedkeuringen/nieuwbouw/?view=table"
+                    width="100%"
+                    height="500"
+                    style="border: 0;"
+                    title="Nieuwbouw (Gebouwen)"
+                    loading="lazy"
+                ></iframe>
+            </div>
+            <div class="status loading" id="status2">⏳ Laden...</div>
+        </div>
+
+        <!-- Test 3: Vergunningen Goedkeuringen - Renovatie (Map) -->
+        <div class="test-section">
+            <h2>Test 3: Vergunningen & Goedkeuringen - Renovatie (Map)</h2>
+            <p>Test embed voor renovatievergunningen met kaart weergave.</p>
+
+            <details>
+                <summary>Toon embed code</summary>
+                <div class="code-block" id="code3"><!-- Will be populated by JS --></div>
+            </details>
+
+            <div class="embed-container">
+                <iframe
+                    id="test3"
+                    data-path="/embed/vergunningen-goedkeuringen/renovatie/?view=map"
+                    width="100%"
+                    height="500"
+                    style="border: 0;"
+                    title="Renovatie (Gebouwen)"
+                    loading="lazy"
+                ></iframe>
+            </div>
+            <div class="status loading" id="status3">⏳ Laden...</div>
+        </div>
+
+        <!-- Test 4: Vastgoed Verkopen - Transacties met filters -->
+        <div class="test-section">
+            <h2>Test 4: Vastgoed Verkopen - Transacties (met geografische filters)</h2>
+            <p>Test custom embed met geografische filtering (Vlaams-Brabant, huizen met 4+ slaapkamers).</p>
+
+            <details>
+                <summary>Toon embed code</summary>
+                <div class="code-block" id="code4"><!-- Will be populated by JS --></div>
+            </details>
+
+            <div class="embed-container">
+                <iframe
+                    id="test4"
+                    data-path="/embed/vastgoed-verkopen/transacties/?view=chart&geo=2000&type=huizen_4plus"
+                    width="100%"
+                    height="500"
+                    style="border: 0;"
+                    title="Aantal transacties"
+                    loading="lazy"
+                ></iframe>
+            </div>
+            <div class="status loading" id="status4">⏳ Laden...</div>
+        </div>
+
+        <!-- Test 5: Starters Stoppers - Survival -->
+        <div class="test-section">
+            <h2>Test 5: Starters & Stoppers - Overlevingskans</h2>
+            <p>Test custom embed met horizon en sector filtering (3 jaar horizon, bouw sector F).</p>
+
+            <details>
+                <summary>Toon embed code</summary>
+                <div class="code-block" id="code5"><!-- Will be populated by JS --></div>
+            </details>
+
+            <div class="embed-container">
+                <iframe
+                    id="test5"
+                    data-path="/embed/starters-stoppers/survival/?view=chart&horizon=3&sector=F"
+                    width="100%"
+                    height="500"
+                    style="border: 0;"
+                    title="Overlevingskans"
+                    loading="lazy"
+                ></iframe>
+            </div>
+            <div class="status loading" id="status5">⏳ Laden...</div>
+        </div>
+
+        <!-- Test 6: Faillissementen - Evolutie -->
+        <div class="test-section">
+            <h2>Test 6: Faillissementen - Evolutie</h2>
+            <p>Test faillissementen embed met sector filtering (horeca sector I).</p>
+
+            <details>
+                <summary>Toon embed code</summary>
+                <div class="code-block" id="code6"><!-- Will be populated by JS --></div>
+            </details>
+
+            <div class="embed-container">
+                <iframe
+                    id="test6"
+                    data-path="/embed/faillissementen/evolutie/?view=chart&sector=I"
+                    width="100%"
+                    height="500"
+                    style="border: 0;"
+                    title="Evolutie faillissementen"
+                    loading="lazy"
+                ></iframe>
+            </div>
+            <div class="status loading" id="status6">⏳ Laden...</div>
+        </div>
+
+        <!-- Test 7: Huishoudensgroei - Ranking -->
+        <div class="test-section">
+            <h2>Test 7: Huishoudensgroei - Gemeenten Ranking</h2>
+            <p>Test huishoudensgroei embed met horizon jaar (2033) en decline filter.</p>
+
+            <details>
+                <summary>Toon embed code</summary>
+                <div class="code-block" id="code7"><!-- Will be populated by JS --></div>
+            </details>
+
+            <div class="embed-container">
+                <iframe
+                    id="test7"
+                    data-path="/embed/huishoudensgroei/ranking/?view=chart&horizon=2033&sector=decline"
+                    width="100%"
+                    height="500"
+                    style="border: 0;"
+                    title="Gemeenten ranking"
+                    loading="lazy"
+                ></iframe>
+            </div>
+            <div class="status loading" id="status7">⏳ Laden...</div>
+        </div>
+
+        <!-- Test 8: Responsive width test -->
+        <div class="test-section">
+            <h2>Test 8: Responsive Width Test (50% breedte)</h2>
+            <p>Test of embeds correct schalen bij verschillende container breedtes.</p>
+
+            <details>
+                <summary>Toon embed code</summary>
+                <div class="code-block" id="code8"><!-- Will be populated by JS --></div>
+            </details>
+
+            <div class="embed-container" style="width: 50%; margin: 0 auto;">
+                <iframe
+                    id="test8"
+                    data-path="/embed/vergunningen-goedkeuringen/renovatie/?view=chart"
+                    width="100%"
+                    height="500"
+                    style="border: 0;"
+                    title="Renovatie (Gebouwen)"
+                    loading="lazy"
+                ></iframe>
+            </div>
+            <div class="status loading" id="status8">⏳ Laden...</div>
+        </div>
+
+        <!-- Interactive Test Section -->
+        <div class="test-section">
+            <h2>Test 9: Interactieve Embed Generator</h2>
+            <p>Genereer je eigen embed code om te testen.</p>
+
+            <div class="test-controls">
+                <label>
+                    Analyse:
+                    <!-- NOTE: This list must be manually updated when new analyses are added -->
+                    <!-- TODO: Consider fetching dynamically from an API endpoint or config file -->
+                    <select id="analysisSelect">
+                        <option value="vergunningen-goedkeuringen/renovatie">Vergunningen - Renovatie</option>
+                        <option value="vergunningen-goedkeuringen/nieuwbouw">Vergunningen - Nieuwbouw</option>
+                        <option value="vastgoed-verkopen/transacties">Vastgoed - Transacties</option>
+                        <option value="vastgoed-verkopen/prijzen">Vastgoed - Prijzen</option>
+                        <option value="starters-stoppers/starters">Starters & Stoppers - Starters</option>
+                        <option value="starters-stoppers/stoppers">Starters & Stoppers - Stoppers</option>
+                        <option value="starters-stoppers/survival">Starters & Stoppers - Survival</option>
+                        <option value="faillissementen/evolutie">Faillissementen - Evolutie</option>
+                        <option value="huishoudensgroei/evolutie">Huishoudensgroei - Evolutie</option>
+                    </select>
+                </label>
+
+                <label>
+                    View:
+                    <select id="viewSelect">
+                        <option value="chart">Chart</option>
+                        <option value="table">Table</option>
+                        <option value="map">Map</option>
+                    </select>
+                </label>
+
+                <label>
+                    Extra parameters (optioneel):
+                    <input type="text" id="paramsInput" placeholder="bijv: geo=2000&type=huizen_4plus">
+                </label>
+
+                <button onclick="generateCustomEmbed()">Genereer Embed</button>
+            </div>
+
+            <div id="customEmbedContainer"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // Configuration constants
+        const CONFIG = {
+            IFRAME_HEIGHT: 500,
+            LOAD_TIMEOUT_MS: 10000,
+            PRODUCTION_BASE_URL: 'https://gehuybre.github.io/data-blog',
+            LOCAL_BASE_URL: 'http://localhost:3000'
+        };
+
+        /**
+         * Detect the base URL based on the environment
+         * Returns the appropriate base URL for embedding iframes
+         */
+        function getBaseUrl() {
+            const hostname = window.location.hostname;
+
+            // Production (GitHub Pages)
+            if (hostname === 'gehuybre.github.io') {
+                return CONFIG.PRODUCTION_BASE_URL;
+            }
+
+            // Local development
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return CONFIG.LOCAL_BASE_URL;
+            }
+
+            // Fallback to production URL
+            return CONFIG.PRODUCTION_BASE_URL;
+        }
+
+        /**
+         * Build the full embed URL including basePath
+         */
+        function buildEmbedUrl(path) {
+            const baseUrl = getBaseUrl();
+            // Remove leading slash from path if present (already included in baseUrl)
+            const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+            return `${baseUrl}/${cleanPath}`;
+        }
+
+        /**
+         * Generate embed code HTML string
+         */
+        function generateEmbedCode(url, title = 'Data Blog Embed') {
+            return `<iframe
+  src="${url}"
+  width="100%"
+  height="${CONFIG.IFRAME_HEIGHT}"
+  style="border: 0;"
+  title="${title}"
+  loading="lazy"
+></iframe>`;
+        }
+
+        /**
+         * Attach event listeners to an iframe for load/error monitoring
+         * @param {HTMLIFrameElement} iframe - The iframe element
+         * @param {HTMLElement} statusElement - The status display element
+         * @param {string} testName - Name of the test for display purposes
+         */
+        function attachIframeMonitoring(iframe, statusElement, testName) {
+            let loadTimeout;
+
+            iframe.addEventListener('load', () => {
+                clearTimeout(loadTimeout);
+                statusElement.className = 'status success';
+                statusElement.textContent = '✅ Geladen - ' + testName;
+
+                // Try to detect errors in iframe content
+                try {
+                    // Note: This will fail for cross-origin iframes (expected behavior)
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (iframeDoc.body && iframeDoc.body.textContent.includes('error')) {
+                        statusElement.className = 'status error';
+                        statusElement.textContent = '❌ Error gedetecteerd in iframe';
+                    }
+                } catch (e) {
+                    // Only log if it's NOT a cross-origin security error
+                    if (e.name !== 'SecurityError' && !e.message.includes('cross-origin')) {
+                        console.error('Unexpected error checking iframe content:', e);
+                    }
+                }
+            });
+
+            iframe.addEventListener('error', () => {
+                clearTimeout(loadTimeout);
+                statusElement.className = 'status error';
+                statusElement.textContent = '❌ Fout bij laden - ' + testName;
+            });
+
+            // Timeout after configured duration
+            loadTimeout = setTimeout(() => {
+                if (statusElement.className.includes('loading')) {
+                    statusElement.className = 'status error';
+                    statusElement.textContent = '⏰ Timeout - Laden duurde te lang';
+                }
+            }, CONFIG.LOAD_TIMEOUT_MS);
+        }
+
+        // Display detected environment
+        const baseUrl = getBaseUrl();
+        const isProduction = baseUrl.includes('github.io');
+        document.getElementById('detectedBaseUrl').textContent = baseUrl;
+        document.getElementById('detectedEnv').textContent = isProduction ? 'Production (GitHub Pages)' : 'Local Development';
+
+        // Track iframe load status
+        // NOTE: This list must be manually updated when new analyses are added
+        // TODO: Consider fetching this dynamically from the API or config file
+        const iframeTests = [
+            { id: 'test1', name: 'Renovatie Chart' },
+            { id: 'test2', name: 'Nieuwbouw Table' },
+            { id: 'test3', name: 'Renovatie Map' },
+            { id: 'test4', name: 'Vastgoed met filters' },
+            { id: 'test5', name: 'Starters Stoppers Survival' },
+            { id: 'test6', name: 'Faillissementen' },
+            { id: 'test7', name: 'Huishoudensgroei' },
+            { id: 'test8', name: 'Responsive test' }
+        ];
+
+        // Initialize all iframes with correct URLs and populate code blocks
+        iframeTests.forEach((test, index) => {
+            const iframe = document.getElementById(test.id);
+            const path = iframe.getAttribute('data-path');
+            const fullUrl = buildEmbedUrl(path);
+            const title = iframe.getAttribute('title');
+
+            // Set the iframe src
+            iframe.src = fullUrl;
+
+            // Populate the code block
+            const codeBlock = document.getElementById(`code${index + 1}`);
+            if (codeBlock) {
+                const embedCode = generateEmbedCode(fullUrl, title);
+                codeBlock.textContent = embedCode;
+            }
+        });
+
+        // Monitor iframe loading using the reusable helper
+        iframeTests.forEach(test => {
+            const iframe = document.getElementById(test.id);
+            const status = document.getElementById('status' + test.id.replace('test', ''));
+            attachIframeMonitoring(iframe, status, test.name);
+        });
+
+        // Interactive embed generator
+        function generateCustomEmbed() {
+            const analysis = document.getElementById('analysisSelect').value;
+            const view = document.getElementById('viewSelect').value;
+            const params = document.getElementById('paramsInput').value;
+
+            let embedPath = `/embed/${analysis}/?view=${view}`;
+
+            if (params) {
+                embedPath += '&' + params;
+            }
+
+            const embedUrl = buildEmbedUrl(embedPath);
+            const embedCode = generateEmbedCode(embedUrl, 'Custom Embed');
+
+            // Clear container and build DOM elements safely (prevents XSS)
+            const container = document.getElementById('customEmbedContainer');
+            container.innerHTML = ''; // Clear existing content
+
+            // Create details element for code display
+            const details = document.createElement('details');
+            details.open = true;
+            details.style.marginTop = '15px';
+
+            const summary = document.createElement('summary');
+            summary.textContent = 'Gegenereerde embed code';
+            details.appendChild(summary);
+
+            const codeBlock = document.createElement('div');
+            codeBlock.className = 'code-block';
+            codeBlock.textContent = embedCode; // textContent auto-escapes HTML
+            details.appendChild(codeBlock);
+
+            // Create embed container
+            const embedContainer = document.createElement('div');
+            embedContainer.className = 'embed-container';
+            embedContainer.style.marginTop = '15px';
+
+            // Create iframe safely using DOM methods
+            const iframe = document.createElement('iframe');
+            iframe.src = embedUrl;
+            iframe.width = '100%';
+            iframe.height = CONFIG.IFRAME_HEIGHT;
+            iframe.style.border = '0';
+            iframe.title = 'Custom Embed';
+            iframe.loading = 'lazy';
+            embedContainer.appendChild(iframe);
+
+            // Create status element
+            const status = document.createElement('div');
+            status.className = 'status loading';
+            status.textContent = '⏳ Laden...';
+
+            // Append all elements to container
+            container.appendChild(details);
+            container.appendChild(embedContainer);
+            container.appendChild(status);
+
+            // Attach monitoring to the new iframe
+            attachIframeMonitoring(iframe, status, 'Custom embed');
+        }
+
+        // Console logging for debugging
+        console.log('Test pagina geladen. Monitoring', iframeTests.length, 'embeds...');
+        console.log('Base URL:', baseUrl);
+        console.log('Environment:', isProduction ? 'Production' : 'Development');
+
+        // Log all messages from iframes
+        window.addEventListener('message', (event) => {
+            console.log('Message from iframe:', event.data);
+        });
+    </script>
+</body>
+</html>
