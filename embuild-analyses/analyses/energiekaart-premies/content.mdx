@@ -7,11 +7,14 @@ slug: energiekaart-premies
 sourceProvider: Vlaams Energieagentschap
 sourceTitle: Energiekaart - Premies Tijdreeks
 sourceUrl: https://apps.energiesparen.be/energiekaart/vlaanderen/premies-res-tijdreeks-algemeen
+sourcePublicationDate: 2025-12-28
 ---
+
+import { EnergiekaartDashboard } from "@/components/analyses/energiekaart-premies/EnergiekaartDashboard"
 
 # Energiepremies Vlaanderen
 
-Deze analyse toont de evolutie van energiepremies voor residentiële gebouwen in Vlaanderen. De data wordt geëxtraheerd uit het officiële Energiekaart PowerBI dashboard van het Vlaams Energieagentschap.
+Deze analyse toont de evolutie van energiepremies voor residentiële gebouwen in Vlaanderen (data: 28 december 2025). De data wordt geëxtraheerd uit het officiële Energiekaart PowerBI dashboard van het Vlaams Energieagentschap.
 
 ## Over de data
 
@@ -23,7 +26,9 @@ De energiepremies ondersteunen Vlaamse gezinnen bij energiebesparende renovaties
 
 ## Analyse
 
-_De visualisaties en interactieve componenten worden binnenkort toegevoegd._
+Gebruik de filter bovenaan om te schakelen tussen premies voor alle begunstigden en per type maatregel.
+
+<EnergiekaartDashboard />
 
 ---
 
