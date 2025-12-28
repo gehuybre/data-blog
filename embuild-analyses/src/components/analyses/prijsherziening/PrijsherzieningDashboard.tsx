@@ -346,7 +346,7 @@ export function PrijsherzieningDashboard() {
                   periodCells: [row.label],
                   // Add dynamic component columns
                   ...selectedComponentList.reduce((acc, comp) => {
-                    acc[comp] = row[comp] || 0
+                    acc[comp] = (row[comp] as number) || 0
                     return acc
                   }, {} as Record<string, number>)
                 }
