@@ -3,7 +3,6 @@
 import * as React from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -15,7 +14,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { GeoProvider } from "../shared/GeoContext"
-import { ExportButtons } from "../shared/ExportButtons"
+import { TimeSeriesSection } from "../shared/TimeSeriesSection"
 import {
   BarChart,
   Bar,
@@ -142,7 +141,6 @@ function MetricSelector<T extends string>({
 
 function NieuwbouwSection() {
   const [metric, setMetric] = React.useState<MetricCode>("w")
-  const [currentView, setCurrentView] = React.useState<string>("yearly")
 
   // Summary stats
   const currentYear = 2024
@@ -189,189 +187,165 @@ function NieuwbouwSection() {
     }))
   }, [metric])
 
-  // Export data based on current view
-  const exportData = React.useMemo(() => {
-    if (currentView === "yearly") {
-      return yearlyData.map((r) => ({
-        label: String(r.jaar),
-        value: r.waarde,
-        periodCells: [r.jaar],
-      }))
-    } else if (currentView === "quarterly") {
-      return quarterlyData.map((r) => ({
-        label: r.label,
-        value: r.waarde,
-        periodCells: [r.label],
-      }))
-    } else if (currentView === "type") {
-      return typeData.flatMap((r) =>
-        Object.entries(r)
-          .filter(([key]) => key !== "jaar")
-          .map(([type, value]) => ({
-            label: `${r.jaar} - ${type}`,
-            value: value as number,
-            periodCells: [r.jaar, type],
-          }))
-      )
-    } else if (currentView === "trend") {
-      return trendData.map((r) => ({
-        label: String(r.jaar),
-        value: r.index,
-        periodCells: [r.jaar],
-      }))
-    } else {
-      return yearlyData.map((r) => ({
-        label: String(r.jaar),
-        value: r.waarde,
-        periodCells: [r.jaar],
-      }))
-    }
-  }, [currentView, yearlyData, quarterlyData, typeData, trendData])
+  const yearlyExportData = React.useMemo(() => {
+    return yearlyData.map((r) => ({ label: String(r.jaar), value: r.waarde, periodCells: [r.jaar] }))
+  }, [yearlyData])
 
-  // Period headers based on current view
-  const periodHeaders = React.useMemo(() => {
-    if (currentView === "yearly" || currentView === "trend") return ["Jaar"]
-    if (currentView === "quarterly") return ["Periode"]
-    if (currentView === "type") return ["Jaar", "Type"]
-    return ["Jaar"]
-  }, [currentView])
+  const quarterlyExportData = React.useMemo(() => {
+    return quarterlyData.map((r) => ({ label: r.label, value: r.waarde, periodCells: [r.label] }))
+  }, [quarterlyData])
 
-  // Value label based on current view
-  const valueLabel = React.useMemo(() => {
-    if (currentView === "trend") return "Index (2018 = 100)"
-    return METRIC_LABELS[metric]
-  }, [currentView, metric])
+  const typeExportData = React.useMemo(() => {
+    return typeData.flatMap((r) =>
+      Object.entries(r)
+        .filter(([key]) => key !== "jaar")
+        .map(([type, value]) => ({
+          label: `${r.jaar} - ${type}`,
+          value: value as number,
+          periodCells: [r.jaar, type],
+        }))
+    )
+  }, [typeData])
+
+  const trendExportData = React.useMemo(() => {
+    return trendData.map((r) => ({ label: String(r.jaar), value: r.index, periodCells: [r.jaar] }))
+  }, [trendData])
+
+  const valueLabel = METRIC_LABELS[metric]
+  const trendValueLabel = "Index (2018 = 100)"
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Nieuwbouw</h2>
-        <div className="flex items-center gap-2">
-          <ExportButtons
-            data={exportData}
-            periodHeaders={periodHeaders}
-            title="Nieuwbouw vergunningen"
-            slug="vergunningen-aanvragen"
-            sectionId="nieuwbouw"
-            viewType="chart"
-            valueLabel={valueLabel}
-            dataSource="Omgevingsloket Vlaanderen"
-            dataSourceUrl="https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen"
-          />
-          <MetricSelector selected={metric} onChange={setMetric} labels={METRIC_LABELS} />
+    <TimeSeriesSection
+      title="Nieuwbouw"
+      slug="vergunningen-aanvragen"
+      sectionId="nieuwbouw"
+      dataSource="Omgevingsloket Vlaanderen"
+      dataSourceUrl="https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen"
+      defaultView="yearly"
+      headerContent={
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-sm text-muted-foreground">{METRIC_LABELS[metric]} {currentYear}</div>
+              <div className="text-2xl font-bold">{current ? formatInt(current[metric]) : "-"}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-sm text-muted-foreground">vs {currentYear - 1}</div>
+              <div className={cn("text-2xl font-bold", change >= 0 ? "text-green-600" : "text-red-600")}>
+                {formatPct(change)}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="col-span-2 md:col-span-1">
+            <CardContent className="pt-4">
+              <div className="text-sm text-muted-foreground">Totaal 2018-2024</div>
+              <div className="text-2xl font-bold">
+                {formatInt((nieuwbouwYearly as YearlyRow[]).filter((r) => r.y <= 2024).reduce((sum, r) => sum + r[metric], 0))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">{METRIC_LABELS[metric]} {currentYear}</div>
-            <div className="text-2xl font-bold">{current ? formatInt(current[metric]) : "-"}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">vs {currentYear - 1}</div>
-            <div className={cn("text-2xl font-bold", change >= 0 ? "text-green-600" : "text-red-600")}>
-              {formatPct(change)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="col-span-2 md:col-span-1">
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">Totaal 2018-2024</div>
-            <div className="text-2xl font-bold">
-              {formatInt((nieuwbouwYearly as YearlyRow[]).filter((r) => r.y <= 2024).reduce((sum, r) => sum + r[metric], 0))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts in tabs */}
-      <Tabs defaultValue="yearly" onValueChange={setCurrentView}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="yearly">Per jaar</TabsTrigger>
-          <TabsTrigger value="quarterly">Per kwartaal</TabsTrigger>
-          <TabsTrigger value="type">Per type</TabsTrigger>
-          <TabsTrigger value="trend">Trend</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="yearly">
-          <Card>
-            <CardHeader><CardTitle>Jaarlijkse evolutie nieuwbouw</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={yearlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="jaar" />
-                  <YAxis tickFormatter={formatInt} />
-                  <Tooltip formatter={(v: number) => formatInt(v)} />
-                  <Bar dataKey="waarde" name={METRIC_LABELS[metric]} fill="#3b82f6" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="quarterly">
-          <Card>
-            <CardHeader><CardTitle>Kwartaalevolutie nieuwbouw</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={quarterlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} />
-                  <YAxis tickFormatter={formatInt} />
-                  <Tooltip formatter={(v: number) => formatInt(v)} />
-                  <Area type="monotone" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#3b82f6" stroke="#2563eb" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="type">
-          <Card>
-            <CardHeader><CardTitle>Nieuwbouw per woningtype</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={typeData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="jaar" />
-                  <YAxis tickFormatter={formatInt} />
-                  <Tooltip formatter={(v: number) => formatInt(v)} />
-                  <Legend />
-                  <Bar dataKey="Eengezinswoning" fill={TYPE_COLORS.eengezins} />
-                  <Bar dataKey="Meergezinswoning" fill={TYPE_COLORS.meergezins} />
-                  <Bar dataKey="Kamerwoning" fill={TYPE_COLORS.kamer} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="trend">
-          <Card>
-            <CardHeader><CardTitle>Trend nieuwbouw (index 2018 = 100)</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="jaar" />
-                  <YAxis yAxisId="left" tickFormatter={formatInt} />
-                  <YAxis yAxisId="right" orientation="right" domain={[0, 150]} />
-                  <Tooltip formatter={(v: number, name: string) => name === "Index" ? v.toFixed(1) : formatInt(v)} />
-                  <Legend />
-                  <Bar yAxisId="left" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#3b82f6" />
-                  <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+      }
+      rightControls={<MetricSelector selected={metric} onChange={setMetric} labels={METRIC_LABELS} />}
+      views={[
+        {
+          value: "yearly",
+          label: "Per jaar",
+          exportData: yearlyExportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Jaarlijkse evolutie nieuwbouw</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={yearlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="jaar" />
+                    <YAxis tickFormatter={formatInt} />
+                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Bar dataKey="waarde" name={METRIC_LABELS[metric]} fill="#3b82f6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+        {
+          value: "quarterly",
+          label: "Per kwartaal",
+          exportData: quarterlyExportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Periode"], valueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Kwartaalevolutie nieuwbouw</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={quarterlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} />
+                    <YAxis tickFormatter={formatInt} />
+                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Area type="monotone" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#3b82f6" stroke="#2563eb" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+        {
+          value: "type",
+          label: "Per type",
+          exportData: typeExportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar", "Type"], valueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Nieuwbouw per woningtype</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={typeData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="jaar" />
+                    <YAxis tickFormatter={formatInt} />
+                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Legend />
+                    <Bar dataKey="Eengezinswoning" fill={TYPE_COLORS.eengezins} />
+                    <Bar dataKey="Meergezinswoning" fill={TYPE_COLORS.meergezins} />
+                    <Bar dataKey="Kamerwoning" fill={TYPE_COLORS.kamer} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+        {
+          value: "trend",
+          label: "Trend",
+          exportData: trendExportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel: trendValueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Trend nieuwbouw (index 2018 = 100)</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <ComposedChart data={trendData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="jaar" />
+                    <YAxis yAxisId="left" tickFormatter={formatInt} />
+                    <YAxis yAxisId="right" orientation="right" domain={[0, 150]} />
+                    <Tooltip formatter={(v: number, name: string) => name === "Index" ? v.toFixed(1) : formatInt(v)} />
+                    <Legend />
+                    <Bar yAxisId="left" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#3b82f6" />
+                    <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+      ]}
+    />
   )
 }
 
@@ -381,7 +355,6 @@ function NieuwbouwSection() {
 
 function VerbouwSection() {
   const [metric, setMetric] = React.useState<MetricCode>("w")
-  const [currentView, setCurrentView] = React.useState<string>("yearly")
 
   const currentYear = 2024
   const current = (verbouwYearly as YearlyRow[]).find((r) => r.y === currentYear)
@@ -417,187 +390,165 @@ function VerbouwSection() {
     }))
   }, [metric])
 
-  // Export data based on current view
-  const exportData = React.useMemo(() => {
-    if (currentView === "yearly") {
-      return yearlyData.map((r) => ({
-        label: String(r.jaar),
-        value: r.waarde,
-        periodCells: [r.jaar],
-      }))
-    } else if (currentView === "quarterly") {
-      return quarterlyData.map((r) => ({
-        label: r.label,
-        value: r.waarde,
-        periodCells: [r.label],
-      }))
-    } else if (currentView === "type") {
-      return typeData.flatMap((r) =>
-        Object.entries(r)
-          .filter(([key]) => key !== "jaar")
-          .map(([type, value]) => ({
-            label: `${r.jaar} - ${type}`,
-            value: value as number,
-            periodCells: [r.jaar, type],
-          }))
-      )
-    } else if (currentView === "trend") {
-      return trendData.map((r) => ({
-        label: String(r.jaar),
-        value: r.index,
-        periodCells: [r.jaar],
-      }))
-    } else {
-      return yearlyData.map((r) => ({
-        label: String(r.jaar),
-        value: r.waarde,
-        periodCells: [r.jaar],
-      }))
-    }
-  }, [currentView, yearlyData, quarterlyData, typeData, trendData])
+  const yearlyExportData = React.useMemo(() => {
+    return yearlyData.map((r) => ({ label: String(r.jaar), value: r.waarde, periodCells: [r.jaar] }))
+  }, [yearlyData])
 
-  // Period headers based on current view
-  const periodHeaders = React.useMemo(() => {
-    if (currentView === "yearly" || currentView === "trend") return ["Jaar"]
-    if (currentView === "quarterly") return ["Periode"]
-    if (currentView === "type") return ["Jaar", "Type"]
-    return ["Jaar"]
-  }, [currentView])
+  const quarterlyExportData = React.useMemo(() => {
+    return quarterlyData.map((r) => ({ label: r.label, value: r.waarde, periodCells: [r.label] }))
+  }, [quarterlyData])
 
-  // Value label based on current view
-  const valueLabel = React.useMemo(() => {
-    if (currentView === "trend") return "Index (2018 = 100)"
-    return METRIC_LABELS[metric]
-  }, [currentView, metric])
+  const typeExportData = React.useMemo(() => {
+    return typeData.flatMap((r) =>
+      Object.entries(r)
+        .filter(([key]) => key !== "jaar")
+        .map(([type, value]) => ({
+          label: `${r.jaar} - ${type}`,
+          value: value as number,
+          periodCells: [r.jaar, type],
+        }))
+    )
+  }, [typeData])
+
+  const trendExportData = React.useMemo(() => {
+    return trendData.map((r) => ({ label: String(r.jaar), value: r.index, periodCells: [r.jaar] }))
+  }, [trendData])
+
+  const valueLabel = METRIC_LABELS[metric]
+  const trendValueLabel = "Index (2018 = 100)"
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Verbouwen</h2>
-        <div className="flex items-center gap-2">
-          <ExportButtons
-            data={exportData}
-            periodHeaders={periodHeaders}
-            title="Verbouw vergunningen"
-            slug="vergunningen-aanvragen"
-            sectionId="verbouw"
-            viewType="chart"
-            valueLabel={valueLabel}
-            dataSource="Omgevingsloket Vlaanderen"
-            dataSourceUrl="https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen"
-          />
-          <MetricSelector selected={metric} onChange={setMetric} labels={METRIC_LABELS} />
+    <TimeSeriesSection
+      title="Verbouwen"
+      slug="vergunningen-aanvragen"
+      sectionId="verbouw"
+      dataSource="Omgevingsloket Vlaanderen"
+      dataSourceUrl="https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen"
+      defaultView="yearly"
+      headerContent={
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-sm text-muted-foreground">{METRIC_LABELS[metric]} {currentYear}</div>
+              <div className="text-2xl font-bold">{current ? formatInt(current[metric]) : "-"}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-sm text-muted-foreground">vs {currentYear - 1}</div>
+              <div className={cn("text-2xl font-bold", change >= 0 ? "text-green-600" : "text-red-600")}>
+                {formatPct(change)}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="col-span-2 md:col-span-1">
+            <CardContent className="pt-4">
+              <div className="text-sm text-muted-foreground">Totaal 2018-2024</div>
+              <div className="text-2xl font-bold">
+                {formatInt((verbouwYearly as YearlyRow[]).filter((r) => r.y <= 2024).reduce((sum, r) => sum + r[metric], 0))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">{METRIC_LABELS[metric]} {currentYear}</div>
-            <div className="text-2xl font-bold">{current ? formatInt(current[metric]) : "-"}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">vs {currentYear - 1}</div>
-            <div className={cn("text-2xl font-bold", change >= 0 ? "text-green-600" : "text-red-600")}>
-              {formatPct(change)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="col-span-2 md:col-span-1">
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">Totaal 2018-2024</div>
-            <div className="text-2xl font-bold">
-              {formatInt((verbouwYearly as YearlyRow[]).filter((r) => r.y <= 2024).reduce((sum, r) => sum + r[metric], 0))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="yearly" onValueChange={setCurrentView}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="yearly">Per jaar</TabsTrigger>
-          <TabsTrigger value="quarterly">Per kwartaal</TabsTrigger>
-          <TabsTrigger value="type">Per type</TabsTrigger>
-          <TabsTrigger value="trend">Trend</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="yearly">
-          <Card>
-            <CardHeader><CardTitle>Jaarlijkse evolutie verbouw</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={yearlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="jaar" />
-                  <YAxis tickFormatter={formatInt} />
-                  <Tooltip formatter={(v: number) => formatInt(v)} />
-                  <Bar dataKey="waarde" name={METRIC_LABELS[metric]} fill="#22c55e" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="quarterly">
-          <Card>
-            <CardHeader><CardTitle>Kwartaalevolutie verbouw</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={quarterlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} />
-                  <YAxis tickFormatter={formatInt} />
-                  <Tooltip formatter={(v: number) => formatInt(v)} />
-                  <Area type="monotone" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#22c55e" stroke="#16a34a" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="type">
-          <Card>
-            <CardHeader><CardTitle>Verbouw per woningtype</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={typeData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="jaar" />
-                  <YAxis tickFormatter={formatInt} />
-                  <Tooltip formatter={(v: number) => formatInt(v)} />
-                  <Legend />
-                  <Bar dataKey="Eengezinswoning" fill={TYPE_COLORS.eengezins} />
-                  <Bar dataKey="Meergezinswoning" fill={TYPE_COLORS.meergezins} />
-                  <Bar dataKey="Kamerwoning" fill={TYPE_COLORS.kamer} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="trend">
-          <Card>
-            <CardHeader><CardTitle>Trend verbouw (index 2018 = 100)</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="jaar" />
-                  <YAxis yAxisId="left" tickFormatter={formatInt} />
-                  <YAxis yAxisId="right" orientation="right" domain={[0, 150]} />
-                  <Tooltip formatter={(v: number, name: string) => name === "Index" ? v.toFixed(1) : formatInt(v)} />
-                  <Legend />
-                  <Bar yAxisId="left" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#22c55e" />
-                  <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+      }
+      rightControls={<MetricSelector selected={metric} onChange={setMetric} labels={METRIC_LABELS} />}
+      views={[
+        {
+          value: "yearly",
+          label: "Per jaar",
+          exportData: yearlyExportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Jaarlijkse evolutie verbouw</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={yearlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="jaar" />
+                    <YAxis tickFormatter={formatInt} />
+                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Bar dataKey="waarde" name={METRIC_LABELS[metric]} fill="#22c55e" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+        {
+          value: "quarterly",
+          label: "Per kwartaal",
+          exportData: quarterlyExportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Periode"], valueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Kwartaalevolutie verbouw</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={quarterlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} />
+                    <YAxis tickFormatter={formatInt} />
+                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Area type="monotone" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#22c55e" stroke="#16a34a" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+        {
+          value: "type",
+          label: "Per type",
+          exportData: typeExportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar", "Type"], valueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Verbouw per woningtype</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={typeData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="jaar" />
+                    <YAxis tickFormatter={formatInt} />
+                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Legend />
+                    <Bar dataKey="Eengezinswoning" fill={TYPE_COLORS.eengezins} />
+                    <Bar dataKey="Meergezinswoning" fill={TYPE_COLORS.meergezins} />
+                    <Bar dataKey="Kamerwoning" fill={TYPE_COLORS.kamer} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+        {
+          value: "trend",
+          label: "Trend",
+          exportData: trendExportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel: trendValueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Trend verbouw (index 2018 = 100)</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <ComposedChart data={trendData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="jaar" />
+                    <YAxis yAxisId="left" tickFormatter={formatInt} />
+                    <YAxis yAxisId="right" orientation="right" domain={[0, 150]} />
+                    <Tooltip formatter={(v: number, name: string) => name === "Index" ? v.toFixed(1) : formatInt(v)} />
+                    <Legend />
+                    <Bar yAxisId="left" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#22c55e" />
+                    <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+      ]}
+    />
   )
 }
 
@@ -607,7 +558,6 @@ function VerbouwSection() {
 
 function SloopSection() {
   const [metric, setMetric] = React.useState<SloopMetricCode>("m2")
-  const [currentView, setCurrentView] = React.useState<string>("yearly")
 
   const currentYear = 2024
   const current = (sloopYearly as SloopYearlyRow[]).find((r) => r.y === currentYear)
@@ -645,187 +595,165 @@ function SloopSection() {
     }))
   }, [metric])
 
-  // Export data based on current view
-  const exportData = React.useMemo(() => {
-    if (currentView === "yearly") {
-      return yearlyData.map((r) => ({
-        label: String(r.jaar),
-        value: r.waarde,
-        periodCells: [r.jaar],
-      }))
-    } else if (currentView === "quarterly") {
-      return quarterlyData.map((r) => ({
-        label: r.label,
-        value: r.waarde,
-        periodCells: [r.label],
-      }))
-    } else if (currentView === "besluit") {
-      return besluitData.flatMap((r) =>
-        Object.entries(r)
-          .filter(([key]) => key !== "jaar")
-          .map(([besluit, value]) => ({
-            label: `${r.jaar} - ${besluit}`,
-            value: value as number,
-            periodCells: [r.jaar, besluit],
-          }))
-      )
-    } else if (currentView === "trend") {
-      return trendData.map((r) => ({
-        label: String(r.jaar),
-        value: r.index,
-        periodCells: [r.jaar],
-      }))
-    } else {
-      return yearlyData.map((r) => ({
-        label: String(r.jaar),
-        value: r.waarde,
-        periodCells: [r.jaar],
-      }))
-    }
-  }, [currentView, yearlyData, quarterlyData, besluitData, trendData])
+  const yearlyExportData = React.useMemo(() => {
+    return yearlyData.map((r) => ({ label: String(r.jaar), value: r.waarde, periodCells: [r.jaar] }))
+  }, [yearlyData])
 
-  // Period headers based on current view
-  const periodHeaders = React.useMemo(() => {
-    if (currentView === "yearly" || currentView === "trend") return ["Jaar"]
-    if (currentView === "quarterly") return ["Periode"]
-    if (currentView === "besluit") return ["Jaar", "Besluit"]
-    return ["Jaar"]
-  }, [currentView])
+  const quarterlyExportData = React.useMemo(() => {
+    return quarterlyData.map((r) => ({ label: r.label, value: r.waarde, periodCells: [r.label] }))
+  }, [quarterlyData])
 
-  // Value label based on current view
-  const valueLabel = React.useMemo(() => {
-    if (currentView === "trend") return "Index (2018 = 100)"
-    return SLOOP_METRIC_LABELS[metric]
-  }, [currentView, metric])
+  const besluitExportData = React.useMemo(() => {
+    return besluitData.flatMap((r) =>
+      Object.entries(r)
+        .filter(([key]) => key !== "jaar")
+        .map(([besluit, value]) => ({
+          label: `${r.jaar} - ${besluit}`,
+          value: value as number,
+          periodCells: [r.jaar, besluit],
+        }))
+    )
+  }, [besluitData])
+
+  const trendExportData = React.useMemo(() => {
+    return trendData.map((r) => ({ label: String(r.jaar), value: r.index, periodCells: [r.jaar] }))
+  }, [trendData])
+
+  const valueLabel = SLOOP_METRIC_LABELS[metric]
+  const trendValueLabel = "Index (2018 = 100)"
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Sloop</h2>
-        <div className="flex items-center gap-2">
-          <ExportButtons
-            data={exportData}
-            periodHeaders={periodHeaders}
-            title="Sloop vergunningen"
-            slug="vergunningen-aanvragen"
-            sectionId="sloop"
-            viewType="chart"
-            valueLabel={valueLabel}
-            dataSource="Omgevingsloket Vlaanderen"
-            dataSourceUrl="https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen"
-          />
-          <MetricSelector selected={metric} onChange={setMetric} labels={SLOOP_METRIC_LABELS} />
+    <TimeSeriesSection
+      title="Sloop"
+      slug="vergunningen-aanvragen"
+      sectionId="sloop"
+      dataSource="Omgevingsloket Vlaanderen"
+      dataSourceUrl="https://omgevingsloketrapportering.omgeving.vlaanderen.be/wonen"
+      defaultView="yearly"
+      headerContent={
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-sm text-muted-foreground">{SLOOP_METRIC_LABELS[metric]} {currentYear}</div>
+              <div className="text-2xl font-bold">{current ? formatInt(current[metric]) : "-"}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-sm text-muted-foreground">vs {currentYear - 1}</div>
+              <div className={cn("text-2xl font-bold", change >= 0 ? "text-green-600" : "text-red-600")}>
+                {formatPct(change)}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="col-span-2 md:col-span-1">
+            <CardContent className="pt-4">
+              <div className="text-sm text-muted-foreground">Totaal 2018-2024</div>
+              <div className="text-2xl font-bold">
+                {formatInt((sloopYearly as SloopYearlyRow[]).filter((r) => r.y <= 2024).reduce((sum, r) => sum + r[metric], 0))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">{SLOOP_METRIC_LABELS[metric]} {currentYear}</div>
-            <div className="text-2xl font-bold">{current ? formatInt(current[metric]) : "-"}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">vs {currentYear - 1}</div>
-            <div className={cn("text-2xl font-bold", change >= 0 ? "text-green-600" : "text-red-600")}>
-              {formatPct(change)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="col-span-2 md:col-span-1">
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">Totaal 2018-2024</div>
-            <div className="text-2xl font-bold">
-              {formatInt((sloopYearly as SloopYearlyRow[]).filter((r) => r.y <= 2024).reduce((sum, r) => sum + r[metric], 0))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="yearly" onValueChange={setCurrentView}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="yearly">Per jaar</TabsTrigger>
-          <TabsTrigger value="quarterly">Per kwartaal</TabsTrigger>
-          <TabsTrigger value="besluit">Per besluit</TabsTrigger>
-          <TabsTrigger value="trend">Trend</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="yearly">
-          <Card>
-            <CardHeader><CardTitle>Jaarlijkse evolutie sloop</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={yearlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="jaar" />
-                  <YAxis tickFormatter={formatInt} />
-                  <Tooltip formatter={(v: number) => formatInt(v)} />
-                  <Bar dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="#ef4444" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="quarterly">
-          <Card>
-            <CardHeader><CardTitle>Kwartaalevolutie sloop</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={quarterlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} />
-                  <YAxis tickFormatter={formatInt} />
-                  <Tooltip formatter={(v: number) => formatInt(v)} />
-                  <Area type="monotone" dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="#ef4444" stroke="#dc2626" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="besluit">
-          <Card>
-            <CardHeader><CardTitle>Sloop per besluitniveau</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={besluitData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="jaar" />
-                  <YAxis tickFormatter={formatInt} />
-                  <Tooltip formatter={(v: number) => formatInt(v)} />
-                  <Legend />
-                  <Bar dataKey="Gemeente" fill="#3b82f6" stackId="a" />
-                  <Bar dataKey="Provincie" fill="#22c55e" stackId="a" />
-                  <Bar dataKey="Onbekend" fill="#9ca3af" stackId="a" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="trend">
-          <Card>
-            <CardHeader><CardTitle>Trend sloop (index 2018 = 100)</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="jaar" />
-                  <YAxis yAxisId="left" tickFormatter={formatInt} />
-                  <YAxis yAxisId="right" orientation="right" domain={[0, 150]} />
-                  <Tooltip formatter={(v: number, name: string) => name === "Index" ? v.toFixed(1) : formatInt(v)} />
-                  <Legend />
-                  <Bar yAxisId="left" dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="#ef4444" />
-                  <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+      }
+      rightControls={<MetricSelector selected={metric} onChange={setMetric} labels={SLOOP_METRIC_LABELS} />}
+      views={[
+        {
+          value: "yearly",
+          label: "Per jaar",
+          exportData: yearlyExportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Jaarlijkse evolutie sloop</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={yearlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="jaar" />
+                    <YAxis tickFormatter={formatInt} />
+                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Bar dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="#ef4444" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+        {
+          value: "quarterly",
+          label: "Per kwartaal",
+          exportData: quarterlyExportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Periode"], valueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Kwartaalevolutie sloop</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={quarterlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} />
+                    <YAxis tickFormatter={formatInt} />
+                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Area type="monotone" dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="#ef4444" stroke="#dc2626" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+        {
+          value: "besluit",
+          label: "Per besluit",
+          exportData: besluitExportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar", "Besluit"], valueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Sloop per besluitniveau</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={besluitData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="jaar" />
+                    <YAxis tickFormatter={formatInt} />
+                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Legend />
+                    <Bar dataKey="Gemeente" fill="#3b82f6" stackId="a" />
+                    <Bar dataKey="Provincie" fill="#22c55e" stackId="a" />
+                    <Bar dataKey="Onbekend" fill="#9ca3af" stackId="a" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+        {
+          value: "trend",
+          label: "Trend",
+          exportData: trendExportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel: trendValueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Trend sloop (index 2018 = 100)</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <ComposedChart data={trendData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="jaar" />
+                    <YAxis yAxisId="left" tickFormatter={formatInt} />
+                    <YAxis yAxisId="right" orientation="right" domain={[0, 150]} />
+                    <Tooltip formatter={(v: number, name: string) => name === "Index" ? v.toFixed(1) : formatInt(v)} />
+                    <Legend />
+                    <Bar yAxisId="left" dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="#ef4444" />
+                    <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+      ]}
+    />
   )
 }
 
