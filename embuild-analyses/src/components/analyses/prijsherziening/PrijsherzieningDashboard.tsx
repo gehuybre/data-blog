@@ -76,11 +76,17 @@ function formatMonth(year: number, month: number): string {
 
 function formatDate(dateString: string | null): string {
   if (!dateString) return "Onbekend"
+  // Parse ISO date string correctly to avoid timezone issues
   const date = new Date(dateString)
-  return date.toLocaleDateString("nl-BE", { year: "numeric", month: "long", day: "numeric" })
+  // Use UTC methods to avoid timezone shifting
+  const year = date.getUTCFullYear()
+  const month = date.getUTCMonth()
+  const day = date.getUTCDate()
+  const utcDate = new Date(Date.UTC(year, month, day))
+  return utcDate.toLocaleDateString("nl-BE", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })
 }
 
-function formatPct(n: number) {
+function formatPct(n: number): string {
   const sign = n >= 0 ? "+" : ""
   return `${sign}${n.toFixed(1)}%`
 }
@@ -228,11 +234,9 @@ export function PrijsherzieningDashboard() {
       const latest = latestValues.get(comp.code)
       if (!latest) return
 
-      // Find value from 12 months ago
-      const prevYear = latest.year
-      const prevMonth = latest.month
-      const compareYear = latest.month === 12 ? prevYear : prevYear - 1
-      const compareMonth = latest.month === 12 ? 12 : latest.month
+      // Find value from 12 months ago (same month, previous year)
+      const compareYear = latest.year - 1
+      const compareMonth = latest.month
 
       const prevValue = monthlyData.find(
         d => d.component === comp.code && d.year === compareYear && d.month === compareMonth
@@ -254,15 +258,21 @@ export function PrijsherzieningDashboard() {
   }, [latestValues])
 
   const biggestRiser = React.useMemo(() => {
+    if (componentChanges.length === 0) {
+      return { component: "Geen data", change: 0, latest: 0, year: 0, month: 0 }
+    }
     return componentChanges.reduce((max, curr) =>
       curr.change > max.change ? curr : max
-    , componentChanges[0] || { component: "N/A", change: 0, latest: 0, year: 0, month: 0 })
+    , componentChanges[0])
   }, [componentChanges])
 
   const biggestFaller = React.useMemo(() => {
+    if (componentChanges.length === 0) {
+      return { component: "Geen data", change: 0, latest: 0, year: 0, month: 0 }
+    }
     return componentChanges.reduce((min, curr) =>
       curr.change < min.change ? curr : min
-    , componentChanges[0] || { component: "N/A", change: 0, latest: 0, year: 0, month: 0 })
+    , componentChanges[0])
   }, [componentChanges])
 
   const indexI2021Latest = React.useMemo(() => {
@@ -273,10 +283,10 @@ export function PrijsherzieningDashboard() {
     <div className="space-y-6">
       {/* Date info under title (no card) */}
       <div className="text-sm text-muted-foreground space-y-1">
-        <p>Data laatst bijgewerkt op: {formatDate(metadataData.last_updated)}</p>
         {metadataData.latest_data_date && (
           <p>Recentste data: {formatDate(metadataData.latest_data_date)}</p>
         )}
+        <p>Data laatst bijgewerkt op: {formatDate(metadataData.last_updated)}</p>
       </div>
 
       {/* Summary cards: biggest riser, biggest faller, overall index */}
@@ -318,11 +328,19 @@ export function PrijsherzieningDashboard() {
           <h2 className="text-2xl font-bold">Evolutie prijsherzieningsindex</h2>
           <div className="flex items-center gap-2">
             <ExportButtons
-              data={chartData.map((row) => ({
-                label: row.label,
-                value: 0, // Not used for multi-component export
-                periodCells: [row.label],
-              }))}
+              data={chartData.map((row) => {
+                // Build data object with all selected components
+                const dataObj: Record<string, any> = {
+                  label: row.label,
+                  value: selectedComponentList.length === 1 ? (row[selectedComponentList[0]] as number) || 0 : 0,
+                  periodCells: [row.label],
+                }
+                // Add each component as a separate column
+                selectedComponentList.forEach(comp => {
+                  dataObj[comp] = row[comp] || 0
+                })
+                return dataObj
+              })}
               periodHeaders={["Periode"]}
               title="Prijsherzieningsindex I-2021"
               slug="prijsherziening-index-i-2021"
