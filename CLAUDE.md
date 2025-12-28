@@ -6,6 +6,93 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Data Blog is a static site generator for publishing data analyses. It combines a Next.js frontend with Python data processing scripts, deployed to GitHub Pages at https://gehuybre.github.io/data-blog/
 
+## Claude Code Permissions
+
+This section defines which commands Claude Code is allowed to execute without explicit user approval.
+
+### Allowed Tools
+
+```yaml
+allowed_tools:
+  # File operations
+  - Read
+  - Edit
+  - Write
+  - Glob
+  - Grep
+
+  # Version control
+  - Bash(git *)
+
+  # Package management
+  - Bash(npm *)
+  - Bash(pip *)
+  - Bash(npx *)
+
+  # Python execution
+  - Bash(python *)
+  - Bash(python3 *)
+
+  # File system operations
+  - Bash(ls *)
+  - Bash(cat *)
+  - Bash(mkdir *)
+  - Bash(rm *)
+  - Bash(mv *)
+  - Bash(cp *)
+  - Bash(find *)
+
+  # Network operations
+  - Bash(curl *)
+  - Bash(wget *)
+
+  # GitHub CLI
+  - Bash(gh *)
+  - Bash(gh pr *)
+  - Bash(gh workflow *)
+  - Bash(gh secret *)
+  - Bash(gh api *)
+
+  # Process management
+  - Bash(timeout *)
+  - Bash(node *)
+
+  # Data processing
+  - Bash(jq *)
+  - Bash(sed *)
+  - Bash(awk *)
+```
+
+### Usage Patterns
+
+#### Development
+Start dev server, run builds, and linters:
+- `npm run dev` - Start development server
+- `npm run build` - Build static site
+- `npm run lint` - Run ESLint
+- `npm run test` - Run tests (if applicable)
+- `python run_blog.py` - Start dev server with port conflict handling
+
+#### Python Data Processing
+- `pip install <package>` - Install Python dependencies
+- `python run_blog.py` - Run development server
+- `python scripts/*` - Run utility scripts
+- `python analyses/<slug>/src/*` - Run analysis processing scripts
+
+#### GitHub Operations
+Inspect and manage PRs and workflows:
+- `gh pr create` - Create pull requests
+- `gh pr edit` - Edit pull requests
+- `gh pr view` - View pull request details
+- `gh pr list` - List pull requests
+- `gh workflow run` - Trigger GitHub Actions workflows
+- `gh workflow view` - View workflow details
+
+#### File Management
+- `ls`, `cat`, `mkdir`, `rm`, `mv`, `cp` - Basic file operations
+- `find` - Search for files
+- `jq` - Parse and manipulate JSON data
+
 ## Commands
 
 ### Development
