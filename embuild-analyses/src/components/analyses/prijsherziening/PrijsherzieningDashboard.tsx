@@ -67,6 +67,7 @@ const COMPONENT_COLORS: Record<string, string> = {
   "Hout": "#84cc16",
   "Lonen": "#06b6d4",
   "Index I": "#ec4899",
+  "Index I-2021": "#ec4899",
 }
 
 function formatMonth(year: number, month: number): string {
@@ -334,17 +335,21 @@ export function PrijsherzieningDashboard() {
           <div className="flex items-center gap-2">
             <ExportButtons
               data={chartData.map((row) => {
-                // Build data object with all selected components
-                const dataObj: Record<string, any> = {
+                // For single component, use value field; for multiple, set to 0 (CSV export uses all columns)
+                const value = selectedComponentList.length === 1
+                  ? (row[selectedComponentList[0]] as number) || 0
+                  : 0
+
+                return {
                   label: row.label,
-                  value: selectedComponentList.length === 1 ? (row[selectedComponentList[0]] as number) || 0 : 0,
+                  value: value,
                   periodCells: [row.label],
+                  // Add dynamic component columns
+                  ...selectedComponentList.reduce((acc, comp) => {
+                    acc[comp] = row[comp] || 0
+                    return acc
+                  }, {} as Record<string, number>)
                 }
-                // Add each component as a separate column
-                selectedComponentList.forEach(comp => {
-                  dataObj[comp] = row[comp] || 0
-                })
-                return dataObj
               })}
               periodHeaders={["Periode"]}
               title="Prijsherzieningsindex I-2021"
