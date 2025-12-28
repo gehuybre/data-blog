@@ -432,6 +432,8 @@
             <div class="test-controls">
                 <label>
                     Analyse:
+                    <!-- NOTE: This list must be manually updated when new analyses are added -->
+                    <!-- TODO: Consider fetching dynamically from an API endpoint or config file -->
                     <select id="analysisSelect">
                         <option value="vergunningen-goedkeuringen/renovatie">Vergunningen - Renovatie</option>
                         <option value="vergunningen-goedkeuringen/nieuwbouw">Vergunningen - Nieuwbouw</option>
@@ -468,6 +470,14 @@
     </div>
 
     <script>
+        // Configuration constants
+        const CONFIG = {
+            IFRAME_HEIGHT: 500,
+            LOAD_TIMEOUT_MS: 10000,
+            PRODUCTION_BASE_URL: 'https://gehuybre.github.io/data-blog',
+            LOCAL_BASE_URL: 'http://localhost:3000'
+        };
+
         /**
          * Detect the base URL based on the environment
          * Returns the appropriate base URL for embedding iframes
@@ -477,16 +487,16 @@
 
             // Production (GitHub Pages)
             if (hostname === 'gehuybre.github.io') {
-                return 'https://gehuybre.github.io/data-blog';
+                return CONFIG.PRODUCTION_BASE_URL;
             }
 
             // Local development
             if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                return 'http://localhost:3000';
+                return CONFIG.LOCAL_BASE_URL;
             }
 
             // Fallback to production URL
-            return 'https://gehuybre.github.io/data-blog';
+            return CONFIG.PRODUCTION_BASE_URL;
         }
 
         /**
@@ -506,11 +516,56 @@
             return `<iframe
   src="${url}"
   width="100%"
-  height="500"
+  height="${CONFIG.IFRAME_HEIGHT}"
   style="border: 0;"
   title="${title}"
   loading="lazy"
 ></iframe>`;
+        }
+
+        /**
+         * Attach event listeners to an iframe for load/error monitoring
+         * @param {HTMLIFrameElement} iframe - The iframe element
+         * @param {HTMLElement} statusElement - The status display element
+         * @param {string} testName - Name of the test for display purposes
+         */
+        function attachIframeMonitoring(iframe, statusElement, testName) {
+            let loadTimeout;
+
+            iframe.addEventListener('load', () => {
+                clearTimeout(loadTimeout);
+                statusElement.className = 'status success';
+                statusElement.textContent = '✅ Geladen - ' + testName;
+
+                // Try to detect errors in iframe content
+                try {
+                    // Note: This will fail for cross-origin iframes (expected behavior)
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (iframeDoc.body && iframeDoc.body.textContent.includes('error')) {
+                        statusElement.className = 'status error';
+                        statusElement.textContent = '❌ Error gedetecteerd in iframe';
+                    }
+                } catch (e) {
+                    // Only log if it's NOT a cross-origin security error
+                    if (e.name !== 'SecurityError' && !e.message.includes('cross-origin')) {
+                        console.error('Unexpected error checking iframe content:', e);
+                    }
+                }
+            });
+
+            iframe.addEventListener('error', () => {
+                clearTimeout(loadTimeout);
+                statusElement.className = 'status error';
+                statusElement.textContent = '❌ Fout bij laden - ' + testName;
+            });
+
+            // Timeout after configured duration
+            loadTimeout = setTimeout(() => {
+                if (statusElement.className.includes('loading')) {
+                    statusElement.className = 'status error';
+                    statusElement.textContent = '⏰ Timeout - Laden duurde te lang';
+                }
+            }, CONFIG.LOAD_TIMEOUT_MS);
         }
 
         // Display detected environment
@@ -520,6 +575,8 @@
         document.getElementById('detectedEnv').textContent = isProduction ? 'Production (GitHub Pages)' : 'Local Development';
 
         // Track iframe load status
+        // NOTE: This list must be manually updated when new analyses are added
+        // TODO: Consider fetching this dynamically from the API or config file
         const iframeTests = [
             { id: 'test1', name: 'Renovatie Chart' },
             { id: 'test2', name: 'Nieuwbouw Table' },
@@ -549,45 +606,11 @@
             }
         });
 
-        // Monitor iframe loading
+        // Monitor iframe loading using the reusable helper
         iframeTests.forEach(test => {
             const iframe = document.getElementById(test.id);
             const status = document.getElementById('status' + test.id.replace('test', ''));
-
-            let loadTimeout;
-
-            iframe.addEventListener('load', () => {
-                clearTimeout(loadTimeout);
-                status.className = 'status success';
-                status.textContent = '✅ Geladen - ' + test.name;
-
-                // Try to detect errors in iframe
-                try {
-                    // Note: Cross-origin restrictions may prevent this
-                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                    if (iframeDoc.body && iframeDoc.body.textContent.includes('error')) {
-                        status.className = 'status error';
-                        status.textContent = '❌ Error gedetecteerd in iframe';
-                    }
-                } catch (e) {
-                    // Cross-origin restriction - expected behavior
-                    console.log('Cross-origin check blocked (expected):', e.message);
-                }
-            });
-
-            iframe.addEventListener('error', () => {
-                clearTimeout(loadTimeout);
-                status.className = 'status error';
-                status.textContent = '❌ Fout bij laden - ' + test.name;
-            });
-
-            // Timeout after 10 seconds
-            loadTimeout = setTimeout(() => {
-                if (status.className.includes('loading')) {
-                    status.className = 'status error';
-                    status.textContent = '⏰ Timeout - Laden duurde te lang';
-                }
-            }, 10000);
+            attachIframeMonitoring(iframe, status, test.name);
         });
 
         // Interactive embed generator
@@ -605,31 +628,51 @@
             const embedUrl = buildEmbedUrl(embedPath);
             const embedCode = generateEmbedCode(embedUrl, 'Custom Embed');
 
+            // Clear container and build DOM elements safely (prevents XSS)
             const container = document.getElementById('customEmbedContainer');
-            container.innerHTML = `
-                <details open style="margin-top: 15px;">
-                    <summary>Gegenereerde embed code</summary>
-                    <div class="code-block">${embedCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
-                </details>
-                <div class="embed-container" style="margin-top: 15px;">
-                    ${embedCode}
-                </div>
-                <div class="status loading">⏳ Laden...</div>
-            `;
+            container.innerHTML = ''; // Clear existing content
 
-            // Add event listener to the new iframe
-            const newIframe = container.querySelector('iframe');
-            const newStatus = container.querySelector('.status');
+            // Create details element for code display
+            const details = document.createElement('details');
+            details.open = true;
+            details.style.marginTop = '15px';
 
-            newIframe.addEventListener('load', () => {
-                newStatus.className = 'status success';
-                newStatus.textContent = '✅ Custom embed geladen';
-            });
+            const summary = document.createElement('summary');
+            summary.textContent = 'Gegenereerde embed code';
+            details.appendChild(summary);
 
-            newIframe.addEventListener('error', () => {
-                newStatus.className = 'status error';
-                newStatus.textContent = '❌ Fout bij laden custom embed';
-            });
+            const codeBlock = document.createElement('div');
+            codeBlock.className = 'code-block';
+            codeBlock.textContent = embedCode; // textContent auto-escapes HTML
+            details.appendChild(codeBlock);
+
+            // Create embed container
+            const embedContainer = document.createElement('div');
+            embedContainer.className = 'embed-container';
+            embedContainer.style.marginTop = '15px';
+
+            // Create iframe safely using DOM methods
+            const iframe = document.createElement('iframe');
+            iframe.src = embedUrl;
+            iframe.width = '100%';
+            iframe.height = CONFIG.IFRAME_HEIGHT;
+            iframe.style.border = '0';
+            iframe.title = 'Custom Embed';
+            iframe.loading = 'lazy';
+            embedContainer.appendChild(iframe);
+
+            // Create status element
+            const status = document.createElement('div');
+            status.className = 'status loading';
+            status.textContent = '⏳ Laden...';
+
+            // Append all elements to container
+            container.appendChild(details);
+            container.appendChild(embedContainer);
+            container.appendChild(status);
+
+            // Attach monitoring to the new iframe
+            attachIframeMonitoring(iframe, status, 'Custom embed');
         }
 
         // Console logging for debugging
