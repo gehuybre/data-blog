@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm :*)",
+      "Bash(pip :*)",
+      "Bash(npx :*)",
+      "Bash(python :*)",
+      "Bash(python3 :*)",
+      "Bash(ls :*)",
+      "Bash(cat :*)",
+      "Bash(mkdir :*)",
+      "Bash(rm :*)",
+      "Bash(mv :*)",
+      "Bash(cp :*)",
+      "Bash(find :*)",
+      "Bash(curl :*)",
+      "Bash(wget :*)",
+      "Bash(git :*)",
+      "Bash(gh :*)",
+      "Bash(timeout :*)",
+      "Bash(node :*)",
+      "Bash(jq :*)",
+      "Bash(sed :*)",
+      "Bash(awk :*)"
+    ]
+  }
+}
