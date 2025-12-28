@@ -294,3 +294,12 @@ export function getAllEmbedParams(): Array<{ slug: string; section: string }> {
 export function isEmbeddable(slug: string, section: string): boolean {
   return getEmbedConfig(slug, section) !== null
 }
+
+/**
+ * Get all valid section names for a specific analysis
+ */
+export function getValidSections(slug: string): string[] {
+  const analysisConfig = EMBED_CONFIGS.find((a) => a.slug === slug)
+  if (!analysisConfig) return []
+  return Object.keys(analysisConfig.sections)
+}
