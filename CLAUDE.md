@@ -10,57 +10,62 @@ Data Blog is a static site generator for publishing data analyses. It combines a
 
 This section defines which commands Claude Code is allowed to execute without explicit user approval.
 
+### Configuration
+
+Permissions are configured in `.claude/settings.json` (committed to the repository). This file is automatically loaded by Claude Code and applies to all team members.
+
+**Important**: Use the `:*` pattern for prefix matching (note the colon):
+- ✅ Correct: `"Bash(npm :*)"`  - matches `npm install`, `npm audit`, etc.
+- ❌ Wrong: `"Bash(npm *)"`     - invalid syntax
+- ❌ Wrong: `"Bash(npm install:*)"` - only matches `npm install:something`
+
 ### Allowed Tools
+
+The following tools and commands are pre-approved in `.claude/settings.json`:
 
 ```yaml
 allowed_tools:
-  # File operations
+  # File operations (built-in tools - always available)
   - Read
   - Edit
   - Write
   - Glob
   - Grep
 
-  # Version control
-  - Bash(git *)
-
   # Package management
-  - Bash(npm *)
-  - Bash(pip *)
-  - Bash(npx *)
+  - Bash(npm :*)      # All npm commands (install, audit, update, etc.)
+  - Bash(pip :*)      # All pip commands
+  - Bash(npx :*)      # All npx commands
 
   # Python execution
-  - Bash(python *)
-  - Bash(python3 *)
+  - Bash(python :*)   # All python commands
+  - Bash(python3 :*)  # All python3 commands
 
   # File system operations
-  - Bash(ls *)
-  - Bash(cat *)
-  - Bash(mkdir *)
-  - Bash(rm *)
-  - Bash(mv *)
-  - Bash(cp *)
-  - Bash(find *)
+  - Bash(ls :*)       # List files
+  - Bash(cat :*)      # Display file contents
+  - Bash(mkdir :*)    # Create directories
+  - Bash(rm :*)       # Remove files (use with caution)
+  - Bash(mv :*)       # Move/rename files
+  - Bash(cp :*)       # Copy files
+  - Bash(find :*)     # Find files
 
   # Network operations
-  - Bash(curl *)
-  - Bash(wget *)
+  - Bash(curl :*)     # HTTP requests
+  - Bash(wget :*)     # Download files
 
-  # GitHub CLI
-  - Bash(gh *)
-  - Bash(gh pr *)
-  - Bash(gh workflow *)
-  - Bash(gh secret *)
-  - Bash(gh api *)
+  # Version control & GitHub
+  - Bash(git :*)      # All git commands
+  - Bash(gh :*)       # All GitHub CLI commands
 
   # Process management
-  - Bash(timeout *)
-  - Bash(node *)
+  - Bash(timeout :*)  # Run commands with timeout
+  - Bash(node :*)     # Run Node.js scripts
 
   # Data processing
-  - Bash(jq *)
-  - Bash(sed *)
-  - Bash(awk *)
+  - Bash(jq :*)       # JSON processing
+  - Bash(sed :*)      # Stream editing
+  - Bash(awk :*)      # Text processing
 ```
 
 ### Usage Patterns
