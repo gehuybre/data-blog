@@ -264,7 +264,7 @@ function NieuwbouwSection() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="jaar" />
                     <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
                     <Bar dataKey="waarde" name={METRIC_LABELS[metric]} fill="#3b82f6" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -286,7 +286,7 @@ function NieuwbouwSection() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} />
                     <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
                     <Area type="monotone" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#3b82f6" stroke="#2563eb" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -308,7 +308,7 @@ function NieuwbouwSection() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="jaar" />
                     <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
                     <Legend />
                     <Bar dataKey="Eengezinswoning" fill={TYPE_COLORS.eengezins} />
                     <Bar dataKey="Meergezinswoning" fill={TYPE_COLORS.meergezins} />
@@ -334,7 +334,7 @@ function NieuwbouwSection() {
                     <XAxis dataKey="jaar" />
                     <YAxis yAxisId="left" tickFormatter={formatInt} />
                     <YAxis yAxisId="right" orientation="right" domain={[0, 150]} />
-                    <Tooltip formatter={(v: number, name: string) => name === "Index" ? v.toFixed(1) : formatInt(v)} />
+                    <Tooltip formatter={(v: number | undefined, name: string | undefined) => v !== undefined ? (name === "Index" ? v.toFixed(1) : formatInt(v)) : ""} />
                     <Legend />
                     <Bar yAxisId="left" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#3b82f6" />
                     <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
@@ -467,7 +467,7 @@ function VerbouwSection() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="jaar" />
                     <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
                     <Bar dataKey="waarde" name={METRIC_LABELS[metric]} fill="#22c55e" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -489,7 +489,7 @@ function VerbouwSection() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} />
                     <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
                     <Area type="monotone" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#22c55e" stroke="#16a34a" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -511,7 +511,7 @@ function VerbouwSection() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="jaar" />
                     <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
                     <Legend />
                     <Bar dataKey="Eengezinswoning" fill={TYPE_COLORS.eengezins} />
                     <Bar dataKey="Meergezinswoning" fill={TYPE_COLORS.meergezins} />
@@ -537,7 +537,7 @@ function VerbouwSection() {
                     <XAxis dataKey="jaar" />
                     <YAxis yAxisId="left" tickFormatter={formatInt} />
                     <YAxis yAxisId="right" orientation="right" domain={[0, 150]} />
-                    <Tooltip formatter={(v: number, name: string) => name === "Index" ? v.toFixed(1) : formatInt(v)} />
+                    <Tooltip formatter={(v: number | undefined, name: string | undefined) => v !== undefined ? (name === "Index" ? v.toFixed(1) : formatInt(v)) : ""} />
                     <Legend />
                     <Bar yAxisId="left" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#22c55e" />
                     <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
@@ -672,7 +672,7 @@ function SloopSection() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="jaar" />
                     <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
                     <Bar dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="#ef4444" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -694,7 +694,7 @@ function SloopSection() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} />
                     <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
                     <Area type="monotone" dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="#ef4444" stroke="#dc2626" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -716,7 +716,7 @@ function SloopSection() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="jaar" />
                     <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number) => formatInt(v)} />
+                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
                     <Legend />
                     <Bar dataKey="Gemeente" fill="#3b82f6" stackId="a" />
                     <Bar dataKey="Provincie" fill="#22c55e" stackId="a" />
@@ -742,7 +742,7 @@ function SloopSection() {
                     <XAxis dataKey="jaar" />
                     <YAxis yAxisId="left" tickFormatter={formatInt} />
                     <YAxis yAxisId="right" orientation="right" domain={[0, 150]} />
-                    <Tooltip formatter={(v: number, name: string) => name === "Index" ? v.toFixed(1) : formatInt(v)} />
+                    <Tooltip formatter={(v: number | undefined, name: string | undefined) => v !== undefined ? (name === "Index" ? v.toFixed(1) : formatInt(v)) : ""} />
                     <Legend />
                     <Bar yAxisId="left" dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="#ef4444" />
                     <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />

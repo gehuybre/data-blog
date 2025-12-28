@@ -58,7 +58,7 @@ export function EnergiekaartChart({ data, label, isCurrency = false }: Energieka
         />
         <YAxis tickFormatter={formatValue} style={{ fontSize: "0.875rem" }} />
         <Tooltip
-          formatter={(value: number) => formatValue(value)}
+          formatter={(value: number | undefined) => value !== undefined ? formatValue(value) : ""}
           labelFormatter={(jaar) => `Jaar: ${jaar}`}
           contentStyle={{
             backgroundColor: "hsl(var(--card))",
