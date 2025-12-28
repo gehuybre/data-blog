@@ -2,8 +2,8 @@ name: Update faillissementen data
 
 on:
   schedule:
-    # At 00:00 on day-of-month 1 (monthly, around when new data is available)
-    - cron: '0 0 1 * *'
+    # Monthly on day-of-month 1 (UTC)
+    - cron: '10 0 1 * *'
   workflow_dispatch: {}
 
 permissions:
