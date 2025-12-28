@@ -34,12 +34,12 @@ test.describe('Embed Iframe Tests', () => {
     // Wait for iframe to load
     const iframe = page.frameLocator('#test-iframe');
 
-    // Wait for iframe content to be ready
-    await page.waitForTimeout(2000);
-
     // Verify iframe loaded (by checking the frame exists and has content)
     const iframeElement = await page.locator('#test-iframe');
     await expect(iframeElement).toBeVisible();
+
+    // Wait for iframe content to be ready
+    await page.waitForLoadState('networkidle');
   });
 
   test('should load multiple iframes simultaneously', async ({ page }) => {
@@ -73,7 +73,7 @@ test.describe('Embed Iframe Tests', () => {
     `);
 
     // Wait for all iframes to load
-    await page.waitForTimeout(3000);
+    await page.waitForLoadState('networkidle');
 
     // Verify all iframes are visible
     for (let i = 0; i < embeds.length; i++) {
@@ -110,7 +110,7 @@ test.describe('Embed Iframe Tests', () => {
     await iframe.scrollIntoViewIfNeeded();
 
     // Wait for iframe to load
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
 
     // Verify iframe is visible
     await expect(iframe).toBeVisible();
@@ -139,7 +139,7 @@ test.describe('Embed Iframe Tests', () => {
         </html>
       `);
 
-      await page.waitForTimeout(2000);
+      await page.waitForLoadState('networkidle');
 
       const iframe = page.locator('#responsive-iframe');
       await expect(iframe).toBeVisible();
@@ -178,7 +178,7 @@ test.describe('Embed Iframe Tests', () => {
     `);
 
     // Wait for iframe to fully load
-    await page.waitForTimeout(3000);
+    await page.waitForLoadState('networkidle');
 
     // Verify no errors occurred
     expect(consoleErrors).toHaveLength(0);
@@ -188,6 +188,14 @@ test.describe('Embed Iframe Tests', () => {
   test('should handle iframe with basePath correctly', async ({ page }) => {
     // Verify that embeds work with the GitHub Pages basePath
     // The baseURL should already include the basePath in production
+
+    // Verify no 404 errors
+    const consoleErrors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error' && msg.text().includes('404')) {
+        consoleErrors.push(msg.text());
+      }
+    });
 
     await page.setContent(`
       <!DOCTYPE html>
@@ -206,20 +214,11 @@ test.describe('Embed Iframe Tests', () => {
       </html>
     `);
 
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
 
     const iframe = page.locator('#basepath-iframe');
     await expect(iframe).toBeVisible();
 
-    // Verify no 404 errors
-    const consoleErrors: string[] = [];
-    page.on('console', (msg) => {
-      if (msg.type() === 'error' && msg.text().includes('404')) {
-        consoleErrors.push(msg.text());
-      }
-    });
-
-    await page.waitForTimeout(1000);
     expect(consoleErrors).toHaveLength(0);
   });
 });
