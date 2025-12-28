@@ -45,7 +45,6 @@ allowed_tools:
   - Bash(ls :*)       # List files
   - Bash(cat :*)      # Display file contents
   - Bash(mkdir :*)    # Create directories
-  - Bash(rm :*)       # Remove files (use with caution)
   - Bash(mv :*)       # Move/rename files
   - Bash(cp :*)       # Copy files
   - Bash(find :*)     # Find files
@@ -54,9 +53,21 @@ allowed_tools:
   - Bash(curl :*)     # HTTP requests
   - Bash(wget :*)     # Download files
 
-  # Version control & GitHub
-  - Bash(git :*)      # All git commands
-  - Bash(gh :*)       # All GitHub CLI commands
+  # Version control & GitHub (restricted for security)
+  - Bash(git add:*)    # Stage files
+  - Bash(git commit:*) # Create commits
+  - Bash(git push:*)   # Push to remote
+  - Bash(git status:*) # Check status
+  - Bash(git diff:*)   # View changes
+  - Bash(git log:*)    # View history
+  - Bash(git rm:*)     # Remove tracked files
+  - Bash(gh :*)        # All GitHub CLI commands
+
+  # Note: Destructive git operations are NOT allowed:
+  # - git push --force (overwrites remote history)
+  # - git reset --hard (discards uncommitted changes)
+  # - git clean -fd (deletes untracked files)
+  # - git rebase --force (can cause conflicts)
 
   # Process management
   - Bash(timeout :*)  # Run commands with timeout
@@ -94,9 +105,10 @@ Inspect and manage PRs and workflows:
 - `gh workflow view` - View workflow details
 
 #### File Management
-- `ls`, `cat`, `mkdir`, `rm`, `mv`, `cp` - Basic file operations
+- `ls`, `cat`, `mkdir`, `mv`, `cp` - Basic file operations
 - `find` - Search for files
 - `jq` - Parse and manipulate JSON data
+- `git rm` - Remove tracked files (safer than rm)
 
 ## Commands
 
