@@ -76,14 +76,10 @@ function formatMonth(year: number, month: number): string {
 
 function formatDate(dateString: string | null): string {
   if (!dateString) return "Onbekend"
-  // Parse ISO date string correctly to avoid timezone issues
-  const date = new Date(dateString)
-  // Use UTC methods to avoid timezone shifting
-  const year = date.getUTCFullYear()
-  const month = date.getUTCMonth()
-  const day = date.getUTCDate()
-  const utcDate = new Date(Date.UTC(year, month, day))
-  return utcDate.toLocaleDateString("nl-BE", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })
+  // Parse as local date parts (YYYY-MM-DD) to avoid timezone shifting
+  const [year, month, day] = dateString.split('-').map(Number)
+  const date = new Date(year, month - 1, day) // month is 0-indexed
+  return date.toLocaleDateString("nl-BE", { year: "numeric", month: "long", day: "numeric" })
 }
 
 function formatPct(n: number): string {
@@ -174,7 +170,7 @@ export function PrijsherzieningDashboard() {
   // Prepare table data
   const tableData = React.useMemo(() => {
     return chartData.map(row => {
-      const result: Record<string, any> = {
+      const result: Record<string, string> = {
         Periode: row.label,
       }
       selectedComponentList.forEach(comp => {
@@ -334,24 +330,24 @@ export function PrijsherzieningDashboard() {
           <div className="flex items-center gap-2">
             <ExportButtons
               data={chartData.map((row) => {
-                // Build data object with all selected components
-                const dataObj: Record<string, any> = {
+                // For single component, export that component's value
+                // For multiple components, export the first component or 0
+                const value = selectedComponentList.length === 1
+                  ? (row[selectedComponentList[0]] as number) || 0
+                  : (selectedComponentList.length > 0 ? (row[selectedComponentList[0]] as number) || 0 : 0)
+
+                return {
                   label: row.label,
-                  value: selectedComponentList.length === 1 ? (row[selectedComponentList[0]] as number) || 0 : 0,
+                  value: value,
                   periodCells: [row.label],
                 }
-                // Add each component as a separate column
-                selectedComponentList.forEach(comp => {
-                  dataObj[comp] = row[comp] || 0
-                })
-                return dataObj
               })}
               periodHeaders={["Periode"]}
               title="Prijsherzieningsindex I-2021"
               slug="prijsherziening-index-i-2021"
               sectionId="evolutie"
               viewType="chart"
-              valueLabel="Index"
+              valueLabel={selectedComponentList.length === 1 ? selectedComponentList[0] : "Index"}
               dataSource="FOD Economie - Prijsherzieningsindexen"
               dataSourceUrl="https://economie.fgov.be/nl/themas/ondernemingen/specifieke-sectoren/bouw/prijsherzieningsindexen/mercuriale-index-i-2021"
             />
