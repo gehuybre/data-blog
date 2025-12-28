@@ -18,6 +18,23 @@ import { MapLevelToggle, MapDisplayLevel } from "./MapLevelToggle"
 
 type UnknownRecord = Record<string, any>
 
+interface GeoJsonFeature {
+  type: string
+  properties: {
+    code: string
+    name?: string
+    LAU_NAME?: string
+    nuts_id?: string
+  }
+  geometry: GeoJSON.Geometry
+  rsmKey?: string
+}
+
+interface GeoJsonFeatureCollection {
+  type: "FeatureCollection"
+  features: GeoJsonFeature[]
+}
+
 interface TooltipState {
   visible: boolean
   x: number
@@ -26,6 +43,12 @@ interface TooltipState {
   label: string
   value: string
 }
+
+const STROKE_WIDTHS = {
+  region: 1,
+  province: 1,
+  municipality: 0.5,
+} as const
 
 interface UnifiedMapProps<TData extends UnknownRecord = UnknownRecord> {
   data: TData[]
@@ -84,7 +107,7 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
   const [userLevel, setUserLevel] = useState<MapDisplayLevel>(controlledLevel ?? autoLevel)
   const displayLevel = controlledLevel ?? userLevel
 
-  const [geoData, setGeoData] = useState<any>(null)
+  const [geoData, setGeoData] = useState<GeoJsonFeatureCollection | null>(null)
   const [loading, setLoading] = useState(true)
   const [tooltip, setTooltip] = useState<TooltipState>({
     visible: false,
@@ -115,81 +138,104 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
       })
   }, [displayLevel])
 
-  // Data getters with defaults
-  const regionCodeGetter = getRegionCode ?? ((d: any) => d?.r)
-  const provinceCodeGetter = getProvinceCode ?? ((d: any) => d?.p)
-  const municipalityCodeGetter = getMunicipalityCode ?? ((d: any) => d?.m)
-
-  const metricGetter =
-    getMetricValue ??
-    ((d: any, m?: string) => {
-      if (typeof d?.value === "number") return d.value
-      if (m) return typeof d?.[m] === "number" ? d[m] : Number(d?.[m] ?? 0)
-      return typeof d?.value === "number" ? d.value : Number(d?.value ?? 0)
-    })
+  // Data getters with defaults - memoized to ensure stable references
+  const getRegionCodeMemo = useMemo(
+    () => getRegionCode ?? ((d: any) => d?.r),
+    [getRegionCode]
+  )
+  const getProvinceCodeMemo = useMemo(
+    () => getProvinceCode ?? ((d: any) => d?.p),
+    [getProvinceCode]
+  )
+  const getMunicipalityCodeMemo = useMemo(
+    () => getMunicipalityCode ?? ((d: any) => d?.m),
+    [getMunicipalityCode]
+  )
+  const getMetricValueMemo = useMemo(
+    () =>
+      getMetricValue ??
+      ((d: any, m?: string) => {
+        if (typeof d?.value === "number") return d.value
+        if (m) return typeof d?.[m] === "number" ? d[m] : Number(d?.[m] ?? 0)
+        return typeof d?.value === "number" ? d.value : Number(d?.value ?? 0)
+      }),
+    [getMetricValue]
+  )
 
   // Build value maps for each level
   const valueByRegion = useMemo(() => {
     const m = new Map<string, number>()
     for (const row of data ?? []) {
-      const code = regionCodeGetter(row)
+      const code = getRegionCodeMemo(row)
       if (!code) continue
-      const v = metricGetter(row, metric)
+      const v = getMetricValueMemo(row, metric)
       if (typeof v !== "number" || !Number.isFinite(v)) continue
       m.set(String(code), v)
     }
     return m
-  }, [data, metric, regionCodeGetter, metricGetter])
+  }, [data, metric, getRegionCodeMemo, getMetricValueMemo])
 
   const valueByProvince = useMemo(() => {
     const m = new Map<string, number>()
     for (const row of data ?? []) {
-      const code = provinceCodeGetter(row)
+      const code = getProvinceCodeMemo(row)
       if (!code) continue
-      const v = metricGetter(row, metric)
+      const v = getMetricValueMemo(row, metric)
       if (typeof v !== "number" || !Number.isFinite(v)) continue
       m.set(String(code), v)
     }
     return m
-  }, [data, metric, provinceCodeGetter, metricGetter])
+  }, [data, metric, getProvinceCodeMemo, getMetricValueMemo])
 
   const valueByMunicipality = useMemo(() => {
     const m = new Map<string, number>()
     for (const row of data ?? []) {
-      const code = municipalityCodeGetter(row)
+      const code = getMunicipalityCodeMemo(row)
       if (!code) continue
-      const v = metricGetter(row, metric)
+      const v = getMetricValueMemo(row, metric)
       if (typeof v !== "number" || !Number.isFinite(v)) continue
       m.set(String(code), v)
     }
     return m
-  }, [data, metric, municipalityCodeGetter, metricGetter])
+  }, [data, metric, getMunicipalityCodeMemo, getMetricValueMemo])
 
   // Filter geographies based on selection
-  const filteredGeo = useMemo(() => {
+  const filteredGeo = useMemo((): GeoJsonFeatureCollection | null => {
     if (!geoData?.features) return null
 
     // For region level, filter by selected region (or show all if Belgium selected)
     if (displayLevel === "region") {
       if (selectedRegion === "1000") return geoData
+      const filtered = geoData.features.filter(
+        (f) => String(f?.properties?.code) === String(selectedRegion)
+      )
+      if (filtered.length === 0) {
+        console.warn(`No region found with code: ${selectedRegion}`)
+      }
       return {
         ...geoData,
-        features: geoData.features.filter(
-          (f: any) => String(f?.properties?.code) === String(selectedRegion)
-        ),
+        features: filtered,
       }
     }
 
     // For province level, filter by selected region
     if (displayLevel === "province") {
       if (selectedRegion === "1000") return geoData
+      const filtered = geoData.features.filter((f) => {
+        const provCode = String(f?.properties?.code)
+        const prov = PROVINCES.find((p) => String(p.code) === provCode)
+        if (!prov) {
+          console.warn(`Unknown province code in map data: ${provCode}`)
+          return false
+        }
+        return String(prov.regionCode) === String(selectedRegion)
+      })
+      if (filtered.length === 0) {
+        console.warn(`No provinces found for region: ${selectedRegion}`)
+      }
       return {
         ...geoData,
-        features: geoData.features.filter((f: any) => {
-          const provCode = String(f?.properties?.code)
-          const prov = PROVINCES.find((p) => String(p.code) === provCode)
-          return prov && String(prov.regionCode) === String(selectedRegion)
-        }),
+        features: filtered,
       }
     }
 
@@ -197,22 +243,41 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
     if (displayLevel === "municipality") {
       if (selectedRegion === "1000") return geoData
 
+      const filtered = geoData.features.filter((f) => {
+        const raw = f?.properties?.code
+        if (!raw) return false
+        const munCode = Number.parseInt(String(raw), 10)
+        if (!Number.isFinite(munCode)) {
+          console.warn(`Invalid municipality code: ${raw}`)
+          return false
+        }
+
+        if (selectedProvince) {
+          const provCode = getProvinceForMunicipality(munCode)
+          if (!provCode) {
+            console.warn(`Could not determine province for municipality: ${munCode}`)
+            return false
+          }
+          return String(provCode) === String(selectedProvince)
+        }
+
+        const regCode = getRegionForMunicipality(munCode)
+        if (!regCode) {
+          console.warn(`Could not determine region for municipality: ${munCode}`)
+          return false
+        }
+        return String(regCode) === String(selectedRegion)
+      })
+
+      if (filtered.length === 0) {
+        console.warn(
+          `No municipalities found for ${selectedProvince ? `province ${selectedProvince}` : `region ${selectedRegion}`}`
+        )
+      }
+
       return {
         ...geoData,
-        features: geoData.features.filter((f: any) => {
-          const raw = f?.properties?.code
-          if (!raw) return false
-          const munCode = Number.parseInt(String(raw), 10)
-          if (!Number.isFinite(munCode)) return false
-
-          if (selectedProvince) {
-            const provCode = getProvinceForMunicipality(munCode)
-            return String(provCode) === String(selectedProvince)
-          }
-
-          const regCode = getRegionForMunicipality(munCode)
-          return String(regCode) === String(selectedRegion)
-        }),
+        features: filtered,
       }
     }
 
@@ -388,7 +453,7 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
                       : String(value)
 
                 // Stroke width varies by level
-                const strokeWidth = displayLevel === "municipality" ? 0.5 : 1
+                const strokeWidth = STROKE_WIDTHS[displayLevel]
 
                 return (
                   <Geography
