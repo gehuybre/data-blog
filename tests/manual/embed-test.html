@@ -185,6 +185,22 @@
             margin-bottom: 5px;
             color: #555;
         }
+
+        .env-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 4px;
+            border: 1px solid #0066cc;
+        }
+
+        .env-info .url {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            color: #0066cc;
+        }
     </style>
 </head>
 <body>
@@ -196,6 +212,14 @@
             <br><br>
             <strong>Doel:</strong> Controleren dat embeds correct laden, interacties werken, en ze responsive zijn.
         </p>
+
+        <div class="env-info">
+            <h3>🌐 Omgeving Detectie</h3>
+            <p>
+                <strong>Gedetecteerde base URL:</strong> <span class="url" id="detectedBaseUrl">...</span><br>
+                <strong>Environment:</strong> <span id="detectedEnv">...</span>
+            </p>
+        </div>
 
         <div class="legend">
             <h3>📋 Wat wordt getest?</h3>
@@ -215,20 +239,13 @@
 
             <details>
                 <summary>Toon embed code</summary>
-                <div class="code-block">&lt;iframe
-  src="http://localhost:3000/embed/vergunningen-goedkeuringen/renovatie/?view=chart"
-  width="100%"
-  height="500"
-  style="border: 0;"
-  title="Renovatie (Gebouwen)"
-  loading="lazy"
-&gt;&lt;/iframe&gt;</div>
+                <div class="code-block" id="code1"><!-- Will be populated by JS --></div>
             </details>
 
             <div class="embed-container">
                 <iframe
                     id="test1"
-                    src="http://localhost:3000/embed/vergunningen-goedkeuringen/renovatie/?view=chart"
+                    data-path="/embed/vergunningen-goedkeuringen/renovatie/?view=chart"
                     width="100%"
                     height="500"
                     style="border: 0;"
@@ -246,20 +263,13 @@
 
             <details>
                 <summary>Toon embed code</summary>
-                <div class="code-block">&lt;iframe
-  src="http://localhost:3000/embed/vergunningen-goedkeuringen/nieuwbouw/?view=table"
-  width="100%"
-  height="500"
-  style="border: 0;"
-  title="Nieuwbouw (Gebouwen)"
-  loading="lazy"
-&gt;&lt;/iframe&gt;</div>
+                <div class="code-block" id="code2"><!-- Will be populated by JS --></div>
             </details>
 
             <div class="embed-container">
                 <iframe
                     id="test2"
-                    src="http://localhost:3000/embed/vergunningen-goedkeuringen/nieuwbouw/?view=table"
+                    data-path="/embed/vergunningen-goedkeuringen/nieuwbouw/?view=table"
                     width="100%"
                     height="500"
                     style="border: 0;"
@@ -277,20 +287,13 @@
 
             <details>
                 <summary>Toon embed code</summary>
-                <div class="code-block">&lt;iframe
-  src="http://localhost:3000/embed/vergunningen-goedkeuringen/renovatie/?view=map"
-  width="100%"
-  height="500"
-  style="border: 0;"
-  title="Renovatie (Gebouwen)"
-  loading="lazy"
-&gt;&lt;/iframe&gt;</div>
+                <div class="code-block" id="code3"><!-- Will be populated by JS --></div>
             </details>
 
             <div class="embed-container">
                 <iframe
                     id="test3"
-                    src="http://localhost:3000/embed/vergunningen-goedkeuringen/renovatie/?view=map"
+                    data-path="/embed/vergunningen-goedkeuringen/renovatie/?view=map"
                     width="100%"
                     height="500"
                     style="border: 0;"
@@ -308,20 +311,13 @@
 
             <details>
                 <summary>Toon embed code</summary>
-                <div class="code-block">&lt;iframe
-  src="http://localhost:3000/embed/vastgoed-verkopen/transacties/?view=chart&geo=2000&type=huizen_4plus"
-  width="100%"
-  height="500"
-  style="border: 0;"
-  title="Aantal transacties"
-  loading="lazy"
-&gt;&lt;/iframe&gt;</div>
+                <div class="code-block" id="code4"><!-- Will be populated by JS --></div>
             </details>
 
             <div class="embed-container">
                 <iframe
                     id="test4"
-                    src="http://localhost:3000/embed/vastgoed-verkopen/transacties/?view=chart&geo=2000&type=huizen_4plus"
+                    data-path="/embed/vastgoed-verkopen/transacties/?view=chart&geo=2000&type=huizen_4plus"
                     width="100%"
                     height="500"
                     style="border: 0;"
@@ -339,20 +335,13 @@
 
             <details>
                 <summary>Toon embed code</summary>
-                <div class="code-block">&lt;iframe
-  src="http://localhost:3000/embed/starters-stoppers/survival/?view=chart&horizon=3&sector=F"
-  width="100%"
-  height="500"
-  style="border: 0;"
-  title="Overlevingskans"
-  loading="lazy"
-&gt;&lt;/iframe&gt;</div>
+                <div class="code-block" id="code5"><!-- Will be populated by JS --></div>
             </details>
 
             <div class="embed-container">
                 <iframe
                     id="test5"
-                    src="http://localhost:3000/embed/starters-stoppers/survival/?view=chart&horizon=3&sector=F"
+                    data-path="/embed/starters-stoppers/survival/?view=chart&horizon=3&sector=F"
                     width="100%"
                     height="500"
                     style="border: 0;"
@@ -370,20 +359,13 @@
 
             <details>
                 <summary>Toon embed code</summary>
-                <div class="code-block">&lt;iframe
-  src="http://localhost:3000/embed/faillissementen/evolutie/?view=chart&sector=I"
-  width="100%"
-  height="500"
-  style="border: 0;"
-  title="Evolutie faillissementen"
-  loading="lazy"
-&gt;&lt;/iframe&gt;</div>
+                <div class="code-block" id="code6"><!-- Will be populated by JS --></div>
             </details>
 
             <div class="embed-container">
                 <iframe
                     id="test6"
-                    src="http://localhost:3000/embed/faillissementen/evolutie/?view=chart&sector=I"
+                    data-path="/embed/faillissementen/evolutie/?view=chart&sector=I"
                     width="100%"
                     height="500"
                     style="border: 0;"
@@ -401,20 +383,13 @@
 
             <details>
                 <summary>Toon embed code</summary>
-                <div class="code-block">&lt;iframe
-  src="http://localhost:3000/embed/huishoudensgroei/ranking/?view=chart&horizon=2033&sector=decline"
-  width="100%"
-  height="500"
-  style="border: 0;"
-  title="Gemeenten ranking"
-  loading="lazy"
-&gt;&lt;/iframe&gt;</div>
+                <div class="code-block" id="code7"><!-- Will be populated by JS --></div>
             </details>
 
             <div class="embed-container">
                 <iframe
                     id="test7"
-                    src="http://localhost:3000/embed/huishoudensgroei/ranking/?view=chart&horizon=2033&sector=decline"
+                    data-path="/embed/huishoudensgroei/ranking/?view=chart&horizon=2033&sector=decline"
                     width="100%"
                     height="500"
                     style="border: 0;"
@@ -432,20 +407,13 @@
 
             <details>
                 <summary>Toon embed code</summary>
-                <div class="code-block">&lt;iframe
-  src="http://localhost:3000/embed/vergunningen-goedkeuringen/renovatie/?view=chart"
-  width="100%"
-  height="500"
-  style="border: 0;"
-  title="Renovatie (Gebouwen)"
-  loading="lazy"
-&gt;&lt;/iframe&gt;</div>
+                <div class="code-block" id="code8"><!-- Will be populated by JS --></div>
             </details>
 
             <div class="embed-container" style="width: 50%; margin: 0 auto;">
                 <iframe
                     id="test8"
-                    src="http://localhost:3000/embed/vergunningen-goedkeuringen/renovatie/?view=chart"
+                    data-path="/embed/vergunningen-goedkeuringen/renovatie/?view=chart"
                     width="100%"
                     height="500"
                     style="border: 0;"
@@ -500,6 +468,57 @@
     </div>
 
     <script>
+        /**
+         * Detect the base URL based on the environment
+         * Returns the appropriate base URL for embedding iframes
+         */
+        function getBaseUrl() {
+            const hostname = window.location.hostname;
+
+            // Production (GitHub Pages)
+            if (hostname === 'gehuybre.github.io') {
+                return 'https://gehuybre.github.io/data-blog';
+            }
+
+            // Local development
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return 'http://localhost:3000';
+            }
+
+            // Fallback to production URL
+            return 'https://gehuybre.github.io/data-blog';
+        }
+
+        /**
+         * Build the full embed URL including basePath
+         */
+        function buildEmbedUrl(path) {
+            const baseUrl = getBaseUrl();
+            // Remove leading slash from path if present (already included in baseUrl)
+            const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+            return `${baseUrl}/${cleanPath}`;
+        }
+
+        /**
+         * Generate embed code HTML string
+         */
+        function generateEmbedCode(url, title = 'Data Blog Embed') {
+            return `<iframe
+  src="${url}"
+  width="100%"
+  height="500"
+  style="border: 0;"
+  title="${title}"
+  loading="lazy"
+></iframe>`;
+        }
+
+        // Display detected environment
+        const baseUrl = getBaseUrl();
+        const isProduction = baseUrl.includes('github.io');
+        document.getElementById('detectedBaseUrl').textContent = baseUrl;
+        document.getElementById('detectedEnv').textContent = isProduction ? 'Production (GitHub Pages)' : 'Local Development';
+
         // Track iframe load status
         const iframeTests = [
             { id: 'test1', name: 'Renovatie Chart' },
@@ -511,6 +530,24 @@
             { id: 'test7', name: 'Huishoudensgroei' },
             { id: 'test8', name: 'Responsive test' }
         ];
+
+        // Initialize all iframes with correct URLs and populate code blocks
+        iframeTests.forEach((test, index) => {
+            const iframe = document.getElementById(test.id);
+            const path = iframe.getAttribute('data-path');
+            const fullUrl = buildEmbedUrl(path);
+            const title = iframe.getAttribute('title');
+
+            // Set the iframe src
+            iframe.src = fullUrl;
+
+            // Populate the code block
+            const codeBlock = document.getElementById(`code${index + 1}`);
+            if (codeBlock) {
+                const embedCode = generateEmbedCode(fullUrl, title);
+                codeBlock.textContent = embedCode;
+            }
+        });
 
         // Monitor iframe loading
         iframeTests.forEach(test => {
@@ -548,7 +585,7 @@
             loadTimeout = setTimeout(() => {
                 if (status.className.includes('loading')) {
                     status.className = 'status error';
-                    status.textContent = '⏰ Timeout - Duurde te lang om te laden';
+                    status.textContent = '⏰ Timeout - Laden duurde te lang';
                 }
             }, 10000);
         });
@@ -559,21 +596,14 @@
             const view = document.getElementById('viewSelect').value;
             const params = document.getElementById('paramsInput').value;
 
-            const baseUrl = 'http://localhost:3000';
-            let embedUrl = `${baseUrl}/embed/${analysis}/?view=${view}`;
+            let embedPath = `/embed/${analysis}/?view=${view}`;
 
             if (params) {
-                embedUrl += '&' + params;
+                embedPath += '&' + params;
             }
 
-            const embedCode = `<iframe
-  src="${embedUrl}"
-  width="100%"
-  height="500"
-  style="border: 0;"
-  title="Custom Embed"
-  loading="lazy"
-></iframe>`;
+            const embedUrl = buildEmbedUrl(embedPath);
+            const embedCode = generateEmbedCode(embedUrl, 'Custom Embed');
 
             const container = document.getElementById('customEmbedContainer');
             container.innerHTML = `
@@ -604,6 +634,8 @@
 
         // Console logging for debugging
         console.log('Test pagina geladen. Monitoring', iframeTests.length, 'embeds...');
+        console.log('Base URL:', baseUrl);
+        console.log('Environment:', isProduction ? 'Production' : 'Development');
 
         // Log all messages from iframes
         window.addEventListener('message', (event) => {
