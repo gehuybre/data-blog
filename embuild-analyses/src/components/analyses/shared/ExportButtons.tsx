@@ -14,6 +14,7 @@ type ExportData = {
   label: string
   value: number
   periodCells?: Array<string | number>
+  [key: string]: string | number | Array<string | number> | undefined
 }
 
 interface ExportButtonsProps {
@@ -75,13 +76,36 @@ export function ExportButtons({
     metadata.push(`# Analyse: ${baseUrl}/analyses/${slug}/`)
     metadata.push(`#`)
 
+    // Detect additional columns (beyond standard label, value, periodCells)
+    const standardKeys = new Set(["label", "value", "periodCells"])
+    const additionalColumns: string[] = []
+
+    if (data.length > 0) {
+      const firstRow = data[0]
+      for (const key in firstRow) {
+        if (!standardKeys.has(key) && typeof firstRow[key] === "number") {
+          additionalColumns.push(key)
+        }
+      }
+    }
+
     // Build CSV headers
-    const headers = [...periodHeaders, valueLabel]
+    const headers = additionalColumns.length > 0
+      ? [...periodHeaders, ...additionalColumns]
+      : [...periodHeaders, valueLabel]
 
     // Build CSV rows
     const rows = data.map((row) => {
       const periodValues = row.periodCells ?? [row.label]
-      return [...periodValues, row.value].join(",")
+
+      if (additionalColumns.length > 0) {
+        // Multi-column export: include all additional columns
+        const columnValues = additionalColumns.map(col => row[col] ?? "")
+        return [...periodValues, ...columnValues].join(",")
+      } else {
+        // Single value export: use the value field
+        return [...periodValues, row.value].join(",")
+      }
     })
 
     const csv = [...metadata, headers.join(","), ...rows].join("\n")

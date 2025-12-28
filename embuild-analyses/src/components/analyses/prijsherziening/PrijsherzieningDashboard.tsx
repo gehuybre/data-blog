@@ -184,6 +184,7 @@ export function PrijsherzieningDashboard() {
     })
   }, [chartData, selectedComponentList])
 
+
   // Calculate latest values
   const latestValues = React.useMemo(() => {
     const latest = new Map<string, { value: number; year: number; month: number }>()
@@ -331,21 +332,26 @@ export function PrijsherzieningDashboard() {
           <div className="flex items-center gap-2">
             <ExportButtons
               data={chartData.map((row) => {
-                // For single component, use value field; for multiple, set to 0 (CSV export uses all columns)
-                const value = selectedComponentList.length === 1
-                  ? (row[selectedComponentList[0]] as number) || 0
-                  : 0
-
-                return {
+                // Base data structure
+                const baseData: {
+                  label: string
+                  value: number
+                  periodCells: Array<string | number>
+                  [key: string]: string | number | Array<string | number>
+                } = {
                   label: row.label,
-                  value: value,
+                  value: selectedComponentList.length === 1
+                    ? (row[selectedComponentList[0]] as number) || 0
+                    : 0,
                   periodCells: [row.label],
-                  // Add dynamic component columns
-                  ...selectedComponentList.reduce((acc, comp) => {
-                    acc[comp] = (row[comp] as number) || 0
-                    return acc
-                  }, {} as Record<string, number>)
                 }
+
+                // Add each component as a separate column for multi-series CSV export
+                selectedComponentList.forEach(comp => {
+                  baseData[comp] = (row[comp] as number) || 0
+                })
+
+                return baseData
               })}
               periodHeaders={["Periode"]}
               title="Prijsherzieningsindex I-2021"
