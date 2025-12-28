@@ -50,6 +50,10 @@ const STROKE_WIDTHS = {
   municipality: 0.5,
 } as const
 
+// Map center and scale for Belgium
+const BELGIUM_MAP_CENTER: [number, number] = [4.4, 50.6]
+const BELGIUM_MAP_SCALE = 6500
+
 interface UnifiedMapProps<TData extends UnknownRecord = UnknownRecord> {
   data: TData[]
   metric?: string
@@ -106,6 +110,13 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
 
   const [userLevel, setUserLevel] = useState<MapDisplayLevel>(controlledLevel ?? autoLevel)
   const displayLevel = controlledLevel ?? userLevel
+
+  // Sync user level with auto-detected level when selection changes (if not controlled)
+  useEffect(() => {
+    if (!controlledLevel) {
+      setUserLevel(autoLevel)
+    }
+  }, [controlledLevel, autoLevel])
 
   const [geoData, setGeoData] = useState<GeoJsonFeatureCollection | null>(null)
   const [loading, setLoading] = useState(true)
@@ -209,7 +220,7 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
       const filtered = geoData.features.filter(
         (f) => String(f?.properties?.code) === String(selectedRegion)
       )
-      if (filtered.length === 0) {
+      if (filtered.length === 0 && process.env.NODE_ENV !== "production") {
         console.warn(`No region found with code: ${selectedRegion}`)
       }
       return {
@@ -225,12 +236,14 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
         const provCode = String(f?.properties?.code)
         const prov = PROVINCES.find((p) => String(p.code) === provCode)
         if (!prov) {
-          console.warn(`Unknown province code in map data: ${provCode}`)
+          if (process.env.NODE_ENV !== "production") {
+            console.warn(`Unknown province code in map data: ${provCode}`)
+          }
           return false
         }
         return String(prov.regionCode) === String(selectedRegion)
       })
-      if (filtered.length === 0) {
+      if (filtered.length === 0 && process.env.NODE_ENV !== "production") {
         console.warn(`No provinces found for region: ${selectedRegion}`)
       }
       return {
@@ -248,14 +261,18 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
         if (!raw) return false
         const munCode = Number.parseInt(String(raw), 10)
         if (!Number.isFinite(munCode)) {
-          console.warn(`Invalid municipality code: ${raw}`)
+          if (process.env.NODE_ENV !== "production") {
+            console.warn(`Invalid municipality code: ${raw}`)
+          }
           return false
         }
 
         if (selectedProvince) {
           const provCode = getProvinceForMunicipality(munCode)
           if (!provCode) {
-            console.warn(`Could not determine province for municipality: ${munCode}`)
+            if (process.env.NODE_ENV !== "production") {
+              console.warn(`Could not determine province for municipality: ${munCode}`)
+            }
             return false
           }
           return String(provCode) === String(selectedProvince)
@@ -263,13 +280,15 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
 
         const regCode = getRegionForMunicipality(munCode)
         if (!regCode) {
-          console.warn(`Could not determine region for municipality: ${munCode}`)
+          if (process.env.NODE_ENV !== "production") {
+            console.warn(`Could not determine region for municipality: ${munCode}`)
+          }
           return false
         }
         return String(regCode) === String(selectedRegion)
       })
 
-      if (filtered.length === 0) {
+      if (filtered.length === 0 && process.env.NODE_ENV !== "production") {
         console.warn(
           `No municipalities found for ${selectedProvince ? `province ${selectedProvince}` : `region ${selectedRegion}`}`
         )
@@ -392,7 +411,7 @@ export function UnifiedMap<TData extends UnknownRecord = UnknownRecord>({
 
         <ComposableMap
           projection="geoMercator"
-          projectionConfig={{ center: [4.4, 50.6], scale: 6500 }}
+          projectionConfig={{ center: BELGIUM_MAP_CENTER, scale: BELGIUM_MAP_SCALE }}
           width={800}
           height={420}
           className="w-full h-full"
