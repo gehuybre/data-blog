@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { Calendar, TrendingUp, Calculator, Download, Check, ChevronsUpDown } from "lucide-react"
+import { Calendar, TrendingUp, Calculator, Check, ChevronsUpDown } from "lucide-react"
+import { ExportButtons } from "../shared/ExportButtons"
 
 // Import data
 import monthlyIndices from "../../../../analyses/prijsherziening-index-i-2021/results/monthly_indices.json"
@@ -173,6 +174,26 @@ export function PrijsherzieningDashboard() {
     })
   }, [chartData, selectedComponentList])
 
+  // Prepare export data - flatten multi-series data for ExportButtons
+  const exportData = React.useMemo(() => {
+    const flattened: Array<{ label: string; value: number; periodCells: Array<string | number> }> = []
+
+    chartData.forEach(row => {
+      selectedComponentList.forEach(comp => {
+        const value = row[comp]
+        if (typeof value === "number") {
+          flattened.push({
+            label: `${row.label} - ${comp}`,
+            value: value,
+            periodCells: [row.year, row.month, comp],
+          })
+        }
+      })
+    })
+
+    return flattened
+  }, [chartData, selectedComponentList])
+
   // Calculate latest values
   const latestValues = React.useMemo(() => {
     const latest = new Map<string, { value: number; year: number; month: number }>()
@@ -213,37 +234,6 @@ export function PrijsherzieningDashboard() {
   }
 
   const revisedPriceResult = calculateRevisedPrice()
-
-  // CSV export data
-  const csvData = tableData
-
-  const downloadCsv = React.useCallback(
-    (filename: string) => {
-      if (!csvData.length) return
-
-      const columns = ["Periode", ...selectedComponentList]
-
-      const escapeCell = (v: unknown) => {
-        const s = v === null || v === undefined ? "" : String(v)
-        return /[",\n]/.test(s) ? `"${s.replaceAll("\"", "\"\"")}"` : s
-      }
-
-      const header = columns.join(",")
-      const rows = csvData.map((row) => columns.map((c) => escapeCell((row as Record<string, unknown>)[c])).join(","))
-      const body = [header, ...rows].join("\n")
-
-      const blob = new Blob([body], { type: "text/csv;charset=utf-8;" })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
-    },
-    [csvData, selectedComponentList]
-  )
 
   return (
     <div className="space-y-6">
@@ -426,16 +416,17 @@ export function PrijsherzieningDashboard() {
             </ResponsiveContainer>
           </div>
           <div className="mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => downloadCsv("prijsherziening-index-i-2021.csv")}
-              disabled={!csvData.length}
-              title="Download CSV"
-            >
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">CSV</span>
-            </Button>
+            <ExportButtons
+              data={exportData}
+              title="Evolutie prijsherzieningsindex"
+              slug="prijsherziening-index-i-2021"
+              sectionId="chart"
+              viewType="chart"
+              periodHeaders={["Jaar", "Maand", "Component"]}
+              valueLabel="Index"
+              dataSource="Statbel"
+              dataSourceUrl="https://statbel.fgov.be/"
+            />
           </div>
         </CardContent>
       </Card>
@@ -474,16 +465,17 @@ export function PrijsherzieningDashboard() {
             </table>
           </div>
           <div className="mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => downloadCsv("prijsherziening-index-i-2021-table.csv")}
-              disabled={!csvData.length}
-              title="Download CSV"
-            >
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">CSV</span>
-            </Button>
+            <ExportButtons
+              data={exportData}
+              title="Indexwaarden per maand"
+              slug="prijsherziening-index-i-2021"
+              sectionId="table"
+              viewType="table"
+              periodHeaders={["Jaar", "Maand", "Component"]}
+              valueLabel="Index"
+              dataSource="Statbel"
+              dataSourceUrl="https://statbel.fgov.be/"
+            />
           </div>
         </CardContent>
       </Card>
