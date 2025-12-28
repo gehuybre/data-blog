@@ -8,6 +8,7 @@ Downloads the Excel file and processes monthly index data for the dashboard.
 
 import json
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -56,21 +57,54 @@ def download_data() -> str:
     return str(excel_path)
 
 
-def simplify_component_name(name: str) -> str:
-    """Simplify component names for display."""
-    if not name or pd.isna(name):
-        return name
+def _normalize_code(value) -> str | None:
+    if value is None or pd.isna(value):
+        return None
+    if isinstance(value, (int,)):
+        return str(value)
+    if isinstance(value, float):
+        if value.is_integer():
+            return str(int(value))
+        return str(value)
 
-    # Try exact match first
-    if name in COMPONENT_NAMES:
-        return COMPONENT_NAMES[name]
+    s = str(value).strip()
+    s = re.sub(r"\.0$", "", s)
+    return s or None
 
-    # Try partial matches
-    for key, value in COMPONENT_NAMES.items():
-        if key.lower() in name.lower():
-            return value
 
-    return name
+def _normalize_month_column(value) -> pd.Timestamp | None:
+    if value is None or pd.isna(value):
+        return None
+
+    if isinstance(value, (datetime, pd.Timestamp)):
+        ts = pd.Timestamp(value)
+    elif isinstance(value, str):
+        s = value.strip()
+        ts = pd.to_datetime(s, errors="coerce", dayfirst=True)
+        if pd.isna(ts):
+            ts = pd.to_datetime(s, errors="coerce", format="%b-%y")
+    else:
+        ts = pd.to_datetime(value, errors="coerce")
+
+    if pd.isna(ts):
+        return None
+    return ts.to_period("M").to_timestamp()
+
+
+def _simplify_component_id(code: str | None, description: str | None) -> str | None:
+    if code and "CEMENT" in code.upper():
+        return "Cement"
+    if description:
+        d = str(description).strip()
+        if d.upper().startswith("INDEX I-2021"):
+            return "Index I-2021"
+        if d.upper() == "INDEX I+":
+            return "Index I+"
+    if code:
+        return code
+    if description and not pd.isna(description):
+        return str(description).strip() or None
+    return None
 
 
 def process_data(excel_path: str) -> None:
@@ -80,66 +114,70 @@ def process_data(excel_path: str) -> None:
     xl_file = pd.ExcelFile(excel_path)
     print(f"Excel sheets: {xl_file.sheet_names}")
 
-    # Read the Dutch data sheet (I_2021 (Nl))
-    df = pd.read_excel(excel_path, sheet_name='I_2021 (Nl)')
+    # Read the Dutch data sheet (I_2021 (Nl)).
+    # This sheet is a wide table: rows = components, columns = months.
+    df = pd.read_excel(excel_path, sheet_name="I_2021 (Nl)", header=1)
     print(f"Loaded {len(df)} rows, {len(df.columns)} columns")
-    print(f"Columns: {df.columns.tolist()}")
 
-    # The Excel structure typically has:
-    # - First column: dates (month/year)
-    # - Subsequent columns: different index components
+    df.columns = [c.strip() if isinstance(c, str) else c for c in df.columns]
 
-    # Clean column names
-    df.columns = df.columns.str.strip()
+    code_col, desc_col, weight_col = df.columns[:3]
+    df = df.rename(columns={code_col: "code", desc_col: "description", weight_col: "weight"})
 
-    # Find date column (usually first column or named something with 'date', 'maand', 'periode')
-    date_col = df.columns[0]
+    month_cols_raw = list(df.columns[3:])
+    month_col_map: dict[object, pd.Timestamp] = {}
+    for col in month_cols_raw:
+        ts = _normalize_month_column(col)
+        if ts is not None:
+            month_col_map[col] = ts
 
-    # Convert date column to datetime
-    df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
-    df = df.dropna(subset=[date_col])
+    df = df.rename(columns=month_col_map)
+    month_cols = [month_col_map.get(c) for c in month_cols_raw]
+    month_cols = [c for c in month_cols if c is not None]
 
-    # Extract year and month
-    df['year'] = df[date_col].dt.year
-    df['month'] = df[date_col].dt.month
+    # Melt to long format: one row per component per month
+    df_long = df.melt(
+        id_vars=["code", "description", "weight"],
+        value_vars=month_cols,
+        var_name="date",
+        value_name="value",
+    )
+    df_long = df_long.dropna(subset=["value", "date"])
 
-    # Get component columns (all columns except date, year, month)
-    component_cols = [col for col in df.columns if col not in [date_col, 'year', 'month']]
+    monthly_data: list[dict] = []
+    for _, row in df_long.iterrows():
+        code = _normalize_code(row["code"])
+        description = None if pd.isna(row["description"]) else str(row["description"]).strip()
+        component_id = _simplify_component_id(code, description)
+        if not component_id:
+            continue
 
-    # Process monthly indices
-    monthly_data = []
-    for _, row in df.iterrows():
-        year = int(row['year'])
-        month = int(row['month'])
+        date = pd.Timestamp(row["date"])
+        try:
+            value = float(row["value"])
+        except (ValueError, TypeError):
+            continue
 
-        for component in component_cols:
-            value = row[component]
-            if pd.notna(value):
-                try:
-                    monthly_data.append({
-                        'year': year,
-                        'month': month,
-                        'component': simplify_component_name(component),
-                        'component_orig': component,
-                        'value': float(value)
-                    })
-                except (ValueError, TypeError):
-                    continue
+        monthly_data.append(
+            {
+                "year": int(date.year),
+                "month": int(date.month),
+                "component": component_id,
+                "component_orig": description or code or component_id,
+                "value": value,
+            }
+        )
 
     # Save monthly indices
     with open(RESULTS_DIR / "monthly_indices.json", "w") as f:
         json.dump(monthly_data, f, ensure_ascii=False, indent=2)
 
     # Create components list (unique components)
-    components = sorted(set(item['component'] for item in monthly_data))
-    components_data = [
-        {
-            'code': comp,
-            'name': comp,
-            'original': next(item['component_orig'] for item in monthly_data if item['component'] == comp)
-        }
-        for comp in components
-    ]
+    components = sorted(set(item["component"] for item in monthly_data))
+    components_data = []
+    for comp in components:
+        original = next((item["component_orig"] for item in monthly_data if item["component"] == comp), comp)
+        components_data.append({"code": comp, "name": comp, "original": original})
 
     with open(RESULTS_DIR / "components.json", "w") as f:
         json.dump(components_data, f, ensure_ascii=False, indent=2)
@@ -157,18 +195,18 @@ def process_data(excel_path: str) -> None:
     df_pivot.to_csv(csv_path, index=False)
 
     # Metadata
-    latest_date = df[date_col].max()
+    latest_date = max(month_cols) if month_cols else None
     metadata = {
         'last_updated': datetime.now().isoformat(),
         'data_source': DATA_URL,
-        'latest_data_date': latest_date.isoformat() if pd.notna(latest_date) else None,
+        'latest_data_date': latest_date.isoformat() if latest_date is not None else None,
         'total_records': len(monthly_data),
         'components': components,
         'date_range': {
-            'min_year': int(df['year'].min()),
-            'max_year': int(df['year'].max()),
-            'min_month': int(df['month'].min()),
-            'max_month': int(df['month'].max()),
+            'min_year': int(min(month_cols).year) if month_cols else None,
+            'max_year': int(max(month_cols).year) if month_cols else None,
+            'min_month': int(min(month_cols).month) if month_cols else None,
+            'max_month': int(max(month_cols).month) if month_cols else None,
         }
     }
 

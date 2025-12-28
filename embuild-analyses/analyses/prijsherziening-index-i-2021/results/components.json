@@ -1,312 +1,157 @@
 [
   {
-    "code": "Unnamed: 10",
-    "name": "Unnamed: 10",
-    "original": "Unnamed: 10"
+    "code": "081",
+    "name": "081",
+    "original": "Winning van steen, zand en klei"
   },
   {
-    "code": "Unnamed: 11",
-    "name": "Unnamed: 11",
-    "original": "Unnamed: 11"
+    "code": "161",
+    "name": "161",
+    "original": "Zagen en schaven van hout"
   },
   {
-    "code": "Unnamed: 12",
-    "name": "Unnamed: 12",
-    "original": "Unnamed: 12"
+    "code": "162",
+    "name": "162",
+    "original": "Vervaardiging van artikelen van hout, kurk, riet of vlechtwerk"
   },
   {
-    "code": "Unnamed: 13",
-    "name": "Unnamed: 13",
-    "original": "Unnamed: 13"
+    "code": "203",
+    "name": "203",
+    "original": "Vervaardiging van verf, vernis e.d., drukinkt en mastiek"
   },
   {
-    "code": "Unnamed: 14",
-    "name": "Unnamed: 14",
-    "original": "Unnamed: 14"
+    "code": "205",
+    "name": "205",
+    "original": "Vervaardiging van andere chemische producten"
   },
   {
-    "code": "Unnamed: 15",
-    "name": "Unnamed: 15",
-    "original": "Unnamed: 15"
+    "code": "222",
+    "name": "222",
+    "original": "Vervaardiging van producten van kunststof"
   },
   {
-    "code": "Unnamed: 16",
-    "name": "Unnamed: 16",
-    "original": "Unnamed: 16"
+    "code": "23",
+    "name": "23",
+    "original": "Vervaardiging van andere niet-metaalhoudende minerale producten"
   },
   {
-    "code": "Unnamed: 17",
-    "name": "Unnamed: 17",
-    "original": "Unnamed: 17"
+    "code": "231",
+    "name": "231",
+    "original": "Vervaardiging van glas en glaswerk"
   },
   {
-    "code": "Unnamed: 18",
-    "name": "Unnamed: 18",
-    "original": "Unnamed: 18"
+    "code": "233",
+    "name": "233",
+    "original": "Vervaardiging van producten voor de bouw, van klei"
   },
   {
-    "code": "Unnamed: 19",
-    "name": "Unnamed: 19",
-    "original": "Unnamed: 19"
+    "code": "235",
+    "name": "235",
+    "original": "Vervaardiging van cement, kalk en gips"
   },
   {
-    "code": "Unnamed: 2",
-    "name": "Unnamed: 2",
-    "original": "Unnamed: 2"
+    "code": "236",
+    "name": "236",
+    "original": "Vervaardiging van artikelen van beton, cement en gips"
   },
   {
-    "code": "Unnamed: 20",
-    "name": "Unnamed: 20",
-    "original": "Unnamed: 20"
+    "code": "237",
+    "name": "237",
+    "original": "Houwen, bewerken en afwerken van natuursteen"
   },
   {
-    "code": "Unnamed: 21",
-    "name": "Unnamed: 21",
-    "original": "Unnamed: 21"
+    "code": "239",
+    "name": "239",
+    "original": "Vervaardiging van andere schuurmiddelen en niet-metaalhoudende minerale producten n.e.g."
   },
   {
-    "code": "Unnamed: 22",
-    "name": "Unnamed: 22",
-    "original": "Unnamed: 22"
+    "code": "24",
+    "name": "24",
+    "original": "Vervaardiging van metalen in primaire vorm"
   },
   {
-    "code": "Unnamed: 23",
-    "name": "Unnamed: 23",
-    "original": "Unnamed: 23"
+    "code": "241",
+    "name": "241",
+    "original": "Vervaardiging van ijzer en staal en van ferrolegeringen"
   },
   {
-    "code": "Unnamed: 24",
-    "name": "Unnamed: 24",
-    "original": "Unnamed: 24"
+    "code": "243",
+    "name": "243",
+    "original": "Vervaardiging van andere producten van de eerste verwerking van staal"
   },
   {
-    "code": "Unnamed: 25",
-    "name": "Unnamed: 25",
-    "original": "Unnamed: 25"
+    "code": "244",
+    "name": "244",
+    "original": "Productie van edele metalen en van andere non-ferrometalen"
   },
   {
-    "code": "Unnamed: 26",
-    "name": "Unnamed: 26",
-    "original": "Unnamed: 26"
+    "code": "251",
+    "name": "251",
+    "original": "Vervaardiging van metalen constructiewerken"
   },
   {
-    "code": "Unnamed: 27",
-    "name": "Unnamed: 27",
-    "original": "Unnamed: 27"
+    "code": "252",
+    "name": "252",
+    "original": "Vervaardiging van tanks, reservoirs en bergingsmiddelen, van metaal"
   },
   {
-    "code": "Unnamed: 28",
-    "name": "Unnamed: 28",
-    "original": "Unnamed: 28"
+    "code": "257",
+    "name": "257",
+    "original": "Vervaardiging van scharen, messen, bestekken, gereedschap en ijzerwaren"
   },
   {
-    "code": "Unnamed: 29",
-    "name": "Unnamed: 29",
-    "original": "Unnamed: 29"
+    "code": "259",
+    "name": "259",
+    "original": "Vervaardiging van andere producten van metaal"
   },
   {
-    "code": "Unnamed: 3",
-    "name": "Unnamed: 3",
-    "original": "Unnamed: 3"
+    "code": "263",
+    "name": "263",
+    "original": "Vervaardiging van communicatieapparatuur"
   },
   {
-    "code": "Unnamed: 30",
-    "name": "Unnamed: 30",
-    "original": "Unnamed: 30"
+    "code": "271",
+    "name": "271",
+    "original": "Vervaardiging van elektromotoren, van elektrische generatoren en transformatoren en van schakel- en verdeelinrichtingen"
   },
   {
-    "code": "Unnamed: 31",
-    "name": "Unnamed: 31",
-    "original": "Unnamed: 31"
+    "code": "273",
+    "name": "273",
+    "original": "Vervaardiging van kabels en van schakelaars, stekkers, stopcontacten e. d."
   },
   {
-    "code": "Unnamed: 32",
-    "name": "Unnamed: 32",
-    "original": "Unnamed: 32"
+    "code": "274",
+    "name": "274",
+    "original": "Vervaardiging van lampen en verlichtingsapparaten"
   },
   {
-    "code": "Unnamed: 33",
-    "name": "Unnamed: 33",
-    "original": "Unnamed: 33"
+    "code": "282",
+    "name": "282",
+    "original": "Vervaardiging van andere machines en apparaten voor algemeen gebruik"
   },
   {
-    "code": "Unnamed: 34",
-    "name": "Unnamed: 34",
-    "original": "Unnamed: 34"
+    "code": "310",
+    "name": "310",
+    "original": "Vervaardiging van meubelen"
   },
   {
-    "code": "Unnamed: 35",
-    "name": "Unnamed: 35",
-    "original": "Unnamed: 35"
+    "code": "Cement",
+    "name": "Cement",
+    "original": "CEMENT (Onderzoek)"
   },
   {
-    "code": "Unnamed: 36",
-    "name": "Unnamed: 36",
-    "original": "Unnamed: 36"
+    "code": "INDEX I Laatste waarde gepubliceerd (December 2022)",
+    "name": "INDEX I Laatste waarde gepubliceerd (December 2022)",
+    "original": "INDEX I Laatste waarde gepubliceerd (December 2022)"
   },
   {
-    "code": "Unnamed: 37",
-    "name": "Unnamed: 37",
-    "original": "Unnamed: 37"
+    "code": "Index I+",
+    "name": "Index I+",
+    "original": "INDEX I+"
   },
   {
-    "code": "Unnamed: 38",
-    "name": "Unnamed: 38",
-    "original": "Unnamed: 38"
-  },
-  {
-    "code": "Unnamed: 39",
-    "name": "Unnamed: 39",
-    "original": "Unnamed: 39"
-  },
-  {
-    "code": "Unnamed: 4",
-    "name": "Unnamed: 4",
-    "original": "Unnamed: 4"
-  },
-  {
-    "code": "Unnamed: 40",
-    "name": "Unnamed: 40",
-    "original": "Unnamed: 40"
-  },
-  {
-    "code": "Unnamed: 41",
-    "name": "Unnamed: 41",
-    "original": "Unnamed: 41"
-  },
-  {
-    "code": "Unnamed: 42",
-    "name": "Unnamed: 42",
-    "original": "Unnamed: 42"
-  },
-  {
-    "code": "Unnamed: 43",
-    "name": "Unnamed: 43",
-    "original": "Unnamed: 43"
-  },
-  {
-    "code": "Unnamed: 44",
-    "name": "Unnamed: 44",
-    "original": "Unnamed: 44"
-  },
-  {
-    "code": "Unnamed: 45",
-    "name": "Unnamed: 45",
-    "original": "Unnamed: 45"
-  },
-  {
-    "code": "Unnamed: 46",
-    "name": "Unnamed: 46",
-    "original": "Unnamed: 46"
-  },
-  {
-    "code": "Unnamed: 47",
-    "name": "Unnamed: 47",
-    "original": "Unnamed: 47"
-  },
-  {
-    "code": "Unnamed: 48",
-    "name": "Unnamed: 48",
-    "original": "Unnamed: 48"
-  },
-  {
-    "code": "Unnamed: 49",
-    "name": "Unnamed: 49",
-    "original": "Unnamed: 49"
-  },
-  {
-    "code": "Unnamed: 5",
-    "name": "Unnamed: 5",
-    "original": "Unnamed: 5"
-  },
-  {
-    "code": "Unnamed: 50",
-    "name": "Unnamed: 50",
-    "original": "Unnamed: 50"
-  },
-  {
-    "code": "Unnamed: 51",
-    "name": "Unnamed: 51",
-    "original": "Unnamed: 51"
-  },
-  {
-    "code": "Unnamed: 52",
-    "name": "Unnamed: 52",
-    "original": "Unnamed: 52"
-  },
-  {
-    "code": "Unnamed: 53",
-    "name": "Unnamed: 53",
-    "original": "Unnamed: 53"
-  },
-  {
-    "code": "Unnamed: 54",
-    "name": "Unnamed: 54",
-    "original": "Unnamed: 54"
-  },
-  {
-    "code": "Unnamed: 55",
-    "name": "Unnamed: 55",
-    "original": "Unnamed: 55"
-  },
-  {
-    "code": "Unnamed: 56",
-    "name": "Unnamed: 56",
-    "original": "Unnamed: 56"
-  },
-  {
-    "code": "Unnamed: 57",
-    "name": "Unnamed: 57",
-    "original": "Unnamed: 57"
-  },
-  {
-    "code": "Unnamed: 58",
-    "name": "Unnamed: 58",
-    "original": "Unnamed: 58"
-  },
-  {
-    "code": "Unnamed: 59",
-    "name": "Unnamed: 59",
-    "original": "Unnamed: 59"
-  },
-  {
-    "code": "Unnamed: 6",
-    "name": "Unnamed: 6",
-    "original": "Unnamed: 6"
-  },
-  {
-    "code": "Unnamed: 60",
-    "name": "Unnamed: 60",
-    "original": "Unnamed: 60"
-  },
-  {
-    "code": "Unnamed: 61",
-    "name": "Unnamed: 61",
-    "original": "Unnamed: 61"
-  },
-  {
-    "code": "Unnamed: 62",
-    "name": "Unnamed: 62",
-    "original": "Unnamed: 62"
-  },
-  {
-    "code": "Unnamed: 63",
-    "name": "Unnamed: 63",
-    "original": "Unnamed: 63"
-  },
-  {
-    "code": "Unnamed: 7",
-    "name": "Unnamed: 7",
-    "original": "Unnamed: 7"
-  },
-  {
-    "code": "Unnamed: 8",
-    "name": "Unnamed: 8",
-    "original": "Unnamed: 8"
-  },
-  {
-    "code": "Unnamed: 9",
-    "name": "Unnamed: 9",
-    "original": "Unnamed: 9"
+    "code": "Index I-2021",
+    "name": "Index I-2021",
+    "original": "INDEX I-2021 (Base nov_20 = 100)"
   }
 ]

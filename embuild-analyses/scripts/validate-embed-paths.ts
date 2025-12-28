@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Validation logic for embed configuration paths
  *
@@ -6,9 +5,9 @@
  * Separated into its own file for better maintainability and testability.
  */
 
-import { EMBED_CONFIGS } from '../src/lib/embed-config.ts'
-import { hasEmbedData } from '../src/lib/embed-data-registry.ts'
-import { validateEmbedPath } from '../src/lib/embed-path-validation.ts'
+import { EMBED_CONFIGS } from "../src/lib/embed-config"
+import { hasEmbedData } from "../src/lib/embed-data-registry"
+import { validateEmbedPath } from "../src/lib/embed-path-validation"
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -21,8 +20,8 @@ const analysesDir = path.join(__dirname, '../analyses')
  * @returns {{ errors: string[], warnings: string[], validatedCount: number }}
  */
 export function validateEmbedConfigs() {
-  const errors = []
-  const warnings = []
+  const errors: string[] = []
+  const warnings: string[] = []
   let validatedCount = 0
 
   console.log('🔍 Validating embed configuration...\n')
