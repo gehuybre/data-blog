@@ -6,6 +6,7 @@ import { StartersStoppersEmbed } from "@/components/analyses/starters-stoppers/S
 import { VastgoedVerkopenEmbed } from "@/components/analyses/vastgoed-verkopen/VastgoedVerkopenEmbed"
 import { FaillissementenEmbed } from "@/components/analyses/faillissementen/FaillissementenEmbed"
 import { HuishoudensgroeiEmbed } from "@/components/analyses/huishoudensgroei/HuishoudensgroeiEmbed"
+import { EnergiekaartPremiesEmbed } from "@/components/analyses/energiekaart-premies/EnergiekaartPremiesEmbed"
 import { VergunningenAanvragenEmbed } from "@/components/analyses/vergunningen-aanvragen/VergunningenAanvragenEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig, getValidSections } from "@/lib/embed-config"
@@ -40,6 +41,7 @@ interface UrlParams {
   region: RegionCode | null
   province: ProvinceCode | null
   sector: string | null
+  measure: string | null
   metric: string | null
   timeRange: string | null
   subView: string | null
@@ -48,7 +50,7 @@ interface UrlParams {
 
 function getParamsFromUrl(): UrlParams {
   if (typeof window === "undefined") {
-    return { view: "chart", horizon: 1, region: null, province: null, sector: null, metric: null, timeRange: null, subView: null, showDecline: false }
+    return { view: "chart", horizon: 1, region: null, province: null, sector: null, measure: null, metric: null, timeRange: null, subView: null, showDecline: false }
   }
 
   const params = new URLSearchParams(window.location.search)
@@ -76,6 +78,9 @@ function getParamsFromUrl(): UrlParams {
   // Sector (NACE code)
   const sector = params.get("sector") || null
 
+  // Measure (for energiekaart-premies)
+  const measure = params.get("measure") || null
+
   // Metric (for vergunningen-aanvragen)
   const metric = params.get("metric") || null
 
@@ -88,7 +93,7 @@ function getParamsFromUrl(): UrlParams {
   // Show Decline (for huishoudensgroei)
   const showDecline = params.get("showDecline") === "true"
 
-  return { view: viewType, horizon, region, province, sector, metric, timeRange, subView, showDecline }
+  return { view: viewType, horizon, region, province, sector, measure, metric, timeRange, subView, showDecline }
 }
 
 function toChartOrTableViewType(viewType: ViewType): ChartOrTableViewType {
@@ -102,6 +107,7 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     region: null,
     province: null,
     sector: null,
+    measure: null,
     metric: null,
     timeRange: null,
     subView: null,
@@ -326,6 +332,27 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
           metric={metric}
           timeRange={timeRange}
           subView={subView}
+        />
+      )
+    }
+
+    // Handle EnergiekaartPremiesEmbed
+    if (config.component === "EnergiekaartPremiesEmbed") {
+      const validSections = getValidSections(slug)
+      if (!validSections.includes(section)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}. Geldige opties: {validSections.join(", ")}
+            </p>
+          </div>
+        )
+      }
+
+      return (
+        <EnergiekaartPremiesEmbed
+          section={section as "aantal-premies" | "bedrag-premies" | "aantal-beschermd" | "bedrag-beschermd"}
+          measure={urlParams.measure ?? undefined}
         />
       )
     }
