@@ -12,37 +12,37 @@ import { test, expect } from '@playwright/test';
 test.describe('Embed Loading Tests', () => {
   const testEmbeds = [
     {
-      path: '/embed/vergunningen-goedkeuringen/renovatie/?view=chart',
+      path: 'embed/vergunningen-goedkeuringen/renovatie/?view=chart',
       name: 'Renovatie Chart',
       title: 'Renovatie (Gebouwen)',
     },
     {
-      path: '/embed/vergunningen-goedkeuringen/nieuwbouw/?view=table',
+      path: 'embed/vergunningen-goedkeuringen/nieuwbouw/?view=table',
       name: 'Nieuwbouw Table',
       title: 'Nieuwbouw (Gebouwen)',
     },
     {
-      path: '/embed/vergunningen-goedkeuringen/renovatie/?view=map',
+      path: 'embed/vergunningen-goedkeuringen/renovatie/?view=map',
       name: 'Renovatie Map',
       title: 'Renovatie (Gebouwen)',
     },
     {
-      path: '/embed/vastgoed-verkopen/transacties/?view=chart&geo=2000&type=huizen_4plus',
+      path: 'embed/vastgoed-verkopen/transacties/?view=chart&geo=2000&type=huizen_4plus',
       name: 'Vastgoed Transacties with filters',
       title: 'Aantal transacties',
     },
     {
-      path: '/embed/starters-stoppers/survival/?view=chart&horizon=3&sector=F',
+      path: 'embed/starters-stoppers/survival/?view=chart&horizon=3&sector=F',
       name: 'Starters Stoppers Survival',
       title: 'Overlevingskans',
     },
     {
-      path: '/embed/faillissementen/evolutie/?view=chart&sector=I',
+      path: 'embed/faillissementen/evolutie/?view=chart&sector=I',
       name: 'Faillissementen Evolutie',
       title: 'Evolutie faillissementen',
     },
     {
-      path: '/embed/huishoudensgroei/ranking/?view=chart&horizon=2033&sector=decline',
+      path: 'embed/huishoudensgroei/ranking/?view=chart&horizon=2033&sector=decline',
       name: 'Huishoudensgroei Ranking',
       title: 'Gemeenten ranking',
     },
@@ -94,7 +94,7 @@ test.describe('Embed Loading Tests', () => {
     // Test that embeds work correctly in smaller viewports
     await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE size
 
-    const response = await page.goto('/embed/vergunningen-goedkeuringen/renovatie/?view=chart');
+    const response = await page.goto('embed/vergunningen-goedkeuringen/renovatie/?view=chart');
     expect(response?.status()).toBe(200);
 
     await page.waitForLoadState('networkidle');
@@ -110,7 +110,7 @@ test.describe('Embed Loading Tests', () => {
     page.setDefaultTimeout(5000);
 
     // This test verifies that our embeds load within a reasonable time
-    const response = await page.goto('/embed/vergunningen-goedkeuringen/renovatie/?view=chart');
+    const response = await page.goto('embed/vergunningen-goedkeuringen/renovatie/?view=chart');
     expect(response?.status()).toBe(200);
 
     // If we get here without timing out, the test passes

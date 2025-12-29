@@ -5,6 +5,11 @@ import { defineConfig, devices } from '@playwright/test';
  *
  * See https://playwright.dev/docs/test-configuration
  */
+function normalizeBaseUrl(raw: string): string {
+  // Ensure relative `page.goto('path')` resolves under any basePath
+  return raw.endsWith('/') ? raw : `${raw}/`;
+}
+
 export default defineConfig({
   testDir: './tests/e2e',
 
@@ -21,12 +26,12 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
 
   /* Reporter to use */
-  reporter: process.env.CI ? 'github' : 'html',
+  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'html',
 
   /* Shared settings for all the projects below */
   use: {
     /* Base URL to use in actions like `await page.goto('/')` */
-    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    baseURL: normalizeBaseUrl(process.env.BASE_URL || 'http://localhost:3000'),
 
     /* Collect trace when retrying the failed test */
     trace: 'on-first-retry',

@@ -122,7 +122,7 @@ See `.github/workflows/playwright-tests.yml` for the CI configuration.
    import { test, expect } from '@playwright/test';
 
    test('my new test', async ({ page }) => {
-     await page.goto('/embed/my-analysis/my-metric/?view=chart');
+     await page.goto('embed/my-analysis/my-metric/?view=chart');
      // Add assertions
    });
    ```
