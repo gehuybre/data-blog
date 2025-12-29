@@ -12,6 +12,8 @@ import {
   Legend,
 } from "recharts"
 
+import { formatScaledEuro, formatScaledNumber, getCurrencyScale } from "./formatters"
+
 interface ChartDataPoint {
   jaar: number
   value: number
@@ -35,15 +37,10 @@ export function EnergiekaartChart({ data, label, isCurrency = false }: Energieka
     return { ...point, average: sum / 4 }
   })
 
+  const scale = isCurrency ? getCurrencyScale(data.map((d) => d.value)) : null
+
   const formatValue = (value: number) => {
-    if (isCurrency) {
-      return new Intl.NumberFormat("nl-BE", {
-        style: "currency",
-        currency: "EUR",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(value)
-    }
+    if (isCurrency && scale) return formatScaledEuro(value, scale)
     return new Intl.NumberFormat("nl-BE").format(value)
   }
 
@@ -56,22 +53,31 @@ export function EnergiekaartChart({ data, label, isCurrency = false }: Energieka
           tickFormatter={(value) => value.toString()}
           style={{ fontSize: "0.875rem" }}
         />
-        <YAxis tickFormatter={formatValue} style={{ fontSize: "0.875rem" }} />
+        <YAxis
+          tickFormatter={(value) => {
+            if (typeof value !== "number") return String(value)
+            if (!isCurrency || !scale) return new Intl.NumberFormat("nl-BE").format(value)
+            return formatScaledNumber(value, scale)
+          }}
+          style={{ fontSize: "0.875rem" }}
+        />
         <Tooltip
           formatter={(value: number | undefined) => value !== undefined ? formatValue(value) : ""}
           labelFormatter={(jaar) => `Jaar: ${jaar}`}
+          wrapperStyle={{ zIndex: 50 }}
           contentStyle={{
-            backgroundColor: "hsl(var(--card))",
-            border: "1px solid hsl(var(--border))",
+            backgroundColor: "var(--popover)",
+            color: "var(--popover-foreground)",
+            border: "1px solid var(--border)",
             borderRadius: "var(--radius)",
           }}
         />
         <Legend />
-        <Bar dataKey="value" fill="hsl(var(--primary))" name={label} />
+        <Bar dataKey="value" fill="var(--color-chart-1)" name={label} />
         <Line
           type="monotone"
           dataKey="average"
-          stroke="hsl(var(--destructive))"
+          stroke="var(--color-chart-2)"
           strokeWidth={2}
           dot={false}
           name="4-jaar gemiddelde"

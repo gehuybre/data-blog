@@ -9,6 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+import { formatScaledEuro, getCurrencyScale } from "./formatters"
+
 interface TableDataPoint {
   jaar: number
   value: number
@@ -21,14 +23,12 @@ interface EnergiekaartTableProps {
 }
 
 export function EnergiekaartTable({ data, label, isCurrency = false }: EnergiekaartTableProps) {
+  const scale = isCurrency ? getCurrencyScale(data.map((d) => d.value)) : null
+
   const formatValue = (value: number) => {
     if (isCurrency) {
-      return new Intl.NumberFormat("nl-BE", {
-        style: "currency",
-        currency: "EUR",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(value)
+      if (!scale) return `€ ${value}`
+      return formatScaledEuro(value, scale)
     }
     return new Intl.NumberFormat("nl-BE").format(value)
   }
