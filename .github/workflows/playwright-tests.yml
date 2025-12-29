@@ -74,17 +74,14 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Install serve (for serving static files)
-        run: npm install -g serve
-
       - name: Start production server with basePath
         run: |
-          # Serve the out directory at /data-blog path
-          serve out -l 3000 &
+          # Serve the Next.js export output under the configured basePath
+          BASE_PATH=/data-blog PORT=3000 node scripts/serve-export-with-basepath.mjs &
           SERVER_PID=$!
           echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
           # Wait for server to be ready
-          npx wait-on http://localhost:3000 --timeout 30000
+          npx wait-on http://localhost:3000/data-blog/ --timeout 30000
 
       - name: Run Playwright tests against production build
         run: npm test
