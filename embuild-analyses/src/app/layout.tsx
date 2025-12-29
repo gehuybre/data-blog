@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
 import "./globals.css";
+import { EmbedParentResizeListener } from "@/components/EmbedParentResizeListener";
 
 const geistSans = Inter({
   variable: "--font-geist-sans",
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <EmbedParentResizeListener />
         {children}
       </body>
     </html>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, ComposedChart } from "recharts"
 
 type UnknownRecord = Record<string, any>
@@ -20,6 +20,12 @@ export function FilterableChart<TData = UnknownRecord>({
   getValue,
   getSortValue,
 }: FilterableChartProps<TData>) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const chartData = useMemo(() => {
     const labelGetter =
       getLabel ??
@@ -69,9 +75,13 @@ export function FilterableChart<TData = UnknownRecord>({
     })
   }, [data, metric, getLabel, getValue, getSortValue])
 
+  if (!mounted) {
+    return <div className="h-[400px] w-full min-w-0" />
+  }
+
   return (
     <div className="h-[400px] w-full min-w-0">
-      <ResponsiveContainer width="100%" height="100%" minWidth={0} aspect={2}>
+      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
         <ComposedChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />

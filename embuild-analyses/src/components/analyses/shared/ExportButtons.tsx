@@ -159,12 +159,35 @@ export function ExportButtons({
 
     return `<iframe
   src="${embedUrl}"
+  data-data-blog-embed="true"
   width="100%"
   height="${height}"
   style="border: 0;"
   title="${title}"
   loading="lazy"
-></iframe>`
+></iframe>
+<script>
+(function () {
+  if (window.__DATA_BLOG_EMBED_RESIZER__) return;
+  window.__DATA_BLOG_EMBED_RESIZER__ = true;
+
+  window.addEventListener("message", function (event) {
+    var data = event.data;
+    if (!data || data.type !== "data-blog-embed:resize") return;
+    var height = Number(data.height);
+    if (!isFinite(height) || height <= 0) return;
+
+    var iframes = document.querySelectorAll('iframe[data-data-blog-embed="true"]');
+    for (var i = 0; i < iframes.length; i++) {
+      var iframe = iframes[i];
+      if (iframe.contentWindow === event.source) {
+        iframe.style.height = Math.ceil(height) + "px";
+        return;
+      }
+    }
+  });
+})();
+</script>`
   }, [slug, sectionId, viewType, title, embedParams])
 
   const copyEmbedCode = useCallback(async () => {

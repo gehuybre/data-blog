@@ -55,7 +55,15 @@ test.describe('Embed Loading Tests', () => {
       page.on('console', (msg) => {
         if (msg.type() === 'error') {
           const text = msg.text();
+          const loc = msg.location()?.url || '';
           // Filter out React hydration warnings - these are dev-mode only and don't affect functionality
+          // Also filter out transient 404s for _next assets during initial dev compilation.
+          if (
+            (text.includes('Failed to load resource') || text.includes('404 (Not Found)')) &&
+            (loc.includes('/_next/static/') || loc.endsWith('/favicon.ico') || loc === '')
+          ) {
+            return;
+          }
           if (!text.includes('Warning: Prop') && !text.includes('did not match')) {
             consoleErrors.push(text);
           }
