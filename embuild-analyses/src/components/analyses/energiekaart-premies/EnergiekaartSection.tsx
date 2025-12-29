@@ -7,6 +7,7 @@ import { ExportButtons } from "../shared/ExportButtons"
 import { EnergiekaartChart } from "./EnergiekaartChart"
 import { EnergiekaartTable } from "./EnergiekaartTable"
 import type { YearlyDataRow } from "./EnergiekaartDashboard"
+import { formatScaledEuro, getCurrencyLabel, getCurrencyScale } from "./formatters"
 
 interface EnergiekaartSectionProps {
   title: string
@@ -45,6 +46,16 @@ export function EnergiekaartSection({
       .sort((a, b) => a.jaar - b.jaar)
   }, [data, metric])
 
+  const currencyScale = useMemo(() => {
+    if (!isCurrency) return null
+    return getCurrencyScale(chartData.map((d) => d.value))
+  }, [chartData, isCurrency])
+
+  const displayLabel = useMemo(() => {
+    if (!isCurrency || !currencyScale) return label
+    return getCurrencyLabel(label, currencyScale)
+  }, [currencyScale, isCurrency, label])
+
   // Prepare CSV data
   const csvData = useMemo(() => {
     return chartData.map((row) => ({
@@ -71,12 +82,8 @@ export function EnergiekaartSection({
   // Format numbers
   const formatNumber = (value: number) => {
     if (isCurrency) {
-      return new Intl.NumberFormat("nl-BE", {
-        style: "currency",
-        currency: "EUR",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(value)
+      if (!currencyScale) return `€ ${value}`
+      return formatScaledEuro(value, currencyScale)
     }
     return new Intl.NumberFormat("nl-BE").format(value)
   }
@@ -139,13 +146,13 @@ export function EnergiekaartSection({
 
         <TabsContent value="grafiek" className="mt-4">
           <Card className="p-6">
-            <EnergiekaartChart data={chartData} label={label} isCurrency={isCurrency} />
+            <EnergiekaartChart data={chartData} label={displayLabel} isCurrency={isCurrency} />
           </Card>
         </TabsContent>
 
         <TabsContent value="tabel" className="mt-4">
           <Card className="p-6">
-            <EnergiekaartTable data={chartData} label={label} isCurrency={isCurrency} />
+            <EnergiekaartTable data={chartData} label={displayLabel} isCurrency={isCurrency} />
           </Card>
         </TabsContent>
       </Tabs>
