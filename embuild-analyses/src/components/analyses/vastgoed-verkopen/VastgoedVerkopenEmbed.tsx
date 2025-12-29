@@ -38,6 +38,49 @@ type YearPoint = {
 
 type SectionType = "transacties" | "prijzen" | "transacties-kwartaal" | "prijzen-kwartaal"
 type ViewType = "chart" | "table"
+type GeoLevel = "belgium" | "region" | "province"
+
+function inferGeoLevelAndCode(geo: string | null | undefined): { level: GeoLevel; code: string | null } {
+  if (!geo) return { level: "belgium", code: null }
+
+  // Common "Belgium" codes across the project.
+  if (geo === "1000" || geo === "01000") return { level: "belgium", code: null }
+
+  // Regions are typically "2000/3000/4000" but data also contains "02000/03000/04000".
+  if (geo === "2000" || geo === "3000" || geo === "4000" || geo === "02000" || geo === "03000" || geo === "04000") {
+    return { level: "region", code: geo }
+  }
+
+  // Heuristic:
+  // - 4 digits => region (2000/3000/4000)
+  // - 5 digits starting with 0 => region (02000/03000/04000)
+  // - otherwise assume province (10000/20001/...)
+  if (/^\d{4}$/.test(geo)) return { level: "region", code: geo }
+  if (/^0\d{4}$/.test(geo)) return { level: "region", code: geo }
+  return { level: "province", code: geo }
+}
+
+function filterYearlyByGeo(rows: YearlyRow[], geo: string | null | undefined): YearlyRow[] {
+  const { level, code } = inferGeoLevelAndCode(geo)
+  if (level === "belgium") return rows.filter((r) => r.lvl === 1)
+  if (level === "region" && code) {
+    const codeWithZero = code.padStart(5, "0")
+    return rows.filter((r) => r.lvl === 2 && (r.nis === code || r.nis === codeWithZero))
+  }
+  if (level === "province" && code) return rows.filter((r) => r.lvl === 3 && r.nis === code)
+  return rows.filter((r) => r.lvl === 1)
+}
+
+function filterQuarterlyByGeo(rows: QuarterlyRow[], geo: string | null | undefined): QuarterlyRow[] {
+  const { level, code } = inferGeoLevelAndCode(geo)
+  if (level === "belgium") return rows.filter((r) => r.lvl === 1)
+  if (level === "region" && code) {
+    const codeWithZero = code.padStart(5, "0")
+    return rows.filter((r) => r.lvl === 2 && (r.nis === code || r.nis === codeWithZero))
+  }
+  if (level === "province" && code) return rows.filter((r) => r.lvl === 3 && r.nis === code)
+  return rows.filter((r) => r.lvl === 1)
+}
 
 function aggregateTransactionsByYear(rows: YearlyRow[]): YearPoint[] {
   const agg = new Map<number, number>()
@@ -76,26 +119,26 @@ interface VastgoedVerkopenEmbedProps {
   section: SectionType
   viewType: ViewType
   type?: string | null
+  geo?: string | null
 }
 
 export function VastgoedVerkopenEmbed({
   section,
   viewType,
   type = "alle_huizen",
+  geo = null,
 }: VastgoedVerkopenEmbedProps) {
   const yearlyRows = useMemo(() => yearlyRaw as YearlyRow[], [])
   const quarterlyRows = useMemo(() => quarterlyRaw as QuarterlyRow[], [])
 
-  // Filter by geo level (Belgium = lvl 1)
+  // Filter by geo + property type
   const filteredYearly = useMemo(() => {
-    let filtered = yearlyRows.filter((r) => r.lvl === 1 && r.type === type)
-    return filtered
-  }, [yearlyRows, type])
+    return filterYearlyByGeo(yearlyRows, geo).filter((r) => r.type === type)
+  }, [yearlyRows, geo, type])
 
   const filteredQuarterly = useMemo(() => {
-    let filtered = quarterlyRows.filter((r) => r.lvl === 1 && r.type === type)
-    return filtered
-  }, [quarterlyRows, type])
+    return filterQuarterlyByGeo(quarterlyRows, geo).filter((r) => r.type === type)
+  }, [quarterlyRows, geo, type])
 
   // Compute the appropriate data series based on section
   const yearSeries = useMemo(() => {
@@ -129,10 +172,18 @@ export function VastgoedVerkopenEmbed({
   const isPriceMetric = section.includes("prijzen")
   const label = isPriceMetric ? "Prijs (€)" : "Transacties"
   const periodHeaders = isQuarterly ? ["Jaar", "Kwartaal"] : ["Jaar"]
+  const hasData = yearSeries.length > 0
 
   return (
     <div className="p-4">
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
+
+      {!hasData && (
+        <div className="p-8 text-center text-muted-foreground">
+          <p>Geen data beschikbaar voor deze selectie.</p>
+          <p className="text-sm mt-2">Controleer je filters (bv. `geo` en `type`).</p>
+        </div>
+      )}
 
       {viewType === "chart" && (
         <FilterableChart

@@ -37,7 +37,9 @@ interface StartersStoppersEmbedProps {
 
 interface UrlParams {
   view: ViewType
-  horizon: StopHorizon
+  horizon: number | null
+  geo: string | null
+  type: string | null
   region: RegionCode | null
   province: ProvinceCode | null
   sector: string | null
@@ -50,7 +52,7 @@ interface UrlParams {
 
 function getParamsFromUrl(): UrlParams {
   if (typeof window === "undefined") {
-    return { view: "chart", horizon: 1, region: null, province: null, sector: null, measure: null, metric: null, timeRange: null, subView: null, showDecline: false }
+    return { view: "chart", horizon: null, geo: null, type: null, region: null, province: null, sector: null, measure: null, metric: null, timeRange: null, subView: null, showDecline: false }
   }
 
   const params = new URLSearchParams(window.location.search)
@@ -59,13 +61,15 @@ function getParamsFromUrl(): UrlParams {
   const view = params.get("view")
   const viewType: ViewType = (view === "table" || view === "map") ? view : "chart"
 
-  // Horizon (1-5)
+  // Horizon (used differently per embed: stop horizon for starters-stoppers, year for some other embeds)
   const horizonStr = params.get("horizon")
-  let horizon: StopHorizon = 1
-  if (horizonStr) {
-    const h = parseInt(horizonStr, 10)
-    if (h >= 1 && h <= 5) horizon = h as StopHorizon
-  }
+  const horizon = horizonStr ? parseInt(horizonStr, 10) : null
+
+  // Geo filter (generic NIS-like code: region/province/...)
+  const geo = params.get("geo") || null
+
+  // Type filter (e.g. vastgoed-verkopen property type)
+  const type = params.get("type") || null
 
   // Region
   const regionStr = params.get("region")
@@ -90,20 +94,28 @@ function getParamsFromUrl(): UrlParams {
   // Sub View (for vergunningen-aanvragen)
   const subView = params.get("subView") || null
 
-  // Show Decline (for huishoudensgroei)
-  const showDecline = params.get("showDecline") === "true"
+  // Show Decline (for huishoudensgroei): allow both explicit boolean and legacy "sector=decline"
+  const showDecline = params.get("showDecline") === "true" || sector === "decline"
 
-  return { view: viewType, horizon, region, province, sector, measure, metric, timeRange, subView, showDecline }
+  return { view: viewType, horizon: Number.isFinite(horizon as number) ? horizon : null, geo, type, region, province, sector, measure, metric, timeRange, subView, showDecline }
 }
 
 function toChartOrTableViewType(viewType: ViewType): ChartOrTableViewType {
   return viewType === "table" ? "table" : "chart"
 }
 
+function toStopHorizon(horizon: number | null): StopHorizon {
+  if (!horizon) return 1
+  if (horizon >= 1 && horizon <= 5) return horizon as StopHorizon
+  return 1
+}
+
 export function EmbedClient({ slug, section }: EmbedClientProps) {
   const [urlParams, setUrlParams] = useState<UrlParams>({
     view: "chart",
-    horizon: 1,
+    horizon: null,
+    geo: null,
+    type: null,
     region: null,
     province: null,
     sector: null,
@@ -225,7 +237,7 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
         <StartersStoppersEmbed
           section={section as StartersStoppersSection}
           viewType={urlParams.view}
-          horizon={urlParams.horizon}
+          horizon={toStopHorizon(urlParams.horizon)}
           region={urlParams.region}
           province={urlParams.province}
           sector={urlParams.sector}
@@ -250,7 +262,8 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
         <VastgoedVerkopenEmbed
           section={section as "transacties" | "prijzen" | "transacties-kwartaal" | "prijzen-kwartaal"}
           viewType={toChartOrTableViewType(urlParams.view)}
-          type={urlParams.sector}
+          type={urlParams.type ?? undefined}
+          geo={urlParams.geo}
         />
       )
     }
@@ -273,7 +286,7 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
           section={section as "evolutie" | "leeftijd" | "bedrijfsgrootte" | "sectoren"}
           viewType={toChartOrTableViewType(urlParams.view)}
           sector={urlParams.sector ?? "F"}
-          year={urlParams.horizon}
+          year={urlParams.horizon && urlParams.horizon >= 1900 ? urlParams.horizon : undefined}
           timeRange={(urlParams.view === "table" || urlParams.view === "map") ? "yearly" : "monthly"}
         />
       )
@@ -296,8 +309,8 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
         <HuishoudensgroeiEmbed
           section={section as "evolutie" | "ranking" | "size-breakdown"}
           viewType={toChartOrTableViewType(urlParams.view)}
-          geo={urlParams.region}
-          horizonYear={urlParams.horizon ?? 2033}
+          geo={urlParams.geo}
+          horizonYear={urlParams.horizon && urlParams.horizon >= 1900 ? urlParams.horizon : 2033}
           showDecline={urlParams.showDecline}
         />
       )
