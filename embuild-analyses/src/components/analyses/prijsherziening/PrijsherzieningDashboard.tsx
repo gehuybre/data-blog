@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Command,
   CommandEmpty,
@@ -116,6 +117,8 @@ export function PrijsherzieningDashboard() {
     return `${selectedComponents.size} geselecteerd`
   }, [allComponentCodes.length, selectedComponents])
 
+  const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
+
   // Price revision calculator state
   const [initialPrice, setInitialPrice] = React.useState<string>("100000")
   const [initialLaborIndex, setInitialLaborIndex] = React.useState<string>("")
@@ -181,6 +184,30 @@ export function PrijsherzieningDashboard() {
         }
       })
       return result
+    })
+  }, [chartData, selectedComponentList])
+
+  const exportData = React.useMemo(() => {
+    return chartData.map((row) => {
+      const baseData: {
+        label: string
+        value: number
+        periodCells: Array<string | number>
+        [key: string]: string | number | Array<string | number>
+      } = {
+        label: row.label,
+        value:
+          selectedComponentList.length === 1
+            ? (row[selectedComponentList[0]] as number) || 0
+            : 0,
+        periodCells: [row.label],
+      }
+
+      selectedComponentList.forEach((comp) => {
+        baseData[comp] = (row[comp] as number) || 0
+      })
+
+      return baseData
     })
   }, [chartData, selectedComponentList])
 
@@ -325,204 +352,194 @@ export function PrijsherzieningDashboard() {
         </Card>
       </div>
 
-      {/* Chart */}
-      <div className="space-y-6">
+      {/* Chart + table (same element) */}
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Evolutie prijsherzieningsindex</h2>
-          <div className="flex items-center gap-2">
-            <ExportButtons
-              data={chartData.map((row) => {
-                // Base data structure
-                const baseData: {
-                  label: string
-                  value: number
-                  periodCells: Array<string | number>
-                  [key: string]: string | number | Array<string | number>
-                } = {
-                  label: row.label,
-                  value: selectedComponentList.length === 1
-                    ? (row[selectedComponentList[0]] as number) || 0
-                    : 0,
-                  periodCells: [row.label],
-                }
-
-                // Add each component as a separate column for multi-series CSV export
-                selectedComponentList.forEach(comp => {
-                  baseData[comp] = (row[comp] as number) || 0
-                })
-
-                return baseData
-              })}
-              periodHeaders={["Periode"]}
-              title="Prijsherzieningsindex I-2021"
-              slug="prijsherziening-index-i-2021"
-              sectionId="evolutie"
-              viewType="chart"
-              valueLabel={selectedComponentList.length === 1 ? selectedComponentList[0] : "Index"}
-              dataSource="FOD Economie - Prijsherzieningsindexen"
-              dataSourceUrl="https://economie.fgov.be/nl/themas/ondernemingen/specifieke-sectoren/bouw/prijsherzieningsindexen/mercuriale-index-i-2021"
-            />
-            <Popover open={componentsOpen} onOpenChange={setComponentsOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  role="combobox"
-                  aria-expanded={componentsOpen}
-                  className="h-8 gap-1 min-w-[130px]"
-                >
-                  <span className="truncate">{componentTriggerLabel}</span>
-                  <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[360px] p-0" align="end">
-                <Command>
-                  <CommandInput placeholder="Zoek component..." />
-                  <CommandList>
-                    <CommandEmpty>Geen resultaat.</CommandEmpty>
-                    <CommandGroup heading="Selectie">
-                      <CommandItem
-                        value="Alle componenten"
-                        onSelect={() => {
-                          setSelectedComponents(new Set(allComponentCodes))
-                          setComponentsOpen(false)
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            selectedComponents.size === allComponentCodes.length ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        Alle componenten
-                      </CommandItem>
-                      <CommandItem
-                        value="Standaard selectie"
-                        onSelect={() => {
-                          setSelectedComponents(new Set(defaultSelected))
-                          setComponentsOpen(false)
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            selectedComponents.size === defaultSelected.size &&
-                              Array.from(defaultSelected).every((c) => selectedComponents.has(c))
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                        Standaard selectie
-                      </CommandItem>
-                      <CommandItem
-                        value="Wis selectie"
-                        onSelect={() => {
-                          setSelectedComponents(new Set())
-                          setComponentsOpen(false)
-                        }}
-                      >
-                        <Check className={cn("mr-2 h-4 w-4", selectedComponents.size === 0 ? "opacity-100" : "opacity-0")} />
-                        Wis selectie
-                      </CommandItem>
-                    </CommandGroup>
-                    <CommandSeparator />
-                    <CommandGroup heading="Component">
-                      {componentsData.map((comp) => (
-                        <CommandItem
-                          key={comp.code}
-                          value={`${comp.code} ${comp.name} ${comp.original ?? ""}`.trim()}
-                          onSelect={() => toggleComponent(comp.code)}
-                        >
-                          <Check className={cn("mr-2 h-4 w-4", selectedComponents.has(comp.code) ? "opacity-100" : "opacity-0")} />
-                          <span className="flex flex-col">
-                            <span>{comp.name}</span>
-                            {comp.original && comp.original !== comp.name ? (
-                              <span className="text-xs text-muted-foreground">{comp.original}</span>
-                            ) : null}
-                          </span>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
+          <ExportButtons
+            data={exportData}
+            periodHeaders={["Periode"]}
+            title="Prijsherzieningsindex I-2021"
+            slug="prijsherziening-index-i-2021"
+            sectionId="evolutie"
+            viewType={currentView}
+            valueLabel={selectedComponentList.length === 1 ? selectedComponentList[0] : "Index"}
+            dataSource="FOD Economie - Prijsherzieningsindexen"
+            dataSourceUrl="https://economie.fgov.be/nl/themas/ondernemingen/specifieke-sectoren/bouw/prijsherzieningsindexen/mercuriale-index-i-2021"
+          />
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardDescription>
-              Maandelijkse evolutie van de geselecteerde indexcomponenten
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="label"
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                    interval="preserveStartEnd"
-                  />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  {selectedComponentList.map(comp => (
-                    <Line
-                      key={comp}
-                      type="monotone"
-                      dataKey={comp}
-                      stroke={COMPONENT_COLORS[comp] || "#888888"}
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
+        <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table")}>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <TabsList>
+              <TabsTrigger value="chart">Grafiek</TabsTrigger>
+              <TabsTrigger value="table">Tabel</TabsTrigger>
+            </TabsList>
+            <div className="flex items-center gap-2">
+              <Popover open={componentsOpen} onOpenChange={setComponentsOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    role="combobox"
+                    aria-expanded={componentsOpen}
+                    className="h-8 gap-1 min-w-[130px]"
+                  >
+                    <span className="truncate">{componentTriggerLabel}</span>
+                    <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[360px] p-0" align="end">
+                  <Command>
+                    <CommandInput placeholder="Zoek component..." />
+                    <CommandList>
+                      <CommandEmpty>Geen resultaat.</CommandEmpty>
+                      <CommandGroup heading="Selectie">
+                        <CommandItem
+                          value="Alle componenten"
+                          onSelect={() => {
+                            setSelectedComponents(new Set(allComponentCodes))
+                            setComponentsOpen(false)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedComponents.size === allComponentCodes.length ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          Alle componenten
+                        </CommandItem>
+                        <CommandItem
+                          value="Standaard selectie"
+                          onSelect={() => {
+                            setSelectedComponents(new Set(defaultSelected))
+                            setComponentsOpen(false)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedComponents.size === defaultSelected.size &&
+                                Array.from(defaultSelected).every((c) => selectedComponents.has(c))
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          Standaard selectie
+                        </CommandItem>
+                        <CommandItem
+                          value="Wis selectie"
+                          onSelect={() => {
+                            setSelectedComponents(new Set())
+                            setComponentsOpen(false)
+                          }}
+                        >
+                          <Check className={cn("mr-2 h-4 w-4", selectedComponents.size === 0 ? "opacity-100" : "opacity-0")} />
+                          Wis selectie
+                        </CommandItem>
+                      </CommandGroup>
+                      <CommandSeparator />
+                      <CommandGroup heading="Component">
+                        {componentsData.map((comp) => (
+                          <CommandItem
+                            key={comp.code}
+                            value={`${comp.code} ${comp.name} ${comp.original ?? ""}`.trim()}
+                            onSelect={() => toggleComponent(comp.code)}
+                          >
+                            <Check className={cn("mr-2 h-4 w-4", selectedComponents.has(comp.code) ? "opacity-100" : "opacity-0")} />
+                            <span className="flex flex-col">
+                              <span>{comp.name}</span>
+                              {comp.original && comp.original !== comp.name ? (
+                                <span className="text-xs text-muted-foreground">{comp.original}</span>
+                              ) : null}
+                            </span>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Data table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Indexwaarden per maand</CardTitle>
-          <CardDescription>
-            Volledige tabel met alle maandelijkse indexwaarden
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-2">Periode</th>
-                  {selectedComponentList.map(comp => (
-                    <th key={comp} className="text-right p-2">{comp}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {tableData.slice(-24).reverse().map((row, idx) => (
-                  <tr key={idx} className="border-b">
-                    <td className="p-2">{row.Periode}</td>
-                    {selectedComponentList.map(comp => (
-                      <td key={comp} className="text-right p-2">
-                        {row[comp] || "-"}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
-        </CardContent>
-      </Card>
+
+          <TabsContent value="chart">
+            <Card>
+              <CardHeader>
+                <CardTitle>Evolutie</CardTitle>
+                <CardDescription>Maandelijkse evolutie van de geselecteerde indexcomponenten</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="label"
+                        angle={-45}
+                        textAnchor="end"
+                        height={80}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      {selectedComponentList.map((comp) => (
+                        <Line
+                          key={comp}
+                          type="monotone"
+                          dataKey={comp}
+                          stroke={COMPONENT_COLORS[comp] || "#888888"}
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="table">
+            <Card>
+              <CardHeader>
+                <CardTitle>Data</CardTitle>
+                <CardDescription>Volledige tabel met alle maandelijkse indexwaarden</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-2">Periode</th>
+                        {selectedComponentList.map((comp) => (
+                          <th key={comp} className="text-right p-2">
+                            {comp}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tableData.slice(-24).reverse().map((row, idx) => (
+                        <tr key={idx} className="border-b">
+                          <td className="p-2">{row.Periode}</td>
+                          {selectedComponentList.map((comp) => (
+                            <td key={comp} className="text-right p-2">
+                              {row[comp] || "-"}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
 
       {/* Price revision calculator */}
       <Card>
