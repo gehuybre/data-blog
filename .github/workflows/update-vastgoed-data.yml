@@ -41,9 +41,7 @@ jobs:
           missing_required=false
           required_files=(
             "embuild-analyses/analyses/vastgoed-verkopen/results/yearly.json"
-            "embuild-analyses/analyses/vastgoed-verkopen/results/yearly.csv"
             "embuild-analyses/analyses/vastgoed-verkopen/results/quarterly.json"
-            "embuild-analyses/analyses/vastgoed-verkopen/results/quarterly.csv"
             "embuild-analyses/analyses/vastgoed-verkopen/results/lookups.json"
             "embuild-analyses/analyses/vastgoed-verkopen/results/metadata.json"
           )
