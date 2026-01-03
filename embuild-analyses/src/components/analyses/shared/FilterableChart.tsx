@@ -53,12 +53,12 @@ export function FilterableChart<TData = UnknownRecord>({
       input.sort((a: any, b: any) => sortGetter(a) - sortGetter(b))
     }
 
-    // Calculate moving average (last 4 periods)
+    // Calculate 4-period moving average
     return input.map((d, i) => {
       const val = valueGetter(d, metric)
       let sum = 0
       let count = 0
-      // Look back 3 periods + current
+      // Look back 3 periods + current period
       for (let j = 0; j < 4; j++) {
         if (i - j >= 0) {
           const prev = input[i - j]
@@ -66,7 +66,8 @@ export function FilterableChart<TData = UnknownRecord>({
           count++
         }
       }
-      const ma = count === 4 ? sum / 4 : null // Only show if we have full year? Or show partial?
+      // Only show MA when we have 4 full periods (avoids partial MA at start of chart)
+      const ma = count === 4 ? sum / 4 : null
 
       return {
         name: labelGetter(d),
