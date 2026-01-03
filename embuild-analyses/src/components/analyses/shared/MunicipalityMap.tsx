@@ -1,373 +1,556 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps"
 import { scaleQuantile } from "d3-scale"
 import { geoBounds } from "d3-geo"
-import { Loader2 } from "lucide-react"
-import { PROVINCES, getProvinceForMunicipality, getRegionForMunicipality, RegionCode, ProvinceCode, MunicipalityCode } from "@/lib/geo-utils"
+import { Loader2, TrendingUp, TrendingDown } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { TimeSlider } from "./TimeSlider"
+import { MapLegend, NoDataIndicator } from "./MapLegend"
+import { MapControls } from "./MapControls"
+import { MAP_COLOR_SCHEMES } from "@/lib/chart-theme"
 
-type UnknownRecord = Record<string, any>
+// Types
+type UnknownRecord = Record<string, unknown>
 
-interface MunicipalityMapProps<TData extends UnknownRecord = UnknownRecord> {
-  data: TData[]
-  metric: string
-  municipalities: any[]
-  level?: 'region' | 'province' | 'municipality'
-  displayMode?: "auto" | "province" | "municipality"
-  selectedRegion?: RegionCode
-  selectedProvince?: ProvinceCode | null
-  selectedMunicipality?: MunicipalityCode | null
-  getMunicipalityCode?: (d: TData) => number | string
-  getMetricValue?: (d: TData, metric: string) => number
-  getPeriodKey?: (d: TData) => string
-  getPeriodSortValue?: (d: TData) => number
-  getPeriodLabel?: (d: TData) => string
-  onSelectProvince?: (code: ProvinceCode) => void
-  onSelectMunicipality?: (code: MunicipalityCode) => void
-  tooltipMetricLabel?: string
-  formatValue?: (value: number) => string
+interface TooltipState {
+  visible: boolean
+  x: number
+  y: number
+  name: string
+  value: number | null
+  formattedValue: string
+  previousValue: number | null
+  changePercent: number | null
+  period: string
 }
 
-const GEO_URL =
+type ColorScheme = keyof typeof MAP_COLOR_SCHEMES
+
+interface MunicipalityMapProps<TData extends UnknownRecord = UnknownRecord> {
+  /** Data array containing geographic values across periods */
+  data: TData[]
+
+  /** Accessor for municipality NIS code */
+  getGeoCode?: (d: TData) => string | number | null | undefined
+
+  /** Accessor for metric value */
+  getValue?: (d: TData) => number | null | undefined
+
+  /** Accessor for period (year, quarter, etc.) */
+  getPeriod?: (d: TData) => number | string
+
+  /** Available periods for time slider */
+  periods?: (number | string)[]
+
+  /** Initial period to display */
+  initialPeriod?: number | string
+
+  /** Show time slider */
+  showTimeSlider?: boolean
+
+  /** Selected municipality */
+  selectedMunicipality?: string | null
+
+  /** Callback when municipality is selected */
+  onSelectMunicipality?: (code: string | null) => void
+
+  /** Format function for values */
+  formatValue?: (value: number) => string
+
+  /** Label for tooltips */
+  tooltipLabel?: string
+
+  /** Map height in pixels */
+  height?: number
+
+  /** Color scheme */
+  colorScheme?: ColorScheme
+
+  /** Show province boundaries as overlay */
+  showProvinceBoundaries?: boolean
+
+  /** Optional class name */
+  className?: string
+}
+
+// GeoJSON URLs
+const MUNICIPALITIES_GEO_URL =
   (process.env.NODE_ENV === "production" ? "/data-blog" : "") + "/maps/belgium_municipalities.json"
+const PROVINCES_GEO_URL =
+  (process.env.NODE_ENV === "production" ? "/data-blog" : "") + "/maps/belgium_provinces.json"
+
+// Default formatters
+const defaultFormatValue = (n: number) =>
+  new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(n)
 
 export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
-  data, 
-  metric, 
-  municipalities,
-  level = 'region',
-  displayMode = "auto",
-  selectedRegion = '1000',
-  selectedProvince = null,
+  data,
+  getGeoCode,
+  getValue,
+  getPeriod,
+  periods = [],
+  initialPeriod,
+  showTimeSlider = false,
   selectedMunicipality = null,
-  getMunicipalityCode,
-  getMetricValue,
-  getPeriodKey,
-  getPeriodSortValue,
-  getPeriodLabel,
-  onSelectProvince,
   onSelectMunicipality,
-  tooltipMetricLabel,
-  formatValue,
+  formatValue = defaultFormatValue,
+  tooltipLabel = "Waarde",
+  height = 450,
+  colorScheme = "blue",
+  showProvinceBoundaries = false,
+  className,
 }: MunicipalityMapProps<TData>) {
-  const [geoData, setGeoData] = useState<any>(null)
+  // GeoJSON state
+  const [municipalitiesGeo, setMunicipalitiesGeo] = useState<any>(null)
+  const [provincesGeo, setProvincesGeo] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
+  // Zoom/pan state
+  const [zoom, setZoom] = useState(1)
+  const [center, setCenter] = useState<[number, number]>([4.4, 50.5])
+
+  // Time state
+  const [currentPeriod, setCurrentPeriod] = useState<number | string>(
+    initialPeriod ?? periods[periods.length - 1] ?? ""
+  )
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  // Tooltip state
+  const [tooltip, setTooltip] = useState<TooltipState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    name: "",
+    value: null,
+    formattedValue: "",
+    previousValue: null,
+    changePercent: null,
+    period: "",
+  })
+
+  // Load municipality GeoJSON
   useEffect(() => {
-    fetch(GEO_URL)
+    setLoading(true)
+    fetch(MUNICIPALITIES_GEO_URL)
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch map data")
+        if (!res.ok) throw new Error("Failed to fetch municipality map data")
         return res.json()
       })
       .then((data) => {
-        setGeoData(data)
+        setMunicipalitiesGeo(data)
         setLoading(false)
       })
       .catch((err) => {
-        console.error("Failed to load map data", err)
+        console.error("Failed to load municipality map data", err)
         setLoading(false)
       })
   }, [])
 
-  const resolvedDisplayMode = useMemo<"province" | "municipality">(() => {
-    if (displayMode === "province") return "province"
-    if (displayMode === "municipality") return "municipality"
-    // auto: show provinces for Belgium/region scopes; show municipalities when province/municipality is selected.
-    if (level === "province") return "municipality"
-    if (level === "municipality") return "municipality"
-    return "province"
-  }, [displayMode, level])
-
-  // Filter geographies based on selection
-  const filteredGeographies = useMemo(() => {
-    if (!geoData) return []
-    
-    return geoData.features.filter((feature: any) => {
-      const rawCode = feature.properties.code
-      if (!rawCode) return false
-      
-      const code = parseInt(rawCode)
-      if (isNaN(code)) return false
-      
-      // Province view: show only the selected region (or all Belgium)
-      if (resolvedDisplayMode === "province") {
-        if (level === "region" && selectedRegion !== "1000") {
-          const regCode = getRegionForMunicipality(code)
-          return String(regCode) === String(selectedRegion)
-        }
-        return true
-      }
-
-      // Municipality view
-      if (level === "municipality" && selectedMunicipality) {
-        // Show province context for municipality
-        const provCode = getProvinceForMunicipality(parseInt(selectedMunicipality))
-        return getProvinceForMunicipality(code) === provCode
-      }
-
-      if (level === "province" && selectedProvince) {
-        const provCode = getProvinceForMunicipality(code)
-        return String(provCode) === String(selectedProvince)
-      }
-
-      return true
-    })
-  }, [geoData, resolvedDisplayMode, level, selectedRegion, selectedProvince, selectedMunicipality])
-
-  // Calculate center and zoom based on filtered geographies
-  const { center, zoom } = useMemo(() => {
-    if (!filteredGeographies.length) return { center: [4.4, 50.5] as [number, number], zoom: 1 }
-
-    // If showing all of Belgium, use default
-    if (level === 'region' && selectedRegion === '1000') {
-      return { center: [4.4, 50.5] as [number, number], zoom: 1 }
+  // Load province GeoJSON if needed
+  useEffect(() => {
+    if (!showProvinceBoundaries) {
+      setProvincesGeo(null)
+      return
     }
 
-    // Create a FeatureCollection for bounds calculation
-    const featureCollection = {
-      type: "FeatureCollection",
-      features: filteredGeographies
-    }
+    fetch(PROVINCES_GEO_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch province map data")
+        return res.json()
+      })
+      .then((data) => {
+        setProvincesGeo(data)
+      })
+      .catch((err) => {
+        console.error("Failed to load province map data", err)
+        setProvincesGeo(null)
+      })
+  }, [showProvinceBoundaries])
 
-    // Calculate bounds using d3-geo
-    // Note: We use standard geoBounds which returns [[minLon, minLat], [maxLon, maxLat]]
-    const bounds = geoBounds(featureCollection as any)
-    const [[x0, y0], [x1, y1]] = bounds
+  // Accessors with defaults
+  const geoCodeGetter = useCallback(
+    (d: TData) => {
+      if (getGeoCode) return getGeoCode(d)
+      return (d as any)?.m ?? (d as any)?.municipalityCode
+    },
+    [getGeoCode]
+  )
 
-    const center: [number, number] = [(x0 + x1) / 2, (y0 + y1) / 2]
+  const valueGetter = useCallback(
+    (d: TData) => {
+      if (getValue) return getValue(d)
+      return (d as any)?.value ?? (d as any)?.n
+    },
+    [getValue]
+  )
 
-    // Calculate zoom
-    // Heuristic: Belgium bounds are approx width 3.9, height 2.0
-    // Default zoom 1 fits Belgium.
-    // New zoom = min(defaultWidth / selectionWidth, defaultHeight / selectionHeight)
-    const defaultWidth = 3.9
-    const defaultHeight = 2.0
-    
-    const width = Math.abs(x1 - x0) || 0.1
-    const height = Math.abs(y1 - y0) || 0.1
-    
-    // Add some padding (0.8 factor)
-    const zoomX = (defaultWidth / width) * 0.8
-    const zoomY = (defaultHeight / height) * 0.8
-    const zoom = Math.min(zoomX, zoomY, 15) // Cap max zoom
+  const periodGetter = useCallback(
+    (d: TData) => {
+      if (getPeriod) return getPeriod(d)
+      return (d as any)?.y ?? (d as any)?.period
+    },
+    [getPeriod]
+  )
 
-    // If showing all of Belgium (or close to it), force zoom 1
-    if (width > 3.0 && height > 1.5) return { center: [4.4, 50.5] as [number, number], zoom: 1 }
+  // Get previous period for trend calculation
+  const previousPeriod = useMemo(() => {
+    if (!periods.length || !currentPeriod) return null
+    const idx = periods.indexOf(currentPeriod)
+    if (idx <= 0) return null
+    return periods[idx - 1]
+  }, [periods, currentPeriod])
 
-    return { center, zoom }
-  }, [filteredGeographies, level, selectedRegion])
+  // Current period data
+  const currentPeriodData = useMemo(() => {
+    if (!currentPeriod) return data
+    return data.filter((d) => periodGetter(d) === currentPeriod)
+  }, [data, currentPeriod, periodGetter])
 
-  // Create a filtered GeoJSON object to pass to Geographies
-  const filteredGeoJson = useMemo(() => {
-    if (!geoData) return null
-    
-    // If showing all of Belgium, return original data
-    if (level === 'region' && selectedRegion === '1000') {
-      return geoData
-    }
+  // Previous period data for trend
+  const previousPeriodData = useMemo(() => {
+    if (!previousPeriod) return []
+    return data.filter((d) => periodGetter(d) === previousPeriod)
+  }, [data, previousPeriod, periodGetter])
 
-    return {
-      type: "FeatureCollection",
-      features: filteredGeographies
-    }
-  }, [geoData, filteredGeographies, level, selectedRegion])
-
-  const municipalityCodeGetter =
-    getMunicipalityCode ?? ((d: any) => d?.m)
-  const metricGetter =
-    getMetricValue ?? ((d: any, m: string) => Number(d?.[m] ?? 0))
-  const periodKeyGetter =
-    getPeriodKey ?? ((d: any) => `${d?.y}-${d?.q}`)
-  const periodSortGetter =
-    getPeriodSortValue ?? ((d: any) => (Number(d?.y) || 0) * 10 + (Number(d?.q) || 0))
-  const periodLabelGetter =
-    getPeriodLabel ?? ((d: any) => `${d?.y} Q${d?.q}`)
-
-  // Find latest period
-  const latestPeriod = useMemo(() => {
-    if (!data || !data.length) return null
-    return data.reduce((prev, current) => {
-      return periodSortGetter(current) > periodSortGetter(prev) ? current : prev
-    }, data[0])
-  }, [data, periodSortGetter])
-
-  const latestPeriodRows = useMemo(() => {
-    if (!latestPeriod) return [] as TData[]
-    const latestKey = periodKeyGetter(latestPeriod)
-    return data.filter((d) => periodKeyGetter(d) === latestKey)
-  }, [data, latestPeriod, periodKeyGetter])
-
-  const municipalityValueByCode = useMemo(() => {
-    const out: Record<string, number> = {}
-    for (const row of latestPeriodRows) {
-      const code = municipalityCodeGetter(row)
+  // Value maps
+  const valueByGeoCode = useMemo(() => {
+    const m = new Map<string, number>()
+    for (const row of currentPeriodData) {
+      const code = geoCodeGetter(row)
       if (code === null || code === undefined) continue
-      out[String(code)] = metricGetter(row, metric)
-    }
-    return out
-  }, [latestPeriodRows, metric, municipalityCodeGetter, metricGetter])
-
-  const provinceValueByCode = useMemo(() => {
-    const out: Record<string, number> = {}
-    for (const row of latestPeriodRows) {
-      const m = municipalityCodeGetter(row)
-      const mCode = typeof m === "string" ? Number.parseInt(m, 10) : Number(m)
-      if (!Number.isFinite(mCode)) continue
-      const pCode = String(getProvinceForMunicipality(mCode))
-      const inc = metricGetter(row, metric)
-      out[pCode] = (out[pCode] ?? 0) + (Number.isFinite(inc) ? inc : 0)
-    }
-    return out
-  }, [latestPeriodRows, metric, municipalityCodeGetter, metricGetter])
-
-  const colorScale = useMemo(() => {
-    const values = Object.values(resolvedDisplayMode === "province" ? provinceValueByCode : municipalityValueByCode)
-    if (!values.length) return () => "#EEE"
-    
-    return scaleQuantile<string>()
-      .domain(values)
-      .range([
-        "#ffedea",
-        "#ffcec5",
-        "#ffad9f",
-        "#ff8a75",
-        "#ff5533",
-        "#e2492d",
-        "#be3d26",
-        "#9a311f",
-        "#782618"
-      ])
-  }, [resolvedDisplayMode, municipalityValueByCode, provinceValueByCode])
-
-  const municipalityNameByCode = useMemo(() => {
-    const m = new Map<string, string>()
-    for (const row of municipalities ?? []) {
-      const code = row?.code
-      const name = row?.name
-      if (code === null || code === undefined) continue
-      if (typeof name !== "string" || !name.trim()) continue
-      m.set(String(code), name)
+      const v = valueGetter(row)
+      if (typeof v !== "number" || !Number.isFinite(v)) continue
+      m.set(String(code), v)
     }
     return m
-  }, [municipalities])
+  }, [currentPeriodData, geoCodeGetter, valueGetter])
 
-  const formatNumber = useMemo(() => {
-    return formatValue ?? ((n: number) => new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(n))
-  }, [formatValue])
+  const previousValueByGeoCode = useMemo(() => {
+    const m = new Map<string, number>()
+    for (const row of previousPeriodData) {
+      const code = geoCodeGetter(row)
+      if (code === null || code === undefined) continue
+      const v = valueGetter(row)
+      if (typeof v !== "number" || !Number.isFinite(v)) continue
+      m.set(String(code), v)
+    }
+    return m
+  }, [previousPeriodData, geoCodeGetter, valueGetter])
 
+  // Color scale
+  const colorScale = useMemo(() => {
+    const values = Array.from(valueByGeoCode.values()).filter(
+      (v) => Number.isFinite(v) && v > 0
+    )
+    if (!values.length) return null
+    return scaleQuantile<string>().domain(values).range(MAP_COLOR_SCHEMES[colorScheme])
+  }, [valueByGeoCode, colorScheme])
+
+  // Auto-zoom to selected municipality
+  useEffect(() => {
+    if (!selectedMunicipality || !municipalitiesGeo?.features) {
+      setZoom(1)
+      setCenter([4.4, 50.5])
+      return
+    }
+
+    const feature = municipalitiesGeo.features.find(
+      (f: any) => String(f.properties?.code) === String(selectedMunicipality)
+    )
+
+    if (!feature) {
+      setZoom(1)
+      setCenter([4.4, 50.5])
+      return
+    }
+
+    const bounds = geoBounds(feature)
+    const [[x0, y0], [x1, y1]] = bounds
+    const newCenter: [number, number] = [(x0 + x1) / 2, (y0 + y1) / 2]
+
+    const defaultWidth = 3.9
+    const defaultHeight = 2.0
+    const width = Math.abs(x1 - x0) || 0.1
+    const height = Math.abs(y1 - y0) || 0.1
+
+    const zoomX = (defaultWidth / width) * 0.8
+    const zoomY = (defaultHeight / height) * 0.8
+    const newZoom = Math.min(zoomX, zoomY, 8)
+
+    setCenter(newCenter)
+    setZoom(newZoom)
+  }, [selectedMunicipality, municipalitiesGeo])
+
+  // Zoom handlers
+  const handleZoomIn = useCallback(() => {
+    setZoom((z) => Math.min(z * 1.5, 8))
+  }, [])
+
+  const handleZoomOut = useCallback(() => {
+    setZoom((z) => Math.max(z / 1.5, 0.5))
+  }, [])
+
+  const handleReset = useCallback(() => {
+    setZoom(1)
+    setCenter([4.4, 50.5])
+  }, [])
+
+  // Tooltip handlers
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent, geoCode: string, name: string) => {
+      const rect = (e.currentTarget as HTMLElement)
+        .closest(".municipality-map-container")
+        ?.getBoundingClientRect()
+      if (!rect) return
+
+      const value = valueByGeoCode.get(geoCode) ?? null
+      const prevValue = previousValueByGeoCode.get(geoCode) ?? null
+      const changePercent =
+        value !== null && prevValue !== null && prevValue > 0
+          ? ((value - prevValue) / prevValue) * 100
+          : null
+
+      setTooltip({
+        visible: true,
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top - 10,
+        name,
+        value,
+        formattedValue: value !== null ? formatValue(value) : "Geen data",
+        previousValue: prevValue,
+        changePercent,
+        period: String(currentPeriod),
+      })
+    },
+    [valueByGeoCode, previousValueByGeoCode, currentPeriod, formatValue]
+  )
+
+  const handleMouseLeave = useCallback(() => {
+    setTooltip((prev) => ({ ...prev, visible: false }))
+  }, [])
+
+  // Period slider data
+  const periodItems = useMemo(
+    () => periods.map((p) => ({ value: p, label: String(p) })),
+    [periods]
+  )
+
+  // Loading state
   if (loading) {
-    return <div className="flex h-[400px] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+    return (
+      <div
+        className={cn("flex items-center justify-center", className)}
+        style={{ height }}
+      >
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    )
   }
 
-  if (!geoData) {
-    return <div className="flex h-[400px] items-center justify-center text-muted-foreground">Kon kaart niet laden.</div>
+  // Error state
+  if (!municipalitiesGeo) {
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-center text-sm text-muted-foreground",
+          className
+        )}
+        style={{ height }}
+      >
+        Kaartdata kon niet geladen worden.
+      </div>
+    )
   }
 
   return (
-    <div className="flex flex-col space-y-4">
-        {latestPeriod && (
-            <div className="text-center text-sm text-muted-foreground">
-                Data voor {periodLabelGetter(latestPeriod)}
-            </div>
-        )}
-        <div className="h-[500px] w-full border rounded-lg overflow-hidden bg-slate-50 relative">
-        <ComposableMap 
-            projection="geoMercator" 
-            projectionConfig={{ 
-                scale: 12000, 
-                center: [4.4, 50.5] 
+    <div className={cn("flex flex-col gap-3", className)}>
+      <div
+        className="municipality-map-container relative w-full rounded-lg border bg-card/50 overflow-hidden"
+        style={{ height }}
+      >
+        {/* Tooltip */}
+        {tooltip.visible && (
+          <div
+            className="absolute z-20 pointer-events-none px-3 py-2 bg-popover text-popover-foreground border rounded-lg shadow-lg"
+            style={{
+              left: tooltip.x,
+              top: tooltip.y,
+              transform: "translate(-50%, -100%)",
             }}
-            className="w-full h-full"
+          >
+            <div className="font-medium text-sm">{tooltip.name}</div>
+            {showTimeSlider && tooltip.period && (
+              <div className="text-xs text-muted-foreground">{tooltip.period}</div>
+            )}
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-lg font-bold">{tooltip.formattedValue}</span>
+              {tooltip.changePercent !== null && (
+                <span
+                  className={cn(
+                    "text-xs flex items-center gap-0.5",
+                    tooltip.changePercent >= 0 ? "text-red-600" : "text-green-600"
+                  )}
+                >
+                  {tooltip.changePercent >= 0 ? (
+                    <TrendingUp className="h-3 w-3" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3" />
+                  )}
+                  {tooltip.changePercent >= 0 ? "+" : ""}
+                  {tooltip.changePercent.toFixed(1)}%
+                </span>
+              )}
+            </div>
+            {tooltipLabel && (
+              <div className="text-xs text-muted-foreground mt-0.5">
+                {tooltipLabel}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Zoom Controls */}
+        <MapControls
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onReset={handleReset}
+          zoom={zoom}
+          className="absolute top-3 right-3 z-10"
+        />
+
+        {/* Legend */}
+        <div className="absolute bottom-3 left-3 z-10 bg-background/80 backdrop-blur-sm rounded-lg p-2 border">
+          <MapLegend
+            scale={colorScale}
+            formatValue={formatValue}
+            label={tooltipLabel}
+          />
+          <NoDataIndicator className="mt-2" />
+        </div>
+
+        {/* Map */}
+        <ComposableMap
+          projection="geoMercator"
+          projectionConfig={{
+            center: [4.4, 50.5],
+            scale: 12000,
+          }}
+          className="w-full h-full"
         >
-            <ZoomableGroup 
-              key={`${level}-${selectedRegion}-${selectedProvince}-${selectedMunicipality}`}
-              center={center} 
-              zoom={zoom} 
-              minZoom={0.5} 
-              maxZoom={20}
-              filterZoomEvent={() => true} // Allow zooming
-            >
-            <Geographies geography={filteredGeoJson} key={JSON.stringify(filteredGeoJson?.features?.length)}>
-            {({ geographies }) =>
+          <ZoomableGroup
+            center={center}
+            zoom={zoom}
+            minZoom={0.5}
+            maxZoom={8}
+            onMoveEnd={({ coordinates, zoom: newZoom }) => {
+              setCenter(coordinates as [number, number])
+              setZoom(newZoom)
+            }}
+          >
+            {/* Municipality layer (colored by data) */}
+            <Geographies geography={municipalitiesGeo}>
+              {({ geographies }) =>
                 geographies.map((geo) => {
-                    const municipalityCode = String(geo.properties.code ?? "")
-                    const mCode = Number.parseInt(municipalityCode, 10)
-                    if (!Number.isFinite(mCode)) return null
+                  const rawCode = String(geo.properties?.code ?? "")
+                  const value = valueByGeoCode.get(rawCode)
+                  const isActive = selectedMunicipality && String(selectedMunicipality) === rawCode
+                  const fill =
+                    value === undefined || !colorScale
+                      ? "#f3f4f6"
+                      : colorScale(value) ?? "#f3f4f6"
 
-                    const provinceCode = String(getProvinceForMunicipality(mCode))
-                    const value =
-                      resolvedDisplayMode === "province"
-                        ? provinceValueByCode[provinceCode]
-                        : municipalityValueByCode[municipalityCode]
+                  const name = geo.properties?.LAU_NAME ?? rawCode
 
-                    const isInteractive =
-                      (resolvedDisplayMode === "province" && !!onSelectProvince) ||
-                      (resolvedDisplayMode === "municipality" && !!onSelectMunicipality)
-
-                    const isActive =
-                      resolvedDisplayMode === "province"
-                        ? !!selectedProvince && String(selectedProvince) === provinceCode
-                        : !!selectedMunicipality && String(selectedMunicipality) === municipalityCode
-
-                    const placeName =
-                      resolvedDisplayMode === "province"
-                        ? (PROVINCES.find((p) => String(p.code) === provinceCode)?.name ?? provinceCode)
-                        : (municipalityNameByCode.get(municipalityCode) ?? geo.properties?.LAU_NAME ?? municipalityCode)
-
-                    const metricLabel = tooltipMetricLabel ?? metric
-                    const tooltipValue =
-                      value === undefined || !Number.isFinite(value) ? "Geen data" : formatNumber(value)
-                    const tooltipText = `${placeName} · ${metricLabel}: ${tooltipValue}`
-
-                    const opacity =
-                      resolvedDisplayMode === "province" && selectedProvince
-                        ? String(selectedProvince) === provinceCode
-                          ? 1
-                          : 0.45
-                        : 1
-
-                    const showMunicipalityBoundaries = resolvedDisplayMode === "municipality"
-
-                    return (
-                        <Geography
-                        key={geo.rsmKey}
-                        geography={geo}
-                        fill={value !== undefined && Number.isFinite(value) ? colorScale(value) : "#EEE"}
-                        stroke={showMunicipalityBoundaries ? (isActive ? "#111827" : "#D6D6DA") : "transparent"}
-                        strokeWidth={(showMunicipalityBoundaries ? (isActive ? 1.2 : 0.5) : 0) / zoom}
-                        opacity={opacity}
-                        style={{
-                            default: { outline: "none" },
-                            hover: {
-                              outline: "none",
-                              cursor: isInteractive ? "pointer" : "default",
-                              ...(showMunicipalityBoundaries
-                                ? { stroke: "#111827", strokeWidth: 1.2 / zoom }
-                                : {}),
-                            },
-                            pressed: { outline: "none" },
-                        }}
-                        onClick={() => {
-                          if (resolvedDisplayMode === "province") onSelectProvince?.(provinceCode as ProvinceCode)
-                          else onSelectMunicipality?.(municipalityCode as MunicipalityCode)
-                        }}
-                        aria-label={placeName}
-                        >
-                          <title>{tooltipText}</title>
-                        </Geography>
-                    )
+                  return (
+                    <Geography
+                      key={geo.rsmKey}
+                      geography={geo}
+                      onClick={() => onSelectMunicipality?.(rawCode)}
+                      onMouseMove={(e) => handleMouseMove(e, rawCode, name)}
+                      onMouseLeave={handleMouseLeave}
+                      style={{
+                        default: {
+                          fill,
+                          stroke: "#d1d5db",
+                          strokeWidth: 0.3 / zoom,
+                          outline: "none",
+                          cursor: onSelectMunicipality ? "pointer" : "default",
+                          transition: "fill 300ms ease-in-out",
+                        },
+                        hover: {
+                          fill: value === undefined || !colorScale ? "#e5e7eb" : fill,
+                          stroke: "#6b7280",
+                          strokeWidth: 0.8 / zoom,
+                          outline: "none",
+                        },
+                        pressed: {
+                          fill,
+                          stroke: "#6b7280",
+                          strokeWidth: 0.8 / zoom,
+                          outline: "none",
+                        },
+                      }}
+                      className={cn(isActive ? "drop-shadow-md" : "")}
+                      aria-label={name}
+                    />
+                  )
                 })
-            }
+              }
             </Geographies>
-            </ZoomableGroup>
+
+            {/* Province boundary overlay (optional) */}
+            {showProvinceBoundaries && provincesGeo && (
+              <Geographies geography={provincesGeo}>
+                {({ geographies }) =>
+                  geographies.map((geo) => (
+                    <Geography
+                      key={geo.rsmKey}
+                      geography={geo}
+                      style={{
+                        default: {
+                          fill: "none",
+                          stroke: "#374151",
+                          strokeWidth: 1.5 / zoom,
+                          outline: "none",
+                          pointerEvents: "none",
+                        },
+                        hover: {
+                          fill: "none",
+                          stroke: "#374151",
+                          strokeWidth: 1.5 / zoom,
+                          outline: "none",
+                          pointerEvents: "none",
+                        },
+                        pressed: {
+                          fill: "none",
+                          stroke: "#374151",
+                          strokeWidth: 1.5 / zoom,
+                          outline: "none",
+                          pointerEvents: "none",
+                        },
+                      }}
+                      aria-hidden="true"
+                    />
+                  ))
+                }
+              </Geographies>
+            )}
+          </ZoomableGroup>
         </ComposableMap>
-        </div>
-        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <span>Laag</span>
-            <div className="flex h-2 w-32 rounded-full bg-gradient-to-r from-[#ffedea] to-[#782618]" />
-            <span>Hoog</span>
-        </div>
+      </div>
+
+      {/* Time Slider */}
+      {showTimeSlider && periods.length > 1 && (
+        <TimeSlider
+          periods={periodItems}
+          currentPeriod={currentPeriod}
+          onPeriodChange={setCurrentPeriod}
+          isPlaying={isPlaying}
+          onPlayPause={() => setIsPlaying((p) => !p)}
+        />
+      )}
     </div>
   )
 }

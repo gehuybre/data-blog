@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, ComposedChart } from "recharts"
+import { CHART_COLORS, CHART_THEME } from "@/lib/chart-theme"
 
 type UnknownRecord = Record<string, any>
 
@@ -66,7 +67,7 @@ export function FilterableChart<TData = UnknownRecord>({
         }
       }
       const ma = count === 4 ? sum / 4 : null // Only show if we have full year? Or show partial?
-      
+
       return {
         name: labelGetter(d),
         value: val,
@@ -82,14 +83,43 @@ export function FilterableChart<TData = UnknownRecord>({
   return (
     <div className="h-[400px] w-full min-w-0">
       <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-        <ComposedChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="value" name="Periode" fill="#8884d8" />
-          <Line type="monotone" dataKey="ma" name="Gemiddelde (4 periodes)" stroke="#ff7300" dot={false} strokeWidth={2} />
+        <ComposedChart data={chartData} margin={CHART_THEME.margin}>
+          <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+          <XAxis
+            dataKey="name"
+            fontSize={CHART_THEME.fontSize}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            fontSize={CHART_THEME.fontSize}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => `${value}`}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "var(--popover)",
+              color: "var(--popover-foreground)",
+              borderRadius: "var(--radius)",
+              border: "1px solid var(--border)",
+            }}
+          />
+          <Legend iconType="circle" />
+          <Bar
+            dataKey="value"
+            name="Periode"
+            fill="var(--color-chart-1)"
+            radius={[4, 4, 0, 0]}
+          />
+          <Line
+            type="monotone"
+            dataKey="ma"
+            name="Gemiddelde (4 periodes)"
+            stroke="var(--color-chart-2)"
+            dot={false}
+            strokeWidth={2}
+          />
         </ComposedChart>
       </ResponsiveContainer>
     </div>

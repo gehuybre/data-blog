@@ -20,7 +20,6 @@ import { cn } from "@/lib/utils"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
 import { ExportButtons } from "../shared/ExportButtons"
-import { InteractiveMap } from "../shared/InteractiveMap"
 
 // Import data
 import monthlyConstruction from "../../../../analyses/faillissementen/results/monthly_construction.json"
@@ -775,11 +774,6 @@ function EvolutionSection({
       : getYearlyData(sector, provinceCode)
   }, [sector, provinceCode, timeRange])
 
-  // All years data for interactive map with time slider
-  const { data: allYearsMapData, error: mapError } = React.useMemo(
-    () => getAllYearsProvinceData(sector),
-    [sector]
-  )
 
   const exportData = React.useMemo(
     () =>
@@ -808,12 +802,11 @@ function EvolutionSection({
         />
       </div>
 
-      <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table" | "map")}>
+      <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table")}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <TabsList>
             <TabsTrigger value="chart">Grafiek</TabsTrigger>
             <TabsTrigger value="table">Tabel</TabsTrigger>
-            <TabsTrigger value="map">Kaart</TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2">
             <SectorFilter selected={sector} onChange={onSectorChange} showAll />
@@ -881,45 +874,6 @@ function EvolutionSection({
                   label="Faillissementen"
                   periodHeaders={[timeRange === "monthly" ? "Maand" : "Jaar"]}
                 />
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="map">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {sector === "ALL" ? "Alle sectoren" : "Bouwsector"} - Faillissementen per provincie
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {mapError ? (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Fout bij laden van kaartgegevens</AlertTitle>
-                  <AlertDescription>{mapError}</AlertDescription>
-                </Alert>
-              ) : (
-                <>
-                  <InteractiveMap
-                    data={allYearsMapData}
-                    level="province"
-                    getGeoCode={(d) => d.p}
-                    getValue={(d) => d.n}
-                    getPeriod={(d) => d.y}
-                    periods={years}
-                    showTimeSlider={true}
-                    selectedGeo={provinceCode}
-                    onGeoSelect={(code) => onProvinceChange(code === provinceCode ? null : code)}
-                    formatValue={formatInt}
-                    tooltipLabel="Faillissementen"
-                    regionFilter="2000"
-                    height={500}
-                  />
-                  <div className="mt-3 text-xs text-muted-foreground">
-                    Klik op een provincie om te filteren. Gebruik de tijdsslider om de evolutie te bekijken.
-                  </div>
-                </>
               )}
             </CardContent>
           </Card>
