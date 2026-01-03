@@ -3,8 +3,6 @@
 import { useMemo } from "react"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
-import { ProvinceMap } from "../shared/ProvinceMap"
-import { RegionMap } from "../shared/RegionMap"
 import { PROVINCES, ProvinceCode, REGIONS, RegionCode } from "@/lib/geo-utils"
 
 import raw from "../../../../analyses/starters-stoppers/results/vat_survivals.json"
@@ -29,20 +27,10 @@ type YearPoint = {
   label?: string
 }
 
-type RegionPoint = {
-  r: RegionCode
-  value: number
-}
-
-type ProvincePoint = {
-  p: ProvinceCode
-  value: number
-}
-
 type StopHorizon = 1 | 2 | 3 | 4 | 5
 type SurvivalKey = "s1" | "s2" | "s3" | "s4" | "s5"
 type SectionType = "starters" | "stoppers" | "survival"
-type ViewType = "chart" | "table" | "map"
+type ViewType = "chart" | "table"
 
 function survivalKeyForHorizon(h: StopHorizon): SurvivalKey {
   return `s${h}` as SurvivalKey
@@ -115,44 +103,6 @@ function aggregateSurvivalRateByYear(rows: VatSurvivalRow[], horizon: StopHorizo
     .sort((a, b) => a.sortValue - b.sortValue)
 }
 
-function aggregateByRegionForYear(
-  rows: VatSurvivalRow[],
-  year: number,
-  valueFn: (r: VatSurvivalRow) => number | null
-): RegionPoint[] {
-  const agg = new Map<RegionCode, number>()
-  for (const r of rows) {
-    if (r.y !== year) continue
-    if (!r.r) continue
-    const code = String(r.r) as RegionCode
-    const v = valueFn(r)
-    if (typeof v !== "number" || !Number.isFinite(v)) continue
-    agg.set(code, (agg.get(code) ?? 0) + v)
-  }
-  return Array.from(agg.entries())
-    .map(([r, value]) => ({ r, value }))
-    .sort((a, b) => a.r.localeCompare(b.r))
-}
-
-function aggregateByProvinceForYear(
-  rows: VatSurvivalRow[],
-  year: number,
-  valueFn: (r: VatSurvivalRow) => number | null
-): ProvincePoint[] {
-  const agg = new Map<string, number>()
-  for (const r of rows) {
-    if (r.y !== year) continue
-    if (!r.p) continue
-    const code = String(r.p)
-    const v = valueFn(r)
-    if (typeof v !== "number" || !Number.isFinite(v)) continue
-    agg.set(code, (agg.get(code) ?? 0) + v)
-  }
-  return Array.from(agg.entries())
-    .map(([p, value]) => ({ p, value }))
-    .sort((a, b) => a.p.localeCompare(b.p))
-}
-
 function formatInt(n: number) {
   return new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(n)
 }
@@ -197,77 +147,6 @@ export function StartersStoppersEmbed({
     }
   }, [section, filteredRows, horizon])
 
-  // Get the latest year for map data
-  const latestYear = useMemo(() => {
-    if (!yearSeries.length) return null
-    return yearSeries[yearSeries.length - 1]?.sortValue ?? null
-  }, [yearSeries])
-
-  // Determine map level based on selection
-  const mapLevel = province ? "province" : "region"
-
-  // Compute map data
-  const mapData = useMemo(() => {
-    if (!latestYear) return []
-
-    const mapRows = filterRowsBySector(allRows, sector)
-
-    if (section === "starters") {
-      const valueFn = (r: VatSurvivalRow) => (typeof r.fr === "number" ? r.fr : null)
-      return mapLevel === "province"
-        ? aggregateByProvinceForYear(mapRows, latestYear, valueFn)
-        : aggregateByRegionForYear(mapRows, latestYear, valueFn)
-    }
-
-    if (section === "stoppers") {
-      const key = survivalKeyForHorizon(horizon)
-      const valueFn = (r: VatSurvivalRow) => {
-        const surv = (r as Record<string, unknown>)[key] as number | null
-        return typeof r.fr === "number" && typeof surv === "number" ? Math.max(0, r.fr - surv) : null
-      }
-      return mapLevel === "province"
-        ? aggregateByProvinceForYear(mapRows, latestYear, valueFn)
-        : aggregateByRegionForYear(mapRows, latestYear, valueFn)
-    }
-
-    // survival
-    const key = survivalKeyForHorizon(horizon)
-    if (mapLevel === "province") {
-      const byProvince = new Map<string, { fr: number; surv: number }>()
-      for (const r of mapRows) {
-        if (r.y !== latestYear) continue
-        if (!r.p) continue
-        const surv = (r as Record<string, unknown>)[key] as number | null
-        if (typeof r.fr !== "number" || typeof surv !== "number") continue
-        const code = String(r.p)
-        const prev = byProvince.get(code) ?? { fr: 0, surv: 0 }
-        prev.fr += r.fr
-        prev.surv += surv
-        byProvince.set(code, prev)
-      }
-      return Array.from(byProvince.entries()).map(([p, v]) => ({
-        p,
-        value: v.fr > 0 ? Math.round(((v.surv / v.fr) * 100) * 10) / 10 : 0,
-      }))
-    } else {
-      const byRegion = new Map<RegionCode, { fr: number; surv: number }>()
-      for (const r of mapRows) {
-        if (r.y !== latestYear) continue
-        if (!r.r) continue
-        const surv = (r as Record<string, unknown>)[key] as number | null
-        if (typeof r.fr !== "number" || typeof surv !== "number") continue
-        const code = String(r.r) as RegionCode
-        const prev = byRegion.get(code) ?? { fr: 0, surv: 0 }
-        prev.fr += r.fr
-        prev.surv += surv
-        byRegion.set(code, prev)
-      }
-      return Array.from(byRegion.entries()).map(([r, v]) => ({
-        r,
-        value: v.fr > 0 ? Math.round(((v.surv / v.fr) * 100) * 10) / 10 : 0,
-      }))
-    }
-  }, [section, allRows, sector, latestYear, horizon, mapLevel])
 
   // Build title
   const title = useMemo(() => {
@@ -310,29 +189,6 @@ export function StartersStoppersEmbed({
 
       {viewType === "table" && (
         <FilterableTable data={yearSeries} label={label} periodHeaders={["Jaar"]} />
-      )}
-
-      {viewType === "map" && (
-        <>
-          {mapLevel === "province" ? (
-            <ProvinceMap
-              data={mapData as ProvincePoint[]}
-              selectedRegion={region ?? "1000"}
-              selectedProvince={province}
-              getProvinceCode={(d) => (d as ProvincePoint).p}
-              getMetricValue={(d) => (d as ProvincePoint).value}
-              formatValue={formatValue}
-            />
-          ) : (
-            <RegionMap
-              data={mapData as RegionPoint[]}
-              selectedRegion={region ?? "1000"}
-              getRegionCode={(d) => (d as RegionPoint).r}
-              getMetricValue={(d) => (d as RegionPoint).value}
-              formatValue={formatValue}
-            />
-          )}
-        </>
       )}
 
       <div className="mt-4 text-xs text-muted-foreground text-center">

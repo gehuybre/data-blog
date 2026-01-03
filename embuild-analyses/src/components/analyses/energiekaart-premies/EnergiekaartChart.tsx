@@ -25,6 +25,8 @@ interface EnergiekaartChartProps {
   isCurrency?: boolean
 }
 
+import { CHART_THEME } from "@/lib/chart-theme"
+
 export function EnergiekaartChart({ data, label, isCurrency = false }: EnergiekaartChartProps) {
   // Calculate 4-year moving average
   const dataWithAverage = data.map((point, index) => {
@@ -46,12 +48,14 @@ export function EnergiekaartChart({ data, label, isCurrency = false }: Energieka
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <ComposedChart data={dataWithAverage} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" />
+      <ComposedChart data={dataWithAverage} margin={CHART_THEME.margin}>
+        <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
         <XAxis
           dataKey="jaar"
           tickFormatter={(value) => value.toString()}
-          style={{ fontSize: "0.875rem" }}
+          fontSize={CHART_THEME.fontSize}
+          tickLine={false}
+          axisLine={false}
         />
         <YAxis
           tickFormatter={(value) => {
@@ -59,21 +63,26 @@ export function EnergiekaartChart({ data, label, isCurrency = false }: Energieka
             if (!isCurrency || !scale) return new Intl.NumberFormat("nl-BE").format(value)
             return formatScaledNumber(value, scale)
           }}
-          style={{ fontSize: "0.875rem" }}
+          fontSize={CHART_THEME.fontSize}
+          tickLine={false}
+          axisLine={false}
         />
         <Tooltip
           formatter={(value: number | undefined) => value !== undefined ? formatValue(value) : ""}
           labelFormatter={(jaar) => `Jaar: ${jaar}`}
-          wrapperStyle={{ zIndex: 50 }}
+          cursor={{ fill: "var(--muted)", opacity: 0.2 }}
           contentStyle={{
-            backgroundColor: "var(--popover)",
-            color: "var(--popover-foreground)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius)",
+            ...CHART_THEME.tooltip,
+            zIndex: 50,
           }}
         />
-        <Legend />
-        <Bar dataKey="value" fill="var(--color-chart-1)" name={label} />
+        <Legend iconType="circle" />
+        <Bar
+          dataKey="value"
+          fill="var(--color-chart-1)"
+          name={label}
+          radius={[4, 4, 0, 0]}
+        />
         <Line
           type="monotone"
           dataKey="average"
