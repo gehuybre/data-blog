@@ -20,6 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { Calculator, Check, ChevronsUpDown } from "lucide-react"
 import { ExportButtons } from "../shared/ExportButtons"
+import { CHART_THEME } from "@/lib/chart-theme"
 
 // Import data
 import monthlyIndices from "../../../../analyses/prijsherziening-index-i-2021/results/monthly_indices.json"
@@ -293,7 +294,7 @@ export function PrijsherzieningDashboard() {
     }
     return componentChanges.reduce((max, curr) =>
       curr.change > max.change ? curr : max
-    , componentChanges[0])
+      , componentChanges[0])
   }, [componentChanges])
 
   const biggestFaller = React.useMemo(() => {
@@ -302,7 +303,7 @@ export function PrijsherzieningDashboard() {
     }
     return componentChanges.reduce((min, curr) =>
       curr.change < min.change ? curr : min
-    , componentChanges[0])
+      , componentChanges[0])
   }, [componentChanges])
 
   const indexI2021Latest = React.useMemo(() => {
@@ -473,18 +474,28 @@ export function PrijsherzieningDashboard() {
               <CardContent>
                 <div className="h-[400px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
+                    <LineChart data={chartData} margin={CHART_THEME.margin}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                       <XAxis
                         dataKey="label"
                         angle={-45}
                         textAnchor="end"
                         height={80}
                         interval="preserveStartEnd"
+                        fontSize={CHART_THEME.fontSize}
+                        tickLine={false}
+                        axisLine={false}
                       />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
+                      <YAxis
+                        fontSize={CHART_THEME.fontSize}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip
+                        contentStyle={CHART_THEME.tooltip}
+                        cursor={{ stroke: "var(--muted)", strokeWidth: 1 }}
+                      />
+                      <Legend iconType="circle" />
                       {selectedComponentList.map((comp) => (
                         <Line
                           key={comp}

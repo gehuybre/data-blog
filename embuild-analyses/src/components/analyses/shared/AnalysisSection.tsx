@@ -3,14 +3,13 @@
 import { useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { FilterableChart } from "./FilterableChart"
 import { FilterableTable } from "./FilterableTable"
-import { InteractiveMap } from "./InteractiveMap"
 import { ExportButtons } from "./ExportButtons"
 import { GeoFilterInline } from "./GeoFilterInline"
+import { MapSection } from "./MapSection"
 import { useGeo } from "./GeoContext"
-import { PROVINCES, getProvinceForMunicipality, Municipality, ProvinceCode, RegionCode } from "@/lib/geo-utils"
+import { Municipality, getProvinceForMunicipality, PROVINCES, ProvinceCode, RegionCode } from "@/lib/geo-utils"
 
 type UnknownRecord = Record<string, any>
 
@@ -43,6 +42,8 @@ interface AnalysisSectionProps<TData extends UnknownRecord = UnknownRecord> {
   getMunicipalityCode?: (d: TData) => number
   getMetricValue?: (d: TData, metric: string) => number
   period?: PeriodConfig<TData>
+  /** Show map tab with municipality-level data (default: false) */
+  showMap?: boolean
 }
 
 type AggregatedPoint = {
@@ -65,6 +66,7 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
   getMunicipalityCode,
   getMetricValue,
   period,
+  showMap = false,
 }: AnalysisSectionProps<TData>) {
   const {
     setLevel,
@@ -191,65 +193,7 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
     })
   }, [data, periodKeyGetter, periodSortGetter])
 
-  // Aggregate data by province for all periods (for InteractiveMap with time slider)
-  const provinceMapData = useMemo(() => {
-    if (!data?.length) return []
-
-    // Group by period + province
-    const agg = new Map<string, { p: string; period: string; value: number }>()
-
-    for (const row of data) {
-      const mCode = municipalityCodeGetter(row)
-      const numericMunCode = typeof mCode === "string" ? Number.parseInt(mCode, 10) : Number(mCode)
-      if (!Number.isFinite(numericMunCode)) continue
-
-      const provCode = String(getProvinceForMunicipality(numericMunCode))
-      const periodKey = periodKeyGetter(row)
-      const key = `${periodKey}-${provCode}`
-
-      const prev = agg.get(key)
-      const inc = metricGetter(row, metric)
-
-      if (!prev) {
-        agg.set(key, { p: provCode, period: periodKey, value: inc })
-      } else {
-        prev.value += inc
-      }
-    }
-
-    return Array.from(agg.values())
-  }, [data, metric, municipalityCodeGetter, metricGetter, periodKeyGetter])
-
-  const provinceValueByCode = useMemo(() => {
-    if (!data?.length) return {} as Record<string, number>
-    const latest = data.reduce((prev, cur) => (periodSortGetter(cur) > periodSortGetter(prev) ? cur : prev), data[0])
-    const latestKey = periodKeyGetter(latest)
-    const out: Record<string, number> = {}
-    for (const row of data) {
-      if (periodKeyGetter(row) !== latestKey) continue
-      const mCode = municipalityCodeGetter(row)
-      const numericMunCode = typeof mCode === "string" ? Number.parseInt(mCode, 10) : Number(mCode)
-      if (!Number.isFinite(numericMunCode)) continue
-      const provCode = String(getProvinceForMunicipality(numericMunCode))
-      out[provCode] = (out[provCode] ?? 0) + metricGetter(row, metric)
-    }
-    return out
-  }, [data, metric, municipalityCodeGetter, metricGetter, periodKeyGetter, periodSortGetter])
-
-  const [isPopupOpen, setIsPopupOpen] = useState(false)
-  const [popupProvince, setPopupProvince] = useState<ProvinceCode | null>(null)
   const [currentView, setCurrentView] = useState<"chart" | "table" | "map">("chart")
-
-  const popupProvinceName = useMemo(() => {
-    if (!popupProvince) return null
-    return PROVINCES.find((p) => String(p.code) === String(popupProvince))?.name ?? String(popupProvince)
-  }, [popupProvince])
-
-  const popupValue = useMemo(() => {
-    if (!popupProvince) return null
-    const v = provinceValueByCode[String(popupProvince)]
-    return typeof v === "number" && Number.isFinite(v) ? v : null
-  }, [popupProvince, provinceValueByCode])
 
   return (
     <div className="space-y-6">
@@ -275,7 +219,7 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
           <TabsList>
             <TabsTrigger value="chart">Grafiek</TabsTrigger>
             <TabsTrigger value="table">Tabel</TabsTrigger>
-            <TabsTrigger value="map">Kaart</TabsTrigger>
+            {showMap && <TabsTrigger value="map">Kaart</TabsTrigger>}
           </TabsList>
           <div className="flex items-center gap-2">
             <GeoFilterInline
@@ -307,58 +251,23 @@ export function AnalysisSection<TData extends UnknownRecord = UnknownRecord>({
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="map">
-          <Card>
-            <CardHeader>
-              <CardTitle>Kaart {title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <InteractiveMap
-                data={provinceMapData}
-                level="province"
-                getGeoCode={(d) => d.p}
-                getValue={(d) => d.value}
-                getPeriod={(d) => d.period}
-                periods={periods}
-                showTimeSlider={true}
-                selectedGeo={selectedProvince}
-                onGeoSelect={(code) => {
-                  if (code) {
-                    setSelectedProvince(code as ProvinceCode)
-                    setSelectedMunicipality(null)
-                    const prov = PROVINCES.find((p) => String(p.code) === String(code))
-                    if (prov) setSelectedRegion(prov.regionCode)
-                    setLevel("province")
-                    setPopupProvince(code as ProvinceCode)
-                    setIsPopupOpen(true)
-                  } else {
-                    setSelectedProvince(null)
-                  }
-                }}
-                formatValue={formatInt}
-                tooltipLabel={title}
-                regionFilter="2000"
-                height={500}
-              />
-            </CardContent>
-          </Card>
-          <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{popupProvinceName ? popupProvinceName : "Provincie"}</DialogTitle>
-                <DialogDescription>
-                  {latestPeriodLabel ? `Laatste periode: ${latestPeriodLabel}` : "Laatste periode"}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="text-sm">
-                <div className="flex items-baseline justify-between gap-4">
-                  <div className="text-muted-foreground">{title}</div>
-                  <div className="font-semibold">{popupValue === null ? "Geen data" : formatInt(popupValue)}</div>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </TabsContent>
+        {showMap && (
+          <TabsContent value="map">
+            <MapSection
+              data={data}
+              getGeoCode={municipalityCodeGetter}
+              getValue={(d) => metricGetter(d, metric)}
+              getPeriod={periodKeyGetter}
+              periods={periods}
+              showTimeSlider={periods.length > 1}
+              formatValue={(v) => new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(v)}
+              tooltipLabel={label}
+              showProvinceBoundaries={true}
+              colorScheme="blue"
+              height={500}
+            />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   )

@@ -20,10 +20,11 @@ import { GeoProvider } from "../shared/GeoContext"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
 import { ExportButtons } from "../shared/ExportButtons"
-import { InteractiveMap } from "../shared/InteractiveMap"
+import { MapSection } from "../shared/MapSection"
 
 import yearlyRaw from "../../../../analyses/vastgoed-verkopen/results/yearly.json"
 import quarterlyRaw from "../../../../analyses/vastgoed-verkopen/results/quarterly.json"
+import municipalitiesRaw from "../../../../analyses/vastgoed-verkopen/results/municipalities.json"
 import lookups from "../../../../analyses/vastgoed-verkopen/results/lookups.json"
 
 type YearlyRow = {
@@ -552,51 +553,19 @@ function MetricSection({
           </Card>
         </TabsContent>
         <TabsContent value="map">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                Verdeling per {mapLevel === "municipality" ? "gemeente" : mapLevel === "province" ? "provincie" : "regio"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <InteractiveMap
-                data={mapData as (RegionPoint | ProvincePoint | MunicipalityPoint)[]}
-                level={mapLevel}
-                getGeoCode={(d) => {
-                  const point = d as RegionPoint | ProvincePoint | MunicipalityPoint
-                  if ("m" in point) return point.m
-                  if ("p" in point) return point.p
-                  return point.r
-                }}
-                getValue={(d) => (d as RegionPoint | ProvincePoint | MunicipalityPoint).value}
-                getPeriod={(d) => (d as RegionPoint | ProvincePoint | MunicipalityPoint).y}
-                periods={years}
-                showTimeSlider={true}
-                selectedGeo={
-                  mapLevel === "municipality" ? (geoLevel === "municipality" ? selectedNis : null) :
-                  mapLevel === "province" ? (geoLevel === "province" ? selectedNis : null) :
-                  (geoLevel === "region" ? selectedNis : null)
-                }
-                onGeoSelect={(code) => {
-                  if (mapLevel === "municipality") {
-                    onSelectGeo("municipality", code)
-                  } else if (mapLevel === "province") {
-                    onSelectGeo("province", code)
-                  } else {
-                    onSelectGeo("region", code)
-                  }
-                }}
-                formatValue={formatValue}
-                tooltipLabel={label}
-                regionFilter={mapLevel === "province" && geoLevel === "region" && selectedNis ? selectedNis as "2000" | "3000" | "4000" : undefined}
-                colorScheme="orange"
-                height={500}
-              />
-              <div className="mt-3 text-xs text-muted-foreground">
-                Klik op een {mapLevel === "municipality" ? "gemeente" : mapLevel === "province" ? "provincie" : "regio"} om te filteren, of gebruik de locatie-filter hierboven.
-              </div>
-            </CardContent>
-          </Card>
+          <MapSection
+            data={municipalitiesRaw as any[]}
+            getGeoCode={(d: any) => d.nis}
+            getValue={(d: any) => d[label === "Mediane prijs" ? "p50" : "n"]}
+            getPeriod={(d: any) => d.y}
+            periods={years}
+            showTimeSlider={years.length > 1}
+            formatValue={formatValue}
+            tooltipLabel={label}
+            showProvinceBoundaries={true}
+            colorScheme={label === "Mediane prijs" ? "orange" : "blue"}
+            height={500}
+          />
         </TabsContent>
       </Tabs>
     </div>
@@ -635,7 +604,7 @@ function QuarterlyMetricSection({
   dataSourceUrl?: string
   embedParams?: Record<string, string | number | null | undefined>
 }) {
-  const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
+  const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("chart")
 
   const exportData = React.useMemo(
     () =>
@@ -717,11 +686,12 @@ function QuarterlyMetricSection({
         </div>
       )}
 
-      <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table")}>
+      <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table" | "map")}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <TabsList>
             <TabsTrigger value="chart">Grafiek</TabsTrigger>
             <TabsTrigger value="table">Tabel</TabsTrigger>
+            <TabsTrigger value="map">Kaart</TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2">
             <GeoFilterInline selectedLevel={geoLevel} selectedNis={selectedNis} onSelect={onSelectGeo} />
@@ -752,6 +722,24 @@ function QuarterlyMetricSection({
               <FilterableTable data={quarterlySeries} label={label} periodHeaders={["Jaar", "Kwartaal"]} />
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="map">
+          <div className="text-sm text-muted-foreground mb-4">
+            Kaart toont jaarlijkse data (kwartaaldata niet beschikbaar op gemeenteniveau)
+          </div>
+          <MapSection
+            data={municipalitiesRaw as any[]}
+            getGeoCode={(d: any) => d.nis}
+            getValue={(d: any) => d[label === "Mediane prijs" ? "p50" : "n"]}
+            getPeriod={(d: any) => d.y}
+            periods={Array.from(new Set((municipalitiesRaw as any[]).map((d: any) => d.y))).sort()}
+            showTimeSlider={true}
+            formatValue={formatValue}
+            tooltipLabel={label}
+            showProvinceBoundaries={true}
+            colorScheme={label === "Mediane prijs" ? "orange" : "blue"}
+            height={500}
+          />
         </TabsContent>
       </Tabs>
     </div>

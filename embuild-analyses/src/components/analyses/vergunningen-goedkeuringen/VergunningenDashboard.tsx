@@ -19,6 +19,7 @@ export function VergunningenDashboard() {
           sectionId="renovatie"
           dataSource="Statbel - Bouwvergunningen"
           dataSourceUrl="https://statbel.fgov.be/nl/themas/bouwen-wonen/bouwvergunningen"
+          showMap={true}
         />
 
         <AnalysisSection
@@ -31,6 +32,7 @@ export function VergunningenDashboard() {
           sectionId="nieuwbouw"
           dataSource="Statbel - Bouwvergunningen"
           dataSourceUrl="https://statbel.fgov.be/nl/themas/bouwen-wonen/bouwvergunningen"
+          showMap={true}
         />
       </div>
     </GeoProviderWithDefaults>
