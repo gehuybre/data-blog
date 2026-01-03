@@ -110,18 +110,13 @@ export function EmbeddableSection<TData extends object = UnknownRecord>({
 
       {viewType === "map" && (
         <MunicipalityMap
-          data={data}
-          metric={metric}
-          municipalities={municipalities}
-          level="province"
-          displayMode="province"
-          getMunicipalityCode={municipalityCodeGetter}
-          getMetricValue={metricGetter}
-          getPeriodKey={periodKeyGetter}
-          getPeriodSortValue={periodSortGetter}
-          getPeriodLabel={periodLabelGetter}
-          tooltipMetricLabel={title}
+          data={data as UnknownRecord[]}
+          getGeoCode={(d) => String(municipalityCodeGetter(d as TData))}
+          getValue={(d) => metricGetter(d as TData, metric)}
+          tooltipLabel={title}
           formatValue={formatInt}
+          showProvinceBoundaries={true}
+          height={500}
         />
       )}
 

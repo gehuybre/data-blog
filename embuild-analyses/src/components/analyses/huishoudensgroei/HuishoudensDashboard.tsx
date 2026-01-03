@@ -20,7 +20,7 @@ import { GeoProvider } from "../shared/GeoContext"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
 import { ExportButtons } from "../shared/ExportButtons"
-import { InteractiveMap } from "../shared/InteractiveMap"
+import { MapSection } from "../shared/MapSection"
 
 import municipalitiesRaw from "../../../../analyses/huishoudensgroei/results/municipalities.json"
 import provincesRaw from "../../../../analyses/huishoudensgroei/results/provinces.json"
@@ -413,7 +413,14 @@ function MainSection({
 
   const yearSeries = React.useMemo(() => getYearSeries(level, code, horizonYear), [level, code, horizonYear])
 
-  const allProvinceData = React.useMemo(() => getAllProvinceMapData(), [])
+  // Map data - gebruik echte gemeentedata
+  const municipalityMapData = React.useMemo(() => {
+    return municipalitiesRaw.map((m: any) => ({
+      nis: m.nis,
+      y: m.y,
+      gr: m.gr,
+    }))
+  }, [])
 
   const exportData = React.useMemo(
     () =>
@@ -485,28 +492,24 @@ function MainSection({
         <TabsContent value="map">
           <Card>
             <CardHeader>
-              <CardTitle>Groei per provincie ({BASE_YEAR} - horizon)</CardTitle>
+              <CardTitle>Groei per gemeente ({BASE_YEAR} - horizon)</CardTitle>
             </CardHeader>
             <CardContent>
-              <InteractiveMap
-                data={allProvinceData}
-                level="province"
-                getGeoCode={(d) => d.p}
-                getValue={(d) => d.gr}
-                getPeriod={(d) => d.y}
+              <MapSection
+                data={municipalityMapData}
+                getGeoCode={(d: any) => d.nis}
+                getValue={(d: any) => d.gr}
+                getPeriod={(d: any) => d.y}
                 periods={horizonYears}
-                initialPeriod={horizonYear}
                 showTimeSlider={true}
-                selectedGeo={level === "province" ? code : null}
-                onGeoSelect={(pCode) => onSelectGeo("province", pCode)}
                 formatValue={formatPct}
                 tooltipLabel="Groei (%)"
-                regionFilter="2000"
+                showProvinceBoundaries={true}
                 colorScheme="green"
                 height={500}
               />
               <div className="mt-3 text-xs text-muted-foreground">
-                Klik op een provincie om te filteren. Gebruik de tijdsslider om verschillende horizon-jaren te vergelijken.
+                Gebruik de tijdsslider om verschillende horizon-jaren te vergelijken. Zoek een gemeente om in te zoomen.
               </div>
             </CardContent>
           </Card>

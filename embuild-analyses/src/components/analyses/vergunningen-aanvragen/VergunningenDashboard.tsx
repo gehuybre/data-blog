@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { GeoProvider } from "../shared/GeoContext"
 import { TimeSeriesSection } from "../shared/TimeSeriesSection"
+import { CHART_THEME, CHART_COLORS } from "@/lib/chart-theme"
 import {
   BarChart,
   Bar,
@@ -69,10 +70,11 @@ const SLOOP_METRIC_LABELS: Record<SloopMetricCode, string> = {
   m3: "Gesloopt volume (m³)",
 }
 
+// Standardized colors using CSS variables
 const TYPE_COLORS: Record<string, string> = {
-  eengezins: "#3b82f6",
-  meergezins: "#22c55e",
-  kamer: "#f59e0b",
+  eengezins: "var(--color-chart-1)",
+  meergezins: "var(--color-chart-2)",
+  kamer: "var(--color-chart-3)",
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -260,12 +262,16 @@ function NieuwbouwSection() {
               <CardHeader><CardTitle>Jaarlijkse evolutie nieuwbouw</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={yearlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="jaar" />
-                    <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
-                    <Bar dataKey="waarde" name={METRIC_LABELS[metric]} fill="#3b82f6" />
+                  <BarChart data={yearlyData} margin={CHART_THEME.margin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+                    <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
+                      contentStyle={CHART_THEME.tooltip}
+                      cursor={{ fill: "var(--muted)", opacity: 0.2 }}
+                    />
+                    <Bar dataKey="waarde" name={METRIC_LABELS[metric]} fill="var(--color-chart-1)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -282,12 +288,15 @@ function NieuwbouwSection() {
               <CardHeader><CardTitle>Kwartaalevolutie nieuwbouw</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={quarterlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} />
-                    <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
-                    <Area type="monotone" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#3b82f6" stroke="#2563eb" />
+                  <AreaChart data={quarterlyData} margin={CHART_THEME.margin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+                    <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
+                      contentStyle={CHART_THEME.tooltip}
+                    />
+                    <Area type="monotone" dataKey="waarde" name={METRIC_LABELS[metric]} fill="var(--color-chart-1)" stroke="var(--color-chart-1)" fillOpacity={0.2} />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -304,15 +313,19 @@ function NieuwbouwSection() {
               <CardHeader><CardTitle>Nieuwbouw per woningtype</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={typeData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="jaar" />
-                    <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
-                    <Legend />
-                    <Bar dataKey="Eengezinswoning" fill={TYPE_COLORS.eengezins} />
-                    <Bar dataKey="Meergezinswoning" fill={TYPE_COLORS.meergezins} />
-                    <Bar dataKey="Kamerwoning" fill={TYPE_COLORS.kamer} />
+                  <BarChart data={typeData} margin={CHART_THEME.margin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+                    <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
+                      contentStyle={CHART_THEME.tooltip}
+                      cursor={{ fill: "var(--muted)", opacity: 0.2 }}
+                    />
+                    <Legend iconType="circle" />
+                    <Bar dataKey="Eengezinswoning" fill={TYPE_COLORS.eengezins} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Meergezinswoning" fill={TYPE_COLORS.meergezins} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Kamerwoning" fill={TYPE_COLORS.kamer} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -329,15 +342,19 @@ function NieuwbouwSection() {
               <CardHeader><CardTitle>Trend nieuwbouw (index 2018 = 100)</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <ComposedChart data={trendData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="jaar" />
-                    <YAxis yAxisId="left" tickFormatter={formatInt} />
-                    <YAxis yAxisId="right" orientation="right" domain={[0, 150]} />
-                    <Tooltip formatter={(v: number | undefined, name: string | undefined) => v !== undefined ? (name === "Index" ? v.toFixed(1) : formatInt(v)) : ""} />
-                    <Legend />
-                    <Bar yAxisId="left" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#3b82f6" />
-                    <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
+                  <ComposedChart data={trendData} margin={CHART_THEME.margin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+                    <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis yAxisId="left" tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis yAxisId="right" orientation="right" domain={[0, 150]} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      formatter={(v: number | undefined, name: string | undefined) => v !== undefined ? (name === "Index" ? v.toFixed(1) : formatInt(v)) : ""}
+                      contentStyle={CHART_THEME.tooltip}
+                      cursor={{ fill: "var(--muted)", opacity: 0.2 }}
+                    />
+                    <Legend iconType="circle" />
+                    <Bar yAxisId="left" dataKey="waarde" name={METRIC_LABELS[metric]} fill="var(--color-chart-1)" radius={[4, 4, 0, 0]} />
+                    <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="var(--color-chart-5)" strokeWidth={2} dot={{ r: 3 }} />
                   </ComposedChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -463,12 +480,16 @@ function VerbouwSection() {
               <CardHeader><CardTitle>Jaarlijkse evolutie verbouw</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={yearlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="jaar" />
-                    <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
-                    <Bar dataKey="waarde" name={METRIC_LABELS[metric]} fill="#22c55e" />
+                  <BarChart data={yearlyData} margin={CHART_THEME.margin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+                    <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
+                      contentStyle={CHART_THEME.tooltip}
+                      cursor={{ fill: "var(--muted)", opacity: 0.2 }}
+                    />
+                    <Bar dataKey="waarde" name={METRIC_LABELS[metric]} fill="var(--color-chart-2)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -485,12 +506,15 @@ function VerbouwSection() {
               <CardHeader><CardTitle>Kwartaalevolutie verbouw</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={quarterlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} />
-                    <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
-                    <Area type="monotone" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#22c55e" stroke="#16a34a" />
+                  <AreaChart data={quarterlyData} margin={CHART_THEME.margin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+                    <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
+                      contentStyle={CHART_THEME.tooltip}
+                    />
+                    <Area type="monotone" dataKey="waarde" name={METRIC_LABELS[metric]} fill="var(--color-chart-2)" stroke="var(--color-chart-2)" fillOpacity={0.2} />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -507,15 +531,19 @@ function VerbouwSection() {
               <CardHeader><CardTitle>Verbouw per woningtype</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={typeData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="jaar" />
-                    <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
-                    <Legend />
-                    <Bar dataKey="Eengezinswoning" fill={TYPE_COLORS.eengezins} />
-                    <Bar dataKey="Meergezinswoning" fill={TYPE_COLORS.meergezins} />
-                    <Bar dataKey="Kamerwoning" fill={TYPE_COLORS.kamer} />
+                  <BarChart data={typeData} margin={CHART_THEME.margin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+                    <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
+                      contentStyle={CHART_THEME.tooltip}
+                      cursor={{ fill: "var(--muted)", opacity: 0.2 }}
+                    />
+                    <Legend iconType="circle" />
+                    <Bar dataKey="Eengezinswoning" fill={TYPE_COLORS.eengezins} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Meergezinswoning" fill={TYPE_COLORS.meergezins} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Kamerwoning" fill={TYPE_COLORS.kamer} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -532,15 +560,19 @@ function VerbouwSection() {
               <CardHeader><CardTitle>Trend verbouw (index 2018 = 100)</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <ComposedChart data={trendData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="jaar" />
-                    <YAxis yAxisId="left" tickFormatter={formatInt} />
-                    <YAxis yAxisId="right" orientation="right" domain={[0, 150]} />
-                    <Tooltip formatter={(v: number | undefined, name: string | undefined) => v !== undefined ? (name === "Index" ? v.toFixed(1) : formatInt(v)) : ""} />
-                    <Legend />
-                    <Bar yAxisId="left" dataKey="waarde" name={METRIC_LABELS[metric]} fill="#22c55e" />
-                    <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
+                  <ComposedChart data={trendData} margin={CHART_THEME.margin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+                    <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis yAxisId="left" tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis yAxisId="right" orientation="right" domain={[0, 150]} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      formatter={(v: number | undefined, name: string | undefined) => v !== undefined ? (name === "Index" ? v.toFixed(1) : formatInt(v)) : ""}
+                      contentStyle={CHART_THEME.tooltip}
+                      cursor={{ fill: "var(--muted)", opacity: 0.2 }}
+                    />
+                    <Legend iconType="circle" />
+                    <Bar yAxisId="left" dataKey="waarde" name={METRIC_LABELS[metric]} fill="var(--color-chart-2)" radius={[4, 4, 0, 0]} />
+                    <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="var(--color-chart-5)" strokeWidth={2} dot={{ r: 3 }} />
                   </ComposedChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -668,12 +700,16 @@ function SloopSection() {
               <CardHeader><CardTitle>Jaarlijkse evolutie sloop</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={yearlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="jaar" />
-                    <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
-                    <Bar dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="#ef4444" />
+                  <BarChart data={yearlyData} margin={CHART_THEME.margin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+                    <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
+                      contentStyle={CHART_THEME.tooltip}
+                      cursor={{ fill: "var(--muted)", opacity: 0.2 }}
+                    />
+                    <Bar dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="var(--color-chart-4)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -690,12 +726,15 @@ function SloopSection() {
               <CardHeader><CardTitle>Kwartaalevolutie sloop</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={quarterlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} />
-                    <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
-                    <Area type="monotone" dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="#ef4444" stroke="#dc2626" />
+                  <AreaChart data={quarterlyData} margin={CHART_THEME.margin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+                    <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
+                      contentStyle={CHART_THEME.tooltip}
+                    />
+                    <Area type="monotone" dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="var(--color-chart-4)" stroke="var(--color-chart-4)" fillOpacity={0.2} />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -712,15 +751,19 @@ function SloopSection() {
               <CardHeader><CardTitle>Sloop per besluitniveau</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={besluitData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="jaar" />
-                    <YAxis tickFormatter={formatInt} />
-                    <Tooltip formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""} />
-                    <Legend />
-                    <Bar dataKey="Gemeente" fill="#3b82f6" stackId="a" />
-                    <Bar dataKey="Provincie" fill="#22c55e" stackId="a" />
-                    <Bar dataKey="Onbekend" fill="#9ca3af" stackId="a" />
+                  <BarChart data={besluitData} margin={CHART_THEME.margin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+                    <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
+                      contentStyle={CHART_THEME.tooltip}
+                      cursor={{ fill: "var(--muted)", opacity: 0.2 }}
+                    />
+                    <Legend iconType="circle" />
+                    <Bar dataKey="Gemeente" fill="var(--color-chart-1)" stackId="a" />
+                    <Bar dataKey="Provincie" fill="var(--color-chart-2)" stackId="a" />
+                    <Bar dataKey="Onbekend" fill="var(--color-chart-3)" stackId="a" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -737,15 +780,19 @@ function SloopSection() {
               <CardHeader><CardTitle>Trend sloop (index 2018 = 100)</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <ComposedChart data={trendData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="jaar" />
-                    <YAxis yAxisId="left" tickFormatter={formatInt} />
-                    <YAxis yAxisId="right" orientation="right" domain={[0, 150]} />
-                    <Tooltip formatter={(v: number | undefined, name: string | undefined) => v !== undefined ? (name === "Index" ? v.toFixed(1) : formatInt(v)) : ""} />
-                    <Legend />
-                    <Bar yAxisId="left" dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="#ef4444" />
-                    <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+                  <ComposedChart data={trendData} margin={CHART_THEME.margin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
+                    <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis yAxisId="left" tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis yAxisId="right" orientation="right" domain={[0, 150]} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      formatter={(v: number | undefined, name: string | undefined) => v !== undefined ? (name === "Index" ? v.toFixed(1) : formatInt(v)) : ""}
+                      contentStyle={CHART_THEME.tooltip}
+                      cursor={{ fill: "var(--muted)", opacity: 0.2 }}
+                    />
+                    <Legend iconType="circle" />
+                    <Bar yAxisId="left" dataKey="waarde" name={SLOOP_METRIC_LABELS[metric]} fill="var(--color-chart-4)" radius={[4, 4, 0, 0]} />
+                    <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="var(--color-chart-5)" strokeWidth={2} dot={{ r: 3 }} />
                   </ComposedChart>
                 </ResponsiveContainer>
               </CardContent>

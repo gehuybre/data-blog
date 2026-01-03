@@ -25,3 +25,6 @@ embuild-analyses/analyses/**/data/*
 
 # Exception: vergunningen-aanvragen requires manual uploads (no reliable automated download).
 !embuild-analyses/analyses/vergunningen-aanvragen/data/**
+
+# CSV files in results/ are for debugging only (not used by frontend, which uses JSON)
+embuild-analyses/analyses/**/results/*.csv

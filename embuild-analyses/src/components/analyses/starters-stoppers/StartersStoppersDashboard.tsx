@@ -21,7 +21,6 @@ import { GeoProvider, useGeo } from "../shared/GeoContext"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
 import { ExportButtons } from "../shared/ExportButtons"
-import { InteractiveMap } from "../shared/InteractiveMap"
 
 import raw from "../../../../analyses/starters-stoppers/results/vat_survivals.json"
 import lookups from "../../../../analyses/starters-stoppers/results/lookups.json"
@@ -458,12 +457,11 @@ function MetricSection({
           />
         )}
       </div>
-      <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table" | "map")}>
+      <Tabs defaultValue="chart" onValueChange={(v) => setCurrentView(v as "chart" | "table")}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <TabsList>
             <TabsTrigger value="chart">Grafiek</TabsTrigger>
             <TabsTrigger value="table">Tabel</TabsTrigger>
-            <TabsTrigger value="map">Kaart</TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2">
             <GeoFilterInline
@@ -514,46 +512,6 @@ function MetricSection({
             </CardHeader>
             <CardContent>
               <FilterableTable data={yearSeries} label={label} periodHeaders={["Jaar"]} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="map">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                Verdeling per {mapLevel === "province" ? "provincie" : "regio"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <InteractiveMap
-                data={mapData as (RegionPoint | ProvincePoint)[]}
-                level={mapLevel}
-                getGeoCode={(d) => {
-                  const point = d as RegionPoint | ProvincePoint
-                  return "p" in point ? point.p : point.r
-                }}
-                getValue={(d) => (d as RegionPoint | ProvincePoint).value}
-                getPeriod={(d) => (d as RegionPoint | ProvincePoint).y}
-                periods={years}
-                showTimeSlider={true}
-                selectedGeo={mapLevel === "province" ? selectedProvince : (selectedRegion !== "1000" ? selectedRegion : null)}
-                onGeoSelect={(code) => {
-                  if (mapLevel === "province") {
-                    onSelectProvince(code as ProvinceCode | null)
-                  } else {
-                    onSelectRegion(code as RegionCode || "1000")
-                  }
-                }}
-                formatValue={formatValue}
-                tooltipLabel={label}
-                regionFilter={mapLevel === "province" && selectedRegion !== "1000" ? selectedRegion : undefined}
-                height={500}
-              />
-              <div className="mt-3 text-xs text-muted-foreground">
-                {mapLevel === "province"
-                  ? "Klik op een provincie om te filteren, of gebruik de locatie-filter hierboven."
-                  : "Klik op een regio om te filteren, of gebruik de locatie-filter hierboven."}
-              </div>
             </CardContent>
           </Card>
         </TabsContent>

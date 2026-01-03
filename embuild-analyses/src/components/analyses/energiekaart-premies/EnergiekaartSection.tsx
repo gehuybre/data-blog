@@ -1,9 +1,8 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card } from "@/components/ui/card"
-import { ExportButtons } from "../shared/ExportButtons"
+import { useMemo } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { TimeSeriesSection } from "../shared/TimeSeriesSection"
 import { EnergiekaartChart } from "./EnergiekaartChart"
 import { EnergiekaartTable } from "./EnergiekaartTable"
 import type { YearlyDataRow } from "./EnergiekaartDashboard"
@@ -18,8 +17,9 @@ interface EnergiekaartSectionProps {
   sectionId: string
   dataSource: string
   dataSourceUrl: string
-  selectedMeasure: string
+  selectedMeasure: string // Used for filtering logic inside this component if needed, or just display
   isCurrency?: boolean
+  headerControls?: React.ReactNode
 }
 
 export function EnergiekaartSection({
@@ -33,18 +33,39 @@ export function EnergiekaartSection({
   dataSourceUrl,
   selectedMeasure,
   isCurrency = false,
+  headerControls,
 }: EnergiekaartSectionProps) {
-  const [activeTab, setActiveTab] = useState<string>("grafiek")
 
-  // Prepare chart data
+  // Filter data (if data passed contains all measures)
+  // Note: Previous implementation assumed 'data' passed might contain all rows, 
+  // but often the parent filtered it. 
+  // Let's look at usage: 
+  // In Dashboard (old): passed filteredData.
+  // In Embed: passed filteredData.
+  // BUT the old Dashboard passed `filteredData` which was ALREADY filtered by `selectedMeasure`.
+  // However, my new Adapter logic inside Dashboard did the filtering itself.
+  // To be safe and compatible with both (if they pass full data or filtered data), 
+  // checks are needed. 
+  // Actually, checking previous `EnergiekaartSection.tsx`:
+  // It did NOT filter data. It took `data` prop and used it directly.
+  // `EnergiekaartDashboard` (old) did: `const filteredData = data.filter(...)` then passed it.
+  // `EnergiekaartPremiesEmbed` did: `const filteredData = data.filter(...)` then passed it.
+  // So this component expects PRE-FILTERED data.
+
+
+  // Filter data by selected measure
+  const filteredData = useMemo(() => {
+    return data.filter((row) => row.maatregel === selectedMeasure)
+  }, [data, selectedMeasure])
+
   const chartData = useMemo(() => {
-    return data
+    return filteredData
       .map((row) => ({
         jaar: row.jaar,
         value: Number(row[metric]),
       }))
       .sort((a, b) => a.jaar - b.jaar)
-  }, [data, metric])
+  }, [filteredData, metric])
 
   const currencyScale = useMemo(() => {
     if (!isCurrency) return null
@@ -56,11 +77,12 @@ export function EnergiekaartSection({
     return getCurrencyLabel(label, currencyScale)
   }, [currencyScale, isCurrency, label])
 
-  // Prepare CSV data
-  const csvData = useMemo(() => {
+  // Prepare exports
+  const exportData = useMemo(() => {
     return chartData.map((row) => ({
       label: row.jaar.toString(),
       value: row.value,
+      periodCells: [row.jaar],
     }))
   }, [chartData])
 
@@ -79,7 +101,6 @@ export function EnergiekaartSection({
     return { latest, min, max, total }
   }, [chartData])
 
-  // Format numbers
   const formatNumber = (value: number) => {
     if (isCurrency) {
       if (!currencyScale) return `€ ${value}`
@@ -88,74 +109,75 @@ export function EnergiekaartSection({
     return new Intl.NumberFormat("nl-BE").format(value)
   }
 
+  const latestYear = chartData[chartData.length - 1]?.jaar
+
   return (
-    <section className="space-y-4">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-xl font-semibold">{title}</h3>
-          {selectedMeasure !== "Totaal" && (
-            <p className="text-sm text-muted-foreground mt-1">
-              Gefilterd op: {selectedMeasure}
-            </p>
-          )}
-        </div>
-        <ExportButtons
-          data={csvData}
-          title={title}
-          slug={slug}
-          sectionId={sectionId}
-          viewType="chart"
-          periodHeaders={["Jaar"]}
-          valueLabel={label}
-          dataSource={dataSource}
-          dataSourceUrl={dataSourceUrl}
-        />
-      </div>
-
-      {/* Summary Stats */}
-      {chartData.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="text-sm text-muted-foreground">Meest recent</div>
-            <div className="text-2xl font-bold">{formatNumber(stats.latest)}</div>
-            <div className="text-xs text-muted-foreground mt-1">
-              {chartData[chartData.length - 1]?.jaar}
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-sm text-muted-foreground">Maximum</div>
-            <div className="text-2xl font-bold">{formatNumber(stats.max)}</div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-sm text-muted-foreground">Minimum</div>
-            <div className="text-2xl font-bold">{formatNumber(stats.min)}</div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-sm text-muted-foreground">Totaal (alle jaren)</div>
-            <div className="text-2xl font-bold">{formatNumber(stats.total)}</div>
-          </Card>
-        </div>
-      )}
-
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="grafiek">Grafiek</TabsTrigger>
-          <TabsTrigger value="tabel">Tabel</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="grafiek" className="mt-4">
-          <Card className="p-6">
-            <EnergiekaartChart data={chartData} label={displayLabel} isCurrency={isCurrency} />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="tabel" className="mt-4">
-          <Card className="p-6">
-            <EnergiekaartTable data={chartData} label={displayLabel} isCurrency={isCurrency} />
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </section>
+    <TimeSeriesSection
+      title={title}
+      slug={slug}
+      sectionId={sectionId}
+      dataSource={dataSource}
+      dataSourceUrl={dataSourceUrl}
+      defaultView="chart"
+      rightControls={headerControls}
+      headerContent={
+        chartData.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <Card>
+              <CardContent className="pt-4">
+                <div className="text-sm text-muted-foreground">Meest recent ({latestYear})</div>
+                <div className="text-2xl font-bold">{formatNumber(stats.latest)}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="text-sm text-muted-foreground">Maximum</div>
+                <div className="text-2xl font-bold">{formatNumber(stats.max)}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="text-sm text-muted-foreground">Minimum</div>
+                <div className="text-2xl font-bold">{formatNumber(stats.min)}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="text-sm text-muted-foreground">Totaal (alle jaren)</div>
+                <div className="text-2xl font-bold">{formatNumber(stats.total)}</div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : undefined
+      }
+      views={[
+        {
+          value: "chart",
+          label: "Grafiek",
+          exportData,
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel: label },
+          content: (
+            <Card>
+              <CardContent className="pt-6">
+                <EnergiekaartChart data={chartData} label={displayLabel} isCurrency={isCurrency} />
+              </CardContent>
+            </Card>
+          )
+        },
+        {
+          value: "table",
+          label: "Tabel",
+          exportData,
+          exportMeta: { viewType: "table", periodHeaders: ["Jaar"], valueLabel: label },
+          content: (
+            <Card>
+              <CardContent className="pt-6">
+                <EnergiekaartTable data={chartData} label={displayLabel} isCurrency={isCurrency} />
+              </CardContent>
+            </Card>
+          )
+        }
+      ]}
+    />
   )
 }

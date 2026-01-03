@@ -135,7 +135,7 @@ export function GeoFilter({
   }
 
   return (
-    <div className="space-y-3 p-4 border rounded-lg bg-card text-card-foreground shadow-sm border-blue-500">
+    <div className="space-y-3 p-4 border rounded-lg bg-card text-card-foreground shadow-sm">
       <div className="space-y-2">
         <label className="text-sm font-medium leading-none">Locatie</label>
         <Popover open={open} onOpenChange={setOpen}>

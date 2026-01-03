@@ -236,7 +236,7 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
       return (
         <StartersStoppersEmbed
           section={section as StartersStoppersSection}
-          viewType={urlParams.view}
+          viewType={urlParams.view === "map" ? "chart" : urlParams.view}
           horizon={toStopHorizon(urlParams.horizon)}
           region={urlParams.region}
           province={urlParams.province}
