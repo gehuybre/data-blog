@@ -32,16 +32,19 @@ def process_data():
         "available_stat_types": set()
     }
 
-    # Residential codes or names to sum for "Woongebouwen" (proxy for homes if units not available)
-    # CD_BUILDING_TYPE_NL: 
-    # 'Huizen in gesloten bebouwing'
-    # 'Huizen in halfopen bebouwing'
-    # 'Huizen in open bebouwing, hoeven en kastelen'
-    # 'Buildings en flatgebouwen met appartementen'
-    # 'Handelshuizen' ? Maybe include trade houses as they are often mixed.
-    # Let's inspect codes. Usually R1, R2, R3, R4.
-    
-    residential_codes = {'R1', 'R2', 'R3', 'R4', 'R5'} # Add R5 if Handelshuizen is R5? We will check.
+    # Residential building classification based on Statbel Building Stock data
+    #
+    # Statbel uses the following building type codes for residential buildings:
+    # - R1: Huizen in gesloten bebouwing (Closed-row houses)
+    # - R2: Huizen in halfopen bebouwing (Semi-detached houses)
+    # - R3: Huizen in open bebouwing, hoeven en kastelen (Detached houses, farms, and castles)
+    # - R4: Buildings en flatgebouwen met appartementen (Apartment buildings)
+    # - R5: Handelshuizen (Trade houses - mixed residential/commercial use)
+    #
+    # For this analysis, we define "residential buildings" (Woongebouwen) as R1-R4 only.
+    # R5 (Handelshuizen) is excluded because these are primarily commercial/mixed-use buildings.
+
+    residential_codes = {'R1', 'R2', 'R3', 'R4'}  # Residential buildings only
 
     # Time series temporary storage: year -> level -> region -> {total, residential}
     ts_data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {"total": 0, "residential": 0})))
@@ -58,9 +61,9 @@ def process_data():
             
             for row in reader:
                 results["available_stat_types"].add(row['CD_STAT_TYPE'] + ": " + row['CD_STAT_TYPE_NL'])
-                
-                # Only interested in "Aantal gebouwen" (T1) for now if that's all there is
-                # If there are others, we might capture them.
+
+                # Only process "Aantal gebouwen" (T1) - Number of buildings
+                # Other stat types (if present) are tracked in available_stat_types but not processed
                 if row['CD_STAT_TYPE'] != 'T1':
                     continue
 
@@ -69,9 +72,9 @@ def process_data():
                 value = int(row['MS_VALUE'])
                 b_type_code = row['CD_BUILDING_TYPE']
                 b_type_name = row['CD_BUILDING_TYPE_NL']
-                
-                is_residential = b_type_code in ['R1', 'R2', 'R3', 'R4'] # Exclude Handelshuizen? Or include? "Woongelegenheden" implies places to live.
-                # Let's assume R1-R4 for "Residential Buildings".
+
+                # Check if this building type is residential (R1-R4 only)
+                is_residential = b_type_code in residential_codes
                 
                 # Snapshot 2025
                 if year == 2025:
