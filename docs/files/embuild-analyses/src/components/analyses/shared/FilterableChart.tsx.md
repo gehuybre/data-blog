@@ -26,7 +26,7 @@ stability: experimental
 owner: Unknown
 safe_to_delete_when: No analyses use this shared component
 superseded_by: null
-last_reviewed: 2025-12-13
+last_reviewed: 2025-12-30
 ---
 
 # File: embuild-analyses/src/components/analyses/shared/FilterableChart.tsx
@@ -35,7 +35,7 @@ last_reviewed: 2025-12-13
 Displays a composed chart with quarterly bars and a 4-quarter moving average line.
 
 ## Why it exists
-To visualize the trend of the selected metric over time.
+To visualize the trend of the selected metric over time. It now uses the centralized `chart-theme.ts` and CSS variables to ensure consistency across the blog.
 
 ## Used by workflows
 - [WF-vergunningen-goedkeuringen](../../../../../workflows/WF-vergunningen-goedkeuringen.md)

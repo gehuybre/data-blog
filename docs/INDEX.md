@@ -6,10 +6,15 @@
 
 ## Analyses
 
-- **Huishoudensgroei** - Huishoudensvooruitzichten per gemeente in Vlaanderen (2010-2040)
-- **Vastgoed Verkopen** - Vastgoedtransacties en prijzen per type woning
-- **Starters-Stoppers** - Startende en stoppende ondernemingen
-- **Vergunningen Goedkeuringen** - Bouwvergunningen nieuwbouw en renovatie
+- [Huishoudensgroei](files/embuild-analyses/analyses/huishoudensgroei/README.md) - Huishoudensvooruitzichten per gemeente in Vlaanderen (2010-2040)
+- [Vastgoed Verkopen](files/embuild-analyses/analyses/vastgoed-verkopen/README.md) - Vastgoedtransacties en prijzen per type woning
+- [Starters-Stoppers](files/embuild-analyses/analyses/starters-stoppers/README.md) - Startende en stoppende ondernemingen
+- [Vergunningen Goedkeuringen](files/embuild-analyses/analyses/vergunningen-goedkeuringen/README.md) - Bouwvergunningen nieuwbouw en renovatie
+- [Vergunningen Aanvragen](files/embuild-analyses/analyses/vergunningen-aanvragen/README.md) - Analyse van bouwvergunningsaanvragen
+- [Faillissementen](files/embuild-analyses/analyses/faillissementen/README.md) - Statistieken over faillissementen
+- [Energiekaart Premies](files/embuild-analyses/analyses/energiekaart-premies/README.md) - Overzicht van energiepremies per gemeente
+- [Gemeentelijke Investeringen](files/embuild-analyses/analyses/gemeentelijke-investeringen/README.md) - Analyse van investeringen door gemeenten
+- [Prijsherziening Index I 2021](files/embuild-analyses/analyses/prijsherziening-index-i-2021/README.md) - Analyse van de prijsherzieningsindex
 
 ## Workflows
 
@@ -27,7 +32,7 @@
 - [package.json](files/embuild-analyses/package.json.md)
 - [requirements.txt](files/requirements.txt.md)
 - [run_blog.py](files/run_blog.py.md)
-- [Shared Data README](files/embuild-analyses/shared-data/README.md.md)
+- [Shared Data README](files/embuild-analyses/shared-data/README.md)
 - [LAU GeoPackage](files/embuild-analyses/shared-data/geo/LAU_RG_01M_2024_4326.gpkg.md)
 - [NUTS Level 1 GeoJSON](files/embuild-analyses/shared-data/geo/NUTS_RG_01M_2021_4326_LEVL_1.geojson.md)
 - [NACEBEL 2025](files/embuild-analyses/shared-data/nace/NACEBEL_2025.xlsx.md)
@@ -38,9 +43,35 @@
 - [VergunningenDashboard.tsx](files/embuild-analyses/src/components/analyses/vergunningen-goedkeuringen/VergunningenDashboard.tsx.md)
 - [GeoContext.tsx](files/embuild-analyses/src/components/analyses/shared/GeoContext.tsx.md)
 - [GeoFilter.tsx](files/embuild-analyses/src/components/analyses/shared/GeoFilter.tsx.md)
-- [MunicipalityMap.tsx](files/embuild-analyses/src/components/analyses/shared/MunicipalityMap.tsx.md)
+- [GeoFilterInline.tsx](files/embuild-analyses/src/components/analyses/shared/GeoFilterInline.tsx.md)
+- [MunicipalityMap.tsx](files/embuild-analyses/src/components/analyses/shared/MunicipalityMap.tsx.md) - **Unified map component** (municipality-only rendering with optional province boundaries)
+- [MunicipalitySearch.tsx](files/embuild-analyses/src/components/analyses/shared/MunicipalitySearch.tsx.md) - Municipality search with autocomplete
+- [MapControls.tsx](files/embuild-analyses/src/components/analyses/shared/MapControls.tsx.md)
+- [MapLegend.tsx](files/embuild-analyses/src/components/analyses/shared/MapLegend.tsx.md)
+- [TimeSlider.tsx](files/embuild-analyses/src/components/analyses/shared/TimeSlider.tsx.md)
 - [ExportButtons.tsx](files/embuild-analyses/src/components/analyses/shared/ExportButtons.tsx.md) - CSV download and embed code generation
 - [EmbeddableSection.tsx](files/embuild-analyses/src/components/analyses/shared/EmbeddableSection.tsx.md) - Standalone section for iframe embeds
+- [TimeSeriesSection.tsx](files/embuild-analyses/src/components/analyses/shared/TimeSeriesSection.tsx.md)
+- [AnalysisLayout.tsx](files/embuild-analyses/src/components/analyses/AnalysisLayout.tsx.md)
 - [Embed Route](files/embuild-analyses/src/app/embed/README.md) - Iframe embedding endpoint
 - [embed-config.ts](files/embuild-analyses/src/lib/embed-config.ts.md) - Centralized embed configuration
-- [geo-utils.ts](files/embuild-analyses/src/lib/geo-utils.ts.md)
+- [geo-utils.ts](files/embuild-analyses/src/lib/geo-utils.ts.md) - Geographic utilities (regions, provinces, municipalities)
+- [map-utils.ts](files/embuild-analyses/src/lib/map-utils.ts.md) - **Data expansion utilities** for province/region to municipality conversion
+- [chart-theme.ts](files/embuild-analyses/src/lib/chart-theme.ts.md) - Central theme constants
+- [EnergiekaartChart.tsx](files/embuild-analyses/src/components/analyses/energiekaart-premies/EnergiekaartChart.tsx.md)
+- [EnergiekaartDashboard.tsx](files/embuild-analyses/src/components/analyses/energiekaart-premies/EnergiekaartDashboard.tsx.md)
+- [EnergiekaartEmbed.tsx](files/embuild-analyses/src/components/analyses/energiekaart-premies/EnergiekaartEmbed.tsx.md)
+- [EnergiekaartSection.tsx](files/embuild-analyses/src/components/analyses/energiekaart-premies/EnergiekaartSection.tsx.md)
+- [EnergiekaartTable.tsx](files/embuild-analyses/src/components/analyses/energiekaart-premies/EnergiekaartTable.tsx.md)
+- [MeasureFilter.tsx](files/embuild-analyses/src/components/analyses/energiekaart-premies/MeasureFilter.tsx.md)
+- [FaillissementenDashboard.tsx](files/embuild-analyses/src/components/analyses/faillissementen/FaillissementenDashboard.tsx.md)
+- [FaillissementenEmbed.tsx](files/embuild-analyses/src/components/analyses/faillissementen/FaillissementenEmbed.tsx.md)
+- [HuishoudensDashboard.tsx](files/embuild-analyses/src/components/analyses/huishoudensgroei/HuishoudensDashboard.tsx.md)
+- [HuishoudensgroeiEmbed.tsx](files/embuild-analyses/src/components/analyses/huishoudensgroei/HuishoudensgroeiEmbed.tsx.md)
+- [PrijsherzieningDashboard.tsx](files/embuild-analyses/src/components/analyses/prijsherziening/PrijsherzieningDashboard.tsx.md)
+- [StartersStoppersDashboard.tsx](files/embuild-analyses/src/components/analyses/starters-stoppers/StartersStoppersDashboard.tsx.md)
+- [StartersStoppersEmbed.tsx](files/embuild-analyses/src/components/analyses/starters-stoppers/StartersStoppersEmbed.tsx.md)
+- [VastgoedDashboard.tsx](files/embuild-analyses/src/components/analyses/vastgoed-verkopen/VastgoedDashboard.tsx.md)
+- [VastgoedVerkopenEmbed.tsx](files/embuild-analyses/src/components/analyses/vastgoed-verkopen/VastgoedVerkopenEmbed.tsx.md)
+- [VergunningenDashboard.tsx (Aanvragen)](files/embuild-analyses/src/components/analyses/vergunningen-aanvragen/VergunningenDashboard.tsx.md)
+- [VergunningenAanvragenEmbed.tsx](files/embuild-analyses/src/components/analyses/vergunningen-aanvragen/VergunningenAanvragenEmbed.tsx.md)

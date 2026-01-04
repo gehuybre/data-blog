@@ -171,11 +171,26 @@ docs/                      # Documentation (see LLM_DOCUMENTATION_PROTOCOL.md)
 5. GitHub Actions deploys to GitHub Pages
 
 ### Key Shared Components (`src/components/analyses/shared/`)
+
+#### Geographic Visualization
+- **MunicipalityMap** - Unified map component (municipality-only rendering with optional province boundaries)
+- **MunicipalitySearch** - Autocomplete search for municipalities
 - **GeoContext** - React Context for geographic filter state
 - **GeoFilter** - Dropdown for region/province/municipality selection
-- **RegionMap/ProvinceMap/MunicipalityMap** - D3-based Belgian maps
+- **MapControls** - Zoom/pan controls for maps
+- **MapLegend** - Color legend for choropleth maps
+- **TimeSlider** - Time series slider for maps
+
+#### Data Utilities (`src/lib/`)
+- **map-utils.ts** - Data expansion utilities (province/region → municipality conversion)
+- **geo-utils.ts** - Geographic reference data (regions, provinces, municipalities)
+
+#### Charts & Analysis
 - **FilterableChart** - Recharts wrapper with filtering
-- **AnalysisSection** - Main wrapper for analysis visualizations
+- **FilterableTable** - Sortable data tables
+- **AnalysisSection** - Main wrapper for analysis visualizations (chart/table/map tabs)
+- **TimeSeriesSection** - Time series visualization wrapper
+- **ExportButtons** - CSV download and embed code generation
 
 ## Tech Stack
 
@@ -186,6 +201,48 @@ docs/                      # Documentation (see LLM_DOCUMENTATION_PROTOCOL.md)
 - **Charts**: Recharts
 - **Maps**: react-simple-maps, d3-geo
 - **Data Processing**: Python (pandas, geopandas)
+
+## Map Architecture
+
+### Municipality-Only Rendering (Januari 2025)
+
+Alle kaarten tonen **alleen gemeentegrenzen** (581 Belgische gemeenten). Er is geen hierarchische level-switching meer tussen regio's, provincies en gemeenten.
+
+**Kernprincipes:**
+- Één map component: `MunicipalityMap`
+- Altijd gemeenteniveau GeoJSON (belgium_municipalities.json - 790KB)
+- Provincie data wordt geëxpandeerd naar gemeenten via `map-utils.ts`
+- Provinciegrenzen kunnen als overlay worden getoond
+
+**Voorbeeld:**
+```typescript
+import { MunicipalityMap } from "@/components/analyses/shared/MunicipalityMap"
+import { expandProvinceToMunicipalities } from "@/lib/map-utils"
+
+// Provincie-niveau data
+const provinceData = [{ p: '10000', permits: 500 }]
+
+// Expandeer naar gemeenten
+const municipalityData = expandProvinceToMunicipalities(
+  provinceData,
+  (d) => d.p,
+  (d) => d.permits
+)
+
+<MunicipalityMap
+  data={municipalityData}
+  getGeoCode={(d) => d.municipalityCode}
+  getValue={(d) => d.value}
+  showProvinceBoundaries={true}  // Toon provincie overlay
+/>
+```
+
+**Verwijderde componenten:**
+- ❌ `RegionMap.tsx` (deleted)
+- ❌ `ProvinceMap.tsx` (deleted)
+- ❌ `UnifiedMap.tsx` (deleted)
+- ❌ `MapLevelToggle.tsx` (deleted)
+- ❌ `InteractiveMap.tsx` (gerefactored → MunicipalityMap)
 
 ## Documentation Protocol
 
