@@ -3,6 +3,14 @@
  * Data source: Statbel Open Data
  */
 
+export type BuildingTypeKey =
+  | "Huizen in gesloten bebouwing"
+  | "Huizen in halfopen bebouwing"
+  | "Huizen in open bebouwing, hoeven en kastelen"
+  | "Buildings en flatgebouwen met appartementen"
+  | "Handelshuizen"
+  | "Alle andere gebouwen"
+
 export interface BuildingTypeStats {
   "Huizen in gesloten bebouwing": number
   "Huizen in halfopen bebouwing": number
@@ -26,12 +34,14 @@ export interface RegionalSnapshot {
 export interface TimeSeriesNational {
   total_buildings: number[]
   residential_buildings: number[]
+  by_type: Record<BuildingTypeKey, number[]>
 }
 
 export interface TimeSeriesRegional {
   name: string
   total_buildings: number[]
   residential_buildings: number[]
+  by_type: Record<BuildingTypeKey, number[]>
 }
 
 export interface GebouwenData {
