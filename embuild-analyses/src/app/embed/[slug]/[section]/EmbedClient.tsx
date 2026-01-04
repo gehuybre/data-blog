@@ -8,6 +8,7 @@ import { FaillissementenEmbed } from "@/components/analyses/faillissementen/Fail
 import { HuishoudensgroeiEmbed } from "@/components/analyses/huishoudensgroei/HuishoudensgroeiEmbed"
 import { EnergiekaartPremiesEmbed } from "@/components/analyses/energiekaart-premies/EnergiekaartPremiesEmbed"
 import { VergunningenAanvragenEmbed } from "@/components/analyses/vergunningen-aanvragen/VergunningenAanvragenEmbed"
+import { GebouwenparkEmbed } from "@/components/analyses/gebouwenpark/GebouwenparkEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig, getValidSections } from "@/lib/embed-config"
 import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
@@ -366,6 +367,26 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
         <EnergiekaartPremiesEmbed
           section={section as "aantal-premies" | "bedrag-premies" | "aantal-beschermd" | "bedrag-beschermd"}
           measure={urlParams.measure ?? undefined}
+        />
+      )
+    }
+
+    // Handle GebouwenparkEmbed
+    if (config.component === "GebouwenparkEmbed") {
+      const validSections = getValidSections(slug)
+      if (!validSections.includes(section)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}. Geldige opties: {validSections.join(", ")}
+            </p>
+          </div>
+        )
+      }
+
+      return (
+        <GebouwenparkEmbed
+          section={section as "evolutie"}
         />
       )
     }
