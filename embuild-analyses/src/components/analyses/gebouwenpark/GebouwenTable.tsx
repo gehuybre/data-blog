@@ -10,11 +10,19 @@ interface TableDataPoint {
 
 interface GebouwenTableProps {
   data: TableDataPoint[]
+  totalLabel?: string
+  residentialLabel?: string
+  showBothColumns?: boolean
 }
 
 const formatNumber = (num: number) => new Intl.NumberFormat('nl-BE').format(num)
 
-export function GebouwenTable({ data }: GebouwenTableProps) {
+export function GebouwenTable({
+  data,
+  totalLabel = "Totaal Gebouwen",
+  residentialLabel = "Woongebouwen",
+  showBothColumns = true
+}: GebouwenTableProps) {
   // Sort by year descending for table view
   const sortedData = [...data].sort((a, b) => b.year - a.year)
 
@@ -24,8 +32,10 @@ export function GebouwenTable({ data }: GebouwenTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Jaar</TableHead>
-            <TableHead className="text-right">Totaal Gebouwen</TableHead>
-            <TableHead className="text-right">Woongebouwen</TableHead>
+            <TableHead className="text-right">{totalLabel}</TableHead>
+            {showBothColumns && (
+              <TableHead className="text-right">{residentialLabel}</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -33,7 +43,9 @@ export function GebouwenTable({ data }: GebouwenTableProps) {
             <TableRow key={row.year}>
               <TableCell className="font-medium">{row.year}</TableCell>
               <TableCell className="text-right">{formatNumber(row.total)}</TableCell>
-              <TableCell className="text-right">{formatNumber(row.residential)}</TableCell>
+              {showBothColumns && (
+                <TableCell className="text-right">{formatNumber(row.residential)}</TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

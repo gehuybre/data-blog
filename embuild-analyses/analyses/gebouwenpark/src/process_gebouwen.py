@@ -46,8 +46,12 @@ def process_data():
 
     residential_codes = {'R1', 'R2', 'R3', 'R4'}  # Residential buildings only
 
-    # Time series temporary storage: year -> level -> region -> {total, residential}
-    ts_data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {"total": 0, "residential": 0})))
+    # Time series temporary storage: year -> level -> region -> {total, residential, by_type}
+    ts_data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {
+        "total": 0,
+        "residential": 0,
+        "by_type": defaultdict(int)
+    })))
     region_names = {}
 
     try:
@@ -99,14 +103,16 @@ def process_data():
                 # Store by Year -> Level -> Code
                 if lvl == '1': # National
                     ts_data[year]['national']['00000']['total'] += value
+                    ts_data[year]['national']['00000']['by_type'][b_type_name] += value
                     if is_residential:
                         ts_data[year]['national']['00000']['residential'] += value
                 elif lvl == '2': # Regions
                     reg_code = row['CD_REFNIS']
                     reg_name = row['CD_REFNIS_NL']
                     region_names[reg_code] = reg_name
-                    
+
                     ts_data[year]['regions'][reg_code]['total'] += value
+                    ts_data[year]['regions'][reg_code]['by_type'][b_type_name] += value
                     if is_residential:
                         ts_data[year]['regions'][reg_code]['residential'] += value
 
@@ -122,24 +128,41 @@ def process_data():
     # Process Time Series structure
     sorted_years = sorted(ts_data.keys())
     results['time_series']['years'] = sorted_years
-    
+
+    # Get all building types from the data
+    all_building_types = set()
+    for year_data in ts_data.values():
+        for level_data in year_data.values():
+            for region_data in level_data.values():
+                all_building_types.update(region_data['by_type'].keys())
+
     # National TS
+    results['time_series']['national']['by_type'] = {btype: [] for btype in all_building_types}
     for y in sorted_years:
         data = ts_data[y]['national']['00000']
         results['time_series']['national']['total_buildings'].append(data['total'])
         results['time_series']['national']['residential_buildings'].append(data['residential'])
-    
+
+        # Add by_type data for each building type
+        for btype in all_building_types:
+            results['time_series']['national']['by_type'][btype].append(data['by_type'][btype])
+
     # Regional TS
     for reg_code, reg_name in region_names.items():
         results['time_series']['regions'][reg_code] = {
             "name": reg_name,
             "total_buildings": [],
-            "residential_buildings": []
+            "residential_buildings": [],
+            "by_type": {btype: [] for btype in all_building_types}
         }
         for y in sorted_years:
             val = ts_data[y]['regions'][reg_code] # defaultdict, returns 0s if missing
             results['time_series']['regions'][reg_code]['total_buildings'].append(val['total'])
             results['time_series']['regions'][reg_code]['residential_buildings'].append(val['residential'])
+
+            # Add by_type data for each building type
+            for btype in all_building_types:
+                results['time_series']['regions'][reg_code]['by_type'][btype].append(val['by_type'][btype])
 
     results['available_stat_types'] = list(results['available_stat_types'])
     print("Stat Types Found:", results['available_stat_types'])
