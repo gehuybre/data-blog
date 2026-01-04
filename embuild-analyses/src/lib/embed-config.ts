@@ -214,6 +214,17 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
       },
     },
   },
+  {
+    slug: "gebouwenpark",
+    sections: {
+      evolutie: {
+        type: "custom",
+        title: "Evolutie gebouwenpark",
+        component: "GebouwenparkEmbed",
+        height: 600,
+      },
+    },
+  },
 ]
 
 /**
