@@ -6,15 +6,16 @@
 
 ## Analyses
 
-- [Huishoudensgroei](files/embuild-analyses/analyses/huishoudensgroei/README.md) - Huishoudensvooruitzichten per gemeente in Vlaanderen (2010-2040)
-- [Vastgoed Verkopen](files/embuild-analyses/analyses/vastgoed-verkopen/README.md) - Vastgoedtransacties en prijzen per type woning
-- [Starters-Stoppers](files/embuild-analyses/analyses/starters-stoppers/README.md) - Startende en stoppende ondernemingen
-- [Vergunningen Goedkeuringen](files/embuild-analyses/analyses/vergunningen-goedkeuringen/README.md) - Bouwvergunningen nieuwbouw en renovatie
-- [Vergunningen Aanvragen](files/embuild-analyses/analyses/vergunningen-aanvragen/README.md) - Analyse van bouwvergunningsaanvragen
-- [Faillissementen](files/embuild-analyses/analyses/faillissementen/README.md) - Statistieken over faillissementen
 - [Energiekaart Premies](files/embuild-analyses/analyses/energiekaart-premies/README.md) - Overzicht van energiepremies per gemeente
+- [Faillissementen](files/embuild-analyses/analyses/faillissementen/README.md) - Statistieken over faillissementen
+- [Gebouwenpark](files/embuild-analyses/analyses/gebouwenpark/README.md) - Belgische gebouwenpark evolutie sinds 1995
 - [Gemeentelijke Investeringen](files/embuild-analyses/analyses/gemeentelijke-investeringen/README.md) - Analyse van investeringen door gemeenten
+- [Huishoudensgroei](files/embuild-analyses/analyses/huishoudensgroei/README.md) - Huishoudensvooruitzichten per gemeente in Vlaanderen (2010-2040)
 - [Prijsherziening Index I 2021](files/embuild-analyses/analyses/prijsherziening-index-i-2021/README.md) - Analyse van de prijsherzieningsindex
+- [Starters-Stoppers](files/embuild-analyses/analyses/starters-stoppers/README.md) - Startende en stoppende ondernemingen
+- [Vastgoed Verkopen](files/embuild-analyses/analyses/vastgoed-verkopen/README.md) - Vastgoedtransacties en prijzen per type woning
+- [Vergunningen Aanvragen](files/embuild-analyses/analyses/vergunningen-aanvragen/README.md) - Analyse van bouwvergunningsaanvragen
+- [Vergunningen Goedkeuringen](files/embuild-analyses/analyses/vergunningen-goedkeuringen/README.md) - Bouwvergunningen nieuwbouw en renovatie
 
 ## Workflows
 
@@ -75,3 +76,46 @@
 - [VastgoedVerkopenEmbed.tsx](files/embuild-analyses/src/components/analyses/vastgoed-verkopen/VastgoedVerkopenEmbed.tsx.md)
 - [VergunningenDashboard.tsx (Aanvragen)](files/embuild-analyses/src/components/analyses/vergunningen-aanvragen/VergunningenDashboard.tsx.md)
 - [VergunningenAanvragenEmbed.tsx](files/embuild-analyses/src/components/analyses/vergunningen-aanvragen/VergunningenAanvragenEmbed.tsx.md)
+- [GebouwenDashboard.tsx](files/embuild-analyses/src/components/analyses/gebouwenpark/GebouwenDashboard.tsx.md)
+- [GebouwenparkEmbed.tsx](files/embuild-analyses/src/components/analyses/gebouwenpark/GebouwenparkEmbed.tsx.md)
+- [GebouwenChart.tsx](files/embuild-analyses/src/components/analyses/gebouwenpark/GebouwenChart.tsx.md)
+- [GebouwenTable.tsx](files/embuild-analyses/src/components/analyses/gebouwenpark/GebouwenTable.tsx.md)
+- [gebouwenpark/types.ts](files/embuild-analyses/src/components/analyses/gebouwenpark/types.ts.md)
+
+## Core Components
+
+- [EmbedAutoResize.tsx](files/embuild-analyses/src/components/EmbedAutoResize.tsx.md) - Auto-resize for iframe embeds
+- [EmbedErrorBoundary.tsx](files/embuild-analyses/src/components/EmbedErrorBoundary.tsx.md) - Error handling for embeds
+- [EmbedParentResizeListener.tsx](files/embuild-analyses/src/components/EmbedParentResizeListener.tsx.md) - Parent-side iframe resizing
+- [mdx-content.tsx](files/embuild-analyses/src/components/mdx-content.tsx.md) - MDX content renderer
+
+## Shared Analysis Components
+
+- [AnalysisSection.tsx](files/embuild-analyses/src/components/analyses/shared/AnalysisSection.tsx.md)
+- [FilterableChart.tsx](files/embuild-analyses/src/components/analyses/shared/FilterableChart.tsx.md)
+- [FilterableTable.tsx](files/embuild-analyses/src/components/analyses/shared/FilterableTable.tsx.md)
+- [MapSection.tsx](files/embuild-analyses/src/components/analyses/shared/MapSection.tsx.md) - Complete map with search
+
+## Library Utilities
+
+- [embed-data-registry.ts](files/embuild-analyses/src/lib/embed-data-registry.ts.md) - Centralized embed data imports
+- [embed-data-transformers.ts](files/embuild-analyses/src/lib/embed-data-transformers.ts.md) - Data transformation utilities
+- [embed-path-validation.ts](files/embuild-analyses/src/lib/embed-path-validation.ts.md) - Path security validation
+- [embed-types.ts](files/embuild-analyses/src/lib/embed-types.ts.md) - TypeScript types for embed system
+- [name-utils.ts](files/embuild-analyses/src/lib/name-utils.ts.md) - Municipality name formatting
+- [quarterly-narrative.ts](files/embuild-analyses/src/lib/quarterly-narrative.ts.md) - Automated trend narratives
+- [utils.ts](files/embuild-analyses/src/lib/utils.ts.md) - Tailwind class merging
+
+## Scripts
+
+- [generate_province_map.py](files/scripts/generate_province_map.py.md) - Generate province GeoJSON from municipalities
+- [update_publication_date.py](files/scripts/update_publication_date.py.md) - Scrape and update Statbel publication dates
+- [validate-embed-paths.ts](files/embuild-analyses/scripts/validate-embed-paths.ts.md) - Build-time embed config validation
+- [check-faillissementen-geo-join.js](files/embuild-analyses/scripts/check-faillissementen-geo-join.js.md) - Geo-join validation for faillissementen
+- [serve-export-with-basepath.mjs](files/embuild-analyses/scripts/serve-export-with-basepath.mjs.md) - Local server for testing static exports
+
+## Data Processing Scripts
+
+- [process_gebouwen.py](files/embuild-analyses/analyses/gebouwenpark/src/process_gebouwen.py.md) - Gebouwenpark data processing
+- [inspect.py](files/embuild-analyses/analyses/gebouwenpark/src/inspect.py.md) - Gebouwenpark data inspection utility
+- [process_data.py (vergunningen-goedkeuringen)](files/embuild-analyses/analyses/vergunningen-goedkeuringen/src/process_data.py.md)
