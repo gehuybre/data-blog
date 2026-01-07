@@ -236,9 +236,17 @@ function NieuwbouwSection() {
   }, [])
 
   const tableExportData = React.useMemo(() => {
+    const metricMap = {
+      p: "projecten" as const,
+      g: "gebouwen" as const,
+      w: "wooneenheden" as const,
+      m2: "oppervlakte" as const,
+    }
+    const metricKey = metricMap[metric]
+
     return tableData.map((r) => ({
       label: String(r.jaar),
-      value: r[metric === "p" ? "projecten" : metric === "g" ? "gebouwen" : metric === "w" ? "wooneenheden" : "oppervlakte"],
+      value: r[metricKey],
       periodCells: [r.jaar],
     }))
   }, [tableData, metric])
@@ -510,9 +518,17 @@ function VerbouwSection() {
   }, [])
 
   const tableExportData = React.useMemo(() => {
+    const metricMap = {
+      p: "projecten" as const,
+      g: "gebouwen" as const,
+      w: "wooneenheden" as const,
+      m2: "oppervlakte" as const,
+    }
+    const metricKey = metricMap[metric]
+
     return tableData.map((r) => ({
       label: String(r.jaar),
-      value: r[metric === "p" ? "projecten" : metric === "g" ? "gebouwen" : metric === "w" ? "wooneenheden" : "oppervlakte"],
+      value: r[metricKey],
       periodCells: [r.jaar],
     }))
   }, [tableData, metric])
@@ -786,9 +802,17 @@ function SloopSection() {
   }, [])
 
   const tableExportData = React.useMemo(() => {
+    const metricMap = {
+      p: "projecten" as const,
+      g: "gebouwen" as const,
+      m2: "oppervlakte" as const,
+      m3: "volume" as const,
+    }
+    const metricKey = metricMap[metric]
+
     return tableData.map((r) => ({
       label: String(r.jaar),
-      value: r[metric === "p" ? "projecten" : metric === "g" ? "gebouwen" : metric === "m2" ? "oppervlakte" : "volume"],
+      value: r[metricKey],
       periodCells: [r.jaar],
     }))
   }, [tableData, metric])
