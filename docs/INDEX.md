@@ -24,6 +24,7 @@
 - [Vergunningen Goedkeuringen](workflows/WF-vergunningen-goedkeuringen.md)
 - [Update Vergunningen Data](workflows/WF-update-vergunningen-data.md)
 - [Update Starters-Stoppers Data](workflows/WF-update-starters-stoppers-data.md)
+- [Gemeentelijke Investeringen](workflows/WF-gemeentelijke-investeringen.md) - Municipal investment data processing from BBC-DR system
 
 ## Files
 

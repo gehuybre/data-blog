@@ -1,0 +1,339 @@
+{
+  "domains": [
+    {
+      "domain_code": "0",
+      "domain_name": "Algemene financiering"
+    },
+    {
+      "domain_code": "1",
+      "domain_name": "Algemeen bestuur"
+    },
+    {
+      "domain_code": "2",
+      "domain_name": "Zich verplaatsen en mobiliteit"
+    },
+    {
+      "domain_code": "3",
+      "domain_name": "Natuur en milieubeheer"
+    },
+    {
+      "domain_code": "4",
+      "domain_name": "Veiligheidszorg"
+    },
+    {
+      "domain_code": "5",
+      "domain_name": "Ondernemen en werken"
+    },
+    {
+      "domain_code": "6",
+      "domain_name": "Wonen en ruimtelijke ordening"
+    },
+    {
+      "domain_code": "7",
+      "domain_name": "Cultuur en vrije tijd"
+    },
+    {
+      "domain_code": "8",
+      "domain_name": "Leren en onderwijs"
+    },
+    {
+      "domain_code": "9",
+      "domain_name": "Zorg en opvang"
+    }
+  ],
+  "subdomains": [
+    {
+      "subdomain_code": "00",
+      "subdomain_name": "Algemene financiering",
+      "domain_code": "0"
+    },
+    {
+      "subdomain_code": "010",
+      "subdomain_name": "Politieke organen",
+      "domain_code": "1"
+    },
+    {
+      "subdomain_code": "011",
+      "subdomain_name": "Algemene diensten",
+      "domain_code": "1"
+    },
+    {
+      "subdomain_code": "013",
+      "subdomain_name": "Administratieve dienstverlening",
+      "domain_code": "1"
+    },
+    {
+      "subdomain_code": "016",
+      "subdomain_name": "Hulp aan het buitenland",
+      "domain_code": "1"
+    },
+    {
+      "subdomain_code": "017",
+      "subdomain_name": "Binnengemeentelijke decentralisatie",
+      "domain_code": "1"
+    },
+    {
+      "subdomain_code": "019",
+      "subdomain_name": "Overig algemeen bestuur",
+      "domain_code": "1"
+    },
+    {
+      "subdomain_code": "02",
+      "subdomain_name": "Zich verplaatsen en mobiliteit",
+      "domain_code": "2"
+    },
+    {
+      "subdomain_code": "030",
+      "subdomain_name": "Afval- en materialenbeheer",
+      "domain_code": "3"
+    },
+    {
+      "subdomain_code": "031",
+      "subdomain_name": "Waterbeheer",
+      "domain_code": "3"
+    },
+    {
+      "subdomain_code": "032",
+      "subdomain_name": "Vermindering van de milieuverontreiniging",
+      "domain_code": "3"
+    },
+    {
+      "subdomain_code": "034",
+      "subdomain_name": "Bescherming van biodiversiteit, landschappen en bodem",
+      "domain_code": "3"
+    },
+    {
+      "subdomain_code": "035",
+      "subdomain_name": "Klimaat en energie",
+      "domain_code": "3"
+    },
+    {
+      "subdomain_code": "038/9",
+      "subdomain_name": "Overige milieubescherming",
+      "domain_code": "3"
+    },
+    {
+      "subdomain_code": "040",
+      "subdomain_name": "Politiediensten",
+      "domain_code": "4"
+    },
+    {
+      "subdomain_code": "041",
+      "subdomain_name": "Brandweer",
+      "domain_code": "4"
+    },
+    {
+      "subdomain_code": "042/4",
+      "subdomain_name": "Overige hulpdiensten",
+      "domain_code": "4"
+    },
+    {
+      "subdomain_code": "045/9",
+      "subdomain_name": "Overige elementen van openbare orde en veiligheid",
+      "domain_code": "4"
+    },
+    {
+      "subdomain_code": "050",
+      "subdomain_name": "Handel en middenstand",
+      "domain_code": "5"
+    },
+    {
+      "subdomain_code": "051",
+      "subdomain_name": "Nijverheid",
+      "domain_code": "5"
+    },
+    {
+      "subdomain_code": "052",
+      "subdomain_name": "Toerisme",
+      "domain_code": "5"
+    },
+    {
+      "subdomain_code": "053",
+      "subdomain_name": "Land-, tuin- en bosbouw",
+      "domain_code": "5"
+    },
+    {
+      "subdomain_code": "054",
+      "subdomain_name": "Visvangst",
+      "domain_code": "5"
+    },
+    {
+      "subdomain_code": "055",
+      "subdomain_name": "Werkgelegenheid",
+      "domain_code": "5"
+    },
+    {
+      "subdomain_code": "059",
+      "subdomain_name": "Overige economische zaken",
+      "domain_code": "5"
+    },
+    {
+      "subdomain_code": "060",
+      "subdomain_name": "Ruimtelijke planning",
+      "domain_code": "6"
+    },
+    {
+      "subdomain_code": "061",
+      "subdomain_name": "Gebiedsontwikkeling",
+      "domain_code": "6"
+    },
+    {
+      "subdomain_code": "062",
+      "subdomain_name": "Woonbeleid",
+      "domain_code": "6"
+    },
+    {
+      "subdomain_code": "063",
+      "subdomain_name": "Watervoorziening",
+      "domain_code": "6"
+    },
+    {
+      "subdomain_code": "064",
+      "subdomain_name": "Elektriciteitsvoorziening",
+      "domain_code": "6"
+    },
+    {
+      "subdomain_code": "065",
+      "subdomain_name": "Gasvoorziening",
+      "domain_code": "6"
+    },
+    {
+      "subdomain_code": "066",
+      "subdomain_name": "Communicatievoorzieningen",
+      "domain_code": "6"
+    },
+    {
+      "subdomain_code": "067",
+      "subdomain_name": "Straatverlichting",
+      "domain_code": "6"
+    },
+    {
+      "subdomain_code": "068",
+      "subdomain_name": "Groene ruimte",
+      "domain_code": "6"
+    },
+    {
+      "subdomain_code": "069",
+      "subdomain_name": "Overige nutsvoorzieningen",
+      "domain_code": "6"
+    },
+    {
+      "subdomain_code": "070",
+      "subdomain_name": "Culturele instellingen",
+      "domain_code": "7"
+    },
+    {
+      "subdomain_code": "071",
+      "subdomain_name": "Evenementen",
+      "domain_code": "7"
+    },
+    {
+      "subdomain_code": "072",
+      "subdomain_name": "Erfgoed",
+      "domain_code": "7"
+    },
+    {
+      "subdomain_code": "073",
+      "subdomain_name": "Overig kunst- en cultuurbeleid",
+      "domain_code": "7"
+    },
+    {
+      "subdomain_code": "074",
+      "subdomain_name": "Sport",
+      "domain_code": "7"
+    },
+    {
+      "subdomain_code": "075",
+      "subdomain_name": "Jeugd",
+      "domain_code": "7"
+    },
+    {
+      "subdomain_code": "079",
+      "subdomain_name": "Erediensten  en niet-confessionele levensbeschouwelijke gemeenschappen",
+      "domain_code": "7"
+    },
+    {
+      "subdomain_code": "080",
+      "subdomain_name": "Basisonderwijs",
+      "domain_code": "8"
+    },
+    {
+      "subdomain_code": "081",
+      "subdomain_name": "Secundair onderwijs",
+      "domain_code": "8"
+    },
+    {
+      "subdomain_code": "082",
+      "subdomain_name": "Deeltijds kunstonderwijs",
+      "domain_code": "8"
+    },
+    {
+      "subdomain_code": "083",
+      "subdomain_name": "Hoger en Volwassenenonderwijs",
+      "domain_code": "8"
+    },
+    {
+      "subdomain_code": "086",
+      "subdomain_name": "Ondersteunende diensten voor het onderwijs",
+      "domain_code": "8"
+    },
+    {
+      "subdomain_code": "087/8",
+      "subdomain_name": "Algemeen onderwijsbeleid",
+      "domain_code": "8"
+    },
+    {
+      "subdomain_code": "090",
+      "subdomain_name": "Sociaal beleid",
+      "domain_code": "9"
+    },
+    {
+      "subdomain_code": "091",
+      "subdomain_name": "Ziekte- en invaliditeit",
+      "domain_code": "9"
+    },
+    {
+      "subdomain_code": "092",
+      "subdomain_name": "Werkloosheid",
+      "domain_code": "9"
+    },
+    {
+      "subdomain_code": "093",
+      "subdomain_name": "Sociale huisvesting",
+      "domain_code": "9"
+    },
+    {
+      "subdomain_code": "094",
+      "subdomain_name": "Gezin en kinderen",
+      "domain_code": "9"
+    },
+    {
+      "subdomain_code": "095",
+      "subdomain_name": "Ouderen",
+      "domain_code": "9"
+    },
+    {
+      "subdomain_code": "098",
+      "subdomain_name": "Dienstverlening inzake volksgezondheid",
+      "domain_code": "9"
+    },
+    {
+      "subdomain_code": "099",
+      "subdomain_name": "Begraafplaatsen, crematoria en lijkbezorging",
+      "domain_code": "9"
+    },
+    {
+      "subdomain_code": "015",
+      "subdomain_name": "Internationale samenwerking",
+      "domain_code": "1"
+    }
+  ],
+  "cost_categories_niveau1": [
+    "I Investeringsverrichtingen"
+  ],
+  "years": [
+    2014,
+    2020,
+    2025
+  ]
+}
