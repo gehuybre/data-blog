@@ -225,6 +225,23 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
       },
     },
   },
+  {
+    slug: "gemeentelijke-investeringen",
+    sections: {
+      "investments-by-domain": {
+        type: "custom",
+        title: "Investeringen per beleidsdomein",
+        component: "InvesteringenEmbed",
+        height: 700,
+      },
+      "investments-by-category": {
+        type: "custom",
+        title: "Investeringen per kostenpost",
+        component: "InvesteringenEmbed",
+        height: 700,
+      },
+    },
+  },
 ]
 
 /**

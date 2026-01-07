@@ -22,6 +22,7 @@ import { InvesteringenTable } from "./InvesteringenTable"
 import { InvesteringenMap } from "./InvesteringenMap"
 import type { Lookups, Metadata } from "./types"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { validateMetadata, validateLookups, validateInvestmentData } from "./validation"
 
 // Import data
 import vlaanderenDomainData from '../../../../analyses/gemeentelijke-investeringen/results/investments_by_domain_vlaanderen.json'
@@ -33,6 +34,20 @@ import domainSummary from '../../../../analyses/gemeentelijke-investeringen/resu
 import categorySummary from '../../../../analyses/gemeentelijke-investeringen/results/category_summary.json'
 import lookups from '../../../../analyses/gemeentelijke-investeringen/results/lookups.json'
 import metadata from '../../../../analyses/gemeentelijke-investeringen/results/metadata.json'
+
+// Validate data at load time
+if (!validateMetadata(metadata)) {
+  throw new Error('Invalid metadata structure - see console for details')
+}
+if (!validateLookups(lookups)) {
+  throw new Error('Invalid lookups structure - see console for details')
+}
+if (!validateInvestmentData(vlaanderenDomainData, 'domain')) {
+  throw new Error('Invalid domain investment data - see console for details')
+}
+if (!validateInvestmentData(vlaanderenCategoryData, 'category')) {
+  throw new Error('Invalid category investment data - see console for details')
+}
 
 const lookupsData = lookups as Lookups
 const metadataData = metadata as Metadata
@@ -289,8 +304,8 @@ export function InvesteringenDashboard() {
     }))
   }, [selectedMetricCategory])
 
-  // Check if Kostenpost data is truncated (based on metadata or municipality count)
-  const isKostenpostTruncated = metadataData.kostenpost_records < metadataData.bv_records / 4
+  // Check if Kostenpost data is truncated (use explicit flag from metadata)
+  const isKostenpostTruncated = metadataData.is_kostenpost_truncated ?? false
 
   return (
     <div className="space-y-8">
@@ -299,8 +314,8 @@ export function InvesteringenDashboard() {
           <AlertTriangle className="h-4 w-4 text-amber-600" />
           <AlertTitle className="text-amber-800">Gegevens incompleet</AlertTitle>
           <AlertDescription className="text-amber-700">
-            De detailgegevens per kostenpost zijn momenteel slechts voor een beperkt aantal gemeenten (50) beschikbaar.
-            De gegevens per beleidsdomein zijn wel volledig voor alle 285 gemeenten.
+            De detailgegevens per kostenpost zijn momenteel slechts voor {metadataData.kostenpost_municipalities ?? 50} van de {metadataData.total_municipalities} gemeenten beschikbaar.
+            De gegevens per beleidsdomein zijn wel volledig voor alle gemeenten.
           </AlertDescription>
         </Alert>
       )}
