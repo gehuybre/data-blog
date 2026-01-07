@@ -4,6 +4,8 @@
   "bv_latest_year": 2025,
   "kostenpost_latest_year": 2033,
   "total_municipalities": 285,
+  "kostenpost_municipalities": 50,
   "bv_records": 337852,
-  "kostenpost_records": 64714
+  "kostenpost_records": 64714,
+  "is_kostenpost_truncated": true
 }

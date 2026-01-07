@@ -38,6 +38,8 @@ export interface Metadata {
   bv_latest_year: number
   kostenpost_latest_year: number
   total_municipalities: number
+  kostenpost_municipalities?: number
   bv_records: number
   kostenpost_records: number
+  is_kostenpost_truncated?: boolean
 }

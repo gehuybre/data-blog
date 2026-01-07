@@ -525,7 +525,13 @@ def process_data() -> None:
     bv_muni_domain.to_json(RESULTS_DIR / "investments_by_municipality_domain.json", orient="records", force_ascii=False)
     bv_muni_total.to_json(RESULTS_DIR / "investments_by_municipality_total.json", orient="records", force_ascii=False)
 
-    # 3. Top Domains
+    # 3. Top Domains (manually selected based on strategic importance and investment volume)
+    # Domain codes:
+    # '02': Mobiliteit en openbare werken (Mobility and Public Works)
+    # '074': Onderwijs (Education)
+    # '060': Sport, jeugd en recreatie (Sports, Youth, and Recreation)
+    # '068': Cultuur (Culture)
+    # '041': Groen, ruimtelijke ordening en milieu (Green Space, Spatial Planning, and Environment)
     top_domains = ['02', '074', '060', '068', '041']
     bv_muni_top = bv_combined[bv_combined['domain_code'].isin(top_domains)].copy()
     bv_muni_top.to_json(RESULTS_DIR / "investments_municipality_top_domains.json", orient="records", force_ascii=False)
@@ -593,15 +599,23 @@ def process_data() -> None:
     }
     (RESULTS_DIR / "lookups.json").write_text(json.dumps(lookups, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    # Metadata
+    # Metadata with explicit truncation detection
+    total_municipalities = len(bv_combined['municipality'].unique())
+    kostenpost_municipalities = len(kostenpost_combined['municipality'].unique())
+
+    # Detect if kostenpost data is truncated (significantly fewer municipalities than BV data)
+    is_kostenpost_truncated = kostenpost_municipalities < (total_municipalities * 0.5)
+
     metadata = {
         'latest_year': int(max_year),
         'latest_date': date_str,
         'bv_latest_year': int(bv_max_year),
         'kostenpost_latest_year': int(kostenpost_max_year),
-        'total_municipalities': len(bv_combined['municipality'].unique()),
+        'total_municipalities': total_municipalities,
+        'kostenpost_municipalities': kostenpost_municipalities,
         'bv_records': len(bv_combined),
         'kostenpost_records': len(kostenpost_combined),
+        'is_kostenpost_truncated': is_kostenpost_truncated,
     }
     (RESULTS_DIR / "metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
 
