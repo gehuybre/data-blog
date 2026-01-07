@@ -30,6 +30,14 @@ import {
   AreaChart,
   Area,
 } from "recharts"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 // Nieuwbouw data
 import nieuwbouwQuarterly from "../../../../analyses/vergunningen-aanvragen/results/nieuwbouw_quarterly.json"
@@ -216,6 +224,25 @@ function NieuwbouwSection() {
   const valueLabel = METRIC_LABELS[metric]
   const trendValueLabel = "Index (2018 = 100)"
 
+  // Table data
+  const tableData = React.useMemo(() => {
+    return (nieuwbouwYearly as YearlyRow[]).map((r) => ({
+      jaar: r.y,
+      projecten: r.p,
+      gebouwen: r.g,
+      wooneenheden: r.w,
+      oppervlakte: r.m2,
+    }))
+  }, [])
+
+  const tableExportData = React.useMemo(() => {
+    return tableData.map((r) => ({
+      label: String(r.jaar),
+      value: r[metric === "p" ? "projecten" : metric === "g" ? "gebouwen" : metric === "w" ? "wooneenheden" : "oppervlakte"],
+      periodCells: [r.jaar],
+    }))
+  }, [tableData, metric])
+
   return (
     <TimeSeriesSection
       title="Nieuwbouw"
@@ -361,6 +388,43 @@ function NieuwbouwSection() {
             </Card>
           ),
         },
+        {
+          value: "table",
+          label: "Tabel",
+          exportData: tableExportData,
+          exportMeta: { viewType: "table", periodHeaders: ["Jaar"], valueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Nieuwbouw per jaar (alle metrieken)</CardTitle></CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Jaar</TableHead>
+                        <TableHead className="text-right">Projecten</TableHead>
+                        <TableHead className="text-right">Gebouwen</TableHead>
+                        <TableHead className="text-right">Wooneenheden</TableHead>
+                        <TableHead className="text-right">Oppervlakte (m²)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tableData.map((row) => (
+                        <TableRow key={row.jaar}>
+                          <TableCell className="font-medium">{row.jaar}</TableCell>
+                          <TableCell className="text-right">{formatInt(row.projecten)}</TableCell>
+                          <TableCell className="text-right">{formatInt(row.gebouwen)}</TableCell>
+                          <TableCell className="text-right">{formatInt(row.wooneenheden)}</TableCell>
+                          <TableCell className="text-right">{formatInt(row.oppervlakte)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          ),
+        },
       ]}
     />
   )
@@ -433,6 +497,25 @@ function VerbouwSection() {
 
   const valueLabel = METRIC_LABELS[metric]
   const trendValueLabel = "Index (2018 = 100)"
+
+  // Table data
+  const tableData = React.useMemo(() => {
+    return (verbouwYearly as YearlyRow[]).map((r) => ({
+      jaar: r.y,
+      projecten: r.p,
+      gebouwen: r.g,
+      wooneenheden: r.w,
+      oppervlakte: r.m2,
+    }))
+  }, [])
+
+  const tableExportData = React.useMemo(() => {
+    return tableData.map((r) => ({
+      label: String(r.jaar),
+      value: r[metric === "p" ? "projecten" : metric === "g" ? "gebouwen" : metric === "w" ? "wooneenheden" : "oppervlakte"],
+      periodCells: [r.jaar],
+    }))
+  }, [tableData, metric])
 
   return (
     <TimeSeriesSection
@@ -579,6 +662,43 @@ function VerbouwSection() {
             </Card>
           ),
         },
+        {
+          value: "table",
+          label: "Tabel",
+          exportData: tableExportData,
+          exportMeta: { viewType: "table", periodHeaders: ["Jaar"], valueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Verbouw per jaar (alle metrieken)</CardTitle></CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Jaar</TableHead>
+                        <TableHead className="text-right">Projecten</TableHead>
+                        <TableHead className="text-right">Gebouwen</TableHead>
+                        <TableHead className="text-right">Wooneenheden</TableHead>
+                        <TableHead className="text-right">Oppervlakte (m²)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tableData.map((row) => (
+                        <TableRow key={row.jaar}>
+                          <TableCell className="font-medium">{row.jaar}</TableCell>
+                          <TableCell className="text-right">{formatInt(row.projecten)}</TableCell>
+                          <TableCell className="text-right">{formatInt(row.gebouwen)}</TableCell>
+                          <TableCell className="text-right">{formatInt(row.wooneenheden)}</TableCell>
+                          <TableCell className="text-right">{formatInt(row.oppervlakte)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          ),
+        },
       ]}
     />
   )
@@ -653,6 +773,25 @@ function SloopSection() {
 
   const valueLabel = SLOOP_METRIC_LABELS[metric]
   const trendValueLabel = "Index (2018 = 100)"
+
+  // Table data
+  const tableData = React.useMemo(() => {
+    return (sloopYearly as SloopYearlyRow[]).map((r) => ({
+      jaar: r.y,
+      projecten: r.p,
+      gebouwen: r.g,
+      oppervlakte: r.m2,
+      volume: r.m3,
+    }))
+  }, [])
+
+  const tableExportData = React.useMemo(() => {
+    return tableData.map((r) => ({
+      label: String(r.jaar),
+      value: r[metric === "p" ? "projecten" : metric === "g" ? "gebouwen" : metric === "m2" ? "oppervlakte" : "volume"],
+      periodCells: [r.jaar],
+    }))
+  }, [tableData, metric])
 
   return (
     <TimeSeriesSection
@@ -795,6 +934,43 @@ function SloopSection() {
                     <Line yAxisId="right" type="monotone" dataKey="index" name="Index" stroke="var(--color-chart-5)" strokeWidth={2} dot={{ r: 3 }} />
                   </ComposedChart>
                 </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ),
+        },
+        {
+          value: "table",
+          label: "Tabel",
+          exportData: tableExportData,
+          exportMeta: { viewType: "table", periodHeaders: ["Jaar"], valueLabel },
+          content: (
+            <Card>
+              <CardHeader><CardTitle>Sloop per jaar (alle metrieken)</CardTitle></CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Jaar</TableHead>
+                        <TableHead className="text-right">Projecten</TableHead>
+                        <TableHead className="text-right">Gebouwen</TableHead>
+                        <TableHead className="text-right">Oppervlakte (m²)</TableHead>
+                        <TableHead className="text-right">Volume (m³)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tableData.map((row) => (
+                        <TableRow key={row.jaar}>
+                          <TableCell className="font-medium">{row.jaar}</TableCell>
+                          <TableCell className="text-right">{formatInt(row.projecten)}</TableCell>
+                          <TableCell className="text-right">{formatInt(row.gebouwen)}</TableCell>
+                          <TableCell className="text-right">{formatInt(row.oppervlakte)}</TableCell>
+                          <TableCell className="text-right">{formatInt(row.volume)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           ),

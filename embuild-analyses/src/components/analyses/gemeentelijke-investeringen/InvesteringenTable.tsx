@@ -30,7 +30,7 @@ const formatCurrency = (num: number) => `€ ${formatNumber(num)}`
 type SortKey = 'domain' | 'total' | 'average' | 'count'
 type SortDirection = 'asc' | 'desc' | null
 
-export function InvesteringenTable({ data }: InvesteringenTableProps) {
+export function InvesteringenTable({ data, label = "Domein" }: InvesteringenTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('total')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
 
