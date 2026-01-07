@@ -1,12 +1,19 @@
 ---
 title: Gemeentelijke investeringen
-date: 2023-10-28
-summary: Een analyse van de gemeentelijke investeringen.
-tags: [gemeente, investeringen]
+date: 2033-12-31
+summary: Analyse van gemeentelijke investeringen in Vlaanderen per beleidsdomein op basis van meerjarenplannen.
+tags: [gemeente, investeringen, financiën, beleidsdomein]
 slug: gemeentelijke-investeringen
 sourceProvider: Agentschap Binnenlands Bestuur
-sourceTitle: Gemeentelijke jaarrekeningen
+sourceTitle: Gemeentelijke jaarrekeningen - BBC-DR data
 sourceUrl: https://lokaalbestuur.vlaanderen.be/financien/bbc-dr/gemeente-financien
-sourcePublicationDate: 2023-10-28
+sourcePublicationDate: 2027-12-31
 ---
-Hier komt de analyse van de gemeentelijke investeringen.
+
+import { InvesteringenDashboard } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenDashboard"
+
+Deze analyse toont de gemeentelijke investeringen in Vlaanderen op basis van de meerjarenplannen van 286 gemeenten. De data is afkomstig van het Agentschap Binnenlands Bestuur en omvat investeringen per beleidsdomein zoals mobiliteit, onderwijs, cultuur, sport, en milieu.
+
+De investeringen worden getoond als totaalbedragen en per inwoner, zodat je gemeenten van verschillende groottes kunt vergelijken.
+
+<InvesteringenDashboard />
