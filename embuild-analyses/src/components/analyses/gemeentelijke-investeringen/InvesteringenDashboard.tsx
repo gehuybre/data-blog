@@ -295,7 +295,7 @@ export function InvesteringenDashboard() {
   return (
     <div className="space-y-8">
       {isKostenpostTruncated && (
-        <Alert variant="warning" className="bg-amber-50 border-amber-200">
+        <Alert variant="destructive" className="bg-amber-50 border-amber-200">
           <AlertTriangle className="h-4 w-4 text-amber-600" />
           <AlertTitle className="text-amber-800">Gegevens incompleet</AlertTitle>
           <AlertDescription className="text-amber-700">
