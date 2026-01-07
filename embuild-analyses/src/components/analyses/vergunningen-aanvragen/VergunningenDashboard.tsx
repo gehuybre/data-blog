@@ -291,7 +291,7 @@ function NieuwbouwSection() {
           value: "yearly",
           label: "Per jaar",
           exportData: yearlyExportData,
-          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel },
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel, embedParams: { metric, timeRange: "yearly", subView: "total" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Jaarlijkse evolutie nieuwbouw</CardTitle></CardHeader>
@@ -317,7 +317,7 @@ function NieuwbouwSection() {
           value: "quarterly",
           label: "Per kwartaal",
           exportData: quarterlyExportData,
-          exportMeta: { viewType: "chart", periodHeaders: ["Periode"], valueLabel },
+          exportMeta: { viewType: "chart", periodHeaders: ["Periode"], valueLabel, embedParams: { metric, timeRange: "quarterly", subView: "total" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Kwartaalevolutie nieuwbouw</CardTitle></CardHeader>
@@ -342,7 +342,7 @@ function NieuwbouwSection() {
           value: "type",
           label: "Per type",
           exportData: typeExportData,
-          exportMeta: { viewType: "chart", periodHeaders: ["Jaar", "Type"], valueLabel },
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar", "Type"], valueLabel, embedParams: { metric, timeRange: "yearly", subView: "type" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Nieuwbouw per woningtype</CardTitle></CardHeader>
@@ -371,7 +371,7 @@ function NieuwbouwSection() {
           value: "trend",
           label: "Trend",
           exportData: trendExportData,
-          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel: trendValueLabel },
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel: trendValueLabel, embedParams: { metric, timeRange: "yearly", subView: "total" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Trend nieuwbouw (index 2018 = 100)</CardTitle></CardHeader>
@@ -400,7 +400,7 @@ function NieuwbouwSection() {
           value: "table",
           label: "Tabel",
           exportData: tableExportData,
-          exportMeta: { viewType: "table", periodHeaders: ["Jaar"], valueLabel },
+          exportMeta: { viewType: "table", periodHeaders: ["Jaar"], valueLabel, embedParams: { metric, timeRange: "yearly", subView: "total" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Nieuwbouw per jaar (alle metrieken)</CardTitle></CardHeader>
@@ -573,7 +573,7 @@ function VerbouwSection() {
           value: "yearly",
           label: "Per jaar",
           exportData: yearlyExportData,
-          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel },
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel, embedParams: { metric, timeRange: "yearly", subView: "total" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Jaarlijkse evolutie verbouw</CardTitle></CardHeader>
@@ -599,7 +599,7 @@ function VerbouwSection() {
           value: "quarterly",
           label: "Per kwartaal",
           exportData: quarterlyExportData,
-          exportMeta: { viewType: "chart", periodHeaders: ["Periode"], valueLabel },
+          exportMeta: { viewType: "chart", periodHeaders: ["Periode"], valueLabel, embedParams: { metric, timeRange: "quarterly", subView: "total" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Kwartaalevolutie verbouw</CardTitle></CardHeader>
@@ -624,7 +624,7 @@ function VerbouwSection() {
           value: "type",
           label: "Per type",
           exportData: typeExportData,
-          exportMeta: { viewType: "chart", periodHeaders: ["Jaar", "Type"], valueLabel },
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar", "Type"], valueLabel, embedParams: { metric, timeRange: "yearly", subView: "type" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Verbouw per woningtype</CardTitle></CardHeader>
@@ -653,7 +653,7 @@ function VerbouwSection() {
           value: "trend",
           label: "Trend",
           exportData: trendExportData,
-          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel: trendValueLabel },
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel: trendValueLabel, embedParams: { metric, timeRange: "yearly", subView: "total" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Trend verbouw (index 2018 = 100)</CardTitle></CardHeader>
@@ -682,7 +682,7 @@ function VerbouwSection() {
           value: "table",
           label: "Tabel",
           exportData: tableExportData,
-          exportMeta: { viewType: "table", periodHeaders: ["Jaar"], valueLabel },
+          exportMeta: { viewType: "table", periodHeaders: ["Jaar"], valueLabel, embedParams: { metric, timeRange: "yearly", subView: "total" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Verbouw per jaar (alle metrieken)</CardTitle></CardHeader>
@@ -857,7 +857,7 @@ function SloopSection() {
           value: "yearly",
           label: "Per jaar",
           exportData: yearlyExportData,
-          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel },
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel, embedParams: { metric, timeRange: "yearly", subView: "total" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Jaarlijkse evolutie sloop</CardTitle></CardHeader>
@@ -883,7 +883,7 @@ function SloopSection() {
           value: "quarterly",
           label: "Per kwartaal",
           exportData: quarterlyExportData,
-          exportMeta: { viewType: "chart", periodHeaders: ["Periode"], valueLabel },
+          exportMeta: { viewType: "chart", periodHeaders: ["Periode"], valueLabel, embedParams: { metric, timeRange: "quarterly", subView: "total" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Kwartaalevolutie sloop</CardTitle></CardHeader>
@@ -908,7 +908,7 @@ function SloopSection() {
           value: "besluit",
           label: "Per besluit",
           exportData: besluitExportData,
-          exportMeta: { viewType: "chart", periodHeaders: ["Jaar", "Besluit"], valueLabel },
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar", "Besluit"], valueLabel, embedParams: { metric, timeRange: "yearly", subView: "besluit" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Sloop per besluitniveau</CardTitle></CardHeader>
@@ -937,7 +937,7 @@ function SloopSection() {
           value: "trend",
           label: "Trend",
           exportData: trendExportData,
-          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel: trendValueLabel },
+          exportMeta: { viewType: "chart", periodHeaders: ["Jaar"], valueLabel: trendValueLabel, embedParams: { metric, timeRange: "yearly", subView: "total" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Trend sloop (index 2018 = 100)</CardTitle></CardHeader>
@@ -966,7 +966,7 @@ function SloopSection() {
           value: "table",
           label: "Tabel",
           exportData: tableExportData,
-          exportMeta: { viewType: "table", periodHeaders: ["Jaar"], valueLabel },
+          exportMeta: { viewType: "table", periodHeaders: ["Jaar"], valueLabel, embedParams: { metric, timeRange: "yearly", subView: "total" } },
           content: (
             <Card>
               <CardHeader><CardTitle>Sloop per jaar (alle metrieken)</CardTitle></CardHeader>

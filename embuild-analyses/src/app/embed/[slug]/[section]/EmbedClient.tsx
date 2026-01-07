@@ -330,8 +330,10 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
         )
       }
 
-      // Parse metric from URL params (defaults to "w" for wooneenheden)
-      const metric = urlParams.metric || "w"
+      // Parse metric from URL params with section-specific defaults
+      // Sloop doesn't have "w" (wooneenheden), so default to "m2" (oppervlakte)
+      const defaultMetric = section === "sloop" ? "m2" : "w"
+      const metric = urlParams.metric || defaultMetric
 
       // Parse timeRange from URL params (defaults to "yearly")
       const timeRange = (urlParams.timeRange as "quarterly" | "yearly") || "yearly"
