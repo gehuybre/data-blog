@@ -70,7 +70,7 @@ function validateLookups(data: unknown): REKLookups {
       typeof obj.municipalities !== 'object') {
     throw new Error('Invalid lookups: missing or invalid fields')
   }
-  return obj as REKLookups
+  return obj as unknown as REKLookups
 }
 
 function validateVlaanderenData(data: unknown): REKVlaanderenRecord[] {
