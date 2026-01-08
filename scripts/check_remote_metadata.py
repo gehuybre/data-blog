@@ -7,6 +7,10 @@ import sys
 
 def main():
     meta_file = os.environ.get('META_FILE')
+    if not meta_file:
+        print('Error: META_FILE environment variable is not set', file=sys.stderr)
+        sys.exit(1)
+    
     etag = os.environ.get('REMOTE_ETAG') or ''
     lm = os.environ.get('REMOTE_LASTMOD') or ''
     
