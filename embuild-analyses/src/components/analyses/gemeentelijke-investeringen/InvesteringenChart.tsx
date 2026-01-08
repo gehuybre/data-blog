@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { formatAxisNumber } from '@/lib/chart-theme'
 
 interface ChartData {
   year: number
@@ -30,7 +31,7 @@ export function InvesteringenChart({ data, selectedMetric }: InvesteringenChartP
         />
         <YAxis
           label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }}
-          tickFormatter={formatNumber}
+          tickFormatter={formatAxisNumber}
         />
         <Tooltip
           formatter={(value: number | undefined) => value !== undefined ? [formatCurrency(value), 'Investering'] : ['', '']}

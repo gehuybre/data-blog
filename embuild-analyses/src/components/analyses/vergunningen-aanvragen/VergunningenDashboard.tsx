@@ -15,7 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { GeoProvider } from "../shared/GeoContext"
 import { TimeSeriesSection } from "../shared/TimeSeriesSection"
-import { CHART_THEME, CHART_COLORS } from "@/lib/chart-theme"
+import { CHART_THEME, CHART_COLORS, formatAxisNumber } from "@/lib/chart-theme"
 import {
   BarChart,
   Bar,
@@ -300,7 +300,7 @@ function NieuwbouwSection() {
                   <BarChart data={yearlyData} margin={CHART_THEME.margin}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                     <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
-                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatAxisNumber} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <Tooltip
                       formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
                       contentStyle={CHART_THEME.tooltip}
@@ -326,7 +326,7 @@ function NieuwbouwSection() {
                   <AreaChart data={quarterlyData} margin={CHART_THEME.margin}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                     <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} tickLine={false} axisLine={false} />
-                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatAxisNumber} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <Tooltip
                       formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
                       contentStyle={CHART_THEME.tooltip}
@@ -351,7 +351,7 @@ function NieuwbouwSection() {
                   <BarChart data={typeData} margin={CHART_THEME.margin}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                     <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
-                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatAxisNumber} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <Tooltip
                       formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
                       contentStyle={CHART_THEME.tooltip}
@@ -380,7 +380,7 @@ function NieuwbouwSection() {
                   <ComposedChart data={trendData} margin={CHART_THEME.margin}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                     <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
-                    <YAxis yAxisId="left" tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis yAxisId="left" tickFormatter={formatAxisNumber} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <YAxis yAxisId="right" orientation="right" domain={[0, 150]} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <Tooltip
                       formatter={(v: number | undefined, name: string | undefined) => v !== undefined ? (name === "Index" ? v.toFixed(1) : formatInt(v)) : ""}
@@ -582,7 +582,7 @@ function VerbouwSection() {
                   <BarChart data={yearlyData} margin={CHART_THEME.margin}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                     <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
-                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatAxisNumber} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <Tooltip
                       formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
                       contentStyle={CHART_THEME.tooltip}
@@ -608,7 +608,7 @@ function VerbouwSection() {
                   <AreaChart data={quarterlyData} margin={CHART_THEME.margin}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                     <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} tickLine={false} axisLine={false} />
-                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatAxisNumber} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <Tooltip
                       formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
                       contentStyle={CHART_THEME.tooltip}
@@ -633,7 +633,7 @@ function VerbouwSection() {
                   <BarChart data={typeData} margin={CHART_THEME.margin}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                     <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
-                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatAxisNumber} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <Tooltip
                       formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
                       contentStyle={CHART_THEME.tooltip}
@@ -662,7 +662,7 @@ function VerbouwSection() {
                   <ComposedChart data={trendData} margin={CHART_THEME.margin}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                     <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
-                    <YAxis yAxisId="left" tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis yAxisId="left" tickFormatter={formatAxisNumber} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <YAxis yAxisId="right" orientation="right" domain={[0, 150]} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <Tooltip
                       formatter={(v: number | undefined, name: string | undefined) => v !== undefined ? (name === "Index" ? v.toFixed(1) : formatInt(v)) : ""}
@@ -866,7 +866,7 @@ function SloopSection() {
                   <BarChart data={yearlyData} margin={CHART_THEME.margin}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                     <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
-                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatAxisNumber} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <Tooltip
                       formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
                       contentStyle={CHART_THEME.tooltip}
@@ -892,7 +892,7 @@ function SloopSection() {
                   <AreaChart data={quarterlyData} margin={CHART_THEME.margin}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                     <XAxis dataKey="label" tick={{ fontSize: 10 }} interval={3} tickLine={false} axisLine={false} />
-                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatAxisNumber} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <Tooltip
                       formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
                       contentStyle={CHART_THEME.tooltip}
@@ -917,7 +917,7 @@ function SloopSection() {
                   <BarChart data={besluitData} margin={CHART_THEME.margin}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                     <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
-                    <YAxis tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={formatAxisNumber} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <Tooltip
                       formatter={(v: number | undefined) => v !== undefined ? formatInt(v) : ""}
                       contentStyle={CHART_THEME.tooltip}
@@ -946,7 +946,7 @@ function SloopSection() {
                   <ComposedChart data={trendData} margin={CHART_THEME.margin}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_THEME.gridStroke} vertical={false} />
                     <XAxis dataKey="jaar" fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
-                    <YAxis yAxisId="left" tickFormatter={formatInt} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
+                    <YAxis yAxisId="left" tickFormatter={formatAxisNumber} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <YAxis yAxisId="right" orientation="right" domain={[0, 150]} fontSize={CHART_THEME.fontSize} tickLine={false} axisLine={false} />
                     <Tooltip
                       formatter={(v: number | undefined, name: string | undefined) => v !== undefined ? (name === "Index" ? v.toFixed(1) : formatInt(v)) : ""}
