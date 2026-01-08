@@ -1,0 +1,2313 @@
+{
+  "domains": [
+    {
+      "BV_domein": "0 Algemene financiering"
+    },
+    {
+      "BV_domein": "1 Algemeen bestuur"
+    },
+    {
+      "BV_domein": "2 Zich verplaatsen en mobiliteit"
+    },
+    {
+      "BV_domein": "3 Natuur en milieubeheer"
+    },
+    {
+      "BV_domein": "4 Veiligheidszorg"
+    },
+    {
+      "BV_domein": "5 Ondernemen en werken"
+    },
+    {
+      "BV_domein": "6 Wonen en ruimtelijke ordening"
+    },
+    {
+      "BV_domein": "7 Cultuur en vrije tijd"
+    },
+    {
+      "BV_domein": "8 Leren en onderwijs"
+    },
+    {
+      "BV_domein": "9 Zorg en opvang"
+    }
+  ],
+  "subdomeins": [
+    {
+      "BV_domein": "0 Algemene financiering",
+      "BV_subdomein": "00 Algemene financiering"
+    },
+    {
+      "BV_domein": "1 Algemeen bestuur",
+      "BV_subdomein": "010 Politieke organen"
+    },
+    {
+      "BV_domein": "1 Algemeen bestuur",
+      "BV_subdomein": "011 Algemene diensten"
+    },
+    {
+      "BV_domein": "1 Algemeen bestuur",
+      "BV_subdomein": "013 Administratieve dienstverlening"
+    },
+    {
+      "BV_domein": "1 Algemeen bestuur",
+      "BV_subdomein": "015 Internationale samenwerking"
+    },
+    {
+      "BV_domein": "1 Algemeen bestuur",
+      "BV_subdomein": "016 Hulp aan het buitenland"
+    },
+    {
+      "BV_domein": "1 Algemeen bestuur",
+      "BV_subdomein": "017 Binnengemeentelijke decentralisatie"
+    },
+    {
+      "BV_domein": "1 Algemeen bestuur",
+      "BV_subdomein": "019 Overig algemeen bestuur"
+    },
+    {
+      "BV_domein": "2 Zich verplaatsen en mobiliteit",
+      "BV_subdomein": "02 Zich verplaatsen en mobiliteit"
+    },
+    {
+      "BV_domein": "3 Natuur en milieubeheer",
+      "BV_subdomein": "030 Afval- en materialenbeheer"
+    },
+    {
+      "BV_domein": "3 Natuur en milieubeheer",
+      "BV_subdomein": "031 Waterbeheer"
+    },
+    {
+      "BV_domein": "3 Natuur en milieubeheer",
+      "BV_subdomein": "032 Vermindering van de milieuverontreiniging"
+    },
+    {
+      "BV_domein": "3 Natuur en milieubeheer",
+      "BV_subdomein": "034 Bescherming van biodiversiteit, landschappen en bodem"
+    },
+    {
+      "BV_domein": "3 Natuur en milieubeheer",
+      "BV_subdomein": "035 Klimaat en energie"
+    },
+    {
+      "BV_domein": "3 Natuur en milieubeheer",
+      "BV_subdomein": "038/9 Overige milieubescherming"
+    },
+    {
+      "BV_domein": "4 Veiligheidszorg",
+      "BV_subdomein": "040 Politiediensten"
+    },
+    {
+      "BV_domein": "4 Veiligheidszorg",
+      "BV_subdomein": "041 Brandweer"
+    },
+    {
+      "BV_domein": "4 Veiligheidszorg",
+      "BV_subdomein": "042/4 Overige hulpdiensten"
+    },
+    {
+      "BV_domein": "4 Veiligheidszorg",
+      "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid"
+    },
+    {
+      "BV_domein": "5 Ondernemen en werken",
+      "BV_subdomein": "050 Handel en middenstand"
+    },
+    {
+      "BV_domein": "5 Ondernemen en werken",
+      "BV_subdomein": "051 Nijverheid"
+    },
+    {
+      "BV_domein": "5 Ondernemen en werken",
+      "BV_subdomein": "052 Toerisme"
+    },
+    {
+      "BV_domein": "5 Ondernemen en werken",
+      "BV_subdomein": "053 Land-, tuin- en bosbouw"
+    },
+    {
+      "BV_domein": "5 Ondernemen en werken",
+      "BV_subdomein": "054 Visvangst"
+    },
+    {
+      "BV_domein": "5 Ondernemen en werken",
+      "BV_subdomein": "055 Werkgelegenheid"
+    },
+    {
+      "BV_domein": "5 Ondernemen en werken",
+      "BV_subdomein": "059 Overige economische zaken"
+    },
+    {
+      "BV_domein": "6 Wonen en ruimtelijke ordening",
+      "BV_subdomein": "060 Ruimtelijke planning"
+    },
+    {
+      "BV_domein": "6 Wonen en ruimtelijke ordening",
+      "BV_subdomein": "061 Gebiedsontwikkeling"
+    },
+    {
+      "BV_domein": "6 Wonen en ruimtelijke ordening",
+      "BV_subdomein": "062 Woonbeleid"
+    },
+    {
+      "BV_domein": "6 Wonen en ruimtelijke ordening",
+      "BV_subdomein": "063 Watervoorziening"
+    },
+    {
+      "BV_domein": "6 Wonen en ruimtelijke ordening",
+      "BV_subdomein": "064 Elektriciteitsvoorziening"
+    },
+    {
+      "BV_domein": "6 Wonen en ruimtelijke ordening",
+      "BV_subdomein": "065 Gasvoorziening"
+    },
+    {
+      "BV_domein": "6 Wonen en ruimtelijke ordening",
+      "BV_subdomein": "066 Communicatievoorzieningen"
+    },
+    {
+      "BV_domein": "6 Wonen en ruimtelijke ordening",
+      "BV_subdomein": "067 Straatverlichting"
+    },
+    {
+      "BV_domein": "6 Wonen en ruimtelijke ordening",
+      "BV_subdomein": "068 Groene ruimte"
+    },
+    {
+      "BV_domein": "6 Wonen en ruimtelijke ordening",
+      "BV_subdomein": "069 Overige nutsvoorzieningen"
+    },
+    {
+      "BV_domein": "7 Cultuur en vrije tijd",
+      "BV_subdomein": "070 Culturele instellingen"
+    },
+    {
+      "BV_domein": "7 Cultuur en vrije tijd",
+      "BV_subdomein": "071 Evenementen"
+    },
+    {
+      "BV_domein": "7 Cultuur en vrije tijd",
+      "BV_subdomein": "072 Erfgoed"
+    },
+    {
+      "BV_domein": "7 Cultuur en vrije tijd",
+      "BV_subdomein": "073 Overig kunst- en cultuurbeleid"
+    },
+    {
+      "BV_domein": "7 Cultuur en vrije tijd",
+      "BV_subdomein": "074 Sport"
+    },
+    {
+      "BV_domein": "7 Cultuur en vrije tijd",
+      "BV_subdomein": "075 Jeugd"
+    },
+    {
+      "BV_domein": "7 Cultuur en vrije tijd",
+      "BV_subdomein": "079 Erediensten  en niet-confessionele levensbeschouwelijke gemeenschappen"
+    },
+    {
+      "BV_domein": "8 Leren en onderwijs",
+      "BV_subdomein": "080 Basisonderwijs"
+    },
+    {
+      "BV_domein": "8 Leren en onderwijs",
+      "BV_subdomein": "081 Secundair onderwijs"
+    },
+    {
+      "BV_domein": "8 Leren en onderwijs",
+      "BV_subdomein": "082 Deeltijds kunstonderwijs"
+    },
+    {
+      "BV_domein": "8 Leren en onderwijs",
+      "BV_subdomein": "083 Hoger en Volwassenenonderwijs"
+    },
+    {
+      "BV_domein": "8 Leren en onderwijs",
+      "BV_subdomein": "086 Ondersteunende diensten voor het onderwijs"
+    },
+    {
+      "BV_domein": "8 Leren en onderwijs",
+      "BV_subdomein": "087/8 Algemeen onderwijsbeleid"
+    },
+    {
+      "BV_domein": "9 Zorg en opvang",
+      "BV_subdomein": "090 Sociaal beleid"
+    },
+    {
+      "BV_domein": "9 Zorg en opvang",
+      "BV_subdomein": "091 Ziekte- en invaliditeit"
+    },
+    {
+      "BV_domein": "9 Zorg en opvang",
+      "BV_subdomein": "092 Werkloosheid"
+    },
+    {
+      "BV_domein": "9 Zorg en opvang",
+      "BV_subdomein": "093 Sociale huisvesting"
+    },
+    {
+      "BV_domein": "9 Zorg en opvang",
+      "BV_subdomein": "094 Gezin en kinderen"
+    },
+    {
+      "BV_domein": "9 Zorg en opvang",
+      "BV_subdomein": "095 Ouderen"
+    },
+    {
+      "BV_domein": "9 Zorg en opvang",
+      "BV_subdomein": "098 Dienstverlening inzake volksgezondheid"
+    },
+    {
+      "BV_domein": "9 Zorg en opvang",
+      "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging"
+    }
+  ],
+  "beleidsvelds": [
+    {
+      "BV_subdomein": "00 Algemene financiering",
+      "Beleidsveld": "0010 Algemene overdrachten tussen de verschillende bestuurlijke niveaus"
+    },
+    {
+      "BV_subdomein": "00 Algemene financiering",
+      "Beleidsveld": "0020 Fiscale aangelegenheden"
+    },
+    {
+      "BV_subdomein": "00 Algemene financiering",
+      "Beleidsveld": "0030 Financiële aangelegenheden"
+    },
+    {
+      "BV_subdomein": "00 Algemene financiering",
+      "Beleidsveld": "0040 Transacties in verband met de openbare schuld"
+    },
+    {
+      "BV_subdomein": "00 Algemene financiering",
+      "Beleidsveld": "0050 Patrimonium zonder maatschappelijk doel"
+    },
+    {
+      "BV_subdomein": "00 Algemene financiering",
+      "Beleidsveld": "0090 Overige algemene financiering"
+    },
+    {
+      "BV_subdomein": "00 Algemene financiering",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "010 Politieke organen",
+      "Beleidsveld": "0100 Politieke organen"
+    },
+    {
+      "BV_subdomein": "010 Politieke organen",
+      "Beleidsveld": "0101 Officieel ceremonieel"
+    },
+    {
+      "BV_subdomein": "010 Politieke organen",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "011 Algemene diensten",
+      "Beleidsveld": "0110 Secretariaat"
+    },
+    {
+      "BV_subdomein": "011 Algemene diensten",
+      "Beleidsveld": "0111 Fiscale en financiële diensten"
+    },
+    {
+      "BV_subdomein": "011 Algemene diensten",
+      "Beleidsveld": "0112 Personeelsdienst en vorming"
+    },
+    {
+      "BV_subdomein": "011 Algemene diensten",
+      "Beleidsveld": "0113 Archief"
+    },
+    {
+      "BV_subdomein": "011 Algemene diensten",
+      "Beleidsveld": "0114 Organisatiebeheersing"
+    },
+    {
+      "BV_subdomein": "011 Algemene diensten",
+      "Beleidsveld": "0115 Welzijn op het werk"
+    },
+    {
+      "BV_subdomein": "011 Algemene diensten",
+      "Beleidsveld": "0119 Overige algemene diensten"
+    },
+    {
+      "BV_subdomein": "011 Algemene diensten",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "013 Administratieve dienstverlening",
+      "Beleidsveld": "0130 Administratieve dienstverlening"
+    },
+    {
+      "BV_subdomein": "013 Administratieve dienstverlening",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "015 Internationale samenwerking",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "016 Hulp aan het buitenland",
+      "Beleidsveld": "0160 Hulp aan het buitenland"
+    },
+    {
+      "BV_subdomein": "016 Hulp aan het buitenland",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "017 Binnengemeentelijke decentralisatie",
+      "Beleidsveld": "0170 Binnengemeentelijke decentralisatie"
+    },
+    {
+      "BV_subdomein": "017 Binnengemeentelijke decentralisatie",
+      "Beleidsveld": "0171 Gemeentelijk/stedelijk wijkoverleg"
+    },
+    {
+      "BV_subdomein": "017 Binnengemeentelijke decentralisatie",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "019 Overig algemeen bestuur",
+      "Beleidsveld": "0190 Overig algemeen bestuur"
+    },
+    {
+      "BV_subdomein": "019 Overig algemeen bestuur",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
+      "Beleidsveld": "0200 Wegen"
+    },
+    {
+      "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
+      "Beleidsveld": "0210 Openbaar vervoer"
+    },
+    {
+      "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
+      "Beleidsveld": "0220 Parkeren"
+    },
+    {
+      "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
+      "Beleidsveld": "0290 Overige mobiliteit en verkeer"
+    },
+    {
+      "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "030 Afval- en materialenbeheer",
+      "Beleidsveld": "0300 Ophalen en verwerken van huishoudelijk afval"
+    },
+    {
+      "BV_subdomein": "030 Afval- en materialenbeheer",
+      "Beleidsveld": "0309 Overig afval- en materialenbeheer"
+    },
+    {
+      "BV_subdomein": "030 Afval- en materialenbeheer",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "031 Waterbeheer",
+      "Beleidsveld": "0310 Beheer van regen- en afvalwater"
+    },
+    {
+      "BV_subdomein": "031 Waterbeheer",
+      "Beleidsveld": "0319 Overig waterbeheer"
+    },
+    {
+      "BV_subdomein": "031 Waterbeheer",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "032 Vermindering van de milieuverontreiniging",
+      "Beleidsveld": "0320 Sanering van bodemverontreiniging"
+    },
+    {
+      "BV_subdomein": "032 Vermindering van de milieuverontreiniging",
+      "Beleidsveld": "0329 Overige vermindering van milieuverontreiniging"
+    },
+    {
+      "BV_subdomein": "032 Vermindering van de milieuverontreiniging",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "034 Bescherming van biodiversiteit, landschappen en bodem",
+      "Beleidsveld": "0340 Aankoop, inrichting en beheer van natuur, groen en bos"
+    },
+    {
+      "BV_subdomein": "034 Bescherming van biodiversiteit, landschappen en bodem",
+      "Beleidsveld": "0341 Erosiebestrijding"
+    },
+    {
+      "BV_subdomein": "034 Bescherming van biodiversiteit, landschappen en bodem",
+      "Beleidsveld": "0349 Overige bescherming van biodiversiteit, landschappen en bodem"
+    },
+    {
+      "BV_subdomein": "034 Bescherming van biodiversiteit, landschappen en bodem",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "035 Klimaat en energie",
+      "Beleidsveld": "0350 Klimaat en energie"
+    },
+    {
+      "BV_subdomein": "035 Klimaat en energie",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "038/9 Overige milieubescherming",
+      "Beleidsveld": "0380 Participatie en sensibilisatie"
+    },
+    {
+      "BV_subdomein": "038/9 Overige milieubescherming",
+      "Beleidsveld": "0381 Geïntegreerde milieuprojecten"
+    },
+    {
+      "BV_subdomein": "038/9 Overige milieubescherming",
+      "Beleidsveld": "0390 Overige milieubescherming"
+    },
+    {
+      "BV_subdomein": "038/9 Overige milieubescherming",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "040 Politiediensten",
+      "Beleidsveld": "0400 Politiediensten"
+    },
+    {
+      "BV_subdomein": "040 Politiediensten",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "041 Brandweer",
+      "Beleidsveld": "0410 Brandweer"
+    },
+    {
+      "BV_subdomein": "041 Brandweer",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "042/4 Overige hulpdiensten",
+      "Beleidsveld": "0420 Dienst 100"
+    },
+    {
+      "BV_subdomein": "042/4 Overige hulpdiensten",
+      "Beleidsveld": "0430 Civiele bescherming"
+    },
+    {
+      "BV_subdomein": "042/4 Overige hulpdiensten",
+      "Beleidsveld": "0440 Overige hulpdiensten"
+    },
+    {
+      "BV_subdomein": "042/4 Overige hulpdiensten",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid",
+      "Beleidsveld": "0470 Dierenbescherming"
+    },
+    {
+      "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid",
+      "Beleidsveld": "0480 Bestuurlijke preventie (incl. GAS)"
+    },
+    {
+      "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid",
+      "Beleidsveld": "0490 Overige elementen van openbare orde en veiligheid"
+    },
+    {
+      "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "050 Handel en middenstand",
+      "Beleidsveld": "0500 Handel en middenstand"
+    },
+    {
+      "BV_subdomein": "050 Handel en middenstand",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "051 Nijverheid",
+      "Beleidsveld": "0510 Nijverheid"
+    },
+    {
+      "BV_subdomein": "051 Nijverheid",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "052 Toerisme",
+      "Beleidsveld": "0520 Toerisme - Onthaal en promotie"
+    },
+    {
+      "BV_subdomein": "052 Toerisme",
+      "Beleidsveld": "0521 Toerisme - Sectorondersteuning"
+    },
+    {
+      "BV_subdomein": "052 Toerisme",
+      "Beleidsveld": "0522 Toerisme - Infrastructuur"
+    },
+    {
+      "BV_subdomein": "052 Toerisme",
+      "Beleidsveld": "0529 Overige activiteiten inzake toerisme"
+    },
+    {
+      "BV_subdomein": "052 Toerisme",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "053 Land-, tuin- en bosbouw",
+      "Beleidsveld": "0530 Land-, tuin- en bosbouw"
+    },
+    {
+      "BV_subdomein": "053 Land-, tuin- en bosbouw",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "054 Visvangst",
+      "Beleidsveld": "0540 Visvangst"
+    },
+    {
+      "BV_subdomein": "054 Visvangst",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "055 Werkgelegenheid",
+      "Beleidsveld": "0550 Tewerkstelling en activering"
+    },
+    {
+      "BV_subdomein": "055 Werkgelegenheid",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "059 Overige economische zaken",
+      "Beleidsveld": "0590 Overige economische zaken"
+    },
+    {
+      "BV_subdomein": "059 Overige economische zaken",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "060 Ruimtelijke planning",
+      "Beleidsveld": "0600 Ruimtelijke planning"
+    },
+    {
+      "BV_subdomein": "060 Ruimtelijke planning",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "061 Gebiedsontwikkeling",
+      "Beleidsveld": "0610 Gebiedsontwikkeling"
+    },
+    {
+      "BV_subdomein": "061 Gebiedsontwikkeling",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "062 Woonbeleid",
+      "Beleidsveld": "0620 Grondbeleid voor wonen"
+    },
+    {
+      "BV_subdomein": "062 Woonbeleid",
+      "Beleidsveld": "0621 Bestrijding van krotwoningen"
+    },
+    {
+      "BV_subdomein": "062 Woonbeleid",
+      "Beleidsveld": "0622 Woonwagenterreinen"
+    },
+    {
+      "BV_subdomein": "062 Woonbeleid",
+      "Beleidsveld": "0629 Overig woonbeleid"
+    },
+    {
+      "BV_subdomein": "062 Woonbeleid",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "063 Watervoorziening",
+      "Beleidsveld": "0630 Watervoorziening"
+    },
+    {
+      "BV_subdomein": "063 Watervoorziening",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "064 Elektriciteitsvoorziening",
+      "Beleidsveld": "0640 Elektriciteitsvoorziening"
+    },
+    {
+      "BV_subdomein": "064 Elektriciteitsvoorziening",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "065 Gasvoorziening",
+      "Beleidsveld": "0650 Gasvoorziening"
+    },
+    {
+      "BV_subdomein": "065 Gasvoorziening",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "066 Communicatievoorzieningen",
+      "Beleidsveld": "0660 Communicatievoorzieningen"
+    },
+    {
+      "BV_subdomein": "066 Communicatievoorzieningen",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "067 Straatverlichting",
+      "Beleidsveld": "0670 Straatverlichting"
+    },
+    {
+      "BV_subdomein": "067 Straatverlichting",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "068 Groene ruimte",
+      "Beleidsveld": "0680 Groene ruimte"
+    },
+    {
+      "BV_subdomein": "068 Groene ruimte",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "069 Overige nutsvoorzieningen",
+      "Beleidsveld": "0690 Overige nutsvoorzieningen"
+    },
+    {
+      "BV_subdomein": "069 Overige nutsvoorzieningen",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "070 Culturele instellingen",
+      "Beleidsveld": "0700 Musea"
+    },
+    {
+      "BV_subdomein": "070 Culturele instellingen",
+      "Beleidsveld": "0701 Cultuurcentrum"
+    },
+    {
+      "BV_subdomein": "070 Culturele instellingen",
+      "Beleidsveld": "0702 Schouwburg, concertgebouw, opera"
+    },
+    {
+      "BV_subdomein": "070 Culturele instellingen",
+      "Beleidsveld": "0703 Openbare bibliotheken"
+    },
+    {
+      "BV_subdomein": "070 Culturele instellingen",
+      "Beleidsveld": "0705 Gemeenschapscentrum"
+    },
+    {
+      "BV_subdomein": "070 Culturele instellingen",
+      "Beleidsveld": "0709 Overige culturele instellingen"
+    },
+    {
+      "BV_subdomein": "070 Culturele instellingen",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "071 Evenementen",
+      "Beleidsveld": "0710 Feesten en plechtigheden"
+    },
+    {
+      "BV_subdomein": "071 Evenementen",
+      "Beleidsveld": "0711 Openluchtrecreatie"
+    },
+    {
+      "BV_subdomein": "071 Evenementen",
+      "Beleidsveld": "0712 Festivals"
+    },
+    {
+      "BV_subdomein": "071 Evenementen",
+      "Beleidsveld": "0719 Overige evenementen"
+    },
+    {
+      "BV_subdomein": "071 Evenementen",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "072 Erfgoed",
+      "Beleidsveld": "0720 Monumentenzorg"
+    },
+    {
+      "BV_subdomein": "072 Erfgoed",
+      "Beleidsveld": "0721 Archeologie"
+    },
+    {
+      "BV_subdomein": "072 Erfgoed",
+      "Beleidsveld": "0729 Overig beleid inzake het erfgoed"
+    },
+    {
+      "BV_subdomein": "072 Erfgoed",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "073 Overig kunst- en cultuurbeleid",
+      "Beleidsveld": "0739 Overig kunst- en cultuurbeleid"
+    },
+    {
+      "BV_subdomein": "073 Overig kunst- en cultuurbeleid",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "074 Sport",
+      "Beleidsveld": "0740 Sportsector- en verenigingsondersteuning"
+    },
+    {
+      "BV_subdomein": "074 Sport",
+      "Beleidsveld": "0741 Sportpromotie en -evenementen"
+    },
+    {
+      "BV_subdomein": "074 Sport",
+      "Beleidsveld": "0742 Sportinfrastructuur"
+    },
+    {
+      "BV_subdomein": "074 Sport",
+      "Beleidsveld": "0749 Overig sportbeleid"
+    },
+    {
+      "BV_subdomein": "074 Sport",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "075 Jeugd",
+      "Beleidsveld": "0750 Jeugdsector- en verenigingsondersteuning"
+    },
+    {
+      "BV_subdomein": "075 Jeugd",
+      "Beleidsveld": "0751 Gemeentelijke dienstverlening gericht op kinderen & jongeren"
+    },
+    {
+      "BV_subdomein": "075 Jeugd",
+      "Beleidsveld": "0752 Infrastructuur en faciliteiten ten behoeve van kinderen en jongeren"
+    },
+    {
+      "BV_subdomein": "075 Jeugd",
+      "Beleidsveld": "0759 Overige activiteiten met betrekking tot jeugd"
+    },
+    {
+      "BV_subdomein": "075 Jeugd",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "079 Erediensten  en niet-confessionele levensbeschouwelijke gemeenschappen",
+      "Beleidsveld": "0790 Erediensten"
+    },
+    {
+      "BV_subdomein": "079 Erediensten  en niet-confessionele levensbeschouwelijke gemeenschappen",
+      "Beleidsveld": "0791 Niet-confessionele levensbeschouwelijke gemeenschappen"
+    },
+    {
+      "BV_subdomein": "079 Erediensten  en niet-confessionele levensbeschouwelijke gemeenschappen",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "080 Basisonderwijs",
+      "Beleidsveld": "0800 Gewoon basisonderwijs"
+    },
+    {
+      "BV_subdomein": "080 Basisonderwijs",
+      "Beleidsveld": "0801 Buitengewoon basisonderwijs"
+    },
+    {
+      "BV_subdomein": "080 Basisonderwijs",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "081 Secundair onderwijs",
+      "Beleidsveld": "0810 Gewoon secundair onderwijs"
+    },
+    {
+      "BV_subdomein": "081 Secundair onderwijs",
+      "Beleidsveld": "0814 Leren en werken"
+    },
+    {
+      "BV_subdomein": "081 Secundair onderwijs",
+      "Beleidsveld": "0815 Buitengewoon secundair onderwijs"
+    },
+    {
+      "BV_subdomein": "081 Secundair onderwijs",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "082 Deeltijds kunstonderwijs",
+      "Beleidsveld": "0820 Deeltijds kunstonderwijs"
+    },
+    {
+      "BV_subdomein": "082 Deeltijds kunstonderwijs",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "083 Hoger en Volwassenenonderwijs",
+      "Beleidsveld": "0830 Centra voor volwassenenonderwijs"
+    },
+    {
+      "BV_subdomein": "083 Hoger en Volwassenenonderwijs",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "086 Ondersteunende diensten voor het onderwijs",
+      "Beleidsveld": "0869 Overige ondersteunende diensten voor het onderwijs"
+    },
+    {
+      "BV_subdomein": "086 Ondersteunende diensten voor het onderwijs",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "087/8 Algemeen onderwijsbeleid",
+      "Beleidsveld": "0870 Sociale voordelen"
+    },
+    {
+      "BV_subdomein": "087/8 Algemeen onderwijsbeleid",
+      "Beleidsveld": "0879 Andere voordelen"
+    },
+    {
+      "BV_subdomein": "087/8 Algemeen onderwijsbeleid",
+      "Beleidsveld": "0889 Ondersteunende diensten voor het algemeen onderwijsbeleid"
+    },
+    {
+      "BV_subdomein": "087/8 Algemeen onderwijsbeleid",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "090 Sociaal beleid",
+      "Beleidsveld": "0900 Sociale bijstand"
+    },
+    {
+      "BV_subdomein": "090 Sociaal beleid",
+      "Beleidsveld": "0902 Integratie van personen met vreemde herkomst"
+    },
+    {
+      "BV_subdomein": "090 Sociaal beleid",
+      "Beleidsveld": "0903 Lokale opvanginitiatieven voor asielzoekers"
+    },
+    {
+      "BV_subdomein": "090 Sociaal beleid",
+      "Beleidsveld": "0905 Dienst voor juridische informatie en advies"
+    },
+    {
+      "BV_subdomein": "090 Sociaal beleid",
+      "Beleidsveld": "0909 Overige verrichtingen inzake sociaal beleid"
+    },
+    {
+      "BV_subdomein": "090 Sociaal beleid",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "091 Ziekte- en invaliditeit",
+      "Beleidsveld": "0910 Woningen voor personen met een handicap"
+    },
+    {
+      "BV_subdomein": "091 Ziekte- en invaliditeit",
+      "Beleidsveld": "0911 Diensten en voorzieningen voor personen met een handicap"
+    },
+    {
+      "BV_subdomein": "091 Ziekte- en invaliditeit",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "092 Werkloosheid",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "093 Sociale huisvesting",
+      "Beleidsveld": "0930 Sociale huisvesting"
+    },
+    {
+      "BV_subdomein": "093 Sociale huisvesting",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "094 Gezin en kinderen",
+      "Beleidsveld": "0940 Jeugdvoorzieningen"
+    },
+    {
+      "BV_subdomein": "094 Gezin en kinderen",
+      "Beleidsveld": "0941 Gezinsvervangende tehuizen"
+    },
+    {
+      "BV_subdomein": "094 Gezin en kinderen",
+      "Beleidsveld": "0943 Gezinshulp"
+    },
+    {
+      "BV_subdomein": "094 Gezin en kinderen",
+      "Beleidsveld": "0944 Preventieve gezinsondersteuning"
+    },
+    {
+      "BV_subdomein": "094 Gezin en kinderen",
+      "Beleidsveld": "0945 Kinderopvang"
+    },
+    {
+      "BV_subdomein": "094 Gezin en kinderen",
+      "Beleidsveld": "0946 Thuisbezorgde maaltijden"
+    },
+    {
+      "BV_subdomein": "094 Gezin en kinderen",
+      "Beleidsveld": "0947 Klusjesdienst"
+    },
+    {
+      "BV_subdomein": "094 Gezin en kinderen",
+      "Beleidsveld": "0948 Poetsdienst"
+    },
+    {
+      "BV_subdomein": "094 Gezin en kinderen",
+      "Beleidsveld": "0949 Overige gezinshulp"
+    },
+    {
+      "BV_subdomein": "094 Gezin en kinderen",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "095 Ouderen",
+      "Beleidsveld": "0950 Ouderenwoningen"
+    },
+    {
+      "BV_subdomein": "095 Ouderen",
+      "Beleidsveld": "0951 Dienstencentra"
+    },
+    {
+      "BV_subdomein": "095 Ouderen",
+      "Beleidsveld": "0952 Assistentiewoningen"
+    },
+    {
+      "BV_subdomein": "095 Ouderen",
+      "Beleidsveld": "0953 Woon- en zorgcentra"
+    },
+    {
+      "BV_subdomein": "095 Ouderen",
+      "Beleidsveld": "0954 Dagzorgcentra"
+    },
+    {
+      "BV_subdomein": "095 Ouderen",
+      "Beleidsveld": "0959 Overige verrichtingen betreffende ouderen"
+    },
+    {
+      "BV_subdomein": "095 Ouderen",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+      "Beleidsveld": "0980 Sociale geneeskunde"
+    },
+    {
+      "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+      "Beleidsveld": "0982 Ziekenhuizen"
+    },
+    {
+      "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+      "Beleidsveld": "0983 Andere verpleeg- en verzorgingsinrichtingen"
+    },
+    {
+      "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+      "Beleidsveld": "0984 Ontsmetting en openbare reiniging"
+    },
+    {
+      "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+      "Beleidsveld": "0985 Gezondheidspromotie en ziektepreventie"
+    },
+    {
+      "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+      "Beleidsveld": "0986 Eerstelijnsgezondheidszorg"
+    },
+    {
+      "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+      "Beleidsveld": "0989 Overige dienstverlening inzake volksgezondheid"
+    },
+    {
+      "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+      "Beleidsveld": "None"
+    },
+    {
+      "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging",
+      "Beleidsveld": "0990 Begraafplaatsen"
+    },
+    {
+      "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging",
+      "Beleidsveld": "0991 Crematoria"
+    },
+    {
+      "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging",
+      "Beleidsveld": "0992 Lijkbezorging"
+    },
+    {
+      "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging",
+      "Beleidsveld": "None"
+    }
+  ],
+  "municipalities": {
+    "73075": "'s Gravenvoeren",
+    "11041": "'s Gravenwezel",
+    "73076": "'s Herenelderen",
+    "41001": "Aaigem",
+    "34001": "Aalbeke",
+    "41002": "Aalst",
+    "71001": "Aalst",
+    "44001": "Aalter",
+    "44084": "Aalter",
+    "24001": "Aarschot",
+    "37001": "Aarsele",
+    "31001": "Aartrijke",
+    "11001": "Aartselaar",
+    "72001": "Achel",
+    "43001": "Adegem",
+    "38001": "Adinkerke",
+    "23105": "Affligem",
+    "44002": "Afsnee",
+    "73001": "Alken",
+    "23001": "Alsemberg",
+    "38002": "Alveringem",
+    "21001": "Anderlecht",
+    "11002": "Antwerpen",
+    "34002": "Anzegem",
+    "42001": "Appels",
+    "41003": "Appelterre-Eichem",
+    "36001": "Ardooie",
+    "37020": "Ardooie",
+    "13001": "Arendonk",
+    "71002": "As",
+    "41004": "Aspelare",
+    "44003": "Asper",
+    "23002": "Asse",
+    "31002": "Assebroek",
+    "43002": "Assenede",
+    "24002": "Assent",
+    "44004": "Astene",
+    "24003": "Attenhoven",
+    "24004": "Attenrode",
+    "25002": "Autre-Eglise",
+    "38003": "Avekapelle",
+    "34003": "Avelgem",
+    "24005": "Averbode",
+    "44005": "Baaigem",
+    "24006": "Baal",
+    "41005": "Baardegem",
+    "13002": "Baarle-Hertog",
+    "42002": "Baasrode",
+    "44006": "Bachte-Maria-Leerne",
+    "25003": "Baisy-Thy",
+    "44007": "Balegem",
+    "13003": "Balen",
+    "41006": "Bambrugge",
+    "43003": "Bassevelde",
+    "73002": "Batsheers",
+    "25004": "Baulers",
+    "41007": "Bavegem",
+    "34004": "Bavikhove",
+    "46001": "Bazel",
+    "38030": "Beauvoorde",
+    "45001": "Beerlegem",
+    "31003": "Beernem",
+    "13004": "Beerse",
+    "23003": "Beersel",
+    "32001": "Beerst",
+    "23004": "Beert",
+    "44008": "Beervelde",
+    "12001": "Beerzel",
+    "24007": "Begijnendijk",
+    "23005": "Beigem",
+    "35001": "Bekegem",
+    "23006": "Bekkerzeel",
+    "24008": "Bekkevoort",
+    "34005": "Bellegem",
+    "44009": "Bellem",
+    "23007": "Bellingen",
+    "46002": "Belsele",
+    "71003": "Berbroek",
+    "11003": "Berchem",
+    "45002": "Berchem",
+    "23008": "Berg",
+    "73003": "Berg",
+    "71004": "Beringen",
+    "12002": "Berlaar",
+    "42003": "Berlare",
+    "73004": "Berlingen",
+    "24009": "Bertem",
+    "33001": "Beselare",
+    "24010": "Betekom",
+    "25005": "Bevekom",
+    "12003": "Bevel",
+    "23009": "Bever",
+    "34006": "Beveren",
+    "38004": "Beveren",
+    "46030": "Beveren-Kruibeke-Zwijndrecht",
+    "71005": "Beverlo",
+    "73005": "Beverst",
+    "24011": "Bierbeek",
+    "25006": "Bierges",
+    "25007": "Bierk",
+    "25008": "Biez",
+    "33002": "Bikschote",
+    "73110": "Bilzen-Hoeselt",
+    "71006": "Binderveld",
+    "24012": "Binkom",
+    "34007": "Bissegem",
+    "12004": "Blaasveld",
+    "24013": "Blanden",
+    "31004": "Blankenberge",
+    "72003": "Bocholt",
+    "11004": "Boechout",
+    "71007": "Boekhout",
+    "43004": "Boekhoute",
+    "33003": "Boezinge",
+    "23010": "Bogaarden",
+    "25009": "Bomal",
+    "73007": "Bommershoven",
+    "12005": "Bonheiden",
+    "25010": "Bonlez",
+    "12006": "Booischot",
+    "38005": "Booitshoeke",
+    "11005": "Boom",
+    "73008": "Boorsem",
+    "24014": "Boortmeerbeek",
+    "23011": "Borchtlombeek",
+    "11006": "Borgerhout",
+    "71008": "Borlo",
+    "12007": "Bornem",
+    "25011": "Bornival",
+    "41008": "Borsbeke",
+    "34008": "Bossuit",
+    "25012": "Bossut-Gottechain",
+    "24015": "Bost",
+    "44010": "Bottelare",
+    "25013": "Bousval",
+    "24016": "Boutersem",
+    "13005": "Bouwel",
+    "32002": "Bovekerke",
+    "73103": "Bovelingen",
+    "45059": "Brakel",
+    "11008": "Brasschaat",
+    "11009": "Brecht",
+    "35002": "Bredene",
+    "72004": "Bree",
+    "12008": "Breendonk",
+    "33004": "Brielen",
+    "11010": "Broechem",
+    "73010": "Broekom",
+    "31005": "Brugge",
+    "23012": "Brussegem",
+    "21004": "Brussel",
+    "71009": "Brustem",
+    "24017": "Budingen",
+    "42004": "Buggenhout",
+    "23013": "Buizingen",
+    "23014": "Buken",
+    "38006": "Bulskamp",
+    "24018": "Bunsbeek",
+    "11011": "Burcht",
+    "41009": "Burst",
+    "71010": "Buvingen",
+    "25117": "Chastre",
+    "25017": "Chastre-Villeroux-Blanmont",
+    "25018": "Chaumont-Gistoux",
+    "25020": "Corbais",
+    "25021": "Corroy-le-Grand",
+    "25022": "Cortil-Noirmont",
+    "25023": "Court-Saint-Etienne",
+    "25024": "Couture-Saint-Germain",
+    "25016": "Céroux-Mousty",
+    "36003": "Dadizele",
+    "46004": "Daknam",
+    "31006": "Damme",
+    "35029": "De Haan",
+    "46005": "De Klinge",
+    "38007": "De Moeren",
+    "38008": "De Panne",
+    "34009": "Deerlijk",
+    "45004": "Deftinge",
+    "44011": "Deinze",
+    "44083": "Deinze",
+    "42005": "Denderbelle",
+    "41010": "Denderhoutem",
+    "41011": "Denderleeuw",
+    "42006": "Dendermonde",
+    "41012": "Denderwindeke",
+    "37002": "Dentergem",
+    "13006": "Dessel",
+    "34010": "Desselgem",
+    "44013": "Destelbergen",
+    "44015": "Deurle",
+    "11012": "Deurne",
+    "24019": "Deurne",
+    "25103": "Deurne",
+    "23015": "Diegem",
+    "71011": "Diepenbeek",
+    "24020": "Diest",
+    "73011": "Diets-Heur",
+    "33005": "Dikkebus",
+    "45005": "Dikkele",
+    "44016": "Dikkelvenne",
+    "32003": "Diksmuide",
+    "23016": "Dilbeek",
+    "72005": "Dilsen",
+    "72041": "Dilsen-Stokkem",
+    "25115": "Dion-Valmont",
+    "25025": "Dion-le-Mont",
+    "25026": "Dion-le-Val",
+    "46006": "Doel",
+    "25027": "Dongelberg",
+    "71012": "Donk",
+    "24021": "Dormaal",
+    "33006": "Dranouter",
+    "32028": "Driekapellen",
+    "24022": "Drieslinter",
+    "23098": "Drogenbos",
+    "44017": "Drongen",
+    "31007": "Dudzele",
+    "12009": "Duffel",
+    "24023": "Duisburg",
+    "71013": "Duras",
+    "23017": "Dworp",
+    "11013": "Edegem",
+    "43005": "Eeklo",
+    "25001": "Eerken",
+    "35003": "Eernegem",
+    "37003": "Egem",
+    "38009": "Eggewaartskapelle",
+    "73012": "Eigenbilzen",
+    "25014": "Eigenbrakel",
+    "13007": "Eindhout",
+    "73013": "Eisden",
+    "44018": "Eke",
+    "11014": "Ekeren",
+    "46007": "Eksaarde",
+    "72006": "Eksel",
+    "73104": "Elderen",
+    "72007": "Elen",
+    "41013": "Elene",
+    "23018": "Elewijt",
+    "24024": "Eliksem",
+    "23019": "Elingen",
+    "72008": "Ellikom",
+    "45008": "Elsegem",
+    "21009": "Elsene",
+    "45009": "Elst",
+    "33007": "Elverdinge",
+    "46008": "Elversele",
+    "11015": "Emblem",
+    "71014": "Engelmanshoven",
+    "25028": "Enines",
+    "23020": "Eppegem",
+    "41014": "Erembodegem",
+    "41015": "Erondegem",
+    "41016": "Erpe",
+    "41082": "Erpe-Mere",
+    "24025": "Erps-Kwerps",
+    "43006": "Ertvelde",
+    "41017": "Erwetegem",
+    "11016": "Essen",
+    "23021": "Essene",
+    "45011": "Etikhove",
+    "35004": "Ettelgem",
+    "21005": "Etterbeek",
+    "45012": "Everbeek",
+    "24026": "Everberg",
+    "21006": "Evere",
+    "44019": "Evergem",
+    "24027": "Ezemaal",
+    "25029": "Folx-les-Caves",
+    "23022": "Gaasbeek",
+    "21008": "Ganshoren",
+    "44020": "Gavere",
+    "13008": "Geel",
+    "25030": "Geest-Gérompont-Petit-Rosière",
+    "24028": "Geetbets",
+    "25048": "Geldenaken",
+    "71015": "Gelinden",
+    "73014": "Gellik",
+    "71068": "Gelmen",
+    "24029": "Gelrode",
+    "33008": "Geluveld",
+    "33009": "Geluwe",
+    "25031": "Genepiën",
+    "71016": "Genk",
+    "73015": "Genoelselderen",
+    "44021": "Gent",
+    "44022": "Gentbrugge",
+    "25032": "Gentinnes",
+    "25033": "Genval",
+    "41018": "Geraardsbergen",
+    "25046": "Geten",
+    "13009": "Gierle",
+    "38010": "Gijverinkhove",
+    "41019": "Gijzegem",
+    "34011": "Gijzelbrechtegem",
+    "44023": "Gijzenzele",
+    "71017": "Gingelom",
+    "35005": "Gistel",
+    "36005": "Gits",
+    "25034": "Glabais",
+    "24137": "Glabbeek",
+    "24030": "Glabbeek-Zuurbemde",
+    "25035": "Glimes",
+    "41020": "Godveerdegem",
+    "41021": "Goeferdinge",
+    "24031": "Goetsenhoven",
+    "44024": "Gontrode",
+    "73016": "Gors-Opleeuw",
+    "71018": "Gorsem",
+    "73017": "Gotem",
+    "44025": "Gottem",
+    "44026": "Grammene",
+    "25036": "Grand-Rosière-Hottomont",
+    "25037": "Graven",
+    "24032": "Grazen",
+    "42007": "Grembergen",
+    "23025": "Grimbergen",
+    "41022": "Grimminge",
+    "13010": "Grobbendonk",
+    "23026": "Groot-Bijgaarden",
+    "71019": "Groot-Gelmen",
+    "73018": "Groot-Loon",
+    "72010": "Grote-Brogel",
+    "73019": "Grote-Spouwen",
+    "41023": "Grotenberge",
+    "72011": "Gruitrode",
+    "73020": "Guigoven",
+    "34012": "Gullegem",
+    "73021": "Gutschoven",
+    "25116": "Gérompont",
+    "24033": "Haacht",
+    "41024": "Haaltert",
+    "46009": "Haasdonk",
+    "24034": "Haasrode",
+    "24035": "Hakendover",
+    "71020": "Halen",
+    "12011": "Hallaar",
+    "11017": "Halle",
+    "23027": "Halle",
+    "24036": "Halle-Booienhoven",
+    "71021": "Halmaal",
+    "23028": "Hamme",
+    "42008": "Hamme",
+    "25038": "Hamme-Mille",
+    "72012": "Hamont",
+    "72037": "Hamont-Achel",
+    "32005": "Handzame",
+    "44027": "Hansbeke",
+    "34013": "Harelbeke",
+    "73105": "Haren",
+    "71072": "Hasselt",
+    "25039": "Haut-Ittre",
+    "72013": "Hechtel",
+    "72038": "Hechtel-Eksel",
+    "73022": "Heers",
+    "73023": "Hees",
+    "34014": "Heestert",
+    "12012": "Heffen",
+    "23029": "Heikruis",
+    "12013": "Heindonk",
+    "31008": "Heist",
+    "12014": "Heist-op-den-Berg",
+    "23030": "Hekelgem",
+    "73024": "Heks",
+    "72014": "Helchteren",
+    "41025": "Heldergem",
+    "24037": "Helen-Bos",
+    "34015": "Helkijn",
+    "45013": "Hemelveerdegem",
+    "11018": "Hemiksem",
+    "73025": "Hendrieken",
+    "73026": "Henis",
+    "71023": "Heppen",
+    "73027": "Herderen",
+    "41026": "Herdersem",
+    "24038": "Herent",
+    "13011": "Herentals",
+    "13012": "Herenthout",
+    "23031": "Herfelingen",
+    "71024": "Herk-de-Stad",
+    "13013": "Herselt",
+    "73028": "Herstappe",
+    "73029": "Herten",
+    "31009": "Hertsberge",
+    "41027": "Herzele",
+    "34016": "Heule",
+    "45014": "Heurne",
+    "44028": "Heusden",
+    "71025": "Heusden",
+    "71070": "Heusden-Zolder",
+    "33039": "Heuvelland",
+    "24039": "Hever",
+    "24040": "Heverlee",
+    "25040": "Hevillers",
+    "41028": "Hillegem",
+    "12015": "Hingene",
+    "11019": "Hoboken",
+    "24041": "Hoegaarden",
+    "23033": "Hoeilaart",
+    "31010": "Hoeke",
+    "73030": "Hoelbeek",
+    "24042": "Hoeleden",
+    "73031": "Hoepertingen",
+    "11020": "Hoevenen",
+    "23034": "Hofstade",
+    "41029": "Hofstade",
+    "33010": "Hollebeke",
+    "24043": "Holsbeek",
+    "12016": "Hombeek",
+    "24131": "Honsem",
+    "36006": "Hooglede",
+    "38011": "Hoogstade",
+    "13014": "Hoogstraten",
+    "45062": "Horebeke",
+    "73033": "Horpmaal",
+    "25041": "Houtain-le-Val",
+    "31011": "Houtave",
+    "38012": "Houtem",
+    "72015": "Houthalen",
+    "72039": "Houthalen-Helchteren",
+    "32006": "Houthulst",
+    "13015": "Houtvenne",
+    "24044": "Houwaart",
+    "11021": "Hove",
+    "45015": "Huise",
+    "23035": "Huizingen",
+    "24045": "Huldenberg",
+    "13016": "Hulshout",
+    "34017": "Hulste",
+    "23036": "Humbeek",
+    "45016": "Hundelgem",
+    "25042": "Huppaye",
+    "25118": "Hélécine",
+    "35006": "Ichtegem",
+    "41030": "Iddergem",
+    "41031": "Idegem",
+    "33011": "Ieper",
+    "41032": "Impe",
+    "25043": "Incourt",
+    "36007": "Ingelmunster",
+    "34018": "Ingooigem",
+    "12017": "Itegem",
+    "25044": "Itter",
+    "23037": "Itterbeek",
+    "36008": "Izegem",
+    "38013": "Izenberge",
+    "31012": "Jabbeke",
+    "25045": "Jandrain-Jandrenouille",
+    "25047": "Jauchelette",
+    "73034": "Jesseren",
+    "21010": "Jette",
+    "71026": "Jeuk",
+    "36009": "Kachtem",
+    "24046": "Kaggevinne",
+    "42009": "Kalken",
+    "46010": "Kallo",
+    "11022": "Kalmthout",
+    "23038": "Kampenhout",
+    "37004": "Kanegem",
+    "73035": "Kanne",
+    "23039": "Kapelle-op-den-Bos",
+    "11023": "Kapellen",
+    "24047": "Kapellen",
+    "43007": "Kaprijke",
+    "25015": "Kasteelbrakel",
+    "34019": "Kaster",
+    "13017": "Kasterlee",
+    "72016": "Kaulille",
+    "24048": "Keerbergen",
+    "32008": "Keiem",
+    "33012": "Kemmel",
+    "46011": "Kemzeke",
+    "34020": "Kerkhove",
+    "24049": "Kerkom",
+    "71027": "Kerkom-bij-Sint-Truiden",
+    "41033": "Kerksken",
+    "71028": "Kermt",
+    "73036": "Kerniel",
+    "24050": "Kersbeek-Miskom",
+    "12018": "Kessel",
+    "24051": "Kessel-Lo",
+    "72017": "Kessenich",
+    "23040": "Kester",
+    "46012": "Kieldrecht",
+    "72018": "Kinrooi",
+    "25019": "Klabbeek",
+    "73038": "Klein-Gelmen",
+    "72019": "Kleine-Brogel",
+    "73037": "Kleine-Spouwen",
+    "35007": "Klemskerke",
+    "32009": "Klerken",
+    "45060": "Kluisbergen",
+    "44029": "Knesselare",
+    "31013": "Knokke",
+    "31043": "Knokke-Heist",
+    "23041": "Kobbegem",
+    "32010": "Koekelare",
+    "21011": "Koekelberg",
+    "71029": "Koersel",
+    "38014": "Koksijde",
+    "73106": "Kolmont",
+    "12019": "Koningshooikt",
+    "73039": "Koninksem",
+    "11024": "Kontich",
+    "34021": "Kooigem",
+    "31014": "Koolkerke",
+    "37005": "Koolskamp",
+    "24052": "Korbeek-Dijle",
+    "24053": "Korbeek-Lo",
+    "32011": "Kortemark",
+    "24054": "Kortenaken",
+    "24055": "Kortenberg",
+    "71030": "Kortijs",
+    "34022": "Kortrijk",
+    "24056": "Kortrijk-Dutsel",
+    "71031": "Kozen",
+    "23099": "Kraainem",
+    "33013": "Krombeke",
+    "45068": "Kruisem",
+    "45017": "Kruishoutem",
+    "24057": "Kumtich",
+    "71032": "Kuringen",
+    "73041": "Kuttekoven",
+    "34023": "Kuurne",
+    "71033": "Kwaadmechelen",
+    "45018": "Kwaremont",
+    "13053": "Laakdal",
+    "24058": "Laar",
+    "42010": "Laarne",
+    "32012": "Lampernisse",
+    "73042": "Lanaken",
+    "44030": "Landegem",
+    "24059": "Landen",
+    "44031": "Landskouter",
+    "24060": "Langdorp",
+    "33014": "Langemark",
+    "33040": "Langemark-Poelkapelle",
+    "73043": "Lanklaar",
+    "31015": "Lapscheure",
+    "25119": "Lasne",
+    "25051": "Lasne-Chapelle-Saint-Lambert",
+    "25052": "Lathuy",
+    "73044": "Lauw",
+    "34024": "Lauwe",
+    "42011": "Lebbeke",
+    "41034": "Lede",
+    "44032": "Ledeberg",
+    "36010": "Ledegem",
+    "24061": "Leefdaal",
+    "23042": "Leerbeek",
+    "12020": "Leest",
+    "41035": "Leeuwergem",
+    "35008": "Leffinge",
+    "38015": "Leisele",
+    "32013": "Leke",
+    "23043": "Lembeek",
+    "43009": "Lembeke",
+    "34025": "Lendelede",
+    "23104": "Lennik",
+    "71034": "Leopoldsburg",
+    "41036": "Letterhoutem",
+    "73045": "Leut",
+    "24062": "Leuven",
+    "13018": "Lichtaart",
+    "36011": "Lichtervelde",
+    "23044": "Liedekerke",
+    "41037": "Lieferinge",
+    "12021": "Lier",
+    "45063": "Lierde",
+    "44085": "Lievegem",
+    "12022": "Liezele",
+    "13019": "Lille",
+    "25054": "Lillois-Witterzee",
+    "25055": "Limal",
+    "25056": "Limelette",
+    "24063": "Linden",
+    "23100": "Linkebeek",
+    "71035": "Linkhout",
+    "25057": "Linsmeel",
+    "11025": "Lint",
+    "24133": "Linter",
+    "12023": "Lippelo",
+    "31016": "Lissewege",
+    "32014": "Lo",
+    "32030": "Lo-Reninge",
+    "44087": "Lochristi",
+    "11026": "Loenhout",
+    "33015": "Loker",
+    "46029": "Lokeren",
+    "35009": "Lombardsijde",
+    "72020": "Lommel",
+    "23045": "Londerzeel",
+    "25058": "Longueville",
+    "24064": "Loonbeek",
+    "31017": "Loppem",
+    "23046": "Lot",
+    "44035": "Lotenhulle",
+    "25059": "Loupoigne",
+    "44036": "Lovendegem",
+    "24065": "Lovenjoel",
+    "24066": "Lubbeek",
+    "71037": "Lummen",
+    "45020": "Maarke-Kerkem",
+    "45064": "Maarkedal",
+    "72021": "Maaseik",
+    "73107": "Maasmechelen",
+    "23047": "Machelen",
+    "44037": "Machelen",
+    "73046": "Mal",
+    "43010": "Maldegem",
+    "23048": "Malderen",
+    "25064": "Malen",
+    "11057": "Malle",
+    "25060": "Malèves-Sainte-Marie-Wastinnes",
+    "35010": "Mannekensvere",
+    "25061": "Maransart",
+    "25062": "Marbais",
+    "44038": "Mariakerke",
+    "12024": "Mariekerke",
+    "25063": "Marilles",
+    "34026": "Marke",
+    "37006": "Markegem",
+    "73047": "Martenslinde",
+    "42012": "Massemen",
+    "11027": "Massenhoven",
+    "45021": "Mater",
+    "23049": "Mazenzele",
+    "12025": "Mechelen",
+    "73049": "Mechelen-Bovelingen",
+    "73048": "Mechelen-aan-de-Maas",
+    "24067": "Meensel-Kiezegem",
+    "13020": "Meer",
+    "24068": "Meerbeek",
+    "41038": "Meerbeke",
+    "46015": "Meerdonk",
+    "13021": "Meerhout",
+    "13022": "Meerle",
+    "73050": "Meeswijk",
+    "31018": "Meetkerke",
+    "72022": "Meeuwen",
+    "72040": "Meeuwen-Gruitrode",
+    "44039": "Meigem",
+    "45022": "Meilegem",
+    "23050": "Meise",
+    "45023": "Melden",
+    "41039": "Meldert",
+    "71038": "Meldert",
+    "24070": "Melkwezer",
+    "25065": "Mellery",
+    "23051": "Melsbroek",
+    "46016": "Melsele",
+    "44041": "Melsen",
+    "73051": "Membruggen",
+    "34027": "Menen",
+    "23052": "Merchtem",
+    "41040": "Mere",
+    "44088": "Merelbeke-Melle",
+    "44044": "Merendree",
+    "32015": "Merkem",
+    "11028": "Merksem",
+    "13023": "Merksplas",
+    "33016": "Mesen",
+    "42013": "Mespelare",
+    "24071": "Messelbroek",
+    "73052": "Mettekoven",
+    "45024": "Michelbeke",
+    "43011": "Middelburg",
+    "35011": "Middelkerke",
+    "71039": "Mielen-Boven-Aalst",
+    "73053": "Millen",
+    "13024": "Minderhout",
+    "73054": "Moelingen",
+    "34028": "Moen",
+    "41041": "Moerbeke",
+    "35012": "Moere",
+    "31019": "Moerkerke",
+    "42014": "Moerzeke",
+    "13025": "Mol",
+    "24072": "Molenbeek-Wersbeek",
+    "72023": "Molenbeersel",
+    "24073": "Molenstede",
+    "23053": "Mollem",
+    "25066": "Monstreux",
+    "25067": "Mont-Saint-André",
+    "25068": "Mont-Saint-Guibert",
+    "71040": "Montenaken",
+    "41042": "Moorsel",
+    "34029": "Moorsele",
+    "36012": "Moorslede",
+    "44046": "Moortsele",
+    "73055": "Mopertingen",
+    "45025": "Moregem",
+    "13026": "Morkhoven",
+    "11029": "Mortsel",
+    "23054": "Muizen",
+    "71041": "Muizen",
+    "45026": "Mullem",
+    "45027": "Munkzwalm",
+    "73056": "Munsterbilzen",
+    "44047": "Munte",
+    "44086": "Nazareth-De Pinte",
+    "41043": "Nederboelare",
+    "45028": "Nederbrakel",
+    "41044": "Nederhasselt",
+    "23055": "Nederokkerzeel",
+    "45030": "Nederzwalm-Hermelgem",
+    "71042": "Neerglabbeek",
+    "73057": "Neerharen",
+    "24074": "Neerhespen",
+    "25069": "Neerheylissem",
+    "24075": "Neerijse",
+    "24076": "Neerlanden",
+    "24077": "Neerlinter",
+    "72024": "Neeroeteren",
+    "72025": "Neerpelt",
+    "73058": "Neerrepen",
+    "24079": "Neerwinden",
+    "41045": "Neigem",
+    "73059": "Nerem",
+    "25070": "Nethen",
+    "44049": "Nevele",
+    "11030": "Niel",
+    "71043": "Niel-bij-As",
+    "71044": "Niel-bij-Sint-Truiden",
+    "41046": "Nieuwenhove",
+    "23056": "Nieuwenrode",
+    "41047": "Nieuwerkerken",
+    "71045": "Nieuwerkerken",
+    "32016": "Nieuwkapelle",
+    "33017": "Nieuwkerke",
+    "46017": "Nieuwkerken-Waas",
+    "31020": "Nieuwmunster",
+    "38016": "Nieuwpoort",
+    "24080": "Nieuwrode",
+    "12026": "Nijlen",
+    "25072": "Nijvel",
+    "25071": "Nil-Saint-Vincent-Saint-Martin",
+    "41048": "Ninove",
+    "25073": "Nodebais",
+    "25074": "Noduwez",
+    "45031": "Nokere",
+    "13027": "Noorderwijk",
+    "32017": "Noordschote",
+    "23057": "Nossegem",
+    "25075": "Noville-sur-Méhaigne",
+    "45032": "Nukerke",
+    "31021": "Oedelem",
+    "36013": "Oekene",
+    "11031": "Oelegem",
+    "38017": "Oeren",
+    "37008": "Oeselgem",
+    "23058": "Oetingen",
+    "13028": "Oevel",
+    "25076": "Ohain",
+    "41049": "Okegem",
+    "13029": "Olen",
+    "13030": "Olmen",
+    "44050": "Olsene",
+    "41050": "Onkerzele",
+    "12027": "Onze-Lieve-Vrouw-Waver",
+    "37009": "Ooigem",
+    "45033": "Ooike",
+    "41051": "Oombergen",
+    "24081": "Oorbeek",
+    "41052": "Oordegem",
+    "44051": "Oostakker",
+    "38018": "Oostduinkerke",
+    "43012": "Oosteeklo",
+    "35013": "Oostende",
+    "44052": "Oosterzele",
+    "71046": "Oostham",
+    "31022": "Oostkamp",
+    "25077": "Oostkerk",
+    "31023": "Oostkerke",
+    "32018": "Oostkerke",
+    "11032": "Oostmalle",
+    "36014": "Oostnieuwkerke",
+    "37010": "Oostrozebeke",
+    "33018": "Oostvleteren",
+    "44053": "Oostwinkel",
+    "45034": "Opbrakel",
+    "25049": "Opgeldenaken",
+    "71047": "Opglabbeek",
+    "73060": "Opgrimbie",
+    "25078": "Ophain-Bois-Seigneur-Isaac",
+    "41053": "Ophasselt",
+    "73061": "Opheers",
+    "25079": "Opheylissem",
+    "72026": "Ophoven",
+    "72027": "Opitter",
+    "24082": "Oplinter",
+    "72028": "Opoeteren",
+    "25080": "Opprebais",
+    "12028": "Oppuurs",
+    "23060": "Opwijk",
+    "25081": "Orbais",
+    "71048": "Ordingen",
+    "25120": "Orp-Jauche",
+    "25082": "Orp-le-Grand",
+    "24132": "Orsmaal",
+    "24084": "Orsmaal-Gussenhoven",
+    "34030": "Otegem",
+    "24085": "Ottenburg",
+    "41054": "Ottergem",
+    "25083": "Ottignies",
+    "25121": "Ottignies-Louvain-la-Neuve",
+    "24086": "Oud-Heverlee",
+    "13031": "Oud-Turnhout",
+    "42016": "Oudegem",
+    "32019": "Oudekapelle",
+    "45035": "Oudenaarde",
+    "23061": "Oudenaken",
+    "35014": "Oudenburg",
+    "21002": "Oudergem",
+    "72042": "Oudsbergen",
+    "41055": "Outer",
+    "24087": "Outgaarden",
+    "34031": "Outrijve",
+    "45036": "Ouwegem",
+    "41056": "Overboelare",
+    "24088": "Overhespen",
+    "23062": "Overijse",
+    "42017": "Overmere",
+    "72029": "Overpelt",
+    "73062": "Overrepen",
+    "24089": "Overwinden",
+    "71049": "Paal",
+    "23106": "Pajottegem",
+    "45037": "Parike",
+    "33019": "Passendale",
+    "45038": "Paulatem",
+    "72030": "Peer",
+    "24090": "Pellenberg",
+    "72043": "Pelt",
+    "23064": "Pepingen",
+    "23065": "Perk",
+    "38019": "Pervijze",
+    "25084": "Perwijs",
+    "44054": "Petegem-aan-de-Leie",
+    "45039": "Petegem-aan-de-Schelde",
+    "25085": "Petrem",
+    "23066": "Peutie",
+    "73063": "Piringen",
+    "37011": "Pittem",
+    "25086": "Piétrebais",
+    "25087": "Plancenoit",
+    "13032": "Poederlee",
+    "44055": "Poeke",
+    "33020": "Poelkapelle",
+    "44056": "Poesele",
+    "41057": "Pollare",
+    "32020": "Pollinkhove",
+    "33021": "Poperinge",
+    "13033": "Poppel",
+    "33022": "Proven",
+    "11033": "Pulderbos",
+    "11034": "Pulle",
+    "12029": "Putte",
+    "12030": "Puurs",
+    "12041": "Puurs-Sint-Amands",
+    "25088": "Quenast",
+    "25122": "Ramillies",
+    "25089": "Ramillies-Offus",
+    "23067": "Ramsdonk",
+    "13034": "Ramsel",
+    "31024": "Ramskapelle",
+    "38020": "Ramskapelle",
+    "24091": "Ransberg",
+    "11035": "Ranst",
+    "13035": "Ravels",
+    "25123": "Rebecq",
+    "11036": "Reet",
+    "73064": "Rekem",
+    "34032": "Rekkem",
+    "23068": "Relegem",
+    "73065": "Remersdaal",
+    "32021": "Reninge",
+    "33023": "Reningelst",
+    "72031": "Reppel",
+    "41058": "Ressegem",
+    "13036": "Retie",
+    "73066": "Riemst",
+    "73067": "Rijkel",
+    "13037": "Rijkevorsel",
+    "73068": "Rijkhoven",
+    "12031": "Rijmenam",
+    "73069": "Riksingen",
+    "24092": "Rillaar",
+    "25091": "Rixensart",
+    "45040": "Roborst",
+    "33024": "Roesbrugge-Haringe",
+    "36015": "Roeselare",
+    "35015": "Roksem",
+    "34033": "Rollegem",
+    "36016": "Rollegem-Kapelle",
+    "73070": "Romershoven",
+    "45041": "Ronse",
+    "44057": "Ronsele",
+    "24093": "Roosbeek",
+    "25090": "Roosbeek",
+    "23097": "Roosdaal",
+    "25092": "Rosières",
+    "73071": "Rosmeer",
+    "72032": "Rotem",
+    "24094": "Rotselaar",
+    "25093": "Roux-Miroir",
+    "45042": "Rozebeke",
+    "31025": "Ruddervoorde",
+    "45043": "Ruien",
+    "12032": "Ruisbroek",
+    "23069": "Ruisbroek",
+    "73072": "Rukkelingen-Loon",
+    "36017": "Rumbeke",
+    "24095": "Rummen",
+    "24096": "Rumsdorp",
+    "11037": "Rumst",
+    "71050": "Runkelen",
+    "46018": "Rupelmonde",
+    "73073": "Rutten",
+    "25094": "Saint-Géry",
+    "25098": "Sart-Dames-Avelines",
+    "21015": "Schaarbeek",
+    "24097": "Schaffen",
+    "73074": "Schalkhoven",
+    "44058": "Schelderode",
+    "44059": "Scheldewindeke",
+    "11038": "Schelle",
+    "42018": "Schellebelle",
+    "41059": "Schendelbeke",
+    "23070": "Schepdaal",
+    "24098": "Scherpenheuvel",
+    "24134": "Scherpenheuvel-Zichem",
+    "11039": "Schilde",
+    "42019": "Schoonaarde",
+    "35016": "Schore",
+    "45044": "Schorisse",
+    "11040": "Schoten",
+    "12033": "Schriek",
+    "37013": "Schuiferskapelle",
+    "71051": "Schulen",
+    "44060": "Semmerzake",
+    "42020": "Serskamp",
+    "31026": "Sijsele",
+    "46019": "Sinaai",
+    "21003": "Sint-Agatha-Berchem",
+    "24099": "Sint-Agatha-Rode",
+    "12034": "Sint-Amands",
+    "44061": "Sint-Amandsberg",
+    "31027": "Sint-Andries",
+    "41060": "Sint-Antelinks",
+    "37014": "Sint-Baafs-Vijve",
+    "45045": "Sint-Blasius-Boekel",
+    "34034": "Sint-Denijs",
+    "45046": "Sint-Denijs-Boekel",
+    "44062": "Sint-Denijs-Westrem",
+    "34035": "Sint-Eloois-Vijve",
+    "36018": "Sint-Eloois-Winkel",
+    "23101": "Sint-Genesius-Rode",
+    "21013": "Sint-Gillis",
+    "46020": "Sint-Gillis-Waas",
+    "42021": "Sint-Gillis-bij-Dendermonde",
+    "41061": "Sint-Goriks-Oudenhove",
+    "73077": "Sint-Huibrechts-Hern",
+    "72033": "Sint-Huibrechts-Lille",
+    "32022": "Sint-Jacobs-Kapelle",
+    "33025": "Sint-Jan",
+    "43013": "Sint-Jan-in-Eremo",
+    "25095": "Sint-Jans-Geest",
+    "21012": "Sint-Jans-Molenbeek",
+    "11042": "Sint-Job-in-'t Goor",
+    "21014": "Sint-Joost-ten-Node",
+    "31028": "Sint-Joris",
+    "38021": "Sint-Joris",
+    "24100": "Sint-Joris-Weert",
+    "24101": "Sint-Joris-Winge",
+    "12035": "Sint-Katelijne-Waver",
+    "23071": "Sint-Katherina-Lombeek",
+    "45047": "Sint-Kornelis-Horebeke",
+    "31029": "Sint-Kruis",
+    "23072": "Sint-Kwintens-Lennik",
+    "71052": "Sint-Lambrechts-Herk",
+    "21018": "Sint-Lambrechts-Woluwe",
+    "43014": "Sint-Laureins",
+    "23073": "Sint-Laureins-Berchem",
+    "11043": "Sint-Lenaarts",
+    "41062": "Sint-Lievens-Esse",
+    "41063": "Sint-Lievens-Houtem",
+    "43015": "Sint-Margriete",
+    "24102": "Sint-Margriete-Houtem",
+    "45048": "Sint-Maria-Horebeke",
+    "45049": "Sint-Maria-Latem",
+    "45050": "Sint-Maria-Lierde",
+    "41064": "Sint-Maria-Oudenhove",
+    "23074": "Sint-Martens-Bodegem",
+    "44064": "Sint-Martens-Latem",
+    "44065": "Sint-Martens-Leerne",
+    "23075": "Sint-Martens-Lennik",
+    "45051": "Sint-Martens-Lierde",
+    "73078": "Sint-Martens-Voeren",
+    "31030": "Sint-Michiels",
+    "46021": "Sint-Niklaas",
+    "46022": "Sint-Pauwels",
+    "23076": "Sint-Pieters-Kapelle",
+    "35017": "Sint-Pieters-Kapelle",
+    "23077": "Sint-Pieters-Leeuw",
+    "24103": "Sint-Pieters-Rode",
+    "73079": "Sint-Pieters-Voeren",
+    "21019": "Sint-Pieters-Woluwe",
+    "25096": "Sint-Remigius-Geest",
+    "25097": "Sint-Renelde",
+    "38022": "Sint-Rijkers",
+    "23078": "Sint-Stevens-Woluwe",
+    "71053": "Sint-Truiden",
+    "23079": "Sint-Ulriks-Kapelle",
+    "44066": "Sleidinge",
+    "35018": "Slijpe",
+    "25053": "Sluizen",
+    "73080": "Sluizen",
+    "41065": "Smeerebbe-Vloerzegem",
+    "41066": "Smetlede",
+    "35019": "Snaaskerke",
+    "31031": "Snellegem",
+    "71054": "Spalbeek",
+    "35028": "Spermalie",
+    "34036": "Spiere",
+    "34043": "Spiere-Helkijn",
+    "73108": "Spouwen",
+    "11044": "Stabroek",
+    "36019": "Staden",
+    "31032": "Stalhille",
+    "38023": "Stavele",
+    "46023": "Steendorp",
+    "23080": "Steenhuffel",
+    "41067": "Steenhuize-Wijnhuize",
+    "38024": "Steenkerke",
+    "23081": "Steenokkerzeel",
+    "46024": "Stekene",
+    "35020": "Stene",
+    "23082": "Sterrebeek",
+    "71055": "Stevoort",
+    "73081": "Stokkem",
+    "71056": "Stokrooie",
+    "41068": "Strijpen",
+    "23084": "Strombeek-Bever",
+    "32023": "Stuivekenskerke",
+    "46025": "Temse",
+    "23085": "Teralfene",
+    "11045": "Terhagen",
+    "25050": "Terhulpen",
+    "23086": "Ternat",
+    "24104": "Tervuren",
+    "71071": "Tessenderlo-Ham",
+    "24105": "Testelt",
+    "73082": "Teuven",
+    "25099": "Thines",
+    "25101": "Thorembais-Saint-Trond",
+    "25100": "Thorembais-les-Béguines",
+    "34037": "Tiegem",
+    "13038": "Tielen",
+    "46026": "Tielrode",
+    "24106": "Tielt",
+    "37022": "Tielt",
+    "24135": "Tielt-Winge",
+    "24107": "Tienen",
+    "24108": "Tildonk",
+    "25102": "Tilly",
+    "12036": "Tisselt",
+    "23087": "Tollembeek",
+    "73111": "Tongeren-Borgloon",
+    "13039": "Tongerlo",
+    "72034": "Tongerlo",
+    "31033": "Torhout",
+    "25104": "Tourinnes-Saint-Lambert",
+    "24109": "Tremelo",
+    "25105": "Tubeke",
+    "13040": "Turnhout",
+    "73084": "Uikhoven",
+    "42022": "Uitbergen",
+    "31034": "Uitkerke",
+    "21016": "Ukkel",
+    "73085": "Ulbeek",
+    "44067": "Ursel",
+    "24110": "Vaalbeek",
+    "73086": "Val-Meer",
+    "13041": "Varendonk",
+    "31035": "Varsenare",
+    "73087": "Vechmaal",
+    "13042": "Veerle",
+    "31036": "Veldegem",
+    "73088": "Veldwezelt",
+    "71058": "Velm",
+    "24111": "Veltem-Beisem",
+    "41069": "Velzeke-Ruddershove",
+    "46027": "Verrebroek",
+    "73089": "Veulen",
+    "38025": "Veurne",
+    "41070": "Viane",
+    "34038": "Vichte",
+    "11046": "Viersel",
+    "25106": "Vieux-Genappe",
+    "25107": "Villers-la-Ville",
+    "23088": "Vilvoorde",
+    "44068": "Vinderhoute",
+    "38026": "Vinkem",
+    "44069": "Vinkt",
+    "25108": "Virginal-Samme",
+    "24113": "Vissenaken",
+    "32024": "Vladslo",
+    "33026": "Vlamertinge",
+    "41071": "Vlekkem",
+    "33041": "Vleteren",
+    "23089": "Vlezenbeek",
+    "73090": "Vliermaal",
+    "73091": "Vliermaalroot",
+    "41072": "Vlierzele",
+    "73092": "Vlijtingen",
+    "13043": "Vlimmeren",
+    "35021": "Vlissegem",
+    "73109": "Voeren",
+    "23090": "Vollezele",
+    "41073": "Voorde",
+    "33027": "Voormezele",
+    "73093": "Voort",
+    "13044": "Vorselaar",
+    "71059": "Vorsen",
+    "13045": "Vorst",
+    "21007": "Vorst",
+    "13046": "Vosselaar",
+    "44070": "Vosselare",
+    "24114": "Vossem",
+    "46028": "Vrasene",
+    "11047": "Vremde",
+    "73094": "Vreren",
+    "73095": "Vroenhoven",
+    "73096": "Vucht",
+    "44071": "Vurste",
+    "24115": "Waanrode",
+    "41074": "Waarbeke",
+    "31037": "Waardamme",
+    "11048": "Waarloos",
+    "34039": "Waarmaarde",
+    "44072": "Waarschoot",
+    "42023": "Waasmunster",
+    "37016": "Wakken",
+    "12037": "Walem",
+    "25124": "Walhain",
+    "25109": "Walhain-Saint-Paul",
+    "24118": "Walshoutem",
+    "73097": "Waltwilder",
+    "23091": "Wambeek",
+    "24119": "Wange",
+    "45053": "Wannegem-Lede",
+    "41075": "Wanzele",
+    "34040": "Waregem",
+    "43016": "Waterland-Oudeman",
+    "25110": "Waterloo",
+    "21017": "Watermaal-Bosvoorde",
+    "43017": "Watervliet",
+    "33028": "Watou",
+    "25112": "Waver",
+    "25113": "Ways",
+    "24120": "Webbekom",
+    "13047": "Wechelderzande",
+    "13048": "Weelde",
+    "23092": "Weerde",
+    "12038": "Weert",
+    "45054": "Welden",
+    "41076": "Welle",
+    "73098": "Wellen",
+    "23102": "Wemmel",
+    "31038": "Wenduine",
+    "24121": "Werchter",
+    "32025": "Werken",
+    "73099": "Werm",
+    "33029": "Wervik",
+    "24122": "Wespelaar",
+    "35022": "Westende",
+    "13049": "Westerlo",
+    "31039": "Westkapelle",
+    "35023": "Westkerke",
+    "11049": "Westmalle",
+    "13050": "Westmeerbeek",
+    "33030": "Westouter",
+    "42024": "Westrem",
+    "36020": "Westrozebeke",
+    "33031": "Westvleteren",
+    "42025": "Wetteren",
+    "34041": "Wevelgem",
+    "24123": "Wezemaal",
+    "23103": "Wezembeek-Oppem",
+    "42026": "Wichelen",
+    "73100": "Widooie",
+    "12039": "Wiekevorst",
+    "37017": "Wielsbeke",
+    "42027": "Wieze",
+    "72035": "Wijchmaal",
+    "71060": "Wijer",
+    "11050": "Wijnegem",
+    "72036": "Wijshagen",
+    "33032": "Wijtschate",
+    "71061": "Wilderen",
+    "12040": "Willebroek",
+    "11051": "Wilrijk",
+    "24126": "Wilsele",
+    "35024": "Wilskerke",
+    "71062": "Wimmertingen",
+    "37021": "Wingene",
+    "24127": "Winksele",
+    "73101": "Wintershoven",
+    "33033": "Woesten",
+    "23093": "Wolvertem",
+    "11052": "Wommelgem",
+    "24128": "Wommersom",
+    "44074": "Wondelgem",
+    "44075": "Wontergem",
+    "45055": "Wortegem",
+    "45061": "Wortegem-Petegem",
+    "13051": "Wortel",
+    "41077": "Woubrechtegem",
+    "32026": "Woumen",
+    "25111": "Woutersbrakel",
+    "38027": "Wulpen",
+    "33034": "Wulvergem",
+    "38028": "Wulveringem",
+    "11053": "Wuustwezel",
+    "44076": "Zaffelare",
+    "41078": "Zandbergen",
+    "35025": "Zande",
+    "11054": "Zandhoven",
+    "33035": "Zandvoorde",
+    "35026": "Zandvoorde",
+    "41079": "Zarlardinge",
+    "32027": "Zarren",
+    "32029": "Zarren-Werken",
+    "23094": "Zaventem",
+    "31040": "Zedelgem",
+    "45056": "Zegelsem",
+    "42028": "Zele",
+    "71063": "Zelem",
+    "23095": "Zellik",
+    "43018": "Zelzate",
+    "23096": "Zemst",
+    "71064": "Zepperen",
+    "31041": "Zerkegem",
+    "35027": "Zevekote",
+    "44077": "Zeveneken",
+    "44078": "Zeveren",
+    "44079": "Zevergem",
+    "24129": "Zichem",
+    "73102": "Zichen-Zussen-Bolder",
+    "33036": "Zillebeke",
+    "45057": "Zingem",
+    "25114": "Zittert-Lummen",
+    "13052": "Zoerle-Parwijs",
+    "11055": "Zoersel",
+    "71065": "Zolder",
+    "44080": "Zomergem",
+    "71066": "Zonhoven",
+    "33037": "Zonnebeke",
+    "41080": "Zonnegem",
+    "41081": "Zottegem",
+    "38029": "Zoutenaaie",
+    "24130": "Zoutleeuw",
+    "33038": "Zuidschote",
+    "31042": "Zuienkerke",
+    "44081": "Zulte",
+    "45058": "Zulzeke",
+    "71067": "Zutendaal",
+    "45065": "Zwalm",
+    "34042": "Zwevegem",
+    "37019": "Zwevezele",
+    "44082": "Zwijnaarde"
+  }
+}
