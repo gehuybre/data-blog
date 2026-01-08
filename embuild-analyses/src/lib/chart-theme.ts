@@ -65,13 +65,13 @@ export function formatAxisNumber(value: number): string {
   const absValue = Math.abs(value)
 
   if (absValue >= 1_000_000_000) {
-    return `${(value / 1_000_000_000).toLocaleString('nl-BE', { minimumFractionDigits: 0, maximumFractionDigits: 1 }).replace(/\.0$/, '')}Mrd`
+    return `${(value / 1_000_000_000).toLocaleString('nl-BE', { minimumFractionDigits: 0, maximumFractionDigits: 1 }).replace(/,0$/, '')}Mrd`
   }
   if (absValue >= 1_000_000) {
-    return `${(value / 1_000_000).toLocaleString('nl-BE', { minimumFractionDigits: 0, maximumFractionDigits: 1 }).replace(/\.0$/, '')}M`
+    return `${(value / 1_000_000).toLocaleString('nl-BE', { minimumFractionDigits: 0, maximumFractionDigits: 1 }).replace(/,0$/, '')}M`
   }
   if (absValue >= 10_000) {
-    return `${(value / 1_000).toLocaleString('nl-BE', { minimumFractionDigits: 0, maximumFractionDigits: 1 }).replace(/\.0$/, '')}K`
+    return `${(value / 1_000).toLocaleString('nl-BE', { minimumFractionDigits: 0, maximumFractionDigits: 1 }).replace(/,0$/, '')}K`
   }
 
   return new Intl.NumberFormat('nl-BE', { maximumFractionDigits: 0 }).format(value)
