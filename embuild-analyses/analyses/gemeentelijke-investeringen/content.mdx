@@ -1,8 +1,8 @@
 ---
-title: Gemeentelijke investeringen
+title: Gemeentelijke investeringen in Vlaanderen
 date: 2026-01-07
-summary: Analyse van gemeentelijke investeringen in Vlaanderen per beleidsdomein op basis van meerjarenplannen.
-tags: [gemeente, investeringen, financiën, beleidsdomein]
+summary: Analyse van geplande gemeentelijke investeringen in Vlaanderen per beleidsdomein en subdomein op basis van meerjarenplannen (2014-2033).
+tags: [gemeente, investeringen, financiën, beleidsdomein, meerjarenplan]
 slug: gemeentelijke-investeringen
 sourceProvider: Agentschap Binnenlands Bestuur
 sourceTitle: Gemeentelijke jaarrekeningen - BBC-DR data
@@ -12,12 +12,33 @@ sourcePublicationDate: 2025-12-31
 
 import { InvesteringenDashboard } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenDashboard"
 
-Deze analyse toont de gemeentelijke investeringen in Vlaanderen op basis van de meerjarenplannen van 285 gemeenten. De data is afkomstig van het Agentschap Binnenlands Bestuur en omvat investeringen per beleidsdomein zoals mobiliteit, onderwijs, cultuur, sport, en milieu.
+Deze analyse toont de **geplande gemeentelijke investeringen** in Vlaanderen op basis van de meerjarenplannen van Vlaamse gemeenten over **drie legislaturen** (2014-2019, 2020-2025, 2026-2031). De data is afkomstig van het Agentschap Binnenlands Bestuur en geeft inzicht in hoe gemeenten hun investeringsbudgetten plannen.
 
-**Data periode**: De meerjarenplannen bevatten geplande investeringen tot en met 2033.
+## Over de data
 
-**Let op:** De data bevat meerjarenplanning die tot 2033 loopt. De getoonde cijfers zijn planningscijfers uit de gemeentelijke meerjarenplannen, geen werkelijke uitgaven.
+**Rapportjaren**: 2014, 2020 en 2026 (start van elke legislatuur)
+**Gemeenten**: 285 Vlaamse gemeenten
+**Data datum**: De data bevat meerjarenplannen zoals die werden opgesteld bij aanvang van elke legislatuur
 
-De investeringen worden getoond als totaalbedragen en per inwoner, zodat je gemeenten van verschillende groottes kunt vergelijken.
+**Let op:** Dit zijn **planningscijfers** uit gemeentelijke meerjarenplannen, geen werkelijk gerealiseerde uitgaven. Meerjarenplannen worden opgesteld aan het begin van elke legislatuur en kunnen gedurende de legislatuur worden bijgestuurd.
+
+## Twee perspectieven op investeringen
+
+De data wordt getoond volgens twee classificatiesystemen:
+
+### 1. Per Beleidsdomein (BV)
+Investeringen ingedeeld volgens **wat** gemeenten doen - bijvoorbeeld mobiliteit, onderwijs, cultuur, of sport. Deze indeling toont de beleidsprioriteiten van gemeenten.
+
+### 2. Per Economische Rekening (REK)
+Investeringen ingedeeld volgens **hoe** gemeenten investeren - materiële activa (gebouwen, infrastructuur), immateriële activa (software, intellectuele eigendom), of subsidies. Deze indeling toont de aard van de investeringen.
+
+## Hoe de data te interpreteren
+
+De investeringen worden getoond op twee manieren:
+
+- **Totaal**: De absolute bedragen in euro's per legislatuur - nuttig om de omvang van investeringen te zien
+- **Per inwoner**: Bedragen per hoofd van de bevolking - beter voor vergelijkingen tussen gemeenten van verschillende groottes
+
+Voor elke gemeente worden **drie datapunten** getoond: de geplande investeringen volgens het meerjarenplan van 2014, 2020 en 2026. Dit geeft inzicht in de evolutie van investeringsprioriteiten over drie legislaturen.
 
 <InvesteringenDashboard />

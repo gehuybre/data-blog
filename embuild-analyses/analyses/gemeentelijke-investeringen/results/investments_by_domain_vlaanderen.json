@@ -1,1 +1,282 @@
-[{"year":2014,"domain_code":"0","domain_name":"Algemene financiering","metric":"total","value":956760059.2100000381},{"year":2014,"domain_code":"1","domain_name":"Algemeen bestuur","metric":"total","value":4689674278.6499996185},{"year":2014,"domain_code":"2","domain_name":"Zich verplaatsen en mobiliteit","metric":"total","value":8869387512.6399993896},{"year":2014,"domain_code":"3","domain_name":"Natuur en milieubeheer","metric":"total","value":2725547253.8400001526},{"year":2014,"domain_code":"4","domain_name":"Veiligheidszorg","metric":"total","value":682354913.3999999762},{"year":2014,"domain_code":"5","domain_name":"Ondernemen en werken","metric":"total","value":925003087.25},{"year":2014,"domain_code":"6","domain_name":"Wonen en ruimtelijke ordening","metric":"total","value":5109341410.3999996185},{"year":2014,"domain_code":"7","domain_name":"Cultuur en vrije tijd","metric":"total","value":5084742049.0399999619},{"year":2014,"domain_code":"8","domain_name":"Leren en onderwijs","metric":"total","value":2227269655.2899999619},{"year":2014,"domain_code":"9","domain_name":"Zorg en opvang","metric":"total","value":4971205718.5399999619},{"year":2020,"domain_code":"0","domain_name":"Algemene financiering","metric":"total","value":827996853.6200000048},{"year":2020,"domain_code":"1","domain_name":"Algemeen bestuur","metric":"total","value":6296099833.8599996567},{"year":2020,"domain_code":"2","domain_name":"Zich verplaatsen en mobiliteit","metric":"total","value":12160835373.2099990845},{"year":2020,"domain_code":"3","domain_name":"Natuur en milieubeheer","metric":"total","value":4644528059.3100004196},{"year":2020,"domain_code":"4","domain_name":"Veiligheidszorg","metric":"total","value":1519172008.6099998951},{"year":2020,"domain_code":"5","domain_name":"Ondernemen en werken","metric":"total","value":869868988.5399999619},{"year":2020,"domain_code":"6","domain_name":"Wonen en ruimtelijke ordening","metric":"total","value":5367093518.9399995804},{"year":2020,"domain_code":"7","domain_name":"Cultuur en vrije tijd","metric":"total","value":8882948694.8700008392},{"year":2020,"domain_code":"8","domain_name":"Leren en onderwijs","metric":"total","value":2873924046.1900000572},{"year":2020,"domain_code":"9","domain_name":"Zorg en opvang","metric":"total","value":3092726614.9600000381},{"year":2025,"domain_code":"1","domain_name":"Algemeen bestuur","metric":"total","value":289916184.3799999952},{"year":2025,"domain_code":"2","domain_name":"Zich verplaatsen en mobiliteit","metric":"total","value":217071319.8100000024},{"year":2025,"domain_code":"3","domain_name":"Natuur en milieubeheer","metric":"total","value":65894964.7599999979},{"year":2025,"domain_code":"4","domain_name":"Veiligheidszorg","metric":"total","value":74409560.6099999994},{"year":2025,"domain_code":"5","domain_name":"Ondernemen en werken","metric":"total","value":113602889.75},{"year":2025,"domain_code":"6","domain_name":"Wonen en ruimtelijke ordening","metric":"total","value":150326418.7999999821},{"year":2025,"domain_code":"7","domain_name":"Cultuur en vrije tijd","metric":"total","value":83005758.0699999928},{"year":2025,"domain_code":"8","domain_name":"Leren en onderwijs","metric":"total","value":81186484.3400000036},{"year":2025,"domain_code":"9","domain_name":"Zorg en opvang","metric":"total","value":69903856.799999997},{"year":2014,"domain_code":"0","domain_name":"Algemene financiering","metric":"per_capita","value":14.4727715921},{"year":2014,"domain_code":"1","domain_name":"Algemeen bestuur","metric":"per_capita","value":27.2573508577},{"year":2014,"domain_code":"2","domain_name":"Zich verplaatsen en mobiliteit","metric":"per_capita","value":101.0516467972},{"year":2014,"domain_code":"3","domain_name":"Natuur en milieubeheer","metric":"per_capita","value":13.6758142905},{"year":2014,"domain_code":"4","domain_name":"Veiligheidszorg","metric":"per_capita","value":5.9165001985},{"year":2014,"domain_code":"5","domain_name":"Ondernemen en werken","metric":"per_capita","value":5.1643363272},{"year":2014,"domain_code":"6","domain_name":"Wonen en ruimtelijke ordening","metric":"per_capita","value":14.8779739713},{"year":2014,"domain_code":"7","domain_name":"Cultuur en vrije tijd","metric":"per_capita","value":11.7520102534},{"year":2014,"domain_code":"8","domain_name":"Leren en onderwijs","metric":"per_capita","value":13.3693483311},{"year":2014,"domain_code":"9","domain_name":"Zorg en opvang","metric":"per_capita","value":15.1865479189},{"year":2020,"domain_code":"0","domain_name":"Algemene financiering","metric":"per_capita","value":11.2438337062},{"year":2020,"domain_code":"1","domain_name":"Algemeen bestuur","metric":"per_capita","value":31.6865422477},{"year":2020,"domain_code":"2","domain_name":"Zich verplaatsen en mobiliteit","metric":"per_capita","value":123.6578088958},{"year":2020,"domain_code":"3","domain_name":"Natuur en milieubeheer","metric":"per_capita","value":17.3909944621},{"year":2020,"domain_code":"4","domain_name":"Veiligheidszorg","metric":"per_capita","value":8.0937580474},{"year":2020,"domain_code":"5","domain_name":"Ondernemen en werken","metric":"per_capita","value":5.4944809488},{"year":2020,"domain_code":"6","domain_name":"Wonen en ruimtelijke ordening","metric":"per_capita","value":14.2705309988},{"year":2020,"domain_code":"7","domain_name":"Cultuur en vrije tijd","metric":"per_capita","value":17.0253412035},{"year":2020,"domain_code":"8","domain_name":"Leren en onderwijs","metric":"per_capita","value":16.2957174864},{"year":2020,"domain_code":"9","domain_name":"Zorg en opvang","metric":"per_capita","value":7.8818591482},{"year":2025,"domain_code":"1","domain_name":"Algemeen bestuur","metric":"per_capita","value":35.6034864165},{"year":2025,"domain_code":"2","domain_name":"Zich verplaatsen en mobiliteit","metric":"per_capita","value":100.0351366459},{"year":2025,"domain_code":"3","domain_name":"Natuur en milieubeheer","metric":"per_capita","value":6.7339740884},{"year":2025,"domain_code":"4","domain_name":"Veiligheidszorg","metric":"per_capita","value":12.453203523},{"year":2025,"domain_code":"5","domain_name":"Ondernemen en werken","metric":"per_capita","value":12.3162612293},{"year":2025,"domain_code":"6","domain_name":"Wonen en ruimtelijke ordening","metric":"per_capita","value":13.8173963918},{"year":2025,"domain_code":"7","domain_name":"Cultuur en vrije tijd","metric":"per_capita","value":7.2845081978},{"year":2025,"domain_code":"8","domain_name":"Leren en onderwijs","metric":"per_capita","value":25.0243554346},{"year":2025,"domain_code":"9","domain_name":"Zorg en opvang","metric":"per_capita","value":7.179889416}]
+[
+  {
+    "year": 2014,
+    "domain_code": "0",
+    "domain_name": "Algemene financiering",
+    "metric": "total",
+    "value": 467996238.0
+  },
+  {
+    "year": 2014,
+    "domain_code": "1",
+    "domain_name": "Algemeen bestuur",
+    "metric": "total",
+    "value": 2100496208.0
+  },
+  {
+    "year": 2014,
+    "domain_code": "2",
+    "domain_name": "Zich verplaatsen en mobiliteit",
+    "metric": "total",
+    "value": 4308539845.0
+  },
+  {
+    "year": 2014,
+    "domain_code": "3",
+    "domain_name": "Natuur en milieubeheer",
+    "metric": "total",
+    "value": 1317749902.0
+  },
+  {
+    "year": 2014,
+    "domain_code": "4",
+    "domain_name": "Veiligheidszorg",
+    "metric": "total",
+    "value": 321466988.0
+  },
+  {
+    "year": 2014,
+    "domain_code": "5",
+    "domain_name": "Ondernemen en werken",
+    "metric": "total",
+    "value": 425928181.0
+  },
+  {
+    "year": 2014,
+    "domain_code": "6",
+    "domain_name": "Wonen en ruimtelijke ordening",
+    "metric": "total",
+    "value": 2284762476.0
+  },
+  {
+    "year": 2014,
+    "domain_code": "7",
+    "domain_name": "Cultuur en vrije tijd",
+    "metric": "total",
+    "value": 2437286134.0
+  },
+  {
+    "year": 2014,
+    "domain_code": "8",
+    "domain_name": "Leren en onderwijs",
+    "metric": "total",
+    "value": 995604807.0
+  },
+  {
+    "year": 2014,
+    "domain_code": "9",
+    "domain_name": "Zorg en opvang",
+    "metric": "total",
+    "value": 2320813341.0
+  },
+  {
+    "year": 2020,
+    "domain_code": "0",
+    "domain_name": "Algemene financiering",
+    "metric": "total",
+    "value": 413998442.0
+  },
+  {
+    "year": 2020,
+    "domain_code": "1",
+    "domain_name": "Algemeen bestuur",
+    "metric": "total",
+    "value": 2847028203.0
+  },
+  {
+    "year": 2020,
+    "domain_code": "2",
+    "domain_name": "Zich verplaatsen en mobiliteit",
+    "metric": "total",
+    "value": 5679637309.0
+  },
+  {
+    "year": 2020,
+    "domain_code": "3",
+    "domain_name": "Natuur en milieubeheer",
+    "metric": "total",
+    "value": 2206644776.0
+  },
+  {
+    "year": 2020,
+    "domain_code": "4",
+    "domain_name": "Veiligheidszorg",
+    "metric": "total",
+    "value": 660966482.0
+  },
+  {
+    "year": 2020,
+    "domain_code": "5",
+    "domain_name": "Ondernemen en werken",
+    "metric": "total",
+    "value": 287474321.0
+  },
+  {
+    "year": 2020,
+    "domain_code": "6",
+    "domain_name": "Wonen en ruimtelijke ordening",
+    "metric": "total",
+    "value": 2417556374.0
+  },
+  {
+    "year": 2020,
+    "domain_code": "7",
+    "domain_name": "Cultuur en vrije tijd",
+    "metric": "total",
+    "value": 4245770278.0
+  },
+  {
+    "year": 2020,
+    "domain_code": "8",
+    "domain_name": "Leren en onderwijs",
+    "metric": "total",
+    "value": 1296591058.0
+  },
+  {
+    "year": 2020,
+    "domain_code": "9",
+    "domain_name": "Zorg en opvang",
+    "metric": "total",
+    "value": 1432933944.0
+  },
+  {
+    "year": 2014,
+    "domain_code": "0",
+    "domain_name": "Algemene financiering",
+    "metric": "per_capita",
+    "value": 19487.119140625
+  },
+  {
+    "year": 2014,
+    "domain_code": "1",
+    "domain_name": "Algemeen bestuur",
+    "metric": "per_capita",
+    "value": 75153.40625
+  },
+  {
+    "year": 2014,
+    "domain_code": "2",
+    "domain_name": "Zich verplaatsen en mobiliteit",
+    "metric": "per_capita",
+    "value": 205505.390625
+  },
+  {
+    "year": 2014,
+    "domain_code": "3",
+    "domain_name": "Natuur en milieubeheer",
+    "metric": "per_capita",
+    "value": 58591.0
+  },
+  {
+    "year": 2014,
+    "domain_code": "4",
+    "domain_name": "Veiligheidszorg",
+    "metric": "per_capita",
+    "value": 14394.150390625
+  },
+  {
+    "year": 2014,
+    "domain_code": "5",
+    "domain_name": "Ondernemen en werken",
+    "metric": "per_capita",
+    "value": 12911.4599609375
+  },
+  {
+    "year": 2014,
+    "domain_code": "6",
+    "domain_name": "Wonen en ruimtelijke ordening",
+    "metric": "per_capita",
+    "value": 95125.0078125
+  },
+  {
+    "year": 2014,
+    "domain_code": "7",
+    "domain_name": "Cultuur en vrije tijd",
+    "metric": "per_capita",
+    "value": 109336.859375
+  },
+  {
+    "year": 2014,
+    "domain_code": "8",
+    "domain_name": "Leren en onderwijs",
+    "metric": "per_capita",
+    "value": 45709.08984375
+  },
+  {
+    "year": 2014,
+    "domain_code": "9",
+    "domain_name": "Zorg en opvang",
+    "metric": "per_capita",
+    "value": 98300.7109375
+  },
+  {
+    "year": 2020,
+    "domain_code": "0",
+    "domain_name": "Algemene financiering",
+    "metric": "per_capita",
+    "value": 17506.76953125
+  },
+  {
+    "year": 2020,
+    "domain_code": "1",
+    "domain_name": "Algemeen bestuur",
+    "metric": "per_capita",
+    "value": 105242.9765625
+  },
+  {
+    "year": 2020,
+    "domain_code": "2",
+    "domain_name": "Zich verplaatsen en mobiliteit",
+    "metric": "per_capita",
+    "value": 267614.75
+  },
+  {
+    "year": 2020,
+    "domain_code": "3",
+    "domain_name": "Natuur en milieubeheer",
+    "metric": "per_capita",
+    "value": 98411.1796875
+  },
+  {
+    "year": 2020,
+    "domain_code": "4",
+    "domain_name": "Veiligheidszorg",
+    "metric": "per_capita",
+    "value": 28756.330078125
+  },
+  {
+    "year": 2020,
+    "domain_code": "5",
+    "domain_name": "Ondernemen en werken",
+    "metric": "per_capita",
+    "value": 11137.8701171875
+  },
+  {
+    "year": 2020,
+    "domain_code": "6",
+    "domain_name": "Wonen en ruimtelijke ordening",
+    "metric": "per_capita",
+    "value": 96280.5
+  },
+  {
+    "year": 2020,
+    "domain_code": "7",
+    "domain_name": "Cultuur en vrije tijd",
+    "metric": "per_capita",
+    "value": 187293.90625
+  },
+  {
+    "year": 2020,
+    "domain_code": "8",
+    "domain_name": "Leren en onderwijs",
+    "metric": "per_capita",
+    "value": 61140.7109375
+  },
+  {
+    "year": 2020,
+    "domain_code": "9",
+    "domain_name": "Zorg en opvang",
+    "metric": "per_capita",
+    "value": 58104.03125
+  }
+]

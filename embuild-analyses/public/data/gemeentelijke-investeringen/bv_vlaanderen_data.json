@@ -1,0 +1,2002 @@
+[
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "0 Algemene financiering",
+    "BV_subdomein": "00 Algemene financiering",
+    "Beleidsveld": "None",
+    "Totaal": 488889414.0,
+    "Per_inwoner": 20414.78
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "010 Politieke organen",
+    "Beleidsveld": "None",
+    "Totaal": 2263168.0,
+    "Per_inwoner": 149.7
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "011 Algemene diensten",
+    "Beleidsveld": "None",
+    "Totaal": 1884956311.0,
+    "Per_inwoner": 57384.22
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "013 Administratieve dienstverlening",
+    "Beleidsveld": "None",
+    "Totaal": 89479275.0,
+    "Per_inwoner": 2760.46
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "015 Internationale samenwerking",
+    "Beleidsveld": "None",
+    "Totaal": 66280.0,
+    "Per_inwoner": 1.49
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "016 Hulp aan het buitenland",
+    "Beleidsveld": "None",
+    "Totaal": 300873.0,
+    "Per_inwoner": 15.959999999999999
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "017 Binnengemeentelijke decentralisatie",
+    "Beleidsveld": "None",
+    "Totaal": 146234690.0,
+    "Per_inwoner": 308.43
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "019 Overig algemeen bestuur",
+    "Beleidsveld": "None",
+    "Totaal": 226535338.0,
+    "Per_inwoner": 10282.94
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "2 Zich verplaatsen en mobiliteit",
+    "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
+    "Beleidsveld": "None",
+    "Totaal": 3947022415.0,
+    "Per_inwoner": 181659.24
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "030 Afval- en materialenbeheer",
+    "Beleidsveld": "None",
+    "Totaal": 162752486.0,
+    "Per_inwoner": 5513.08
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "031 Waterbeheer",
+    "Beleidsveld": "None",
+    "Totaal": 920385324.0,
+    "Per_inwoner": 42039.27
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "032 Vermindering van de milieuverontreiniging",
+    "Beleidsveld": "None",
+    "Totaal": 11373289.0,
+    "Per_inwoner": 553.38
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "034 Bescherming van biodiversiteit, landschappen en bodem",
+    "Beleidsveld": "None",
+    "Totaal": 73303365.0,
+    "Per_inwoner": 2979.68
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "035 Klimaat en energie",
+    "Beleidsveld": "None",
+    "Totaal": 32719060.0,
+    "Per_inwoner": 865.83
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "038/9 Overige milieubescherming",
+    "Beleidsveld": "None",
+    "Totaal": 31097097.0,
+    "Per_inwoner": 788.57
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "040 Politiediensten",
+    "Beleidsveld": "None",
+    "Totaal": 99183494.0,
+    "Per_inwoner": 5350.25
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "041 Brandweer",
+    "Beleidsveld": "None",
+    "Totaal": 189693542.0,
+    "Per_inwoner": 7129.33
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "042/4 Overige hulpdiensten",
+    "Beleidsveld": "None",
+    "Totaal": 6455989.0,
+    "Per_inwoner": 274.44
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid",
+    "Beleidsveld": "None",
+    "Totaal": 22589327.0,
+    "Per_inwoner": 614.83
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "050 Handel en middenstand",
+    "Beleidsveld": "None",
+    "Totaal": 32894684.0,
+    "Per_inwoner": 1085.14
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "051 Nijverheid",
+    "Beleidsveld": "None",
+    "Totaal": 220168182.0,
+    "Per_inwoner": 1822.79
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "052 Toerisme",
+    "Beleidsveld": "None",
+    "Totaal": 142958740.0,
+    "Per_inwoner": 8074.41
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "053 Land-, tuin- en bosbouw",
+    "Beleidsveld": "None",
+    "Totaal": 10244883.0,
+    "Per_inwoner": 617.67
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "054 Visvangst",
+    "Beleidsveld": "None",
+    "Totaal": 1743477.0,
+    "Per_inwoner": 71.10999999999999
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "055 Werkgelegenheid",
+    "Beleidsveld": "None",
+    "Totaal": 19643189.0,
+    "Per_inwoner": 198.88
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "059 Overige economische zaken",
+    "Beleidsveld": "None",
+    "Totaal": 32047838.0,
+    "Per_inwoner": 517.8199999999999
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "060 Ruimtelijke planning",
+    "Beleidsveld": "None",
+    "Totaal": 193690848.0,
+    "Per_inwoner": 10199.949999999999
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "061 Gebiedsontwikkeling",
+    "Beleidsveld": "None",
+    "Totaal": 737071829.0,
+    "Per_inwoner": 13177.72
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "062 Woonbeleid",
+    "Beleidsveld": "None",
+    "Totaal": 145578548.0,
+    "Per_inwoner": 4946.42
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "063 Watervoorziening",
+    "Beleidsveld": "None",
+    "Totaal": 101467912.0,
+    "Per_inwoner": 6439.24
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "064 Elektriciteitsvoorziening",
+    "Beleidsveld": "None",
+    "Totaal": 691554438.0,
+    "Per_inwoner": 28913.44
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "065 Gasvoorziening",
+    "Beleidsveld": "None",
+    "Totaal": 315601775.0,
+    "Per_inwoner": 11972.34
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "066 Communicatievoorzieningen",
+    "Beleidsveld": "None",
+    "Totaal": 5180953.0,
+    "Per_inwoner": 365.21
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "067 Straatverlichting",
+    "Beleidsveld": "None",
+    "Totaal": 161907228.0,
+    "Per_inwoner": 7336.29
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "068 Groene ruimte",
+    "Beleidsveld": "None",
+    "Totaal": 235085288.0,
+    "Per_inwoner": 7649.71
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "069 Overige nutsvoorzieningen",
+    "Beleidsveld": "None",
+    "Totaal": 44870622.0,
+    "Per_inwoner": 1498.72
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "070 Culturele instellingen",
+    "Beleidsveld": "None",
+    "Totaal": 704080343.0,
+    "Per_inwoner": 29643.52
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "071 Evenementen",
+    "Beleidsveld": "None",
+    "Totaal": 58698726.0,
+    "Per_inwoner": 3028.88
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "072 Erfgoed",
+    "Beleidsveld": "None",
+    "Totaal": 304535357.0,
+    "Per_inwoner": 10278.66
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "073 Overig kunst- en cultuurbeleid",
+    "Beleidsveld": "None",
+    "Totaal": 101027146.0,
+    "Per_inwoner": 3254.4900000000002
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "074 Sport",
+    "Beleidsveld": "None",
+    "Totaal": 842792099.0,
+    "Per_inwoner": 35243.71
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "075 Jeugd",
+    "Beleidsveld": "None",
+    "Totaal": 258604556.0,
+    "Per_inwoner": 10679.539999999999
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "079 Erediensten  en niet-confessionele levensbeschouwelijke gemeenschappen",
+    "Beleidsveld": "None",
+    "Totaal": 216113159.0,
+    "Per_inwoner": 10933.89
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "080 Basisonderwijs",
+    "Beleidsveld": "None",
+    "Totaal": 608093174.0,
+    "Per_inwoner": 30972.41
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "081 Secundair onderwijs",
+    "Beleidsveld": "None",
+    "Totaal": 88885448.0,
+    "Per_inwoner": 3461.19
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "082 Deeltijds kunstonderwijs",
+    "Beleidsveld": "None",
+    "Totaal": 151390506.0,
+    "Per_inwoner": 5412.61
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "083 Hoger en Volwassenenonderwijs",
+    "Beleidsveld": "None",
+    "Totaal": 17192515.0,
+    "Per_inwoner": 500.66999999999996
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "086 Ondersteunende diensten voor het onderwijs",
+    "Beleidsveld": "None",
+    "Totaal": 115292640.0,
+    "Per_inwoner": 861.88
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "087/8 Algemeen onderwijsbeleid",
+    "Beleidsveld": "None",
+    "Totaal": 138801978.0,
+    "Per_inwoner": 2097.09
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "090 Sociaal beleid",
+    "Beleidsveld": "None",
+    "Totaal": 306416635.0,
+    "Per_inwoner": 11625.789999999999
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "091 Ziekte- en invaliditeit",
+    "Beleidsveld": "None",
+    "Totaal": 9855861.0,
+    "Per_inwoner": 214.61
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "092 Werkloosheid",
+    "Beleidsveld": "None",
+    "Totaal": 16040.0,
+    "Per_inwoner": 0.22999999999999998
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "093 Sociale huisvesting",
+    "Beleidsveld": "None",
+    "Totaal": 113529821.0,
+    "Per_inwoner": 7024.24
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "094 Gezin en kinderen",
+    "Beleidsveld": "None",
+    "Totaal": 234945818.0,
+    "Per_inwoner": 11201.25
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "095 Ouderen",
+    "Beleidsveld": "None",
+    "Totaal": 1694280112.0,
+    "Per_inwoner": 59242.409999999996
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+    "Beleidsveld": "None",
+    "Totaal": 14371387.0,
+    "Per_inwoner": 729.0500000000001
+  },
+  {
+    "Rapportjaar": 2014,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging",
+    "Beleidsveld": "None",
+    "Totaal": 104428320.0,
+    "Per_inwoner": 5288.66
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "0 Algemene financiering",
+    "BV_subdomein": "00 Algemene financiering",
+    "Beleidsveld": "None",
+    "Totaal": 333404721.0,
+    "Per_inwoner": 14365.05
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "010 Politieke organen",
+    "Beleidsveld": "None",
+    "Totaal": 6211045.0,
+    "Per_inwoner": 187.62
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "011 Algemene diensten",
+    "Beleidsveld": "None",
+    "Totaal": 2206392061.0,
+    "Per_inwoner": 72867.21
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "013 Administratieve dienstverlening",
+    "Beleidsveld": "None",
+    "Totaal": 81854781.0,
+    "Per_inwoner": 4391.75
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "015 Internationale samenwerking",
+    "Beleidsveld": "None",
+    "Totaal": 29987.0,
+    "Per_inwoner": 0.42
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "016 Hulp aan het buitenland",
+    "Beleidsveld": "None",
+    "Totaal": 519508.0,
+    "Per_inwoner": 13.79
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "017 Binnengemeentelijke decentralisatie",
+    "Beleidsveld": "None",
+    "Totaal": 203343299.0,
+    "Per_inwoner": 580.99
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "019 Overig algemeen bestuur",
+    "Beleidsveld": "None",
+    "Totaal": 282170718.0,
+    "Per_inwoner": 12718.03
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "2 Zich verplaatsen en mobiliteit",
+    "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
+    "Beleidsveld": "None",
+    "Totaal": 5011882774.0,
+    "Per_inwoner": 211391.02
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "030 Afval- en materialenbeheer",
+    "Beleidsveld": "None",
+    "Totaal": 226823744.0,
+    "Per_inwoner": 4478.6
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "031 Waterbeheer",
+    "Beleidsveld": "None",
+    "Totaal": 1281109379.0,
+    "Per_inwoner": 60180.98
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "032 Vermindering van de milieuverontreiniging",
+    "Beleidsveld": "None",
+    "Totaal": 23548062.0,
+    "Per_inwoner": 620.41
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "034 Bescherming van biodiversiteit, landschappen en bodem",
+    "Beleidsveld": "None",
+    "Totaal": 137807269.0,
+    "Per_inwoner": 5538.6
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "035 Klimaat en energie",
+    "Beleidsveld": "None",
+    "Totaal": 116512461.0,
+    "Per_inwoner": 3048.7
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "038/9 Overige milieubescherming",
+    "Beleidsveld": "None",
+    "Totaal": 30498135.0,
+    "Per_inwoner": 1252.98
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "040 Politiediensten",
+    "Beleidsveld": "None",
+    "Totaal": 282355178.0,
+    "Per_inwoner": 7845.45
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "041 Brandweer",
+    "Beleidsveld": "None",
+    "Totaal": 328943851.0,
+    "Per_inwoner": 12880.16
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "042/4 Overige hulpdiensten",
+    "Beleidsveld": "None",
+    "Totaal": 2547969.0,
+    "Per_inwoner": 156.01
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid",
+    "Beleidsveld": "None",
+    "Totaal": 59546941.0,
+    "Per_inwoner": 1579.83
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "050 Handel en middenstand",
+    "Beleidsveld": "None",
+    "Totaal": 64492202.0,
+    "Per_inwoner": 1897.2800000000002
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "051 Nijverheid",
+    "Beleidsveld": "None",
+    "Totaal": 46264707.0,
+    "Per_inwoner": 1341.2
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "052 Toerisme",
+    "Beleidsveld": "None",
+    "Totaal": 152154903.0,
+    "Per_inwoner": 6320.29
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "053 Land-, tuin- en bosbouw",
+    "Beleidsveld": "None",
+    "Totaal": 11567245.0,
+    "Per_inwoner": 529.09
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "054 Visvangst",
+    "Beleidsveld": "None",
+    "Totaal": 1869586.0,
+    "Per_inwoner": 167.27
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "055 Werkgelegenheid",
+    "Beleidsveld": "None",
+    "Totaal": 12262408.0,
+    "Per_inwoner": 243.02
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "059 Overige economische zaken",
+    "Beleidsveld": "None",
+    "Totaal": 194861910.0,
+    "Per_inwoner": 502.74
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "060 Ruimtelijke planning",
+    "Beleidsveld": "None",
+    "Totaal": 134833221.0,
+    "Per_inwoner": 7670.09
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "061 Gebiedsontwikkeling",
+    "Beleidsveld": "None",
+    "Totaal": 645195326.0,
+    "Per_inwoner": 13085.19
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "062 Woonbeleid",
+    "Beleidsveld": "None",
+    "Totaal": 218476737.0,
+    "Per_inwoner": 4864.76
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "063 Watervoorziening",
+    "Beleidsveld": "None",
+    "Totaal": 5993477.0,
+    "Per_inwoner": 287.54
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "064 Elektriciteitsvoorziening",
+    "Beleidsveld": "None",
+    "Totaal": 184507967.0,
+    "Per_inwoner": 8147.73
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "065 Gasvoorziening",
+    "Beleidsveld": "None",
+    "Totaal": 693418.0,
+    "Per_inwoner": 43.64
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "066 Communicatievoorzieningen",
+    "Beleidsveld": "None",
+    "Totaal": 2214339.0,
+    "Per_inwoner": 129.46
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "067 Straatverlichting",
+    "Beleidsveld": "None",
+    "Totaal": 852822301.0,
+    "Per_inwoner": 39393.78
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "068 Groene ruimte",
+    "Beleidsveld": "None",
+    "Totaal": 340893874.0,
+    "Per_inwoner": 9878.57
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "069 Overige nutsvoorzieningen",
+    "Beleidsveld": "None",
+    "Totaal": 15016380.0,
+    "Per_inwoner": 578.93
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "070 Culturele instellingen",
+    "Beleidsveld": "None",
+    "Totaal": 1038712384.0,
+    "Per_inwoner": 42147.43
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "071 Evenementen",
+    "Beleidsveld": "None",
+    "Totaal": 170118996.0,
+    "Per_inwoner": 8293.33
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "072 Erfgoed",
+    "Beleidsveld": "None",
+    "Totaal": 463499220.0,
+    "Per_inwoner": 13594.61
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "073 Overig kunst- en cultuurbeleid",
+    "Beleidsveld": "None",
+    "Totaal": 84531084.0,
+    "Per_inwoner": 2397.62
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "074 Sport",
+    "Beleidsveld": "None",
+    "Totaal": 1243493210.0,
+    "Per_inwoner": 57012.78
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "075 Jeugd",
+    "Beleidsveld": "None",
+    "Totaal": 339556501.0,
+    "Per_inwoner": 15739.78
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "079 Erediensten  en niet-confessionele levensbeschouwelijke gemeenschappen",
+    "Beleidsveld": "None",
+    "Totaal": 379456519.0,
+    "Per_inwoner": 16294.039999999999
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "080 Basisonderwijs",
+    "Beleidsveld": "None",
+    "Totaal": 768025255.0,
+    "Per_inwoner": 41146.6
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "081 Secundair onderwijs",
+    "Beleidsveld": "None",
+    "Totaal": 77414932.0,
+    "Per_inwoner": 1880.7800000000002
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "082 Deeltijds kunstonderwijs",
+    "Beleidsveld": "None",
+    "Totaal": 170035800.0,
+    "Per_inwoner": 6106.91
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "083 Hoger en Volwassenenonderwijs",
+    "Beleidsveld": "None",
+    "Totaal": 3056824.0,
+    "Per_inwoner": 106.91
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "086 Ondersteunende diensten voor het onderwijs",
+    "Beleidsveld": "None",
+    "Totaal": 37659816.0,
+    "Per_inwoner": 462.65000000000003
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "087/8 Algemeen onderwijsbeleid",
+    "Beleidsveld": "None",
+    "Totaal": 212698196.0,
+    "Per_inwoner": 1175.54
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "090 Sociaal beleid",
+    "Beleidsveld": "None",
+    "Totaal": 188002037.0,
+    "Per_inwoner": 4675.13
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "091 Ziekte- en invaliditeit",
+    "Beleidsveld": "None",
+    "Totaal": 5742486.0,
+    "Per_inwoner": 232.76
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "092 Werkloosheid",
+    "Beleidsveld": "None",
+    "Totaal": 13000.0,
+    "Per_inwoner": 0.2
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "093 Sociale huisvesting",
+    "Beleidsveld": "None",
+    "Totaal": 100749962.0,
+    "Per_inwoner": 3586.42
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "094 Gezin en kinderen",
+    "Beleidsveld": "None",
+    "Totaal": 203578314.0,
+    "Per_inwoner": 8059.14
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "095 Ouderen",
+    "Beleidsveld": "None",
+    "Totaal": 749005942.0,
+    "Per_inwoner": 26498.46
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+    "Beleidsveld": "None",
+    "Totaal": 23316673.0,
+    "Per_inwoner": 842.05
+  },
+  {
+    "Rapportjaar": 2020,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging",
+    "Beleidsveld": "None",
+    "Totaal": 138773077.0,
+    "Per_inwoner": 5855.53
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "0 Algemene financiering",
+    "BV_subdomein": "00 Algemene financiering",
+    "Beleidsveld": "0010 Algemene overdrachten tussen de verschillende bestuurlijke niveaus",
+    "Totaal": 280142489.0,
+    "Per_inwoner": 683.27
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "0 Algemene financiering",
+    "BV_subdomein": "00 Algemene financiering",
+    "Beleidsveld": "0020 Fiscale aangelegenheden",
+    "Totaal": 1730712.0,
+    "Per_inwoner": 3.12
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "0 Algemene financiering",
+    "BV_subdomein": "00 Algemene financiering",
+    "Beleidsveld": "0030 Financiële aangelegenheden",
+    "Totaal": 237078518.0,
+    "Per_inwoner": 1309.38
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "0 Algemene financiering",
+    "BV_subdomein": "00 Algemene financiering",
+    "Beleidsveld": "0040 Transacties in verband met de openbare schuld",
+    "Totaal": 701710.0,
+    "Per_inwoner": 117.66
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "0 Algemene financiering",
+    "BV_subdomein": "00 Algemene financiering",
+    "Beleidsveld": "0050 Patrimonium zonder maatschappelijk doel",
+    "Totaal": 236478871.0,
+    "Per_inwoner": 9690.89
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "0 Algemene financiering",
+    "BV_subdomein": "00 Algemene financiering",
+    "Beleidsveld": "0090 Overige algemene financiering",
+    "Totaal": 32488391.0,
+    "Per_inwoner": 969.1499999999999
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "010 Politieke organen",
+    "Beleidsveld": "0100 Politieke organen",
+    "Totaal": 1020215.0,
+    "Per_inwoner": 85.09
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "010 Politieke organen",
+    "Beleidsveld": "0101 Officieel ceremonieel",
+    "Totaal": 980.0,
+    "Per_inwoner": 5.24
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "011 Algemene diensten",
+    "Beleidsveld": "0110 Secretariaat",
+    "Totaal": 22900967.0,
+    "Per_inwoner": 1281.09
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "011 Algemene diensten",
+    "Beleidsveld": "0111 Fiscale en financiële diensten",
+    "Totaal": 8022612.0,
+    "Per_inwoner": 390.37
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "011 Algemene diensten",
+    "Beleidsveld": "0112 Personeelsdienst en vorming",
+    "Totaal": 13516483.0,
+    "Per_inwoner": 246.85
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "011 Algemene diensten",
+    "Beleidsveld": "0113 Archief",
+    "Totaal": 6686407.0,
+    "Per_inwoner": 243.72
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "011 Algemene diensten",
+    "Beleidsveld": "0114 Organisatiebeheersing",
+    "Totaal": 10181013.0,
+    "Per_inwoner": 350.58
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "011 Algemene diensten",
+    "Beleidsveld": "0115 Welzijn op het werk",
+    "Totaal": 1438710.0,
+    "Per_inwoner": 211.66
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "011 Algemene diensten",
+    "Beleidsveld": "0119 Overige algemene diensten",
+    "Totaal": 2255217051.0,
+    "Per_inwoner": 65362.77
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "013 Administratieve dienstverlening",
+    "Beleidsveld": "0130 Administratieve dienstverlening",
+    "Totaal": 61226958.0,
+    "Per_inwoner": 3423.5
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "016 Hulp aan het buitenland",
+    "Beleidsveld": "0160 Hulp aan het buitenland",
+    "Totaal": 12440.0,
+    "Per_inwoner": 17.64
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "017 Binnengemeentelijke decentralisatie",
+    "Beleidsveld": "0170 Binnengemeentelijke decentralisatie",
+    "Totaal": 4165818.0,
+    "Per_inwoner": 7.88
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "017 Binnengemeentelijke decentralisatie",
+    "Beleidsveld": "0171 Gemeentelijk/stedelijk wijkoverleg",
+    "Totaal": 5970683.0,
+    "Per_inwoner": 137.94
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "1 Algemeen bestuur",
+    "BV_subdomein": "019 Overig algemeen bestuur",
+    "Beleidsveld": "0190 Overig algemeen bestuur",
+    "Totaal": 302656425.0,
+    "Per_inwoner": 12402.57
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "2 Zich verplaatsen en mobiliteit",
+    "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
+    "Beleidsveld": "0200 Wegen",
+    "Totaal": 4700061650.0,
+    "Per_inwoner": 190453.16
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "2 Zich verplaatsen en mobiliteit",
+    "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
+    "Beleidsveld": "0210 Openbaar vervoer",
+    "Totaal": 1872273.0,
+    "Per_inwoner": 1020.76
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "2 Zich verplaatsen en mobiliteit",
+    "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
+    "Beleidsveld": "0220 Parkeren",
+    "Totaal": 149331754.0,
+    "Per_inwoner": 2544.47
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "2 Zich verplaatsen en mobiliteit",
+    "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
+    "Beleidsveld": "0290 Overige mobiliteit en verkeer",
+    "Totaal": 78981062.0,
+    "Per_inwoner": 4894.21
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "030 Afval- en materialenbeheer",
+    "Beleidsveld": "0300 Ophalen en verwerken van huishoudelijk afval",
+    "Totaal": 189051491.0,
+    "Per_inwoner": 2293.3
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "030 Afval- en materialenbeheer",
+    "Beleidsveld": "0309 Overig afval- en materialenbeheer",
+    "Totaal": 30772375.0,
+    "Per_inwoner": 1752.54
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "031 Waterbeheer",
+    "Beleidsveld": "0310 Beheer van regen- en afvalwater",
+    "Totaal": 1213491380.0,
+    "Per_inwoner": 54521.97
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "031 Waterbeheer",
+    "Beleidsveld": "0319 Overig waterbeheer",
+    "Totaal": 34117344.0,
+    "Per_inwoner": 2216.17
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "032 Vermindering van de milieuverontreiniging",
+    "Beleidsveld": "0320 Sanering van bodemverontreiniging",
+    "Totaal": 6513636.0,
+    "Per_inwoner": 462.98
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "032 Vermindering van de milieuverontreiniging",
+    "Beleidsveld": "0329 Overige vermindering van milieuverontreiniging",
+    "Totaal": 32030.0,
+    "Per_inwoner": 183.49
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "034 Bescherming van biodiversiteit, landschappen en bodem",
+    "Beleidsveld": "0340 Aankoop, inrichting en beheer van natuur, groen en bos",
+    "Totaal": 86301827.0,
+    "Per_inwoner": 3058.47
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "034 Bescherming van biodiversiteit, landschappen en bodem",
+    "Beleidsveld": "0341 Erosiebestrijding",
+    "Totaal": 18013607.0,
+    "Per_inwoner": 1542.18
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "034 Bescherming van biodiversiteit, landschappen en bodem",
+    "Beleidsveld": "0349 Overige bescherming van biodiversiteit, landschappen en bodem",
+    "Totaal": 246748.0,
+    "Per_inwoner": 302.82
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "035 Klimaat en energie",
+    "Beleidsveld": "0350 Klimaat en energie",
+    "Totaal": 120322409.0,
+    "Per_inwoner": 3009.69
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "038/9 Overige milieubescherming",
+    "Beleidsveld": "0380 Participatie en sensibilisatie",
+    "Totaal": 18722.0,
+    "Per_inwoner": 34.31
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "038/9 Overige milieubescherming",
+    "Beleidsveld": "0381 Geïntegreerde milieuprojecten",
+    "Totaal": 3040290.0,
+    "Per_inwoner": 247.10000000000002
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "3 Natuur en milieubeheer",
+    "BV_subdomein": "038/9 Overige milieubescherming",
+    "Beleidsveld": "0390 Overige milieubescherming",
+    "Totaal": 3752685.0,
+    "Per_inwoner": 411.91
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "040 Politiediensten",
+    "Beleidsveld": "0400 Politiediensten",
+    "Totaal": 297844964.0,
+    "Per_inwoner": 11461.83
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "041 Brandweer",
+    "Beleidsveld": "0410 Brandweer",
+    "Totaal": 394196752.0,
+    "Per_inwoner": 16715.92
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "042/4 Overige hulpdiensten",
+    "Beleidsveld": "0420 Dienst 100",
+    "Totaal": 618702.0,
+    "Per_inwoner": 32.72
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "042/4 Overige hulpdiensten",
+    "Beleidsveld": "0430 Civiele bescherming",
+    "Totaal": 4650.0,
+    "Per_inwoner": 8.11
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "042/4 Overige hulpdiensten",
+    "Beleidsveld": "0440 Overige hulpdiensten",
+    "Totaal": 4424493.0,
+    "Per_inwoner": 265.16
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid",
+    "Beleidsveld": "0470 Dierenbescherming",
+    "Totaal": 4705880.0,
+    "Per_inwoner": 139.84
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid",
+    "Beleidsveld": "0480 Bestuurlijke preventie (incl. GAS)",
+    "Totaal": 7651368.0,
+    "Per_inwoner": 641.27
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "4 Veiligheidszorg",
+    "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid",
+    "Beleidsveld": "0490 Overige elementen van openbare orde en veiligheid",
+    "Totaal": 38206565.0,
+    "Per_inwoner": 612.8
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "050 Handel en middenstand",
+    "Beleidsveld": "0500 Handel en middenstand",
+    "Totaal": 34426116.0,
+    "Per_inwoner": 1057.8799999999999
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "051 Nijverheid",
+    "Beleidsveld": "0510 Nijverheid",
+    "Totaal": 15989660.0,
+    "Per_inwoner": 728.68
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "052 Toerisme",
+    "Beleidsveld": "0520 Toerisme - Onthaal en promotie",
+    "Totaal": 42141653.0,
+    "Per_inwoner": 2875.37
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "052 Toerisme",
+    "Beleidsveld": "0521 Toerisme - Sectorondersteuning",
+    "Totaal": 5283250.0,
+    "Per_inwoner": 313.04
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "052 Toerisme",
+    "Beleidsveld": "0522 Toerisme - Infrastructuur",
+    "Totaal": 66583044.0,
+    "Per_inwoner": 885.35
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "052 Toerisme",
+    "Beleidsveld": "0529 Overige activiteiten inzake toerisme",
+    "Totaal": 12535.0,
+    "Per_inwoner": 101.09
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "053 Land-, tuin- en bosbouw",
+    "Beleidsveld": "0530 Land-, tuin- en bosbouw",
+    "Totaal": 3784888.0,
+    "Per_inwoner": 332.33
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "054 Visvangst",
+    "Beleidsveld": "0540 Visvangst",
+    "Totaal": 94973.0,
+    "Per_inwoner": 43.06
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "055 Werkgelegenheid",
+    "Beleidsveld": "0550 Tewerkstelling en activering",
+    "Totaal": 16334415.0,
+    "Per_inwoner": 402.33
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "5 Ondernemen en werken",
+    "BV_subdomein": "059 Overige economische zaken",
+    "Beleidsveld": "0590 Overige economische zaken",
+    "Totaal": 15740566.0,
+    "Per_inwoner": 310.64
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "060 Ruimtelijke planning",
+    "Beleidsveld": "0600 Ruimtelijke planning",
+    "Totaal": 97895389.0,
+    "Per_inwoner": 4679.79
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "061 Gebiedsontwikkeling",
+    "Beleidsveld": "0610 Gebiedsontwikkeling",
+    "Totaal": 538038235.0,
+    "Per_inwoner": 9178.3
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "062 Woonbeleid",
+    "Beleidsveld": "0620 Grondbeleid voor wonen",
+    "Totaal": 36416330.0,
+    "Per_inwoner": 844.1700000000001
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "062 Woonbeleid",
+    "Beleidsveld": "0621 Bestrijding van krotwoningen",
+    "Totaal": 2250.0,
+    "Per_inwoner": 5.42
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "062 Woonbeleid",
+    "Beleidsveld": "0622 Woonwagenterreinen",
+    "Totaal": 5768.0,
+    "Per_inwoner": 14.45
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "062 Woonbeleid",
+    "Beleidsveld": "0629 Overig woonbeleid",
+    "Totaal": 114962173.0,
+    "Per_inwoner": 647.89
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "063 Watervoorziening",
+    "Beleidsveld": "0630 Watervoorziening",
+    "Totaal": 27262499.0,
+    "Per_inwoner": 418.90999999999997
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "064 Elektriciteitsvoorziening",
+    "Beleidsveld": "0640 Elektriciteitsvoorziening",
+    "Totaal": 45768634.0,
+    "Per_inwoner": 2310.95
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "065 Gasvoorziening",
+    "Beleidsveld": "0650 Gasvoorziening",
+    "Totaal": 471999.0,
+    "Per_inwoner": 19.86
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "066 Communicatievoorzieningen",
+    "Beleidsveld": "0660 Communicatievoorzieningen",
+    "Totaal": 6680.0,
+    "Per_inwoner": 31.13
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "067 Straatverlichting",
+    "Beleidsveld": "0670 Straatverlichting",
+    "Totaal": 383531283.0,
+    "Per_inwoner": 16066.34
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "068 Groene ruimte",
+    "Beleidsveld": "0680 Groene ruimte",
+    "Totaal": 216792321.0,
+    "Per_inwoner": 7556.599999999999
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "6 Wonen en ruimtelijke ordening",
+    "BV_subdomein": "069 Overige nutsvoorzieningen",
+    "Beleidsveld": "0690 Overige nutsvoorzieningen",
+    "Totaal": 103417.0,
+    "Per_inwoner": 236.67
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "070 Culturele instellingen",
+    "Beleidsveld": "0700 Musea",
+    "Totaal": 90650679.0,
+    "Per_inwoner": 2030.25
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "070 Culturele instellingen",
+    "Beleidsveld": "0701 Cultuurcentrum",
+    "Totaal": 120288788.0,
+    "Per_inwoner": 5449.74
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "070 Culturele instellingen",
+    "Beleidsveld": "0702 Schouwburg, concertgebouw, opera",
+    "Totaal": 34185250.0,
+    "Per_inwoner": 425.28999999999996
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "070 Culturele instellingen",
+    "Beleidsveld": "0703 Openbare bibliotheken",
+    "Totaal": 64446030.0,
+    "Per_inwoner": 3662.92
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "070 Culturele instellingen",
+    "Beleidsveld": "0705 Gemeenschapscentrum",
+    "Totaal": 302396547.0,
+    "Per_inwoner": 18567.67
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "070 Culturele instellingen",
+    "Beleidsveld": "0709 Overige culturele instellingen",
+    "Totaal": 133033114.0,
+    "Per_inwoner": 3838.19
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "071 Evenementen",
+    "Beleidsveld": "0710 Feesten en plechtigheden",
+    "Totaal": 8265397.0,
+    "Per_inwoner": 847.27
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "071 Evenementen",
+    "Beleidsveld": "0711 Openluchtrecreatie",
+    "Totaal": 60590564.0,
+    "Per_inwoner": 2869.9900000000002
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "071 Evenementen",
+    "Beleidsveld": "0712 Festivals",
+    "Totaal": 88432.0,
+    "Per_inwoner": 3.8899999999999997
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "071 Evenementen",
+    "Beleidsveld": "0719 Overige evenementen",
+    "Totaal": 18707924.0,
+    "Per_inwoner": 747.95
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "072 Erfgoed",
+    "Beleidsveld": "0720 Monumentenzorg",
+    "Totaal": 236922990.0,
+    "Per_inwoner": 8284.43
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "072 Erfgoed",
+    "Beleidsveld": "0721 Archeologie",
+    "Totaal": 26440.0,
+    "Per_inwoner": 135.61
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "072 Erfgoed",
+    "Beleidsveld": "0729 Overig beleid inzake het erfgoed",
+    "Totaal": 35757489.0,
+    "Per_inwoner": 1974.83
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "073 Overig kunst- en cultuurbeleid",
+    "Beleidsveld": "0739 Overig kunst- en cultuurbeleid",
+    "Totaal": 221157410.0,
+    "Per_inwoner": 2970.85
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "074 Sport",
+    "Beleidsveld": "0740 Sportsector- en verenigingsondersteuning",
+    "Totaal": 216246503.0,
+    "Per_inwoner": 9276.51
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "074 Sport",
+    "Beleidsveld": "0741 Sportpromotie en -evenementen",
+    "Totaal": 2473610.0,
+    "Per_inwoner": 242.97000000000003
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "074 Sport",
+    "Beleidsveld": "0742 Sportinfrastructuur",
+    "Totaal": 915725847.0,
+    "Per_inwoner": 38407.4
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "074 Sport",
+    "Beleidsveld": "0749 Overig sportbeleid",
+    "Totaal": 20497011.0,
+    "Per_inwoner": 442.15999999999997
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "075 Jeugd",
+    "Beleidsveld": "0750 Jeugdsector- en verenigingsondersteuning",
+    "Totaal": 67302429.0,
+    "Per_inwoner": 3585.89
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "075 Jeugd",
+    "Beleidsveld": "0751 Gemeentelijke dienstverlening gericht op kinderen & jongeren",
+    "Totaal": 386811.0,
+    "Per_inwoner": 366.63
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "075 Jeugd",
+    "Beleidsveld": "0752 Infrastructuur en faciliteiten ten behoeve van kinderen en jongeren",
+    "Totaal": 183678219.0,
+    "Per_inwoner": 7694.82
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "075 Jeugd",
+    "Beleidsveld": "0759 Overige activiteiten met betrekking tot jeugd",
+    "Totaal": 34961423.0,
+    "Per_inwoner": 393.75
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "079 Erediensten  en niet-confessionele levensbeschouwelijke gemeenschappen",
+    "Beleidsveld": "0790 Erediensten",
+    "Totaal": 298696153.0,
+    "Per_inwoner": 13452.6
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "7 Cultuur en vrije tijd",
+    "BV_subdomein": "079 Erediensten  en niet-confessionele levensbeschouwelijke gemeenschappen",
+    "Beleidsveld": "0791 Niet-confessionele levensbeschouwelijke gemeenschappen",
+    "Totaal": 520.0,
+    "Per_inwoner": 2.61
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "080 Basisonderwijs",
+    "Beleidsveld": "0800 Gewoon basisonderwijs",
+    "Totaal": 580558430.0,
+    "Per_inwoner": 27664.82
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "080 Basisonderwijs",
+    "Beleidsveld": "0801 Buitengewoon basisonderwijs",
+    "Totaal": 34789976.0,
+    "Per_inwoner": 1416.1
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "081 Secundair onderwijs",
+    "Beleidsveld": "0810 Gewoon secundair onderwijs",
+    "Totaal": 55298728.0,
+    "Per_inwoner": 2305.7
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "081 Secundair onderwijs",
+    "Beleidsveld": "0814 Leren en werken",
+    "Totaal": 1250.0,
+    "Per_inwoner": 1.8199999999999998
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "081 Secundair onderwijs",
+    "Beleidsveld": "0815 Buitengewoon secundair onderwijs",
+    "Totaal": 3330154.0,
+    "Per_inwoner": 101.66000000000001
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "082 Deeltijds kunstonderwijs",
+    "Beleidsveld": "0820 Deeltijds kunstonderwijs",
+    "Totaal": 135676011.0,
+    "Per_inwoner": 4765.26
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "083 Hoger en Volwassenenonderwijs",
+    "Beleidsveld": "0830 Centra voor volwassenenonderwijs",
+    "Totaal": 1857308.0,
+    "Per_inwoner": 46.67
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "086 Ondersteunende diensten voor het onderwijs",
+    "Beleidsveld": "0869 Overige ondersteunende diensten voor het onderwijs",
+    "Totaal": 150607606.0,
+    "Per_inwoner": 361.49
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "087/8 Algemeen onderwijsbeleid",
+    "Beleidsveld": "0870 Sociale voordelen",
+    "Totaal": 1953393.0,
+    "Per_inwoner": 190.44
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "087/8 Algemeen onderwijsbeleid",
+    "Beleidsveld": "0879 Andere voordelen",
+    "Totaal": 4025.0,
+    "Per_inwoner": 114.16
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "8 Leren en onderwijs",
+    "BV_subdomein": "087/8 Algemeen onderwijsbeleid",
+    "Beleidsveld": "0889 Ondersteunende diensten voor het algemeen onderwijsbeleid",
+    "Totaal": 4596612.0,
+    "Per_inwoner": 88.77
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "090 Sociaal beleid",
+    "Beleidsveld": "0900 Sociale bijstand",
+    "Totaal": 33704489.0,
+    "Per_inwoner": 2207.74
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "090 Sociaal beleid",
+    "Beleidsveld": "0902 Integratie van personen met vreemde herkomst",
+    "Totaal": 6785231.0,
+    "Per_inwoner": 14.790000000000001
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "090 Sociaal beleid",
+    "Beleidsveld": "0903 Lokale opvanginitiatieven voor asielzoekers",
+    "Totaal": 216261.0,
+    "Per_inwoner": 218.5
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "090 Sociaal beleid",
+    "Beleidsveld": "0905 Dienst voor juridische informatie en advies",
+    "Totaal": 1232453.0,
+    "Per_inwoner": 52.39
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "090 Sociaal beleid",
+    "Beleidsveld": "0909 Overige verrichtingen inzake sociaal beleid",
+    "Totaal": 62934363.0,
+    "Per_inwoner": 876.09
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "091 Ziekte- en invaliditeit",
+    "Beleidsveld": "0910 Woningen voor personen met een handicap",
+    "Totaal": 3665.0,
+    "Per_inwoner": 23.8
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "091 Ziekte- en invaliditeit",
+    "Beleidsveld": "0911 Diensten en voorzieningen voor personen met een handicap",
+    "Totaal": 26756.0,
+    "Per_inwoner": 22.03
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "093 Sociale huisvesting",
+    "Beleidsveld": "0930 Sociale huisvesting",
+    "Totaal": 46047304.0,
+    "Per_inwoner": 2001.4
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "094 Gezin en kinderen",
+    "Beleidsveld": "0940 Jeugdvoorzieningen",
+    "Totaal": 5690.0,
+    "Per_inwoner": 18.009999999999998
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "094 Gezin en kinderen",
+    "Beleidsveld": "0941 Gezinsvervangende tehuizen",
+    "Totaal": 13805000.0,
+    "Per_inwoner": 1081.58
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "094 Gezin en kinderen",
+    "Beleidsveld": "0943 Gezinshulp",
+    "Totaal": 1435.0,
+    "Per_inwoner": 8.23
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "094 Gezin en kinderen",
+    "Beleidsveld": "0944 Preventieve gezinsondersteuning",
+    "Totaal": 647181.0,
+    "Per_inwoner": 77.39
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "094 Gezin en kinderen",
+    "Beleidsveld": "0945 Kinderopvang",
+    "Totaal": 147435275.0,
+    "Per_inwoner": 6822.1
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "094 Gezin en kinderen",
+    "Beleidsveld": "0946 Thuisbezorgde maaltijden",
+    "Totaal": 52855.0,
+    "Per_inwoner": 62.18
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "094 Gezin en kinderen",
+    "Beleidsveld": "0947 Klusjesdienst",
+    "Totaal": 1850.0,
+    "Per_inwoner": 12.5
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "094 Gezin en kinderen",
+    "Beleidsveld": "0948 Poetsdienst",
+    "Totaal": 1416.0,
+    "Per_inwoner": 1.15
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "094 Gezin en kinderen",
+    "Beleidsveld": "0949 Overige gezinshulp",
+    "Totaal": 94600.0,
+    "Per_inwoner": 95.22
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "095 Ouderen",
+    "Beleidsveld": "0950 Ouderenwoningen",
+    "Totaal": 13387612.0,
+    "Per_inwoner": 1056.62
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "095 Ouderen",
+    "Beleidsveld": "0951 Dienstencentra",
+    "Totaal": 53115818.0,
+    "Per_inwoner": 3129.76
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "095 Ouderen",
+    "Beleidsveld": "0952 Assistentiewoningen",
+    "Totaal": 50821167.0,
+    "Per_inwoner": 2979.18
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "095 Ouderen",
+    "Beleidsveld": "0953 Woon- en zorgcentra",
+    "Totaal": 291149307.0,
+    "Per_inwoner": 10479.05
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "095 Ouderen",
+    "Beleidsveld": "0954 Dagzorgcentra",
+    "Totaal": 2366798.0,
+    "Per_inwoner": 358.96000000000004
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "095 Ouderen",
+    "Beleidsveld": "0959 Overige verrichtingen betreffende ouderen",
+    "Totaal": 109369976.0,
+    "Per_inwoner": 627.26
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+    "Beleidsveld": "0980 Sociale geneeskunde",
+    "Totaal": 450.0,
+    "Per_inwoner": 2.24
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+    "Beleidsveld": "0982 Ziekenhuizen",
+    "Totaal": 24312227.0,
+    "Per_inwoner": 228.31
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+    "Beleidsveld": "0983 Andere verpleeg- en verzorgingsinrichtingen",
+    "Totaal": 2814922.0,
+    "Per_inwoner": 143.41
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+    "Beleidsveld": "0984 Ontsmetting en openbare reiniging",
+    "Totaal": 4676201.0,
+    "Per_inwoner": 263.24
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+    "Beleidsveld": "0985 Gezondheidspromotie en ziektepreventie",
+    "Totaal": 262029.0,
+    "Per_inwoner": 31.119999999999997
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+    "Beleidsveld": "0986 Eerstelijnsgezondheidszorg",
+    "Totaal": 1551277.0,
+    "Per_inwoner": 257.77
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
+    "Beleidsveld": "0989 Overige dienstverlening inzake volksgezondheid",
+    "Totaal": 7932.0,
+    "Per_inwoner": 39.64
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging",
+    "Beleidsveld": "0990 Begraafplaatsen",
+    "Totaal": 55820168.0,
+    "Per_inwoner": 3987.72
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging",
+    "Beleidsveld": "0991 Crematoria",
+    "Totaal": 1044.0,
+    "Per_inwoner": 0.87
+  },
+  {
+    "Rapportjaar": 2026,
+    "BV_domein": "9 Zorg en opvang",
+    "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging",
+    "Beleidsveld": "0992 Lijkbezorging",
+    "Totaal": 28845.0,
+    "Per_inwoner": 0.71
+  }
+]

@@ -23,23 +23,23 @@ export interface Lookups {
     domain_code: string
     domain_name: string
   }>
-  subdomains: Array<{
-    subdomain_code: string
-    subdomain_name: string
-    domain_code: string
+  subdomeinen: Array<{
+    subdomein_code: string
+    subdomein_name: string
   }>
-  cost_categories_niveau1: string[]
-  years: number[]
+  municipalities: Array<{
+    municipality: string
+    nis_code: string | null
+  }>
 }
 
 export interface Metadata {
-  latest_year: number
-  latest_date: string
-  bv_latest_year: number
-  kostenpost_latest_year: number
   total_municipalities: number
-  kostenpost_municipalities?: number
-  bv_records: number
-  kostenpost_records: number
-  is_kostenpost_truncated?: boolean
+  bv_latest_year: number
+  bv_earliest_year: number
+  total_domains: number
+  total_subdomeinen: number
+  total_records: number
+  municipalities_with_nis: number
+  is_kostenpost_truncated: boolean
 }
