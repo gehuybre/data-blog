@@ -3,8 +3,14 @@
 
 import json
 import os
+import sys
 
 def main():
+    meta_file = os.environ.get('META_FILE')
+    if not meta_file:
+        print('Error: META_FILE environment variable is not set', file=sys.stderr)
+        sys.exit(1)
+    
     meta = {
         'url': os.environ.get('INPUT_URL'),
         'etag': os.environ.get('REMOTE_ETAG') or None,
@@ -12,7 +18,6 @@ def main():
         'sha256': os.environ.get('sha') or None
     }
     
-    meta_file = os.environ.get('META_FILE')
     with open(meta_file, 'w') as f:
         json.dump(meta, f, indent=2)
 
