@@ -1,6 +1,7 @@
 "use client"
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { formatAxisNumber } from '@/lib/chart-theme'
 
 interface ChartDataPoint {
   year: number
@@ -28,7 +29,7 @@ export function GebouwenChart({
       <LineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="year" />
-        <YAxis tickFormatter={(val) => `${val / 1000000}M`} />
+        <YAxis tickFormatter={formatAxisNumber} />
         <Tooltip formatter={(val: any) => formatNumber(Number(val))} />
         <Legend />
         <Line type="monotone" dataKey="total" name={totalLabel} stroke="#8884d8" strokeWidth={2} />

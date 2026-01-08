@@ -13,6 +13,7 @@ import {
 } from "recharts"
 
 import { formatScaledEuro, formatScaledNumber, getCurrencyScale } from "./formatters"
+import { formatAxisNumber } from "@/lib/chart-theme"
 
 interface ChartDataPoint {
   jaar: number
@@ -60,7 +61,7 @@ export function EnergiekaartChart({ data, label, isCurrency = false }: Energieka
         <YAxis
           tickFormatter={(value) => {
             if (typeof value !== "number") return String(value)
-            if (!isCurrency || !scale) return new Intl.NumberFormat("nl-BE").format(value)
+            if (!isCurrency || !scale) return formatAxisNumber(value)
             return formatScaledNumber(value, scale)
           }}
           fontSize={CHART_THEME.fontSize}

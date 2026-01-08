@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, ComposedChart } from "recharts"
-import { CHART_COLORS, CHART_THEME } from "@/lib/chart-theme"
+import { CHART_COLORS, CHART_THEME, formatAxisNumber } from "@/lib/chart-theme"
 
 type UnknownRecord = Record<string, any>
 
@@ -96,7 +96,7 @@ export function FilterableChart<TData = UnknownRecord>({
             fontSize={CHART_THEME.fontSize}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => `${value}`}
+            tickFormatter={formatAxisNumber}
           />
           <Tooltip
             contentStyle={{
