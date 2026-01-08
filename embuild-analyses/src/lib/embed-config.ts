@@ -228,15 +228,15 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
   {
     slug: "gemeentelijke-investeringen",
     sections: {
-      "investments-by-domain": {
+      "investments-bv": {
         type: "custom",
-        title: "Investeringen per beleidsdomein",
+        title: "Investeringen per Beleidsdomein (BV)",
         component: "InvesteringenEmbed",
         height: 700,
       },
-      "investments-by-category": {
+      "investments-rek": {
         type: "custom",
-        title: "Investeringen per kostenpost",
+        title: "Investeringen per Economische Rekening (REK)",
         component: "InvesteringenEmbed",
         height: 700,
       },

@@ -28,3 +28,7 @@ embuild-analyses/analyses/**/data/*
 
 # CSV files in results/ are for debugging only (not used by frontend, which uses JSON)
 embuild-analyses/analyses/**/results/*.csv
+
+# Large JSON reference files in results/ (frontend uses chunked files in public/data/)
+embuild-analyses/analyses/gemeentelijke-investeringen/results/bv_municipality_data.json
+embuild-analyses/analyses/gemeentelijke-investeringen/results/rek_municipality_data.json
