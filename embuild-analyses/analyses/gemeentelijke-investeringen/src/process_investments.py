@@ -48,8 +48,15 @@ def is_flemish(nis_code):
     if not nis_code: return False
     return str(nis_code)[0] in '12347'
 
-def get_mapped_nis(nis_code):
-    """Return target NIS code if part of a merger."""
+def get_mapped_nis(nis_code, rapportjaar):
+    """
+    Return target NIS code if part of a merger.
+
+    Municipality mergers only apply from 2026 onwards.
+    Historical data (2014, 2020) should use original NIS codes.
+    """
+    if rapportjaar < 2026:
+        return str(nis_code)  # No mergers before 2026
     return NIS_MERGERS.get(str(nis_code), str(nis_code))
 
 def process_rek_file(file_path, rapportjaar):
@@ -98,7 +105,7 @@ def process_rek_file(file_path, rapportjaar):
         
         # Filter Flanders and Map Mergers
         if not is_flemish(raw_nis): continue
-        nis_code = get_mapped_nis(raw_nis)
+        nis_code = get_mapped_nis(raw_nis, rapportjaar)
 
         for col_idx in range(1, len(df.columns)):
             value = df_data.iloc[gemeente_idx, col_idx]
@@ -208,9 +215,9 @@ def process_bv_file(file_path, rapportjaar, chunk_size=200):
         for gemeente_idx in range(len(df_chunk)):
             raw_nis = str(df_chunk.iloc[gemeente_idx, 0]).split('.')[0]
             if not raw_nis.isdigit(): continue
-            
+
             if not is_flemish(raw_nis): continue
-            nis_code = get_mapped_nis(raw_nis)
+            nis_code = get_mapped_nis(raw_nis, rapportjaar)
 
             for col_idx in range(1, len(df_chunk.columns)):
                 value = df_chunk.iloc[gemeente_idx, col_idx]

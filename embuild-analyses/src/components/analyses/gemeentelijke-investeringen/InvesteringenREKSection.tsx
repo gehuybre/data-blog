@@ -49,6 +49,44 @@ interface REKVlaanderenRecord {
 const formatNumber = (num: number) => new Intl.NumberFormat('nl-BE').format(Math.round(num))
 const formatCurrency = (num: number) => `€ ${formatNumber(num)}`
 
+// Runtime validation helpers
+function validateMetadata(data: unknown): { bv_chunks: number; rek_chunks: number } {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid metadata: expected object')
+  }
+  const obj = data as Record<string, unknown>
+  if (typeof obj.bv_chunks !== 'number' || typeof obj.rek_chunks !== 'number') {
+    throw new Error('Invalid metadata: missing or invalid chunk counts')
+  }
+  return obj as { bv_chunks: number; rek_chunks: number }
+}
+
+function validateLookups(data: unknown): REKLookups {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid lookups: expected object')
+  }
+  const obj = data as Record<string, unknown>
+  if (!Array.isArray(obj.niveau3s) || !Array.isArray(obj.alg_rekenings) ||
+      typeof obj.municipalities !== 'object') {
+    throw new Error('Invalid lookups: missing or invalid fields')
+  }
+  return obj as REKLookups
+}
+
+function validateVlaanderenData(data: unknown): REKVlaanderenRecord[] {
+  if (!Array.isArray(data)) {
+    throw new Error('Invalid Vlaanderen data: expected array')
+  }
+  return data as REKVlaanderenRecord[]
+}
+
+function validateChunkData(data: unknown): REKRecord[] {
+  if (!Array.isArray(data)) {
+    throw new Error('Invalid chunk data: expected array')
+  }
+  return data as REKRecord[]
+}
+
 export function InvesteringenREKSection() {
   const [lookups, setLookups] = useState<REKLookups | null>(null)
   const [vlaanderenData, setVlaanderenData] = useState<REKVlaanderenRecord[]>([])
@@ -76,9 +114,13 @@ export function InvesteringenREKSection() {
           fetch('/data/gemeentelijke-investeringen/rek_vlaanderen_data.json')
         ])
 
-        const meta = await metaRes.json()
-        const lookupsData = await lookupsRes.json()
-        const vlaanderen = await vlaanderenRes.json()
+        if (!metaRes.ok) throw new Error(`Failed to load metadata: ${metaRes.statusText}`)
+        if (!lookupsRes.ok) throw new Error(`Failed to load lookups: ${lookupsRes.statusText}`)
+        if (!vlaanderenRes.ok) throw new Error(`Failed to load Vlaanderen data: ${vlaanderenRes.statusText}`)
+
+        const meta = validateMetadata(await metaRes.json())
+        const lookupsData = validateLookups(await lookupsRes.json())
+        const vlaanderen = validateVlaanderenData(await vlaanderenRes.json())
 
         setLookups(lookupsData)
         setVlaanderenData(vlaanderen)
@@ -91,7 +133,7 @@ export function InvesteringenREKSection() {
           if (!chunkRes.ok) {
             throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
           }
-          const chunkData = await chunkRes.json()
+          const chunkData = validateChunkData(await chunkRes.json())
           setMuniData(prev => [...prev, ...chunkData])
           setLoadedChunks(i + 1)
         }
@@ -143,15 +185,29 @@ export function InvesteringenREKSection() {
     const byYear: Record<number, { Rapportjaar: number; value: number }> = {}
 
     if (geoSelection.type === 'all') {
-      // Show Vlaanderen sum for Totaal, average for Per_inwoner
+      // For "all" view with filters, aggregate per municipality first to avoid double counting.
+      // Why: A single municipality can have multiple records (one per Niveau_3/Alg_rekening).
+      // If we sum directly, we'd count municipality data multiple times per year.
+      // Instead, we first aggregate per municipality+year, then sum across municipalities.
+      const perMuniYear: Record<string, number> = {}
+
       filteredData.forEach(record => {
-        if (!byYear[record.Rapportjaar]) {
-          byYear[record.Rapportjaar] = { Rapportjaar: record.Rapportjaar, value: 0 }
-        }
-        byYear[record.Rapportjaar].value += record[selectedMetric]
+        const key = `${record.NIS_code}_${record.Rapportjaar}`
+        perMuniYear[key] = (perMuniYear[key] || 0) + record[selectedMetric]
       })
 
-      // For Per_inwoner, calculate average
+      // Then aggregate across municipalities
+      Object.entries(perMuniYear).forEach(([key, value]) => {
+        const year = parseInt(key.split('_')[1])
+        if (!byYear[year]) {
+          byYear[year] = { Rapportjaar: year, value: 0 }
+        }
+        byYear[year].value += value
+      })
+
+      // For Per_inwoner metric, calculate average across municipalities (not sum)
+      // Why: Per_inwoner values are already normalized per municipality population.
+      // Summing them would be meaningless - we need the average to show typical spending.
       if (selectedMetric === 'Per_inwoner') {
         const municipalityCounts: Record<number, Set<string>> = {}
         filteredData.forEach(record => {
@@ -169,7 +225,8 @@ export function InvesteringenREKSection() {
         })
       }
     } else {
-      // For specific selection, show aggregated value
+      // For specific region/province/municipality selection, sum all matching records.
+      // This is safe because filteredData already contains only records for that selection.
       filteredData.forEach(record => {
         if (!byYear[record.Rapportjaar]) {
           byYear[record.Rapportjaar] = { Rapportjaar: record.Rapportjaar, value: 0 }
