@@ -73,7 +73,7 @@ function validateLookups(data: unknown): BVLookups {
       !Array.isArray(obj.beleidsvelds) || typeof obj.municipalities !== 'object') {
     throw new Error('Invalid lookups: missing or invalid fields')
   }
-  return obj as BVLookups
+  return obj as unknown as BVLookups
 }
 
 function validateVlaanderenData(data: unknown): BVVlaanderenRecord[] {
