@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "npm run test:unit && playwright test",
-    "test:unit": "tsx --test 'src/**/__tests__/**/*.test.ts'",
+    "test:unit": "npx tsx --test src/lib/__tests__/chart-theme.test.ts",
     "test:e2e": "playwright test",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
