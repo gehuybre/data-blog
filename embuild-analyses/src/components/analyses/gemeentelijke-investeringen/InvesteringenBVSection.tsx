@@ -159,7 +159,10 @@ export function InvesteringenBVSection() {
     const byYear: Record<number, { Rapportjaar: number; value: number }> = {}
 
     if (geoSelection.type === 'all') {
-      // For "all" view, aggregate per municipality first to avoid double counting
+      // For "all" view with filters, aggregate per municipality first to avoid double counting.
+      // Why: A single municipality can have multiple records (one per domain/subdomein/beleidsveld).
+      // If we sum directly, we'd count municipality data multiple times per year.
+      // Instead, we first aggregate per municipality+year, then sum across municipalities.
       const perMuniYear: Record<string, number> = {}
 
       filteredData.forEach(record => {
@@ -176,7 +179,9 @@ export function InvesteringenBVSection() {
         byYear[year].value += value
       })
 
-      // For Per_inwoner, calculate average
+      // For Per_inwoner metric, calculate average across municipalities (not sum)
+      // Why: Per_inwoner values are already normalized per municipality population.
+      // Summing them would be meaningless - we need the average to show typical spending.
       if (selectedMetric === 'Per_inwoner') {
         const municipalityCounts: Record<number, Set<string>> = {}
         filteredData.forEach(record => {
@@ -194,7 +199,8 @@ export function InvesteringenBVSection() {
         })
       }
     } else {
-      // For specific selection, sum within the region/municipality
+      // For specific region/province/municipality selection, sum all matching records.
+      // This is safe because filteredData already contains only records for that selection.
       filteredData.forEach(record => {
         if (!byYear[record.Rapportjaar]) {
           byYear[record.Rapportjaar] = { Rapportjaar: record.Rapportjaar, value: 0 }
