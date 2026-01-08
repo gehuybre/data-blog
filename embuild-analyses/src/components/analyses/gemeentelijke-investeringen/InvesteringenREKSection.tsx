@@ -4,17 +4,7 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Check, ChevronsUpDown, Loader2 } from 'lucide-react'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+import { Loader2 } from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -28,6 +18,7 @@ import { MunicipalityMap } from "../shared/MunicipalityMap"
 import { SimpleGeoFilter } from "./SimpleGeoFilter"
 import { SimpleGeoContext } from "../shared/GeoContext"
 import { ExportButtons } from "../shared/ExportButtons"
+import { HierarchicalFilter } from "../shared/HierarchicalFilter"
 import { getMunicipalityName } from "./nisUtils"
 
 interface REKLookups {
@@ -58,74 +49,6 @@ interface REKVlaanderenRecord {
 const formatNumber = (num: number) => new Intl.NumberFormat('nl-BE').format(Math.round(num))
 const formatCurrency = (num: number) => `€ ${formatNumber(num)}`
 
-// Hierarchische filter component
-function HierarchicalFilter({
-  value,
-  onChange,
-  options,
-  placeholder,
-}: {
-  value: string
-  onChange: (value: string) => void
-  options: string[]
-  placeholder: string
-}) {
-  const [open, setOpen] = useState(false)
-  const selectedLabel = value || placeholder
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          role="combobox"
-          aria-expanded={open}
-          className="h-9 gap-1 min-w-[250px] justify-between"
-        >
-          <span className="truncate max-w-[230px]">{selectedLabel}</span>
-          <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[500px] p-0" align="start">
-        <Command>
-          <CommandInput placeholder={`Zoek ${placeholder.toLowerCase()}...`} />
-          <CommandList>
-            <CommandEmpty>Geen resultaat.</CommandEmpty>
-            <CommandGroup>
-              <CommandItem
-                value="alle"
-                onSelect={() => {
-                  onChange('')
-                  setOpen(false)
-                }}
-              >
-                <Check className={cn("mr-2 h-4 w-4", value === '' ? "opacity-100" : "opacity-0")} />
-                Alle
-              </CommandItem>
-              {options.map((option) => (
-                <CommandItem
-                  key={option}
-                  value={option}
-                  onSelect={() => {
-                    onChange(option)
-                    setOpen(false)
-                  }}
-                >
-                  <Check className={cn("mr-2 h-4 w-4", value === option ? "opacity-100" : "opacity-0")} />
-                  <span className="truncate">{option}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-
-
 export function InvesteringenREKSection() {
   const [lookups, setLookups] = useState<REKLookups | null>(null)
   const [vlaanderenData, setVlaanderenData] = useState<REKVlaanderenRecord[]>([])
@@ -133,6 +56,7 @@ export function InvesteringenREKSection() {
   const [isLoading, setIsLoading] = useState(true)
   const [loadedChunks, setLoadedChunks] = useState(0)
   const [totalChunks, setTotalChunks] = useState(0)
+  const [error, setError] = useState<string | null>(null)
 
   const [selectedNiveau3, setSelectedNiveau3] = useState<string>('')
   const [selectedAlgRekening, setSelectedAlgRekening] = useState<string>('')
@@ -164,12 +88,17 @@ export function InvesteringenREKSection() {
         // Load chunks sequentially
         for (let i = 0; i < meta.rek_chunks; i++) {
           const chunkRes = await fetch(`/data/gemeentelijke-investeringen/rek_municipality_data_chunk_${i}.json`)
+          if (!chunkRes.ok) {
+            throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
+          }
           const chunkData = await chunkRes.json()
           setMuniData(prev => [...prev, ...chunkData])
           setLoadedChunks(i + 1)
         }
       } catch (err) {
         console.error('Failed to load REK data:', err)
+        setError(err instanceof Error ? err.message : 'Fout bij het laden van de data')
+        setIsLoading(false)
       }
     }
     init()
@@ -224,14 +153,18 @@ export function InvesteringenREKSection() {
 
       // For Per_inwoner, calculate average
       if (selectedMetric === 'Per_inwoner') {
-        const municipalityCounts: Record<number, number> = {}
+        const municipalityCounts: Record<number, Set<string>> = {}
         filteredData.forEach(record => {
-          municipalityCounts[record.Rapportjaar] = (municipalityCounts[record.Rapportjaar] || 0) + 1
+          if (!municipalityCounts[record.Rapportjaar]) {
+            municipalityCounts[record.Rapportjaar] = new Set()
+          }
+          municipalityCounts[record.Rapportjaar].add(record.NIS_code)
         })
         Object.keys(byYear).forEach(year => {
           const y = parseInt(year)
-          if (municipalityCounts[y] > 0) {
-            byYear[y].value = byYear[y].value / municipalityCounts[y]
+          const count = municipalityCounts[y]?.size || 0
+          if (count > 0) {
+            byYear[y].value = byYear[y].value / count
           }
         })
       }
@@ -288,6 +221,20 @@ export function InvesteringenREKSection() {
 
     return Object.values(byMuni)
   }, [filteredData, selectedMetric])
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="h-64 flex flex-col items-center justify-center space-y-4">
+          <p className="text-sm text-destructive font-medium">Fout bij het laden van de data</p>
+          <p className="text-xs text-muted-foreground">{error}</p>
+          <Button onClick={() => window.location.reload()} size="sm">
+            Opnieuw proberen
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
 
   if (isLoading || !lookups) {
     return (
@@ -357,6 +304,7 @@ export function InvesteringenREKSection() {
                 }}
                 options={niveau3Options}
                 placeholder="Selecteer niveau 3"
+                minWidth={250}
               />
               {selectedNiveau3 && (
                 <HierarchicalFilter
@@ -364,6 +312,7 @@ export function InvesteringenREKSection() {
                   onChange={setSelectedAlgRekening}
                   options={algRekeningOptions}
                   placeholder="Selecteer algemene rekening"
+                  minWidth={250}
                 />
               )}
             </div>
