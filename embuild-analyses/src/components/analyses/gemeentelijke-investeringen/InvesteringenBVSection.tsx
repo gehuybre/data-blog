@@ -52,6 +52,44 @@ interface BVVlaanderenRecord {
 const formatNumber = (num: number) => new Intl.NumberFormat('nl-BE').format(Math.round(num))
 const formatCurrency = (num: number) => `€ ${formatNumber(num)}`
 
+// Runtime validation helpers
+function validateMetadata(data: unknown): { bv_chunks: number; rek_chunks: number } {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid metadata: expected object')
+  }
+  const obj = data as Record<string, unknown>
+  if (typeof obj.bv_chunks !== 'number' || typeof obj.rek_chunks !== 'number') {
+    throw new Error('Invalid metadata: missing or invalid chunk counts')
+  }
+  return obj as { bv_chunks: number; rek_chunks: number }
+}
+
+function validateLookups(data: unknown): BVLookups {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid lookups: expected object')
+  }
+  const obj = data as Record<string, unknown>
+  if (!Array.isArray(obj.domains) || !Array.isArray(obj.subdomeins) ||
+      !Array.isArray(obj.beleidsvelds) || typeof obj.municipalities !== 'object') {
+    throw new Error('Invalid lookups: missing or invalid fields')
+  }
+  return obj as BVLookups
+}
+
+function validateVlaanderenData(data: unknown): BVVlaanderenRecord[] {
+  if (!Array.isArray(data)) {
+    throw new Error('Invalid Vlaanderen data: expected array')
+  }
+  return data as BVVlaanderenRecord[]
+}
+
+function validateChunkData(data: unknown): BVRecord[] {
+  if (!Array.isArray(data)) {
+    throw new Error('Invalid chunk data: expected array')
+  }
+  return data as BVRecord[]
+}
+
 export function InvesteringenBVSection() {
   const [lookups, setLookups] = useState<BVLookups | null>(null)
   const [vlaanderenData, setVlaanderenData] = useState<BVVlaanderenRecord[]>([])
@@ -80,9 +118,13 @@ export function InvesteringenBVSection() {
           fetch('/data/gemeentelijke-investeringen/bv_vlaanderen_data.json')
         ])
 
-        const meta = await metaRes.json()
-        const lookupsData = await lookupsRes.json()
-        const vlaanderen = await vlaanderenRes.json()
+        if (!metaRes.ok) throw new Error(`Failed to load metadata: ${metaRes.statusText}`)
+        if (!lookupsRes.ok) throw new Error(`Failed to load lookups: ${lookupsRes.statusText}`)
+        if (!vlaanderenRes.ok) throw new Error(`Failed to load Vlaanderen data: ${vlaanderenRes.statusText}`)
+
+        const meta = validateMetadata(await metaRes.json())
+        const lookupsData = validateLookups(await lookupsRes.json())
+        const vlaanderen = validateVlaanderenData(await vlaanderenRes.json())
 
         setLookups(lookupsData)
         setVlaanderenData(vlaanderen)
@@ -95,7 +137,7 @@ export function InvesteringenBVSection() {
           if (!chunkRes.ok) {
             throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
           }
-          const chunkData = await chunkRes.json()
+          const chunkData = validateChunkData(await chunkRes.json())
           setMuniData(prev => [...prev, ...chunkData])
           setLoadedChunks(i + 1)
         }
