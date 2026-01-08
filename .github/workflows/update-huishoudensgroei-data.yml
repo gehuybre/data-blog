@@ -80,18 +80,18 @@ jobs:
 
           set +e
           python - <<-PY
-import json, os, sys
-meta=os.environ.get('META_FILE')
-etag=os.environ.get('REMOTE_ETAG') or ''
-lm=os.environ.get('REMOTE_LASTMOD') or ''
-if meta and os.path.exists(meta):
-  j=json.load(open(meta))
-  if etag and j.get('etag')==etag:
-    sys.exit(2)
-  if lm and j.get('last_modified')==lm:
-    sys.exit(2)
-sys.exit(0)
-PY
+          import json, os, sys
+          meta=os.environ.get('META_FILE')
+          etag=os.environ.get('REMOTE_ETAG') or ''
+          lm=os.environ.get('REMOTE_LASTMOD') or ''
+          if meta and os.path.exists(meta):
+            j=json.load(open(meta))
+            if etag and j.get('etag')==etag:
+              sys.exit(2)
+            if lm and j.get('last_modified')==lm:
+              sys.exit(2)
+          sys.exit(0)
+          PY
           rc=$?
           set -e
           if [ "$rc" -eq 2 ] && [ "$missing_required" = "false" ]; then
