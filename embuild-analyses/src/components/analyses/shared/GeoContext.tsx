@@ -18,6 +18,22 @@ interface GeoContextType {
 
 const GeoContext = createContext<GeoContextType | undefined>(undefined);
 
+// Simpler geo selection context for analyses that don't need the full complexity
+export interface SimpleGeoSelection {
+  type: 'all' | 'region' | 'province' | 'municipality'
+  code?: string
+}
+
+export interface SimpleGeoContextType {
+  selection: SimpleGeoSelection
+  setSelection: (selection: SimpleGeoSelection) => void
+}
+
+export const SimpleGeoContext = createContext<SimpleGeoContextType>({
+  selection: { type: 'all' },
+  setSelection: () => {}
+});
+
 export function GeoProvider({ children }: { children: ReactNode }) {
   const [level, setLevel] = useState<GeoLevel>('region');
   const [selectedRegion, setSelectedRegion] = useState<RegionCode>('1000'); // Default to Belgium

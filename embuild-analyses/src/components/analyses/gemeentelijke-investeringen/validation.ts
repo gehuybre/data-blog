@@ -20,32 +20,29 @@ export function validateMetadata(data: unknown): data is Metadata {
   const errors: string[] = []
 
   // Required fields
-  if (typeof metadata.latest_year !== 'number') {
-    errors.push('latest_year must be a number')
-  }
-  if (typeof metadata.latest_date !== 'string') {
-    errors.push('latest_date must be a string')
-  }
   if (typeof metadata.bv_latest_year !== 'number') {
     errors.push('bv_latest_year must be a number')
   }
-  if (typeof metadata.kostenpost_latest_year !== 'number') {
-    errors.push('kostenpost_latest_year must be a number')
+  if (typeof metadata.bv_earliest_year !== 'number') {
+    errors.push('bv_earliest_year must be a number')
   }
   if (typeof metadata.total_municipalities !== 'number') {
     errors.push('total_municipalities must be a number')
   }
-  if (typeof metadata.bv_records !== 'number') {
-    errors.push('bv_records must be a number')
+  if (typeof metadata.total_domains !== 'number') {
+    errors.push('total_domains must be a number')
   }
-  if (typeof metadata.kostenpost_records !== 'number') {
-    errors.push('kostenpost_records must be a number')
+  if (typeof metadata.total_subdomeinen !== 'number') {
+    errors.push('total_subdomeinen must be a number')
+  }
+  if (typeof metadata.total_records !== 'number') {
+    errors.push('total_records must be a number')
+  }
+  if (typeof metadata.municipalities_with_nis !== 'number') {
+    errors.push('municipalities_with_nis must be a number')
   }
 
-  // Optional fields (new in this PR)
-  if ('kostenpost_municipalities' in metadata && typeof metadata.kostenpost_municipalities !== 'number') {
-    errors.push('kostenpost_municipalities must be a number if present')
-  }
+  // Optional fields
   if ('is_kostenpost_truncated' in metadata && typeof metadata.is_kostenpost_truncated !== 'boolean') {
     errors.push('is_kostenpost_truncated must be a boolean if present')
   }
@@ -87,16 +84,12 @@ export function validateLookups(data: unknown): data is Lookups {
     }
   }
 
-  if (!Array.isArray(lookups.subdomains)) {
-    errors.push('subdomains must be an array')
+  if (!Array.isArray(lookups.subdomeinen)) {
+    errors.push('subdomeinen must be an array')
   }
 
-  if (!Array.isArray(lookups.cost_categories_niveau1)) {
-    errors.push('cost_categories_niveau1 must be an array')
-  }
-
-  if (!Array.isArray(lookups.years)) {
-    errors.push('years must be an array')
+  if (!Array.isArray(lookups.municipalities)) {
+    errors.push('municipalities must be an array')
   }
 
   if (errors.length > 0) {
@@ -108,11 +101,11 @@ export function validateLookups(data: unknown): data is Lookups {
 }
 
 /**
- * Validate investment record structure (domain or category)
+ * Validate investment record structure (domain or subdomein)
  */
 export function validateInvestmentRecord(
   data: unknown,
-  recordType: 'domain' | 'category'
+  recordType: 'domain' | 'subdomein'
 ): boolean {
   if (!data || typeof data !== 'object') {
     return false
@@ -141,8 +134,11 @@ export function validateInvestmentRecord(
       errors.push('domain_name must be a string')
     }
   } else {
-    if (typeof record.category_l1 !== 'string') {
-      errors.push('category_l1 must be a string')
+    if (typeof record.subdomein_code !== 'string') {
+      errors.push('subdomein_code must be a string')
+    }
+    if (typeof record.subdomein_name !== 'string') {
+      errors.push('subdomein_name must be a string')
     }
   }
 
@@ -159,7 +155,7 @@ export function validateInvestmentRecord(
  */
 export function validateInvestmentData(
   data: unknown,
-  recordType: 'domain' | 'category',
+  recordType: 'domain' | 'subdomein',
   sampleSize: number = 5
 ): boolean {
   if (!Array.isArray(data)) {
