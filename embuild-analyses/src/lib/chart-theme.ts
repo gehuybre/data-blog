@@ -52,25 +52,26 @@ export const TABLE_THEME = {
 
 /**
  * Format large numbers for axis labels to prevent overflow.
- * Uses K (thousands), M (millions), B (billions) suffixes.
+ * Uses K (duizend), M (miljoen), Mrd (miljard) Dutch suffixes to match nl-BE locale.
  *
  * Examples:
  * - 500 -> "500"
- * - 1500 -> "1.5K"
+ * - 1500 -> "1,5K"
  * - 1000000 -> "1M"
- * - 2500000 -> "2.5M"
+ * - 2500000 -> "2,5M"
+ * - 1000000000 -> "1Mrd"
  */
 export function formatAxisNumber(value: number): string {
   const absValue = Math.abs(value)
 
   if (absValue >= 1_000_000_000) {
-    return `${(value / 1_000_000_000).toFixed(1).replace(/\.0$/, '')}B`
+    return `${(value / 1_000_000_000).toLocaleString('nl-BE', { minimumFractionDigits: 0, maximumFractionDigits: 1 }).replace(/\.0$/, '')}Mrd`
   }
   if (absValue >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
+    return `${(value / 1_000_000).toLocaleString('nl-BE', { minimumFractionDigits: 0, maximumFractionDigits: 1 }).replace(/\.0$/, '')}M`
   }
   if (absValue >= 10_000) {
-    return `${(value / 1_000).toFixed(1).replace(/\.0$/, '')}K`
+    return `${(value / 1_000).toLocaleString('nl-BE', { minimumFractionDigits: 0, maximumFractionDigits: 1 }).replace(/\.0$/, '')}K`
   }
 
   return new Intl.NumberFormat('nl-BE', { maximumFractionDigits: 0 }).format(value)
