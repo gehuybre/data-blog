@@ -49,3 +49,29 @@ export const TABLE_THEME = {
   headerBg: "bg-muted/50",
   fontSize: "text-sm",
 }
+
+/**
+ * Format large numbers for axis labels to prevent overflow.
+ * Uses K (thousands), M (millions), B (billions) suffixes.
+ *
+ * Examples:
+ * - 500 -> "500"
+ * - 1500 -> "1.5K"
+ * - 1000000 -> "1M"
+ * - 2500000 -> "2.5M"
+ */
+export function formatAxisNumber(value: number): string {
+  const absValue = Math.abs(value)
+
+  if (absValue >= 1_000_000_000) {
+    return `${(value / 1_000_000_000).toFixed(1).replace(/\.0$/, '')}B`
+  }
+  if (absValue >= 1_000_000) {
+    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
+  }
+  if (absValue >= 10_000) {
+    return `${(value / 1_000).toFixed(1).replace(/\.0$/, '')}K`
+  }
+
+  return new Intl.NumberFormat('nl-BE', { maximumFractionDigits: 0 }).format(value)
+}
