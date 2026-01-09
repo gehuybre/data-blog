@@ -12,7 +12,8 @@ import {
   Legend,
 } from "recharts"
 
-import { formatScaledEuro, formatScaledNumber, getCurrencyScale } from "./formatters"
+import { CHART_THEME } from "@/lib/chart-theme"
+import { createAutoScaledFormatter, formatNumber, formatCurrency } from "@/lib/number-formatters"
 
 interface ChartDataPoint {
   jaar: number
@@ -24,8 +25,6 @@ interface EnergiekaartChartProps {
   label: string
   isCurrency?: boolean
 }
-
-import { CHART_THEME } from "@/lib/chart-theme"
 
 export function EnergiekaartChart({ data, label, isCurrency = false }: EnergiekaartChartProps) {
   // Calculate 4-year moving average
@@ -39,11 +38,15 @@ export function EnergiekaartChart({ data, label, isCurrency = false }: Energieka
     return { ...point, average: sum / 4 }
   })
 
-  const scale = isCurrency ? getCurrencyScale(data.map((d) => d.value)) : null
+  // Use centralized auto-scale formatter
+  const { formatter: yAxisFormatter } = createAutoScaledFormatter(
+    data.map((d) => d.value),
+    isCurrency
+  )
 
   const formatValue = (value: number) => {
-    if (isCurrency && scale) return formatScaledEuro(value, scale)
-    return new Intl.NumberFormat("nl-BE").format(value)
+    if (isCurrency) return formatCurrency(value)
+    return formatNumber(value)
   }
 
   return (
@@ -58,11 +61,7 @@ export function EnergiekaartChart({ data, label, isCurrency = false }: Energieka
           axisLine={false}
         />
         <YAxis
-          tickFormatter={(value) => {
-            if (typeof value !== "number") return String(value)
-            if (!isCurrency || !scale) return new Intl.NumberFormat("nl-BE").format(value)
-            return formatScaledNumber(value, scale)
-          }}
+          tickFormatter={yAxisFormatter}
           fontSize={CHART_THEME.fontSize}
           tickLine={false}
           axisLine={false}

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, ComposedChart } from "recharts"
 import { CHART_COLORS, CHART_THEME } from "@/lib/chart-theme"
+import { createAutoScaledFormatter } from "@/lib/number-formatters"
 
 type UnknownRecord = Record<string, any>
 
@@ -12,6 +13,16 @@ interface FilterableChartProps<TData = UnknownRecord> {
   getLabel?: (d: TData) => string
   getValue?: (d: TData, metric?: string) => number
   getSortValue?: (d: TData) => number
+  /**
+   * Optional Y-axis formatter. If not provided and values are large (>10k),
+   * an auto-scaled formatter will be used to prevent label overflow.
+   */
+  yAxisFormatter?: (value: number) => string
+  /**
+   * If true, treats values as currency and uses € symbol in auto-scaling.
+   * Only applies when yAxisFormatter is not provided. Default: false.
+   */
+  isCurrency?: boolean
 }
 
 export function FilterableChart<TData = UnknownRecord>({
@@ -20,6 +31,8 @@ export function FilterableChart<TData = UnknownRecord>({
   getLabel,
   getValue,
   getSortValue,
+  yAxisFormatter,
+  isCurrency = false,
 }: FilterableChartProps<TData>) {
   const [mounted, setMounted] = useState(false)
 
@@ -77,6 +90,14 @@ export function FilterableChart<TData = UnknownRecord>({
     })
   }, [data, metric, getLabel, getValue, getSortValue])
 
+  // Auto-scale formatter for Y-axis to prevent label overflow
+  const computedYAxisFormatter = useMemo(() => {
+    if (yAxisFormatter) return yAxisFormatter
+    const values = chartData.map(d => d.value)
+    const { formatter } = createAutoScaledFormatter(values, isCurrency)
+    return formatter
+  }, [chartData, yAxisFormatter, isCurrency])
+
   if (!mounted) {
     return <div className="h-[400px] w-full min-w-0" />
   }
@@ -96,7 +117,7 @@ export function FilterableChart<TData = UnknownRecord>({
             fontSize={CHART_THEME.fontSize}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => `${value}`}
+            tickFormatter={computedYAxisFormatter}
           />
           <Tooltip
             contentStyle={{
