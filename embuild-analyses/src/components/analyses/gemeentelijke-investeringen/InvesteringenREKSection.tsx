@@ -71,10 +71,15 @@ function validateLookups(data: unknown): REKLookups {
   }
   const obj = data as Record<string, unknown>
   if (!Array.isArray(obj.niveau3s) || !Array.isArray(obj.alg_rekenings) ||
-      typeof obj.municipalities !== 'object') {
+      !obj.municipalities || typeof obj.municipalities !== 'object') {
     throw new Error('Invalid lookups: missing or invalid fields')
   }
-  return obj as unknown as REKLookups
+  // More explicit structure validation
+  return {
+    niveau3s: obj.niveau3s as Array<{ Niveau_3: string }>,
+    alg_rekenings: obj.alg_rekenings as Array<{ Niveau_3: string; Alg_rekening: string }>,
+    municipalities: obj.municipalities as Record<string, string>
+  }
 }
 
 function validateVlaanderenData(data: unknown): REKVlaanderenRecord[] {
@@ -110,13 +115,21 @@ export function InvesteringenREKSection() {
 
   // Load initial data and start chunk loading
   useEffect(() => {
+    let cancelled = false
+
     async function init() {
       try {
+        // Reset data to prevent double-loading on remount
+        setMuniData([])
+        setLoadedChunks(0)
+
         const [metaRes, lookupsRes, vlaanderenRes] = await Promise.all([
           fetch('/data/gemeentelijke-investeringen/metadata.json'),
           fetch('/data/gemeentelijke-investeringen/rek_lookups.json'),
           fetch('/data/gemeentelijke-investeringen/rek_vlaanderen_data.json')
         ])
+
+        if (cancelled) return
 
         if (!metaRes.ok) throw new Error(`Failed to load metadata: ${metaRes.statusText}`)
         if (!lookupsRes.ok) throw new Error(`Failed to load lookups: ${lookupsRes.statusText}`)
@@ -126,28 +139,40 @@ export function InvesteringenREKSection() {
         const lookupsData = validateLookups(await lookupsRes.json())
         const vlaanderen = validateVlaanderenData(await vlaanderenRes.json())
 
+        if (cancelled) return
+
         setLookups(lookupsData)
         setVlaanderenData(vlaanderen)
         setTotalChunks(meta.rek_chunks)
         setIsLoading(false)
 
         // Load chunks sequentially
+        const allChunks: REKRecord[] = []
         for (let i = 0; i < meta.rek_chunks; i++) {
+          if (cancelled) return
+
           const chunkRes = await fetch(`/data/gemeentelijke-investeringen/rek_municipality_data_chunk_${i}.json`)
           if (!chunkRes.ok) {
             throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
           }
           const chunkData = validateChunkData(await chunkRes.json())
-          setMuniData(prev => [...prev, ...chunkData])
+          allChunks.push(...chunkData)
+          setMuniData([...allChunks])
           setLoadedChunks(i + 1)
         }
       } catch (err) {
-        console.error('Failed to load REK data:', err)
-        setError(err instanceof Error ? err.message : 'Fout bij het laden van de data')
-        setIsLoading(false)
+        if (!cancelled) {
+          console.error('Failed to load REK data:', err)
+          setError(err instanceof Error ? err.message : 'Fout bij het laden van de data')
+          setIsLoading(false)
+        }
       }
     }
     init()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // Get available options based on selections
