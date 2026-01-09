@@ -239,6 +239,39 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
     return m
   }, [previousPeriodData, geoCodeGetter, valueGetter])
 
+  // Detect if data is Flanders-only (no Walloon or Brussels municipalities)
+  const isFlandersOnly = useMemo(() => {
+    const codes = Array.from(valueByGeoCode.keys())
+    if (codes.length === 0) return false
+
+    // Check if any municipality is from Wallonia (5,6,8,9) or Brussels (21)
+    const hasNonFlemish = codes.some((code) => {
+      const firstChar = code.charAt(0)
+      const firstTwo = code.substring(0, 2)
+      // Walloon municipalities start with 5, 6, 8, 9
+      // Brussels municipalities start with 21
+      return firstChar === '5' || firstChar === '6' || firstChar === '8' || firstChar === '9' || firstTwo === '21'
+    })
+
+    return !hasNonFlemish
+  }, [valueByGeoCode])
+
+  // Adjust map projection based on data scope
+  const projectionConfig = useMemo(() => {
+    if (isFlandersOnly) {
+      // Flanders-focused viewport
+      return {
+        center: [4.5, 51.0] as [number, number],
+        scale: 17000,
+      }
+    }
+    // Full Belgium viewport
+    return {
+      center: [4.4, 50.5] as [number, number],
+      scale: 12000,
+    }
+  }, [isFlandersOnly])
+
   // Color scale
   const colorScale = useMemo(() => {
     const values = Array.from(valueByGeoCode.values()).filter(
@@ -248,11 +281,18 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
     return scaleQuantile<string>().domain(values).range(MAP_COLOR_SCHEMES[colorScheme])
   }, [valueByGeoCode, colorScheme])
 
+  // Update center when projection config changes (when data scope is detected)
+  useEffect(() => {
+    if (!selectedMunicipality && zoom === 1) {
+      setCenter(projectionConfig.center)
+    }
+  }, [projectionConfig.center, selectedMunicipality, zoom])
+
   // Auto-zoom to selected municipality
   useEffect(() => {
     if (!selectedMunicipality || !municipalitiesGeo?.features) {
       setZoom(1)
-      setCenter([4.4, 50.5])
+      setCenter(projectionConfig.center)
       return
     }
 
@@ -262,7 +302,7 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
 
     if (!feature) {
       setZoom(1)
-      setCenter([4.4, 50.5])
+      setCenter(projectionConfig.center)
       return
     }
 
@@ -281,7 +321,7 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
 
     setCenter(newCenter)
     setZoom(newZoom)
-  }, [selectedMunicipality, municipalitiesGeo])
+  }, [selectedMunicipality, municipalitiesGeo, projectionConfig.center])
 
   // Zoom handlers
   const handleZoomIn = useCallback(() => {
@@ -294,8 +334,8 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
 
   const handleReset = useCallback(() => {
     setZoom(1)
-    setCenter([4.4, 50.5])
-  }, [])
+    setCenter(projectionConfig.center)
+  }, [projectionConfig.center])
 
   // Tooltip handlers
   const handleMouseMove = useCallback(
@@ -433,10 +473,7 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
         {/* Map */}
         <ComposableMap
           projection="geoMercator"
-          projectionConfig={{
-            center: [4.4, 50.5],
-            scale: 12000,
-          }}
+          projectionConfig={projectionConfig}
           className="w-full h-full"
         >
           <ZoomableGroup
