@@ -31,7 +31,7 @@ export function InvesteringenDashboard() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Secties</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Perspectieven</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">BV & REK</div>
