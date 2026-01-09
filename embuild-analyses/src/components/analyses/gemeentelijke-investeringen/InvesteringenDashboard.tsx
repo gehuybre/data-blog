@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { InvesteringenBVSection } from "./InvesteringenBVSection"
 import { InvesteringenREKSection } from "./InvesteringenREKSection"
+import { InvesteringenBVCategorySection } from "./InvesteringenBVCategorySection"
+import { InvesteringenREKCategorySection } from "./InvesteringenREKCategorySection"
 
 export function InvesteringenDashboard() {
   return (
@@ -41,8 +43,16 @@ export function InvesteringenDashboard() {
         <InvesteringenBVSection />
       </div>
 
+      <div className="border-t pt-16" id="bv-category-breakdown">
+        <InvesteringenBVCategorySection />
+      </div>
+
       <div className="border-t pt-16" id="investments-rek">
         <InvesteringenREKSection />
+      </div>
+
+      <div className="border-t pt-16" id="rek-category-breakdown">
+        <InvesteringenREKCategorySection />
       </div>
     </div>
   )

@@ -1,0 +1,365 @@
+"use client"
+
+import React, { useMemo, useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Loader2, Check, ChevronsUpDown } from 'lucide-react'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+import { ExportButtons } from "../shared/ExportButtons"
+import { formatCurrency } from "@/lib/number-formatters"
+import { getMunicipalityName, getAllMunicipalities } from "./nisUtils"
+
+interface REKLookups {
+  niveau3s: Array<{ Niveau_3: string }>
+  alg_rekenings: Array<{ Niveau_3: string; Alg_rekening: string }>
+  municipalities: Record<string, string>
+}
+
+interface REKRecord {
+  NIS_code: string
+  Rapportjaar: number
+  Niveau_3: string
+  Alg_rekening: string
+  Totaal: number
+  Per_inwoner: number
+}
+
+// Runtime validation helpers
+function validateLookups(data: unknown): REKLookups {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid lookups: expected object')
+  }
+  const obj = data as Record<string, unknown>
+  if (!Array.isArray(obj.niveau3s) || !Array.isArray(obj.alg_rekenings) ||
+      typeof obj.municipalities !== 'object') {
+    throw new Error('Invalid lookups: missing or invalid fields')
+  }
+  return obj as unknown as REKLookups
+}
+
+function validateChunkData(data: unknown): REKRecord[] {
+  if (!Array.isArray(data)) {
+    throw new Error('Invalid chunk data: expected array')
+  }
+  return data as REKRecord[]
+}
+
+function validateMetadata(data: unknown): { bv_chunks: number; rek_chunks: number } {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid metadata: expected object')
+  }
+  const obj = data as Record<string, unknown>
+  if (typeof obj.bv_chunks !== 'number' || typeof obj.rek_chunks !== 'number') {
+    throw new Error('Invalid metadata: missing or invalid chunk counts')
+  }
+  return obj as { bv_chunks: number; rek_chunks: number }
+}
+
+// Municipality filter component
+function MunicipalityFilter({
+  selectedMuni,
+  onChange,
+}: {
+  selectedMuni: string | null
+  onChange: (code: string | null) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const municipalities = getAllMunicipalities()
+
+  const currentLabel = useMemo(() => {
+    if (!selectedMuni) return "Alle gemeenten"
+    return getMunicipalityName(selectedMuni)
+  }, [selectedMuni])
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" role="combobox" aria-expanded={open} className="h-9 gap-1 min-w-[180px]">
+          <span className="truncate max-w-[180px]">{currentLabel}</span>
+          <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[280px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Zoek gemeente..." />
+          <CommandList>
+            <CommandEmpty>Geen gemeente gevonden.</CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                value="Alle gemeenten"
+                onSelect={() => {
+                  onChange(null)
+                  setOpen(false)
+                }}
+              >
+                <Check className={cn("mr-2 h-4 w-4", !selectedMuni ? "opacity-100" : "opacity-0")} />
+                Alle gemeenten
+              </CommandItem>
+              {municipalities.map((m) => (
+                <CommandItem
+                  key={m.nisCode}
+                  value={m.name}
+                  onSelect={() => {
+                    onChange(m.nisCode)
+                    setOpen(false)
+                  }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", selectedMuni === m.nisCode ? "opacity-100" : "opacity-0")} />
+                  {m.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+export function InvesteringenREKCategorySection() {
+  const [lookups, setLookups] = useState<REKLookups | null>(null)
+  const [muniData, setMuniData] = useState<REKRecord[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadedChunks, setLoadedChunks] = useState(0)
+  const [totalChunks, setTotalChunks] = useState(0)
+  const [error, setError] = useState<string | null>(null)
+
+  const [selectedMuni, setSelectedMuni] = useState<string | null>(null)
+  const [selectedMetric, setSelectedMetric] = useState<'Totaal' | 'Per_inwoner'>('Totaal')
+  const [selectedYear, setSelectedYear] = useState<number>(2026)
+
+  // Load initial data and start chunk loading
+  useEffect(() => {
+    async function init() {
+      try {
+        const [metaRes, lookupsRes] = await Promise.all([
+          fetch('/data/gemeentelijke-investeringen/metadata.json'),
+          fetch('/data/gemeentelijke-investeringen/rek_lookups.json'),
+        ])
+
+        if (!metaRes.ok) throw new Error(`Failed to load metadata: ${metaRes.statusText}`)
+        if (!lookupsRes.ok) throw new Error(`Failed to load lookups: ${lookupsRes.statusText}`)
+
+        const meta = validateMetadata(await metaRes.json())
+        const lookupsData = validateLookups(await lookupsRes.json())
+
+        setLookups(lookupsData)
+        setTotalChunks(meta.rek_chunks)
+        setIsLoading(false)
+
+        // Load chunks sequentially
+        for (let i = 0; i < meta.rek_chunks; i++) {
+          const chunkRes = await fetch(`/data/gemeentelijke-investeringen/rek_municipality_data_chunk_${i}.json`)
+          if (!chunkRes.ok) {
+            throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
+          }
+          const chunkData = validateChunkData(await chunkRes.json())
+          setMuniData(prev => [...prev, ...chunkData])
+          setLoadedChunks(i + 1)
+        }
+      } catch (err) {
+        console.error('Failed to load REK data:', err)
+        setError(err instanceof Error ? err.message : 'Fout bij het laden van de data')
+        setIsLoading(false)
+      }
+    }
+    init()
+  }, [])
+
+  // Category breakdown: Top 9 + Other
+  const categoryData = useMemo(() => {
+    if (!lookups || muniData.length === 0) return []
+
+    // Filter by year and municipality
+    let filteredData = muniData.filter(d => d.Rapportjaar === selectedYear)
+    if (selectedMuni) {
+      filteredData = filteredData.filter(d => d.NIS_code === selectedMuni)
+    }
+
+    // Aggregate by Alg_rekening (highest detail level)
+    const byCategory: Record<string, { label: string; value: number }> = {}
+
+    filteredData.forEach(record => {
+      const category = record.Alg_rekening
+      if (!byCategory[category]) {
+        byCategory[category] = { label: category, value: 0 }
+      }
+      byCategory[category].value += record[selectedMetric]
+    })
+
+    // Sort by value descending
+    const sorted = Object.values(byCategory).sort((a, b) => b.value - a.value)
+
+    // Top 9 + Other
+    const top9 = sorted.slice(0, 9)
+    const other = sorted.slice(9)
+
+    const result = [...top9]
+    if (other.length > 0) {
+      const otherSum = other.reduce((sum, item) => sum + item.value, 0)
+      result.push({ label: 'Overige', value: otherSum })
+    }
+
+    return result
+  }, [lookups, muniData, selectedYear, selectedMuni, selectedMetric])
+
+  // Calculate max value for bar chart scaling
+  const maxValue = useMemo(() => {
+    return Math.max(...categoryData.map(d => d.value), 1)
+  }, [categoryData])
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="h-64 flex flex-col items-center justify-center space-y-4">
+          <p className="text-sm text-destructive font-medium">Fout bij het laden van de data</p>
+          <p className="text-xs text-muted-foreground">{error}</p>
+          <Button onClick={() => window.location.reload()} size="sm">
+            Opnieuw proberen
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (isLoading || !lookups) {
+    return (
+      <Card>
+        <CardContent className="h-64 flex flex-col items-center justify-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground italic">Laden van REK categorieën...</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Verdeling per Algemene Rekening (REK)</CardTitle>
+          <div className="flex items-center gap-4">
+            {loadedChunks < totalChunks && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Laden data: {Math.round((loadedChunks / totalChunks) * 100)}%
+              </div>
+            )}
+            <ExportButtons
+              title="Verdeling per Algemene Rekening"
+              slug="gemeentelijke-investeringen"
+              sectionId="rek-category-breakdown"
+              viewType="table"
+              data={categoryData.map(d => ({ label: d.label, value: d.value }))}
+            />
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Top 9 algemene rekeningen met hoogste investeringen + overige categorieën.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {/* Filters */}
+          <div className="flex flex-wrap gap-2">
+            <div className="flex gap-2">
+              <Button
+                variant={selectedMetric === 'Totaal' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedMetric('Totaal')}
+                className="h-9"
+              >
+                Totaal
+              </Button>
+              <Button
+                variant={selectedMetric === 'Per_inwoner' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedMetric('Per_inwoner')}
+                className="h-9"
+              >
+                Per inwoner
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={selectedYear === 2014 ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedYear(2014)}
+                className="h-9"
+              >
+                2014
+              </Button>
+              <Button
+                variant={selectedYear === 2020 ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedYear(2020)}
+                className="h-9"
+              >
+                2020
+              </Button>
+              <Button
+                variant={selectedYear === 2026 ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedYear(2026)}
+                className="h-9"
+              >
+                2026
+              </Button>
+            </div>
+            <MunicipalityFilter selectedMuni={selectedMuni} onChange={setSelectedMuni} />
+          </div>
+
+          {/* Category breakdown */}
+          <div className="space-y-4">
+            {categoryData.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground italic">
+                Geen data beschikbaar voor deze selectie.
+              </div>
+            ) : (
+              categoryData.map((item, index) => (
+                <div key={item.label} className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-sm">
+                      {index + 1}. {item.label}
+                    </span>
+                    <span className="font-bold text-sm">
+                      {selectedMetric === 'Totaal'
+                        ? formatCurrency(item.value)
+                        : `€ ${item.value.toFixed(2)}`
+                      }
+                    </span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-all",
+                        item.label === 'Overige' ? "bg-gray-400" : "bg-green-500"
+                      )}
+                      style={{ width: `${(item.value / maxValue) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <p className="text-sm text-muted-foreground mt-4">
+            {selectedMuni
+              ? `Investeringen voor ${getMunicipalityName(selectedMuni)} in ${selectedYear}`
+              : `Totale investeringen over alle gemeenten in ${selectedYear}`
+            }
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}

@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { Calculator, Check, ChevronsUpDown } from "lucide-react"
 import { ExportButtons } from "../shared/ExportButtons"
-import { CHART_THEME } from "@/lib/chart-theme"
+import { CHART_THEME, formatAxisNumber } from "@/lib/chart-theme"
 
 // Import data
 import monthlyIndices from "../../../../analyses/prijsherziening-index-i-2021/results/monthly_indices.json"
@@ -487,6 +487,7 @@ export function PrijsherzieningDashboard() {
                         axisLine={false}
                       />
                       <YAxis
+                        tickFormatter={formatAxisNumber}
                         fontSize={CHART_THEME.fontSize}
                         tickLine={false}
                         axisLine={false}
