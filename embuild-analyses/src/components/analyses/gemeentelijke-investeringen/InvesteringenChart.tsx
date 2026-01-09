@@ -1,7 +1,12 @@
 "use client"
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import {
+  createAutoScaledFormatter,
+  getScaledLabel,
+  formatCurrency,
+} from "@/lib/number-formatters"
 
 interface ChartData {
   year: number
@@ -14,11 +19,14 @@ interface InvesteringenChartProps {
   selectedMetric: 'total' | 'per_capita'
 }
 
-const formatNumber = (num: number) => new Intl.NumberFormat('nl-BE').format(Math.round(num))
-const formatCurrency = (num: number) => `€ ${formatNumber(num)}`
-
 export function InvesteringenChart({ data, selectedMetric }: InvesteringenChartProps) {
   const yAxisLabel = selectedMetric === 'total' ? 'Investering (€)' : 'Investering per inwoner (€)'
+
+  // Auto-scale formatter for Y-axis to prevent label overflow
+  const { formatter: yAxisFormatter, scale: yAxisScale } = useMemo(() => {
+    const values = data.map(d => d.value)
+    return createAutoScaledFormatter(values, true) // true = currency
+  }, [data])
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -29,8 +37,8 @@ export function InvesteringenChart({ data, selectedMetric }: InvesteringenChartP
           label={{ value: 'Jaar', position: 'insideBottom', offset: -5 }}
         />
         <YAxis
-          label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }}
-          tickFormatter={formatNumber}
+          label={{ value: getScaledLabel(yAxisLabel, yAxisScale), angle: -90, position: 'insideLeft' }}
+          tickFormatter={yAxisFormatter}
         />
         <Tooltip
           formatter={(value: number | undefined) => value !== undefined ? [formatCurrency(value), 'Investering'] : ['', '']}

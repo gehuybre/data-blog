@@ -20,6 +20,11 @@ import { SimpleGeoContext } from "../shared/GeoContext"
 import { ExportButtons } from "../shared/ExportButtons"
 import { HierarchicalFilter } from "../shared/HierarchicalFilter"
 import { getMunicipalityName } from "./nisUtils"
+import {
+  createAutoScaledFormatter,
+  getScaledLabel,
+  formatCurrency as formatFullCurrency,
+} from "@/lib/number-formatters"
 
 interface BVLookups {
   domains: Array<{ BV_domein: string }>
@@ -49,8 +54,7 @@ interface BVVlaanderenRecord {
 
 
 
-const formatNumber = (num: number) => new Intl.NumberFormat('nl-BE').format(Math.round(num))
-const formatCurrency = (num: number) => `€ ${formatNumber(num)}`
+// Removed local formatters - using centralized formatters from @/lib/number-formatters
 
 // Runtime validation helpers
 function validateMetadata(data: unknown): { bv_chunks: number; rek_chunks: number } {
@@ -73,7 +77,7 @@ function validateLookups(data: unknown): BVLookups {
       !Array.isArray(obj.beleidsvelds) || typeof obj.municipalities !== 'object') {
     throw new Error('Invalid lookups: missing or invalid fields')
   }
-  return obj as BVLookups
+  return obj as unknown as BVLookups
 }
 
 function validateVlaanderenData(data: unknown): BVVlaanderenRecord[] {
@@ -254,6 +258,12 @@ export function InvesteringenBVSection() {
     return Object.values(byYear).sort((a, b) => a.Rapportjaar - b.Rapportjaar)
   }, [filteredData, selectedMetric, geoSelection])
 
+  // Auto-scale formatter for Y-axis to prevent label overflow
+  const { formatter: yAxisFormatter, scale: yAxisScale } = useMemo(() => {
+    const values = chartData.map(d => d.value)
+    return createAutoScaledFormatter(values, true) // true = currency
+  }, [chartData])
+
   // Table data: By municipality
   const tableData = useMemo(() => {
     const byMuni: Record<string, { municipality: string; total: number; count: number }> = {}
@@ -415,16 +425,19 @@ export function InvesteringenBVSection() {
                       <XAxis dataKey="Rapportjaar" />
                       <YAxis
                         label={{
-                          value: selectedMetric === 'Totaal' ? 'Totale uitgave (€)' : 'Uitgave per inwoner (€)',
+                          value: getScaledLabel(
+                            selectedMetric === 'Totaal' ? 'Totale uitgave (€)' : 'Uitgave per inwoner (€)',
+                            yAxisScale
+                          ),
                           angle: -90,
                           position: 'insideLeft'
                         }}
-                        tickFormatter={(value) => formatNumber(value)}
+                        tickFormatter={yAxisFormatter}
                       />
                       <Tooltip
                         formatter={(value) => {
                           if (typeof value !== 'number') return ''
-                          return selectedMetric === 'Totaal' ? formatCurrency(value) : `€ ${value.toFixed(2)}`
+                          return selectedMetric === 'Totaal' ? formatFullCurrency(value) : `€ ${value.toFixed(2)}`
                         }}
                         labelFormatter={(label) => `Rapportjaar ${label}`}
                       />
@@ -466,7 +479,7 @@ export function InvesteringenBVSection() {
                             <td className="p-2">{row.municipality}</td>
                             <td className="p-2 text-right">
                               {selectedMetric === 'Totaal'
-                                ? formatCurrency(row.total)
+                                ? formatFullCurrency(row.total)
                                 : `€ ${row.total.toFixed(2)}`
                               }
                             </td>
