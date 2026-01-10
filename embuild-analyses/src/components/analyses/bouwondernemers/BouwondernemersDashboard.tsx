@@ -388,7 +388,6 @@ function BySectorSection() {
                   return Object.values(rest).reduce((sum: number, v) => sum + v, 0)
                 }}
                 getSortValue={(d) => (d as LineSeriesPoint).year}
-                multiLine={true}
               />
             </CardContent>
           </Card>
@@ -525,7 +524,6 @@ function ByGenderSection() {
                   return Object.values(rest).reduce((sum: number, v) => sum + v, 0)
                 }}
                 getSortValue={(d) => (d as LineSeriesPoint).year}
-                multiLine={true}
               />
             </CardContent>
           </Card>
@@ -651,7 +649,6 @@ function ByRegionSection() {
                   return Object.values(rest).reduce((sum: number, v) => sum + v, 0)
                 }}
                 getSortValue={(d) => (d as LineSeriesPoint).year}
-                multiLine={true}
               />
             </CardContent>
           </Card>
@@ -788,7 +785,6 @@ function ByAgeSection() {
                   return Object.values(rest).reduce((sum: number, v) => sum + v, 0)
                 }}
                 getSortValue={(d) => (d as LineSeriesPoint).year}
-                multiLine={true}
               />
             </CardContent>
           </Card>
