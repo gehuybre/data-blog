@@ -22,10 +22,8 @@ import { FilterableTable } from "../shared/FilterableTable"
 import { ExportButtons } from "../shared/ExportButtons"
 import { MapSection } from "../shared/MapSection"
 
-import yearlyRaw from "../../../../analyses/vastgoed-verkopen/results/yearly.json"
-import quarterlyRaw from "../../../../analyses/vastgoed-verkopen/results/quarterly.json"
-import municipalitiesRaw from "../../../../analyses/vastgoed-verkopen/results/municipalities.json"
-import lookups from "../../../../analyses/vastgoed-verkopen/results/lookups.json"
+// Data is now lazy-loaded from public/data/vastgoed-verkopen/
+// Static imports replaced to prevent OOM errors during build
 
 type YearlyRow = {
   y: number
@@ -113,22 +111,87 @@ function formatPrice(n: number) {
   }).format(n)
 }
 
-function usePropertyTypeOptions(): PropertyType[] {
-  return (lookups as { property_types: PropertyType[] }).property_types ?? []
+// Hooks for lazy-loaded data
+function useVastgoedData() {
+  const [yearlyData, setYearlyData] = React.useState<YearlyRow[] | null>(null)
+  const [quarterlyData, setQuarterlyData] = React.useState<QuarterlyRow[] | null>(null)
+  const [municipalitiesData, setMunicipalitiesData] = React.useState<any[] | null>(null)
+  const [lookupsData, setLookupsData] = React.useState<any | null>(null)
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    async function loadData() {
+      try {
+        const basePath = process.env.NODE_ENV === "production" ? "/data-blog" : ""
+
+        // Load metadata first to know how many chunks
+        const metadataRes = await fetch(`${basePath}/data/vastgoed-verkopen/metadata.json`)
+        if (!metadataRes.ok) throw new Error(`Failed to load metadata: ${metadataRes.status}`)
+        const metadata = await metadataRes.json()
+
+        console.log(`Loading vastgoed data: ${metadata.quarterly_chunks} quarterly chunks`)
+
+        // Load all data in parallel
+        const [yearly, municipalities, lookups, ...quarterlyChunks] = await Promise.all([
+          fetch(`${basePath}/data/vastgoed-verkopen/yearly.json`).then(r => {
+            if (!r.ok) throw new Error(`Failed to load yearly.json: ${r.status}`)
+            return r.json()
+          }),
+          fetch(`${basePath}/data/vastgoed-verkopen/municipalities.json`).then(r => {
+            if (!r.ok) throw new Error(`Failed to load municipalities.json: ${r.status}`)
+            return r.json()
+          }),
+          fetch(`${basePath}/data/vastgoed-verkopen/lookups.json`).then(r => {
+            if (!r.ok) throw new Error(`Failed to load lookups.json: ${r.status}`)
+            return r.json()
+          }),
+          ...Array.from({ length: metadata.quarterly_chunks }, (_, i) =>
+            fetch(`${basePath}/data/vastgoed-verkopen/quarterly_chunk_${i}.json`).then(r => {
+              if (!r.ok) throw new Error(`Failed to load chunk ${i}: ${r.status}`)
+              return r.json()
+            })
+          )
+        ])
+
+        // Merge quarterly chunks
+        const quarterly = quarterlyChunks.flat()
+        console.log(`Loaded ${quarterly.length} quarterly records from ${metadata.quarterly_chunks} chunks`)
+
+        setYearlyData(yearly)
+        setQuarterlyData(quarterly)
+        setMunicipalitiesData(municipalities)
+        setLookupsData(lookups)
+        setLoading(false)
+      } catch (err) {
+        console.error("Error loading vastgoed data:", err)
+        setError(err instanceof Error ? err.message : "Failed to load data")
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
+
+  return { yearlyData, quarterlyData, municipalitiesData, lookupsData, loading, error }
 }
 
-function useRegionOptions(): GeoEntity[] {
-  return ((lookups as { regions: GeoEntity[] }).regions ?? []).map((r) => ({
+function usePropertyTypeOptions(lookupsData: any): PropertyType[] {
+  return lookupsData?.property_types ?? []
+}
+
+function useRegionOptions(lookupsData: any): GeoEntity[] {
+  return (lookupsData?.regions ?? []).map((r: GeoEntity) => ({
     ...r,
     code: mapRegionCode(r.code),
   }))
 }
 
-function useProvinceOptions(): GeoEntity[] {
-  return (lookups as { provinces: GeoEntity[] }).provinces ?? []
+function useProvinceOptions(lookupsData: any): GeoEntity[] {
+  return lookupsData?.provinces ?? []
 }
 
-function useMunicipalityOptions(): GeoEntity[] {
+function useMunicipalityOptions(lookupsData: any): GeoEntity[] {
   // Municipalities are not currently available in lookups
   return []
 }
@@ -138,15 +201,17 @@ function GeoFilterInline({
   selectedLevel,
   selectedNis,
   onSelect,
+  lookupsData,
 }: {
   selectedLevel: "belgium" | "region" | "province" | "municipality"
   selectedNis: string | null
   onSelect: (level: "belgium" | "region" | "province" | "municipality", nis: string | null) => void
+  lookupsData: any
 }) {
   const [open, setOpen] = React.useState(false)
-  const regions = useRegionOptions()
-  const provinces = useProvinceOptions()
-  const municipalities = useMunicipalityOptions()
+  const regions = useRegionOptions(lookupsData)
+  const provinces = useProvinceOptions(lookupsData)
+  const municipalities = useMunicipalityOptions(lookupsData)
 
   const currentLabel = React.useMemo(() => {
     if (selectedLevel === "belgium" || !selectedNis) return "België"
@@ -258,12 +323,14 @@ function GeoFilterInline({
 function PropertyTypeFilterInline({
   selected,
   onChange,
+  lookupsData,
 }: {
   selected: string
   onChange: (code: string) => void
+  lookupsData: any
 }) {
   const [open, setOpen] = React.useState(false)
-  const options = usePropertyTypeOptions()
+  const options = usePropertyTypeOptions(lookupsData)
 
   const selectedLabel = React.useMemo(() => {
     const opt = options.find((o) => o.code === selected)
@@ -436,6 +503,8 @@ function MetricSection({
   dataSource,
   dataSourceUrl,
   embedParams,
+  municipalitiesData,
+  lookupsData,
 }: {
   title: string
   label: string
@@ -454,6 +523,8 @@ function MetricSection({
   dataSource?: string
   dataSourceUrl?: string
   embedParams?: Record<string, string | number | null | undefined>
+  municipalitiesData: any[]
+  lookupsData: any
 }) {
   const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("chart")
 
@@ -523,8 +594,8 @@ function MetricSection({
             <TabsTrigger value="map">Kaart</TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2">
-            <GeoFilterInline selectedLevel={geoLevel} selectedNis={selectedNis} onSelect={onSelectGeo} />
-            <PropertyTypeFilterInline selected={selectedType} onChange={onSelectType} />
+            <GeoFilterInline selectedLevel={geoLevel} selectedNis={selectedNis} onSelect={onSelectGeo} lookupsData={lookupsData} />
+            <PropertyTypeFilterInline selected={selectedType} onChange={onSelectType} lookupsData={lookupsData} />
           </div>
         </div>
         <TabsContent value="chart">
@@ -554,7 +625,7 @@ function MetricSection({
         </TabsContent>
         <TabsContent value="map">
           <MapSection
-            data={municipalitiesRaw as any[]}
+            data={municipalitiesData}
             getGeoCode={(d: any) => d.nis}
             getValue={(d: any) => d[label === "Mediane prijs" ? "p50" : "n"]}
             getPeriod={(d: any) => d.y}
@@ -588,6 +659,8 @@ function QuarterlyMetricSection({
   dataSource,
   dataSourceUrl,
   embedParams,
+  municipalitiesData,
+  lookupsData,
 }: {
   title: string
   label: string
@@ -603,6 +676,8 @@ function QuarterlyMetricSection({
   dataSource?: string
   dataSourceUrl?: string
   embedParams?: Record<string, string | number | null | undefined>
+  municipalitiesData: any[]
+  lookupsData: any
 }) {
   const [currentView, setCurrentView] = React.useState<"chart" | "table" | "map">("chart")
 
@@ -694,8 +769,8 @@ function QuarterlyMetricSection({
             <TabsTrigger value="map">Kaart</TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2">
-            <GeoFilterInline selectedLevel={geoLevel} selectedNis={selectedNis} onSelect={onSelectGeo} />
-            <PropertyTypeFilterInline selected={selectedType} onChange={onSelectType} />
+            <GeoFilterInline selectedLevel={geoLevel} selectedNis={selectedNis} onSelect={onSelectGeo} lookupsData={lookupsData} />
+            <PropertyTypeFilterInline selected={selectedType} onChange={onSelectType} lookupsData={lookupsData} />
           </div>
         </div>
         <TabsContent value="chart">
@@ -728,11 +803,11 @@ function QuarterlyMetricSection({
             Kaart toont jaarlijkse data (kwartaaldata niet beschikbaar op gemeenteniveau)
           </div>
           <MapSection
-            data={municipalitiesRaw as any[]}
+            data={municipalitiesData}
             getGeoCode={(d: any) => d.nis}
             getValue={(d: any) => d[label === "Mediane prijs" ? "p50" : "n"]}
             getPeriod={(d: any) => d.y}
-            periods={Array.from(new Set((municipalitiesRaw as any[]).map((d: any) => d.y))).sort()}
+            periods={Array.from(new Set(municipalitiesData.map((d: any) => d.y))).sort()}
             showTimeSlider={true}
             formatValue={formatValue}
             tooltipLabel={label}
@@ -748,12 +823,34 @@ function QuarterlyMetricSection({
 
 // Main Dashboard Component
 function InnerDashboard() {
+  const { yearlyData, quarterlyData, municipalitiesData, lookupsData, loading, error } = useVastgoedData()
   const [geoLevel, setGeoLevel] = React.useState<"belgium" | "region" | "province" | "municipality">("belgium")
   const [selectedNis, setSelectedNis] = React.useState<string | null>(null)
   const [selectedType, setSelectedType] = React.useState<string>("alle_huizen")
 
-  const yearlyRows = React.useMemo(() => yearlyRaw as YearlyRow[], [])
-  const quarterlyRows = React.useMemo(() => quarterlyRaw as QuarterlyRow[], [])
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+          <p className="text-muted-foreground">Vastgoeddata laden...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error || !yearlyData || !quarterlyData || !municipalitiesData || !lookupsData) {
+    return (
+      <div className="rounded-lg border bg-destructive/10 p-6 text-center">
+        <p className="text-destructive">Fout bij het laden van de data: {error || "Onbekende fout"}</p>
+      </div>
+    )
+  }
+
+  const yearlyRows = yearlyData
+  const quarterlyRows = quarterlyData
 
   // Filter data
   const filteredYearly = React.useMemo(() => {
@@ -857,6 +954,8 @@ function InnerDashboard() {
           geo: geoLevel !== "belgium" ? selectedNis : null,
           type: selectedType,
         }}
+        municipalitiesData={municipalitiesData}
+        lookupsData={lookupsData}
       />
 
       <MetricSection
@@ -884,6 +983,8 @@ function InnerDashboard() {
           geo: geoLevel !== "belgium" ? selectedNis : null,
           type: selectedType,
         }}
+        municipalitiesData={municipalitiesData}
+        lookupsData={lookupsData}
       />
 
       <QuarterlyMetricSection
@@ -904,6 +1005,8 @@ function InnerDashboard() {
           geo: geoLevel !== "belgium" ? selectedNis : null,
           type: selectedType,
         }}
+        municipalitiesData={municipalitiesData}
+        lookupsData={lookupsData}
       />
 
       <QuarterlyMetricSection
@@ -924,6 +1027,8 @@ function InnerDashboard() {
           geo: geoLevel !== "belgium" ? selectedNis : null,
           type: selectedType,
         }}
+        municipalitiesData={municipalitiesData}
+        lookupsData={lookupsData}
       />
     </div>
   )
