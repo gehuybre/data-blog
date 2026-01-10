@@ -23,3 +23,22 @@ export function formatNumber(value: number, decimals: number = 0): string {
 export function formatCurrency(value: number, decimals: number = 0): string {
   return `€${formatNumber(value, decimals)}`
 }
+
+/**
+ * Create an auto-scaled number formatter
+ * Automatically chooses between K, M suffixes based on magnitude
+ *
+ * @param values - Array of values to determine scale (optional)
+ * @param isCurrency - Whether to format as currency
+ * @returns Object with formatter function
+ */
+export function createAutoScaledFormatter(values?: number[], isCurrency: boolean = false) {
+  const formatter = (value: number) => {
+    if (isCurrency) {
+      return formatCurrency(value)
+    }
+    return formatNumber(value)
+  }
+
+  return { formatter }
+}
