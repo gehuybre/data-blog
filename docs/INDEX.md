@@ -6,6 +6,7 @@
 
 ## Analyses
 
+- [Bouwondernemers](files/embuild-analyses/analyses/bouwondernemers/README.md) - Zelfstandige ondernemers in de bouwsector
 - [Energiekaart Premies](files/embuild-analyses/analyses/energiekaart-premies/README.md) - Overzicht van energiepremies per gemeente
 - [Faillissementen](files/embuild-analyses/analyses/faillissementen/README.md) - Statistieken over faillissementen
 - [Gebouwenpark](files/embuild-analyses/analyses/gebouwenpark/README.md) - Belgische gebouwenpark evolutie sinds 1995
@@ -22,6 +23,7 @@
 - [Project Setup](workflows/WF-project-setup.md)
 - [Deploy](workflows/WF-deploy.md)
 - [Embed System](workflows/WF-embed-system.md) - Iframe embed configuration and usage
+- [Bouwondernemers](workflows/WF-bouwondernemers.md) - Construction entrepreneurs data processing from Statbel
 - [Vergunningen Goedkeuringen](workflows/WF-vergunningen-goedkeuringen.md)
 - [Update Vergunningen Data](workflows/WF-update-vergunningen-data.md)
 - [Update Starters-Stoppers Data](workflows/WF-update-starters-stoppers-data.md)
