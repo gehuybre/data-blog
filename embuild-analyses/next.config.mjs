@@ -11,6 +11,7 @@ const nextConfig = {
   trailingSlash: true,
   basePath: isProd ? `/${repoName}` : '',
   assetPrefix: isProd ? `/${repoName}/` : '',
+  productionBrowserSourceMaps: false, // Disable source maps in production (reduces build output by ~44 MB)
   webpack: (config) => {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
