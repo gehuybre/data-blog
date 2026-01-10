@@ -38,6 +38,24 @@ type LineSeriesPoint = {
   [key: string]: number
 }
 
+type TableRow = {
+  sortValue: string | number
+  periodCells: Array<string | number>
+  [key: string]: number | string | Array<string | number>
+}
+
+type LookupItem = {
+  code: string | number
+  nl?: string
+  en?: string
+}
+
+type Lookups = {
+  nace?: LookupItem[]
+  gender?: LookupItem[]
+  age_range?: LookupItem[]
+}
+
 type SectorFilterInlineProps = {
   selected: string | null
   onChange: (code: string | null) => void
@@ -47,8 +65,8 @@ function SectorFilterInline({ selected, onChange }: SectorFilterInlineProps) {
   const [open, setOpen] = React.useState(false)
   const sectors = React.useMemo(() => {
     const sectorMap = new Map<string, string>()
-    if (lookups && (lookups as any).nace) {
-      for (const item of (lookups as any).nace) {
+    if (lookups && (lookups as Lookups).nace) {
+      for (const item of (lookups as Lookups).nace!) {
         const code = String(item.code)
         const label = item.nl || item.en || code
         // Only show F-codes (construction)
@@ -127,7 +145,7 @@ function filterRowsBySector(rows: DataRow[], sector: string | null): DataRow[] {
 
 // Overview section: chart + table with geo + sector filters
 function OverviewSection() {
-  const { selectedRegion } = useGeo()
+  const { selectedRegion, selectedProvince, setSelectedRegion, setSelectedProvince } = useGeo()
   const [selectedSector, setSelectedSector] = React.useState<string | null>(null)
   const [displayMode, setDisplayMode] = React.useState<"absolute" | "relative">("absolute")
   const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
@@ -204,7 +222,12 @@ function OverviewSection() {
             <TabsTrigger value="table">Tabel</TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2">
-            <GeoFilterInline />
+            <GeoFilterInline
+              selectedRegion={selectedRegion}
+              selectedProvince={selectedProvince}
+              onSelectRegion={setSelectedRegion}
+              onSelectProvince={setSelectedProvince}
+            />
             <SectorFilterInline selected={selectedSector} onChange={setSelectedSector} />
             <Tabs value={displayMode} onValueChange={(v) => setDisplayMode(v as "absolute" | "relative")}>
               <TabsList className="h-9">
@@ -226,9 +249,9 @@ function OverviewSection() {
             <CardContent>
               <FilterableChart
                 data={data}
-                getLabel={(d) => String((d as any).sortValue)}
-                getValue={(d) => (d as any).value}
-                getSortValue={(d) => (d as any).sortValue}
+                getLabel={(d) => String((d as YearPoint).sortValue)}
+                getValue={(d) => (d as YearPoint).value}
+                getSortValue={(d) => (d as YearPoint).sortValue}
               />
             </CardContent>
           </Card>
@@ -250,7 +273,7 @@ function OverviewSection() {
 
 // Time series section where lines = sectors
 function BySectorSection() {
-  const { selectedRegion } = useGeo()
+  const { selectedRegion, selectedProvince, setSelectedRegion, setSelectedProvince } = useGeo()
   const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
 
   const { chartData, tableData } = React.useMemo(() => {
@@ -267,8 +290,8 @@ function BySectorSection() {
 
     // Build sector labels
     const sectorLabels = new Map<string, string>()
-    if (lookups && (lookups as any).nace) {
-      for (const item of (lookups as any).nace) {
+    if (lookups && (lookups as Lookups).nace) {
+      for (const item of (lookups as Lookups).nace!) {
         const code = String(item.code)
         if (code.startsWith("F")) {
           sectorLabels.set(code, `${code} ${item.nl || item.en || ""}`.trim())
@@ -295,8 +318,8 @@ function BySectorSection() {
     const years = Array.from(dataByYear.keys()).sort((a, b) => a - b)
     const sectors = Array.from(sectorLabels.keys()).sort()
 
-    const tableData = sectors.map((sector) => {
-      const row: any = {
+    const tableData: TableRow[] = sectors.map((sector) => {
+      const row: TableRow = {
         sortValue: sector,
         periodCells: [sectorLabels.get(sector) || sector],
       }
@@ -332,7 +355,12 @@ function BySectorSection() {
             <TabsTrigger value="table">Tabel</TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2">
-            <GeoFilterInline />
+            <GeoFilterInline
+              selectedRegion={selectedRegion}
+              selectedProvince={selectedProvince}
+              onSelectRegion={setSelectedRegion}
+              onSelectProvince={setSelectedProvince}
+            />
           </div>
         </div>
         <TabsContent value="chart">
@@ -343,12 +371,12 @@ function BySectorSection() {
             <CardContent>
               <FilterableChart
                 data={chartData}
-                getLabel={(d) => String((d as any).year)}
+                getLabel={(d) => String((d as LineSeriesPoint).year)}
                 getValue={(d) => {
-                  const { year, ...rest } = d as any
-                  return Object.values(rest).reduce((sum: number, v: any) => sum + (Number(v) || 0), 0)
+                  const { year, ...rest } = d as LineSeriesPoint
+                  return Object.values(rest).reduce((sum: number, v) => sum + v, 0)
                 }}
-                getSortValue={(d) => (d as any).year}
+                getSortValue={(d) => (d as LineSeriesPoint).year}
                 multiLine={true}
               />
             </CardContent>
@@ -371,7 +399,7 @@ function BySectorSection() {
 
 // Time series section where lines = genders
 function ByGenderSection() {
-  const { selectedRegion } = useGeo()
+  const { selectedRegion, selectedProvince, setSelectedRegion, setSelectedProvince } = useGeo()
   const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
 
   const { chartData, tableData } = React.useMemo(() => {
@@ -388,8 +416,8 @@ function ByGenderSection() {
 
     // Build gender labels
     const genderLabels = new Map<string, string>()
-    if (lookups && (lookups as any).gender) {
-      for (const item of (lookups as any).gender) {
+    if (lookups && (lookups as Lookups).gender) {
+      for (const item of (lookups as Lookups).gender!) {
         const code = String(item.code)
         genderLabels.set(code, item.nl || item.en || code)
       }
@@ -415,9 +443,9 @@ function ByGenderSection() {
     const years = Array.from(dataByYear.keys()).sort((a, b) => a - b)
     const genderCodes = Array.from(genderLabels.keys()).sort()
 
-    const tableData = genderCodes.map((code) => {
+    const tableData: TableRow[] = genderCodes.map((code) => {
       const label = genderLabels.get(code) || code
-      const row: any = {
+      const row: TableRow = {
         sortValue: code,
         periodCells: [label],
       }
@@ -453,7 +481,12 @@ function ByGenderSection() {
             <TabsTrigger value="table">Tabel</TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2">
-            <GeoFilterInline />
+            <GeoFilterInline
+              selectedRegion={selectedRegion}
+              selectedProvince={selectedProvince}
+              onSelectRegion={setSelectedRegion}
+              onSelectProvince={setSelectedProvince}
+            />
           </div>
         </div>
         <TabsContent value="chart">
@@ -464,12 +497,12 @@ function ByGenderSection() {
             <CardContent>
               <FilterableChart
                 data={chartData}
-                getLabel={(d) => String((d as any).year)}
+                getLabel={(d) => String((d as LineSeriesPoint).year)}
                 getValue={(d) => {
-                  const { year, ...rest } = d as any
-                  return Object.values(rest).reduce((sum: number, v: any) => sum + (Number(v) || 0), 0)
+                  const { year, ...rest } = d as LineSeriesPoint
+                  return Object.values(rest).reduce((sum: number, v) => sum + v, 0)
                 }}
-                getSortValue={(d) => (d as any).year}
+                getSortValue={(d) => (d as LineSeriesPoint).year}
                 multiLine={true}
               />
             </CardContent>
@@ -533,9 +566,9 @@ function ByRegionSection() {
     const years = Array.from(dataByYear.keys()).sort((a, b) => a - b)
     const regionCodes = Array.from(regionLabels.keys()).sort()
 
-    const tableData = regionCodes.map((code) => {
+    const tableData: TableRow[] = regionCodes.map((code) => {
       const label = regionLabels.get(code) || code
-      const row: any = {
+      const row: TableRow = {
         sortValue: code,
         periodCells: [label],
       }
@@ -579,12 +612,12 @@ function ByRegionSection() {
             <CardContent>
               <FilterableChart
                 data={chartData}
-                getLabel={(d) => String((d as any).year)}
+                getLabel={(d) => String((d as LineSeriesPoint).year)}
                 getValue={(d) => {
-                  const { year, ...rest } = d as any
-                  return Object.values(rest).reduce((sum: number, v: any) => sum + (Number(v) || 0), 0)
+                  const { year, ...rest } = d as LineSeriesPoint
+                  return Object.values(rest).reduce((sum: number, v) => sum + v, 0)
                 }}
-                getSortValue={(d) => (d as any).year}
+                getSortValue={(d) => (d as LineSeriesPoint).year}
                 multiLine={true}
               />
             </CardContent>
@@ -607,7 +640,7 @@ function ByRegionSection() {
 
 // Time series section where lines = age ranges
 function ByAgeSection() {
-  const { selectedRegion } = useGeo()
+  const { selectedRegion, selectedProvince, setSelectedRegion, setSelectedProvince } = useGeo()
   const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
 
   const { chartData, tableData } = React.useMemo(() => {
@@ -624,8 +657,8 @@ function ByAgeSection() {
 
     // Build age labels
     const ageLabels = new Map<string, string>()
-    if (lookups && (lookups as any).age_range) {
-      for (const item of (lookups as any).age_range) {
+    if (lookups && (lookups as Lookups).age_range) {
+      for (const item of (lookups as Lookups).age_range!) {
         const code = String(item.code)
         ageLabels.set(code, item.nl || item.en || code)
       }
@@ -651,9 +684,9 @@ function ByAgeSection() {
     const years = Array.from(dataByYear.keys()).sort((a, b) => a - b)
     const ageCodes = Array.from(ageLabels.keys()).sort()
 
-    const tableData = ageCodes.map((code) => {
+    const tableData: TableRow[] = ageCodes.map((code) => {
       const label = ageLabels.get(code) || code
-      const row: any = {
+      const row: TableRow = {
         sortValue: code,
         periodCells: [label],
       }
@@ -689,7 +722,12 @@ function ByAgeSection() {
             <TabsTrigger value="table">Tabel</TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2">
-            <GeoFilterInline />
+            <GeoFilterInline
+              selectedRegion={selectedRegion}
+              selectedProvince={selectedProvince}
+              onSelectRegion={setSelectedRegion}
+              onSelectProvince={setSelectedProvince}
+            />
           </div>
         </div>
         <TabsContent value="chart">
@@ -700,12 +738,12 @@ function ByAgeSection() {
             <CardContent>
               <FilterableChart
                 data={chartData}
-                getLabel={(d) => String((d as any).year)}
+                getLabel={(d) => String((d as LineSeriesPoint).year)}
                 getValue={(d) => {
-                  const { year, ...rest } = d as any
-                  return Object.values(rest).reduce((sum: number, v: any) => sum + (Number(v) || 0), 0)
+                  const { year, ...rest } = d as LineSeriesPoint
+                  return Object.values(rest).reduce((sum: number, v) => sum + v, 0)
                 }}
-                getSortValue={(d) => (d as any).year}
+                getSortValue={(d) => (d as LineSeriesPoint).year}
                 multiLine={true}
               />
             </CardContent>
