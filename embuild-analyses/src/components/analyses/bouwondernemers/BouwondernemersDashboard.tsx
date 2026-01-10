@@ -332,12 +332,23 @@ function BySectorSection() {
     return { chartData, tableData }
   }, [selectedRegion])
 
+  const exportData = React.useMemo(() => {
+    return tableData.map((row) => ({
+      label: String(row.periodCells[0] || row.sortValue),
+      value: 0, // Not used for multi-column export
+      periodCells: row.periodCells,
+      ...Object.fromEntries(
+        Object.entries(row).filter(([key]) => key.startsWith('y'))
+      ),
+    }))
+  }, [tableData])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Per subsector</h2>
         <ExportButtons
-          data={tableData}
+          data={exportData}
           title="Bouwondernemers per subsector"
           slug="bouwondernemers"
           sectionId="by-sector"
@@ -458,12 +469,23 @@ function ByGenderSection() {
     return { chartData, tableData }
   }, [selectedRegion])
 
+  const exportData = React.useMemo(() => {
+    return tableData.map((row) => ({
+      label: String(row.periodCells[0] || row.sortValue),
+      value: 0, // Not used for multi-column export
+      periodCells: row.periodCells,
+      ...Object.fromEntries(
+        Object.entries(row).filter(([key]) => key.startsWith('y'))
+      ),
+    }))
+  }, [tableData])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Per geslacht</h2>
         <ExportButtons
-          data={tableData}
+          data={exportData}
           title="Bouwondernemers per geslacht"
           slug="bouwondernemers"
           sectionId="by-gender"
@@ -581,12 +603,23 @@ function ByRegionSection() {
     return { chartData, tableData }
   }, [])
 
+  const exportData = React.useMemo(() => {
+    return tableData.map((row) => ({
+      label: String(row.periodCells[0] || row.sortValue),
+      value: 0, // Not used for multi-column export
+      periodCells: row.periodCells,
+      ...Object.fromEntries(
+        Object.entries(row).filter(([key]) => key.startsWith('y'))
+      ),
+    }))
+  }, [tableData])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Per regio</h2>
         <ExportButtons
-          data={tableData}
+          data={exportData}
           title="Bouwondernemers per regio"
           slug="bouwondernemers"
           sectionId="by-region"
@@ -699,12 +732,23 @@ function ByAgeSection() {
     return { chartData, tableData }
   }, [selectedRegion])
 
+  const exportData = React.useMemo(() => {
+    return tableData.map((row) => ({
+      label: String(row.periodCells[0] || row.sortValue),
+      value: 0, // Not used for multi-column export
+      periodCells: row.periodCells,
+      ...Object.fromEntries(
+        Object.entries(row).filter(([key]) => key.startsWith('y'))
+      ),
+    }))
+  }, [tableData])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Per leeftijd</h2>
         <ExportButtons
-          data={tableData}
+          data={exportData}
           title="Bouwondernemers per leeftijd"
           slug="bouwondernemers"
           sectionId="by-age"
