@@ -7,10 +7,12 @@
  * In production (GitHub Pages), this is '/data-blog'
  * In development, this is ''
  *
- * This uses the NEXT_PUBLIC_BASE_PATH environment variable set at build time
- * in next.config.mjs, providing a single source of truth for the basePath.
+ * IMPORTANT: This uses NEXT_PUBLIC_BASE_PATH which is embedded at build time
+ * by Next.js and is safe to access in client-side code.
  */
 export function getBasePath(): string {
+  // NEXT_PUBLIC_* environment variables are embedded at build time
+  // and are safe to access in client-side code
   return process.env.NEXT_PUBLIC_BASE_PATH || ''
 }
 
