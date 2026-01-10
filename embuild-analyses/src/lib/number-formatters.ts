@@ -26,40 +26,76 @@ export function formatCurrency(value: number, decimals: number = 0): string {
 
 /**
  * Create an auto-scaled formatter for chart axes to prevent label overflow
+ *
+ * Determines the appropriate scale (B/M/K) based on the maximum absolute value
+ * in the data and returns a formatter function that applies Belgian locale formatting.
+ *
  * @param values - Array of numbers to determine the scale
  * @param isCurrency - Whether to format as currency (with € symbol)
- * @returns Object with formatter function and scale string
+ * @returns Object with:
+ *   - formatter: Function to format axis tick values with Belgian locale (space separator, comma decimal)
+ *   - scale: Scale suffix string ("B", "M", "K", or "" for no scaling)
  */
 export function createAutoScaledFormatter(
   values: number[],
   isCurrency: boolean = false
 ): { formatter: (value: number) => string; scale: string } {
-  const maxValue = Math.max(...values.filter((v) => !isNaN(v) && isFinite(v)))
+  // Filter out invalid values
+  const filteredValues = values.filter((v) => !isNaN(v) && isFinite(v))
 
-  if (maxValue >= 1_000_000_000) {
+  // Handle empty or all-invalid data
+  if (filteredValues.length === 0) {
+    return {
+      formatter: (value: number) => {
+        const formatted = value.toLocaleString("nl-BE", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        })
+        return isCurrency ? `€${formatted}` : formatted
+      },
+      scale: "",
+    }
+  }
+
+  // Use absolute max to handle negative values correctly
+  const maxAbsValue = Math.max(...filteredValues.map((v) => Math.abs(v)))
+
+  if (maxAbsValue >= 1_000_000_000) {
     // Billion scale
     return {
       formatter: (value: number) => {
         const scaled = value / 1_000_000_000
-        return isCurrency ? `€${scaled.toFixed(1)}` : scaled.toFixed(1)
+        const formatted = scaled.toLocaleString("nl-BE", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        })
+        return isCurrency ? `€${formatted}` : formatted
       },
       scale: "B",
     }
-  } else if (maxValue >= 1_000_000) {
+  } else if (maxAbsValue >= 1_000_000) {
     // Million scale
     return {
       formatter: (value: number) => {
         const scaled = value / 1_000_000
-        return isCurrency ? `€${scaled.toFixed(1)}` : scaled.toFixed(1)
+        const formatted = scaled.toLocaleString("nl-BE", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        })
+        return isCurrency ? `€${formatted}` : formatted
       },
       scale: "M",
     }
-  } else if (maxValue >= 10_000) {
+  } else if (maxAbsValue >= 10_000) {
     // Thousand scale (only if > 10k to avoid unnecessary scaling)
     return {
       formatter: (value: number) => {
         const scaled = value / 1_000
-        return isCurrency ? `€${scaled.toFixed(1)}` : scaled.toFixed(1)
+        const formatted = scaled.toLocaleString("nl-BE", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        })
+        return isCurrency ? `€${formatted}` : formatted
       },
       scale: "K",
     }
@@ -68,7 +104,11 @@ export function createAutoScaledFormatter(
   // No scaling needed
   return {
     formatter: (value: number) => {
-      return isCurrency ? `€${value.toFixed(0)}` : value.toFixed(0)
+      const formatted = value.toLocaleString("nl-BE", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      })
+      return isCurrency ? `€${formatted}` : formatted
     },
     scale: "",
   }
