@@ -7,11 +7,15 @@
  * In production (GitHub Pages), this is '/data-blog'
  * In development, this is ''
  *
- * This uses the NEXT_PUBLIC_BASE_PATH environment variable set at build time
- * in next.config.mjs, providing a single source of truth for the basePath.
+ * IMPORTANT: For client-side code, we hardcode the basePath to avoid runtime
+ * process.env access which doesn't work in the browser.
+ * This matches the basePath in next.config.mjs.
  */
 export function getBasePath(): string {
-  return process.env.NEXT_PUBLIC_BASE_PATH || ''
+  // Use hardcoded value for production build
+  // This must match the basePath in next.config.mjs
+  const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  return isProd ? '/data-blog' : ''
 }
 
 /**
