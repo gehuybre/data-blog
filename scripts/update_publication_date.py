@@ -101,11 +101,13 @@ def update_mdx_frontmatter(mdx_path: Path, publication_date: str) -> bool:
     else:
         # Add new field after sourceUrl if it exists, otherwise at the end
         if 'sourceUrl:' in frontmatter:
+            # Ensure frontmatter ends with newline before adding new field
+            frontmatter_lines = frontmatter.rstrip('\n')
             new_frontmatter = re.sub(
                 r'(sourceUrl:\s*[^\n]+)',
                 rf'\1\nsourcePublicationDate: {publication_date}',
-                frontmatter
-            )
+                frontmatter_lines
+            ) + '\n'
         else:
             # Add at end of frontmatter (ensure newline)
             new_frontmatter = frontmatter.rstrip('\n') + f'\nsourcePublicationDate: {publication_date}\n'
