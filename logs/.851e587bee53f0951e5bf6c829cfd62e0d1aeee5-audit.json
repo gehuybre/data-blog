@@ -6,9 +6,14 @@
     "auditLog": "/Users/gerthuybrechts/pyprojects/data-blog/logs/.851e587bee53f0951e5bf6c829cfd62e0d1aeee5-audit.json",
     "files": [
         {
-            "date": 1766877101646,
-            "name": "/Users/gerthuybrechts/pyprojects/data-blog/logs/mcp-puppeteer-2025-12-28.log",
-            "hash": "91934f0fa8501efbb11b5e5ab14951d1931a1337ddd7eb92e7c08d786a4e4df1"
+            "date": 1768081404771,
+            "name": "/Users/gerthuybrechts/pyprojects/data-blog/logs/mcp-puppeteer-2026-01-10.log",
+            "hash": "5ffe3120e61efac08e9dc812c8fdf9526c31add925797916b83181287d8bb52b"
+        },
+        {
+            "date": 1768087841691,
+            "name": "/Users/gerthuybrechts/pyprojects/data-blog/logs/mcp-puppeteer-2026-01-11.log",
+            "hash": "83e3203162988c56572767933d6d90f3ac11cfc3b9443ae88d12b21f492021de"
         }
     ],
     "hashType": "sha256"
