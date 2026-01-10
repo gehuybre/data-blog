@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"
 import { ExportButtons } from "../shared/ExportButtons"
 import { formatCurrency } from "@/lib/number-formatters"
 import { getMunicipalityName, getAllMunicipalities } from "./nisUtils"
+import { getPublicPath } from "@/lib/path-utils"
 
 interface BVLookups {
   domains: Array<{ BV_domein: string }>
@@ -150,8 +151,8 @@ export function InvesteringenBVCategorySection() {
         setLoadedChunks(0)
 
         const [metaRes, lookupsRes] = await Promise.all([
-          fetch('/data/gemeentelijke-investeringen/metadata.json'),
-          fetch('/data/gemeentelijke-investeringen/bv_lookups.json'),
+          fetch(getPublicPath('/data/gemeentelijke-investeringen/metadata.json')),
+          fetch(getPublicPath('/data/gemeentelijke-investeringen/bv_lookups.json')),
         ])
 
         if (cancelled) return
@@ -173,7 +174,7 @@ export function InvesteringenBVCategorySection() {
         for (let i = 0; i < meta.bv_chunks; i++) {
           if (cancelled) return
 
-          const chunkRes = await fetch(`/data/gemeentelijke-investeringen/bv_municipality_data_chunk_${i}.json`)
+          const chunkRes = await fetch(getPublicPath(`/data/gemeentelijke-investeringen/bv_municipality_data_chunk_${i}.json`))
           if (!chunkRes.ok) {
             throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
           }

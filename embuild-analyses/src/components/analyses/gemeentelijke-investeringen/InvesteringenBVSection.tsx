@@ -25,6 +25,7 @@ import {
   getScaledLabel,
   formatCurrency as formatFullCurrency,
 } from "@/lib/number-formatters"
+import { getPublicPath } from "@/lib/path-utils"
 
 interface BVLookups {
   domains: Array<{ BV_domein: string }>
@@ -129,9 +130,9 @@ export function InvesteringenBVSection() {
         setLoadedChunks(0)
 
         const [metaRes, lookupsRes, vlaanderenRes] = await Promise.all([
-          fetch('/data/gemeentelijke-investeringen/metadata.json'),
-          fetch('/data/gemeentelijke-investeringen/bv_lookups.json'),
-          fetch('/data/gemeentelijke-investeringen/bv_vlaanderen_data.json')
+          fetch(getPublicPath('/data/gemeentelijke-investeringen/metadata.json')),
+          fetch(getPublicPath('/data/gemeentelijke-investeringen/bv_lookups.json')),
+          fetch(getPublicPath('/data/gemeentelijke-investeringen/bv_vlaanderen_data.json'))
         ])
 
         if (cancelled) return
@@ -156,7 +157,7 @@ export function InvesteringenBVSection() {
         for (let i = 0; i < meta.bv_chunks; i++) {
           if (cancelled) return
 
-          const chunkRes = await fetch(`/data/gemeentelijke-investeringen/bv_municipality_data_chunk_${i}.json`)
+          const chunkRes = await fetch(getPublicPath(`/data/gemeentelijke-investeringen/bv_municipality_data_chunk_${i}.json`))
           if (!chunkRes.ok) {
             throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
           }
