@@ -65,8 +65,10 @@ export function ProjectFiltersComponent({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (searchInput.trim()) {
-      setFilters({ ...filters, searchQuery: searchInput.trim() })
+    // Sanitize and limit search query to 200 characters
+    const sanitizedQuery = searchInput.trim().slice(0, 200)
+    if (sanitizedQuery) {
+      setFilters({ ...filters, searchQuery: sanitizedQuery })
     } else {
       const { searchQuery, ...rest } = filters
       setFilters(rest)
@@ -108,6 +110,7 @@ export function ProjectFiltersComponent({
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9"
+              maxLength={200}
             />
           </div>
         </div>
