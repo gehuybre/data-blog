@@ -6,17 +6,12 @@
  * Get the base path for the application.
  * In production (GitHub Pages), this is '/data-blog'
  * In development, this is ''
+ *
+ * This uses the NEXT_PUBLIC_BASE_PATH environment variable set at build time
+ * in next.config.mjs, providing a single source of truth for the basePath.
  */
 export function getBasePath(): string {
-  // Check if we're in production by looking at the current URL
-  if (typeof window !== 'undefined') {
-    const { pathname } = window.location
-    // If pathname starts with /data-blog, we're in production
-    if (pathname.startsWith('/data-blog')) {
-      return '/data-blog'
-    }
-  }
-  return ''
+  return process.env.NEXT_PUBLIC_BASE_PATH || ''
 }
 
 /**
