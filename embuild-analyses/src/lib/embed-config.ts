@@ -248,7 +248,11 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
  * Validate standard embed configuration in development mode
  */
 function validateStandardConfig(config: StandardEmbedConfig, slug: string, section: string): void {
-  if (process.env.NEXT_PUBLIC_DEV_MODE !== "true") return
+  // Only validate in development mode (localhost)
+  if (typeof window === 'undefined' ||
+      (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')) {
+    return;
+  }
 
   const issues: string[] = []
 

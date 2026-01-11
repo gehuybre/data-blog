@@ -51,7 +51,9 @@ export class EmbedErrorBoundary extends React.Component<
             <p className="text-sm text-muted-foreground mb-4">
               Deze visualisatie kan momenteel niet worden weergegeven.
             </p>
-            {process.env.NEXT_PUBLIC_DEV_MODE === "true" && this.state.error && (
+            {typeof window !== 'undefined' &&
+             (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+             this.state.error && (
               <details className="mt-4 text-left">
                 <summary className="cursor-pointer text-xs font-mono text-muted-foreground">
                   Details voor ontwikkelaars
