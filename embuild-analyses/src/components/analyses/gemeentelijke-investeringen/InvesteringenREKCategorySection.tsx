@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"
 import { ExportButtons } from "../shared/ExportButtons"
 import { formatCurrency } from "@/lib/number-formatters"
 import { getMunicipalityName, getAllMunicipalities } from "./nisUtils"
+import { getPublicPath } from "@/lib/path-utils"
 
 interface REKLookups {
   niveau3s: Array<{ Niveau_3: string }>
@@ -139,12 +140,20 @@ export function InvesteringenREKCategorySection() {
 
   // Load initial data and start chunk loading
   useEffect(() => {
+    let cancelled = false
+
     async function init() {
       try {
+        // Reset data to prevent double-loading on remount
+        setMuniData([])
+        setLoadedChunks(0)
+
         const [metaRes, lookupsRes] = await Promise.all([
-          fetch('/data/gemeentelijke-investeringen/metadata.json'),
-          fetch('/data/gemeentelijke-investeringen/rek_lookups.json'),
+          fetch(getPublicPath('/data/gemeentelijke-investeringen/metadata.json')),
+          fetch(getPublicPath('/data/gemeentelijke-investeringen/rek_lookups.json')),
         ])
+
+        if (cancelled) return
 
         if (!metaRes.ok) throw new Error(`Failed to load metadata: ${metaRes.statusText}`)
         if (!lookupsRes.ok) throw new Error(`Failed to load lookups: ${lookupsRes.statusText}`)
@@ -152,27 +161,39 @@ export function InvesteringenREKCategorySection() {
         const meta = validateMetadata(await metaRes.json())
         const lookupsData = validateLookups(await lookupsRes.json())
 
+        if (cancelled) return
+
         setLookups(lookupsData)
         setTotalChunks(meta.rek_chunks)
         setIsLoading(false)
 
         // Load chunks sequentially
+        const allChunks: REKRecord[] = []
         for (let i = 0; i < meta.rek_chunks; i++) {
-          const chunkRes = await fetch(`/data/gemeentelijke-investeringen/rek_municipality_data_chunk_${i}.json`)
+          if (cancelled) return
+
+          const chunkRes = await fetch(getPublicPath(`/data/gemeentelijke-investeringen/rek_municipality_data_chunk_${i}.json`))
           if (!chunkRes.ok) {
             throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
           }
           const chunkData = validateChunkData(await chunkRes.json())
-          setMuniData(prev => [...prev, ...chunkData])
+          allChunks.push(...chunkData)
+          setMuniData([...allChunks])
           setLoadedChunks(i + 1)
         }
       } catch (err) {
-        console.error('Failed to load REK data:', err)
-        setError(err instanceof Error ? err.message : 'Fout bij het laden van de data')
-        setIsLoading(false)
+        if (!cancelled) {
+          console.error('Failed to load REK data:', err)
+          setError(err instanceof Error ? err.message : 'Fout bij het laden van de data')
+          setIsLoading(false)
+        }
       }
     }
     init()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // Category breakdown: Top 9 + Other

@@ -25,44 +25,109 @@ export function formatCurrency(value: number, decimals: number = 0): string {
 }
 
 /**
- * Get the scaled label for a value (K, M, or empty string)
- * Can also append scale suffix to a label string
+ * Create an auto-scaled formatter for chart axes to prevent label overflow
+ *
+ * Determines the appropriate scale (B/M/K) based on the maximum absolute value
+ * in the data and returns a formatter function that applies Belgian locale formatting.
+ *
+ * @param values - Array of numbers to determine the scale
+ * @param isCurrency - Whether to format as currency (with € symbol)
+ * @returns Object with:
+ *   - formatter: Function to format axis tick values with Belgian locale (space separator, comma decimal)
+ *   - scale: Scale suffix string ("B", "M", "K", or "" for no scaling)
  */
-export function getScaledLabel(labelOrValue: string | number, scale?: string): string {
-  // If called with two arguments (label, scale), append scale to label
-  if (typeof labelOrValue === "string" && scale !== undefined) {
-    return scale ? `${labelOrValue} ${scale}` : labelOrValue
+export function createAutoScaledFormatter(
+  values: number[],
+  isCurrency: boolean = false
+): { formatter: (value: number) => string; scale: string } {
+  // Filter out invalid values
+  const filteredValues = values.filter((v) => !isNaN(v) && isFinite(v))
+
+  // Handle empty or all-invalid data
+  if (filteredValues.length === 0) {
+    return {
+      formatter: (value: number) => {
+        const formatted = value.toLocaleString("nl-BE", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        })
+        return isCurrency ? `€${formatted}` : formatted
+      },
+      scale: "",
+    }
   }
 
-  // Otherwise, determine scale from numeric value
-  const value = labelOrValue as number
-  if (value >= 1_000_000) {
-    return "M"
-  } else if (value >= 1_000) {
-    return "K"
+  // Use absolute max to handle negative values correctly
+  const maxAbsValue = Math.max(...filteredValues.map((v) => Math.abs(v)))
+
+  if (maxAbsValue >= 1_000_000_000) {
+    // Billion scale
+    return {
+      formatter: (value: number) => {
+        const scaled = value / 1_000_000_000
+        const formatted = scaled.toLocaleString("nl-BE", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        })
+        return isCurrency ? `€${formatted}` : formatted
+      },
+      scale: "B",
+    }
+  } else if (maxAbsValue >= 1_000_000) {
+    // Million scale
+    return {
+      formatter: (value: number) => {
+        const scaled = value / 1_000_000
+        const formatted = scaled.toLocaleString("nl-BE", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        })
+        return isCurrency ? `€${formatted}` : formatted
+      },
+      scale: "M",
+    }
+  } else if (maxAbsValue >= 10_000) {
+    // Thousand scale (only if > 10k to avoid unnecessary scaling)
+    return {
+      formatter: (value: number) => {
+        const scaled = value / 1_000
+        const formatted = scaled.toLocaleString("nl-BE", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        })
+        return isCurrency ? `€${formatted}` : formatted
+      },
+      scale: "K",
+    }
   }
-  return ""
+
+  // No scaling needed
+  return {
+    formatter: (value: number) => {
+      const formatted = value.toLocaleString("nl-BE", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      })
+      return isCurrency ? `€${formatted}` : formatted
+    },
+    scale: "",
+  }
 }
 
 /**
- * Create an auto-scaled number formatter
- * Automatically chooses between K, M suffixes based on magnitude
- *
- * @param values - Array of values to determine scale (optional)
- * @param isCurrency - Whether to format as currency
- * @returns Object with formatter function and scale label
+ * Append scale suffix to axis label
+ * @param label - The base label (e.g., "Investment (€)")
+ * @param scale - The scale string (e.g., "M", "K", "B", or "")
+ * @returns Label with scale appended appropriately
  */
-export function createAutoScaledFormatter(values?: number[], isCurrency: boolean = false) {
-  // Determine scale based on max value
-  const maxValue = values && values.length > 0 ? Math.max(...values) : 0
-  const scale = getScaledLabel(maxValue)
+export function getScaledLabel(label: string, scale: string): string {
+  if (!scale) return label
 
-  const formatter = (value: number) => {
-    if (isCurrency) {
-      return formatCurrency(value)
-    }
-    return formatNumber(value)
+  // If label ends with (€), insert scale before the closing parenthesis
+  if (label.endsWith("(€)")) {
+    return label.replace("(€)", `(€${scale})`)
   }
 
-  return { formatter, scale }
+  // Otherwise append to the end
+  return `${label} (${scale})`
 }
