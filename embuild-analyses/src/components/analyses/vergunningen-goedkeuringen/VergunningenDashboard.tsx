@@ -5,15 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnalysisSection } from "../shared/AnalysisSection"
 import { GeoProviderWithDefaults } from "../shared/GeoContext"
 
-// Import data files
-import dataQuarterly from "../../../../analyses/vergunningen-goedkeuringen/results/data_quarterly.json"
-import municipalitiesData from "../../../../analyses/vergunningen-goedkeuringen/results/municipalities.json"
-
 type PeriodType = "year" | "quarter"
-
-// Convert imported data to the format we need
-const data = dataQuarterly
-const municipalities = municipalitiesData
 
 type DataRow = {
   y: number
@@ -23,8 +15,50 @@ type DataRow = {
   new: number
 }
 
+type MunicipalityData = {
+  m: number
+  name: string
+}
+
 export function VergunningenDashboard() {
   const [periodType, setPeriodType] = React.useState<PeriodType>("quarter")
+  const [data, setData] = React.useState<DataRow[] | null>(null)
+  const [municipalities, setMunicipalities] = React.useState<MunicipalityData[] | null>(null)
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+
+  // Lazy-load data from public directory to reduce JavaScript bundle size by 3.8 MB
+  React.useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const [dataResponse, municipalitiesResponse] = await Promise.all([
+          fetch("/data-blog/data/vergunningen-goedkeuringen/data_quarterly.json"),
+          fetch("/data-blog/data/vergunningen-goedkeuringen/municipalities.json"),
+        ])
+
+        if (!dataResponse.ok || !municipalitiesResponse.ok) {
+          throw new Error("Failed to load data files")
+        }
+
+        const [dataJson, municipalitiesJson] = await Promise.all([
+          dataResponse.json(),
+          municipalitiesResponse.json(),
+        ])
+
+        setData(dataJson)
+        setMunicipalities(municipalitiesJson)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load data")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
 
   // Define period configurations for different aggregation levels
   const periodConfig = React.useMemo(() => {
@@ -52,6 +86,29 @@ export function VergunningenDashboard() {
     }
   }, [periodType])
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center space-y-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-sm text-muted-foreground">Data laden...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error || !data || !municipalities) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center space-y-3">
+          <p className="text-sm text-destructive">Fout bij het laden van data: {error || "Data niet gevonden"}</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <GeoProviderWithDefaults initialLevel="province" initialRegion="1000" initialProvince={null} initialMunicipality={null}>
       <div className="space-y-8">
@@ -72,7 +129,7 @@ export function VergunningenDashboard() {
 
         <AnalysisSection
           title="Renovatie (Gebouwen)"
-          data={data as DataRow[]}
+          data={data}
           municipalities={municipalities}
           metric="ren"
           label="Aantal"
@@ -86,7 +143,7 @@ export function VergunningenDashboard() {
 
         <AnalysisSection
           title="Nieuwbouw (Gebouwen)"
-          data={data as DataRow[]}
+          data={data}
           municipalities={municipalities}
           metric="new"
           label="Aantal"
