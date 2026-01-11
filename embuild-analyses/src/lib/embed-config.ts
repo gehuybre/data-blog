@@ -248,7 +248,7 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
  * Validate standard embed configuration in development mode
  */
 function validateStandardConfig(config: StandardEmbedConfig, slug: string, section: string): void {
-  if (process.env.NODE_ENV !== "development") return
+  if (process.env.NEXT_PUBLIC_DEV_MODE !== "true") return
 
   const issues: string[] = []
 

@@ -6,6 +6,7 @@ import { scaleQuantile } from "d3-scale"
 import { geoBounds } from "d3-geo"
 import { Loader2, TrendingUp, TrendingDown } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getBasePath } from "@/lib/path-utils"
 import { TimeSlider } from "./TimeSlider"
 import { MapLegend, NoDataIndicator } from "./MapLegend"
 import { MapControls } from "./MapControls"
@@ -76,10 +77,8 @@ interface MunicipalityMapProps<TData extends UnknownRecord = UnknownRecord> {
 }
 
 // GeoJSON URLs
-const MUNICIPALITIES_GEO_URL =
-  (process.env.NODE_ENV === "production" ? "/data-blog" : "") + "/maps/belgium_municipalities.json"
-const PROVINCES_GEO_URL =
-  (process.env.NODE_ENV === "production" ? "/data-blog" : "") + "/maps/belgium_provinces.json"
+const MUNICIPALITIES_GEO_URL = `${getBasePath()}/maps/belgium_municipalities.json`
+const PROVINCES_GEO_URL = `${getBasePath()}/maps/belgium_provinces.json`
 
 // Default formatters
 const defaultFormatValue = (n: number) =>

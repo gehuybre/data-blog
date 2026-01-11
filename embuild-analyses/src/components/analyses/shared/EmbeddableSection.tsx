@@ -5,6 +5,7 @@ import { FilterableChart } from "./FilterableChart"
 import { FilterableTable } from "./FilterableTable"
 import { MunicipalityMap } from "./MunicipalityMap"
 import { getProvinceForMunicipality, Municipality } from "@/lib/geo-utils"
+import { getBasePath } from "@/lib/path-utils"
 
 type UnknownRecord = Record<string, unknown>
 
@@ -122,7 +123,7 @@ export function EmbeddableSection<TData extends object = UnknownRecord>({
 
       <div className="mt-4 text-xs text-muted-foreground text-center">
         <a
-          href={typeof window !== "undefined" ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "") : "#"}
+          href={typeof window !== "undefined" ? window.location.origin + getBasePath() : "#"}
           target="_blank"
           rel="noopener noreferrer"
           className="hover:underline"

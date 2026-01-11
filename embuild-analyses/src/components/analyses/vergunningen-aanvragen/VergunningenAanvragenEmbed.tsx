@@ -3,6 +3,7 @@
 import { useMemo } from "react"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
+import { getBasePath } from "@/lib/path-utils"
 
 import nieuwbouwQuarterly from "../../../../analyses/vergunningen-aanvragen/results/nieuwbouw_quarterly.json"
 import nieuwbouwYearly from "../../../../analyses/vergunningen-aanvragen/results/nieuwbouw_yearly.json"
@@ -276,7 +277,7 @@ export function VergunningenAanvragenEmbed({
           href={
             typeof window !== "undefined"
               ? window.location.origin +
-                (process.env.NODE_ENV === "production" ? "/data-blog" : "") +
+                getBasePath() +
                 "/analyses/vergunningen-aanvragen"
               : ""
           }

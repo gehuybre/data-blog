@@ -7,8 +7,9 @@ import { ProjectList } from "./ProjectList"
 import { ProjectDetailModal } from "./ProjectDetailModal"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
+import { getBasePath } from "@/lib/path-utils"
 
-const BASE_PATH = process.env.NODE_ENV === 'production' ? '/data-blog' : ''
+const BASE_PATH = getBasePath()
 
 export function ProjectBrowser() {
   const [projects, setProjects] = useState<Project[]>([])
