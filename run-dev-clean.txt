@@ -1,0 +1,12 @@
+#!/bin/bash
+# Clean Next.js cache and run development server
+
+cd embuild-analyses
+rm -rf .next
+npm run dev
+
+# If you encounter OpenTelemetry vendor chunk errors:
+# rm -rf .next node_modules package-lock.json
+# npm install --legacy-peer-deps
+# npm run dev
+
