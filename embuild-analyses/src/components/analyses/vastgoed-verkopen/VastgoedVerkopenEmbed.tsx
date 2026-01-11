@@ -1,12 +1,11 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
 import { getBasePath } from "@/lib/path-utils"
 
 import yearlyRaw from "../../../../analyses/vastgoed-verkopen/results/yearly.json"
-import quarterlyRaw from "../../../../analyses/vastgoed-verkopen/results/quarterly.json"
 
 type YearlyRow = {
   y: number
@@ -130,7 +129,55 @@ export function VastgoedVerkopenEmbed({
   geo = null,
 }: VastgoedVerkopenEmbedProps) {
   const yearlyRows = useMemo(() => yearlyRaw as YearlyRow[], [])
-  const quarterlyRows = useMemo(() => quarterlyRaw as QuarterlyRow[], [])
+  const [quarterlyRows, setQuarterlyRows] = useState<QuarterlyRow[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Load quarterly data only if needed
+  const needsQuarterly = section.includes("kwartaal")
+
+  useEffect(() => {
+    if (!needsQuarterly) return
+
+    let isMounted = true
+    const abortController = new AbortController()
+
+    async function loadQuarterlyData() {
+      setLoading(true)
+      try {
+        const basePath = getBasePath()
+        const metadata = await fetch(`${basePath}/data/vastgoed-verkopen/metadata.json`, {
+          signal: abortController.signal,
+        }).then((r) => r.json())
+
+        const chunks = await Promise.all(
+          Array.from({ length: metadata.quarterly_chunks }, (_, i) =>
+            fetch(`${basePath}/data/vastgoed-verkopen/quarterly_chunk_${i}.json`, {
+              signal: abortController.signal,
+            }).then((r) => r.json())
+          )
+        )
+
+        const quarterly = chunks.flat()
+        if (isMounted) {
+          setQuarterlyRows(quarterly)
+          setLoading(false)
+        }
+      } catch (err) {
+        if (isMounted && err instanceof Error && err.name !== "AbortError") {
+          setError(err.message)
+          setLoading(false)
+        }
+      }
+    }
+
+    loadQuarterlyData()
+
+    return () => {
+      isMounted = false
+      abortController.abort()
+    }
+  }, [needsQuarterly])
 
   // Filter by geo + property type
   const filteredYearly = useMemo(() => {
@@ -174,6 +221,33 @@ export function VastgoedVerkopenEmbed({
   const label = isPriceMetric ? "Prijs (€)" : "Transacties"
   const periodHeaders = isQuarterly ? ["Jaar", "Kwartaal"] : ["Jaar"]
   const hasData = yearSeries.length > 0
+
+  // Show loading state for quarterly data
+  if (needsQuarterly && loading) {
+    return (
+      <div className="p-4">
+        <h2 className="text-lg font-semibold mb-4">{title}</h2>
+        <div className="flex items-center justify-center min-h-[200px]">
+          <div className="text-center space-y-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto" />
+            <p className="text-sm text-muted-foreground">Data laden...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="p-4">
+        <h2 className="text-lg font-semibold mb-4">{title}</h2>
+        <div className="p-8 text-center text-destructive">
+          <p>Fout bij het laden van de data: {error}</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-4">

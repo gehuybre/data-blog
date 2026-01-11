@@ -191,8 +191,8 @@ export function InvesteringenREKSection() {
     return options.map(a => a.Alg_rekening).sort()
   }, [lookups, selectedNiveau3])
 
-  // Filter data based on selections
-  const filteredData = useMemo(() => {
+  // Filter data based on REK selections (without geo filter)
+  const dataWithoutGeoFilter = useMemo(() => {
     let data = muniData
 
     if (selectedNiveau3) {
@@ -202,13 +202,20 @@ export function InvesteringenREKSection() {
       data = data.filter(d => d.Alg_rekening === selectedAlgRekening)
     }
 
+    return data
+  }, [muniData, selectedNiveau3, selectedAlgRekening])
+
+  // Filter data based on selections (including geo filter)
+  const filteredData = useMemo(() => {
+    let data = dataWithoutGeoFilter
+
     // Apply geo filter
     if (geoSelection.type === 'municipality' && geoSelection.code) {
       data = data.filter(d => d.NIS_code === geoSelection.code)
     }
 
     return data
-  }, [muniData, selectedNiveau3, selectedAlgRekening, geoSelection])
+  }, [dataWithoutGeoFilter, geoSelection])
 
   // Chart data: Vlaanderen totals or municipality average
   const chartData = useMemo(() => {
@@ -315,6 +322,12 @@ export function InvesteringenREKSection() {
     return Object.values(byMuni)
   }, [filteredData, selectedMetric])
 
+  // Get available municipalities from the filtered data (without geo filter)
+  const availableMunicipalities = useMemo(() => {
+    const nisCodesSet = new Set(dataWithoutGeoFilter.map(d => d.NIS_code))
+    return Array.from(nisCodesSet)
+  }, [dataWithoutGeoFilter])
+
   if (error) {
     return (
       <Card>
@@ -388,7 +401,7 @@ export function InvesteringenREKSection() {
                   Per inwoner
                 </Button>
               </div>
-              <SimpleGeoFilter />
+              <SimpleGeoFilter availableMunicipalities={availableMunicipalities} />
               <HierarchicalFilter
                 value={selectedNiveau3}
                 onChange={(v) => {
