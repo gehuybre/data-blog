@@ -34,13 +34,19 @@ export function VergunningenDashboard() {
         setLoading(true)
         setError(null)
 
+        // Use environment variable for basePath (empty in dev, /data-blog in production)
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+
         const [dataResponse, municipalitiesResponse] = await Promise.all([
-          fetch("/data-blog/data/vergunningen-goedkeuringen/data_quarterly.json"),
-          fetch("/data-blog/data/vergunningen-goedkeuringen/municipalities.json"),
+          fetch(`${basePath}/data/vergunningen-goedkeuringen/data_quarterly.json`),
+          fetch(`${basePath}/data/vergunningen-goedkeuringen/municipalities.json`),
         ])
 
-        if (!dataResponse.ok || !municipalitiesResponse.ok) {
-          throw new Error("Failed to load data files")
+        if (!dataResponse.ok) {
+          throw new Error(`Kon data_quarterly.json niet laden (HTTP ${dataResponse.status})`)
+        }
+        if (!municipalitiesResponse.ok) {
+          throw new Error(`Kon municipalities.json niet laden (HTTP ${municipalitiesResponse.status})`)
         }
 
         const [dataJson, municipalitiesJson] = await Promise.all([
@@ -48,10 +54,18 @@ export function VergunningenDashboard() {
           municipalitiesResponse.json(),
         ])
 
+        // Validate data is an array
+        if (!Array.isArray(dataJson)) {
+          throw new Error("Ongeldige data formaat voor data_quarterly.json")
+        }
+        if (!Array.isArray(municipalitiesJson)) {
+          throw new Error("Ongeldige data formaat voor municipalities.json")
+        }
+
         setData(dataJson)
         setMunicipalities(municipalitiesJson)
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load data")
+        setError(err instanceof Error ? err.message : "Kon databestanden niet laden")
       } finally {
         setLoading(false)
       }
