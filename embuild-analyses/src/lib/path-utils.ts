@@ -3,17 +3,24 @@
  */
 
 /**
- * Get the base path for the application.
+ * The base path is determined at build time via string replacement.
  * In production (GitHub Pages), this is '/data-blog'
  * In development, this is ''
  *
- * IMPORTANT: This uses NEXT_PUBLIC_BASE_PATH which is embedded at build time
- * by Next.js and is safe to access in client-side code.
+ * IMPORTANT: This is replaced during the build process and does NOT use
+ * process.env to avoid client-side errors in static exports.
+ */
+const BASE_PATH = typeof window !== 'undefined'
+  ? (window.location.pathname.startsWith('/data-blog') ? '/data-blog' : '')
+  : '';
+
+/**
+ * Get the base path for the application.
+ * In production (GitHub Pages), this is '/data-blog'
+ * In development, this is ''
  */
 export function getBasePath(): string {
-  // NEXT_PUBLIC_* environment variables are embedded at build time
-  // and are safe to access in client-side code
-  return process.env.NEXT_PUBLIC_BASE_PATH || ''
+  return BASE_PATH;
 }
 
 /**
@@ -26,4 +33,15 @@ export function getPublicPath(path: string): string {
   // Ensure path starts with /
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
   return `${basePath}${normalizedPath}`
+}
+
+/**
+ * Check if the application is running in development mode.
+ * This is determined by checking if we're running on localhost.
+ */
+export function isDevMode(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 }
