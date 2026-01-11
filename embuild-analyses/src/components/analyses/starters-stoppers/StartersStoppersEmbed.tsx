@@ -4,6 +4,7 @@ import { useMemo } from "react"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
 import { PROVINCES, ProvinceCode, REGIONS, RegionCode } from "@/lib/geo-utils"
+import { getBasePath } from "@/lib/path-utils"
 
 import raw from "../../../../analyses/starters-stoppers/results/vat_survivals.json"
 
@@ -193,7 +194,7 @@ export function StartersStoppersEmbed({
 
       <div className="mt-4 text-xs text-muted-foreground text-center">
         <a
-          href={typeof window !== "undefined" ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "") : "#"}
+          href={typeof window !== "undefined" ? window.location.origin + getBasePath() : "#"}
           target="_blank"
           rel="noopener noreferrer"
           className="hover:underline"

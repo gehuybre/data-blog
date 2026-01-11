@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/popover"
 import { Download, Code, Check, Copy } from "lucide-react"
 import { isEmbeddable, getEmbedConfig } from "@/lib/embed-config"
+import { getBasePath } from "@/lib/path-utils"
 
 type ExportData = {
   label: string
@@ -71,7 +72,7 @@ export function ExportButtons({
 
     // Add the analysis page URL
     const baseUrl = typeof window !== "undefined"
-      ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "")
+      ? window.location.origin + getBasePath()
       : ""
     metadata.push(`# Analyse: ${baseUrl}/analyses/${slug}/`)
     metadata.push(`#`)
@@ -136,7 +137,7 @@ export function ExportButtons({
 
     // Get the base URL - in production this will be the GitHub Pages URL
     const baseUrl = typeof window !== "undefined"
-      ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "")
+      ? window.location.origin + getBasePath()
       : ""
 
     // URL-encode slug and sectionId for security
