@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { getBasePath } from "@/lib/path-utils"
 import { GeoProvider } from "../shared/GeoContext"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
@@ -127,7 +128,7 @@ function useVastgoedData() {
 
     async function loadData() {
       try {
-        const basePath = process.env.NODE_ENV === "production" ? "/data-blog" : ""
+        const basePath = getBasePath()
 
         // Helper function to fetch with timeout
         const fetchWithTimeout = async (url: string) => {

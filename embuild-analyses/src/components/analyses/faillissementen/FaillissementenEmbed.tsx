@@ -3,6 +3,7 @@
 import { useMemo } from "react"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
+import { getBasePath } from "@/lib/path-utils"
 
 import monthlyConstruction from "../../../../analyses/faillissementen/results/monthly_construction.json"
 import monthlyTotals from "../../../../analyses/faillissementen/results/monthly_totals.json"
@@ -244,7 +245,7 @@ export function FaillissementenEmbed({
 
       <div className="mt-4 text-xs text-muted-foreground text-center">
         <a
-          href={typeof window !== "undefined" ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "") : "#"}
+          href={typeof window !== "undefined" ? window.location.origin + getBasePath() : "#"}
           target="_blank"
           rel="noopener noreferrer"
           className="hover:underline"

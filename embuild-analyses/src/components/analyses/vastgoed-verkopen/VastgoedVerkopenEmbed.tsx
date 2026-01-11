@@ -3,6 +3,7 @@
 import { useMemo } from "react"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
+import { getBasePath } from "@/lib/path-utils"
 
 import yearlyRaw from "../../../../analyses/vastgoed-verkopen/results/yearly.json"
 import quarterlyRaw from "../../../../analyses/vastgoed-verkopen/results/quarterly.json"
@@ -204,7 +205,7 @@ export function VastgoedVerkopenEmbed({
 
       <div className="mt-4 text-xs text-muted-foreground text-center">
         <a
-          href={typeof window !== "undefined" ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "") : "#"}
+          href={typeof window !== "undefined" ? window.location.origin + getBasePath() : "#"}
           target="_blank"
           rel="noopener noreferrer"
           className="hover:underline"

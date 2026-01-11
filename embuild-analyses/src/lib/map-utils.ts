@@ -1,3 +1,5 @@
+import { getBasePath } from "@/lib/path-utils"
+
 /**
  * Load municipality list from GeoJSON
  *
@@ -9,9 +11,7 @@
 export async function loadMunicipalities(): Promise<
   Array<{ code: string; name: string }>
 > {
-  const geoUrl =
-    (process.env.NODE_ENV === "production" ? "/data-blog" : "") +
-    "/maps/belgium_municipalities.json"
+  const geoUrl = `${getBasePath()}/maps/belgium_municipalities.json`
 
   try {
     const response = await fetch(geoUrl)
