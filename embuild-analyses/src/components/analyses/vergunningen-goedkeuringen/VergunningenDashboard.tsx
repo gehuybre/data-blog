@@ -4,8 +4,9 @@ import * as React from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnalysisSection } from "../shared/AnalysisSection"
 import { GeoProviderWithDefaults } from "../shared/GeoContext"
-import data from "../../../../analyses/vergunningen-goedkeuringen/results/data_quarterly.json"
-import municipalities from "../../../../analyses/vergunningen-goedkeuringen/results/municipalities.json"
+
+// Data is now lazy-loaded from public/data/vergunningen-goedkeuringen/
+// Static imports replaced to reduce JavaScript bundle size by 3.8 MB
 
 type PeriodType = "year" | "quarter"
 

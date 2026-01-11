@@ -1,0 +1,43 @@
+{
+  "quarterly_chunks": 6,
+  "total_records": 145908,
+  "records_per_chunk": 25953,
+  "chunks": [
+    {
+      "index": 0,
+      "filename": "quarterly_chunk_0.json",
+      "records": 25953,
+      "size_mb": 2.9961233139038086
+    },
+    {
+      "index": 1,
+      "filename": "quarterly_chunk_1.json",
+      "records": 25953,
+      "size_mb": 2.9934377670288086
+    },
+    {
+      "index": 2,
+      "filename": "quarterly_chunk_2.json",
+      "records": 25953,
+      "size_mb": 2.997694969177246
+    },
+    {
+      "index": 3,
+      "filename": "quarterly_chunk_3.json",
+      "records": 25953,
+      "size_mb": 3.00360107421875
+    },
+    {
+      "index": 4,
+      "filename": "quarterly_chunk_4.json",
+      "records": 25953,
+      "size_mb": 3.007343292236328
+    },
+    {
+      "index": 5,
+      "filename": "quarterly_chunk_5.json",
+      "records": 16143,
+      "size_mb": 1.867746353149414
+    }
+  ]
+}
