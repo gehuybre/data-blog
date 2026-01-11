@@ -16,7 +16,7 @@ type DataRow = {
 }
 
 type MunicipalityData = {
-  m: number
+  code: number
   name: string
 }
 
