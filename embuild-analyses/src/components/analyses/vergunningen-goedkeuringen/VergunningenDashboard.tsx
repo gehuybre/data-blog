@@ -5,10 +5,15 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnalysisSection } from "../shared/AnalysisSection"
 import { GeoProviderWithDefaults } from "../shared/GeoContext"
 
-// Data is now lazy-loaded from public/data/vergunningen-goedkeuringen/
-// Static imports replaced to reduce JavaScript bundle size by 3.8 MB
+// Import data files
+import dataQuarterly from "../../../../analyses/vergunningen-goedkeuringen/results/data_quarterly.json"
+import municipalitiesData from "../../../../analyses/vergunningen-goedkeuringen/results/municipalities.json"
 
 type PeriodType = "year" | "quarter"
+
+// Convert imported data to the format we need
+const data = dataQuarterly
+const municipalities = municipalitiesData
 
 type DataRow = {
   y: number
