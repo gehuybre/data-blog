@@ -121,36 +121,43 @@ function useVastgoedData() {
   const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
+    let isMounted = true
+    const abortController = new AbortController()
+    const FETCH_TIMEOUT = 30000 // 30 seconds timeout
+
     async function loadData() {
       try {
         const basePath = process.env.NODE_ENV === "production" ? "/data-blog" : ""
 
+        // Helper function to fetch with timeout
+        const fetchWithTimeout = async (url: string) => {
+          const timeoutId = setTimeout(() => abortController.abort(), FETCH_TIMEOUT)
+          try {
+            const response = await fetch(url, { signal: abortController.signal })
+            clearTimeout(timeoutId)
+            if (!response.ok) throw new Error(`Failed to load ${url}: ${response.status}`)
+            return response.json()
+          } catch (err) {
+            clearTimeout(timeoutId)
+            if (err instanceof Error && err.name === 'AbortError') {
+              throw new Error(`Request timeout loading ${url}`)
+            }
+            throw err
+          }
+        }
+
         // Load metadata first to know how many chunks
-        const metadataRes = await fetch(`${basePath}/data/vastgoed-verkopen/metadata.json`)
-        if (!metadataRes.ok) throw new Error(`Failed to load metadata: ${metadataRes.status}`)
-        const metadata = await metadataRes.json()
+        const metadata = await fetchWithTimeout(`${basePath}/data/vastgoed-verkopen/metadata.json`)
 
         console.log(`Loading vastgoed data: ${metadata.quarterly_chunks} quarterly chunks`)
 
         // Load all data in parallel
         const [yearly, municipalities, lookups, ...quarterlyChunks] = await Promise.all([
-          fetch(`${basePath}/data/vastgoed-verkopen/yearly.json`).then(r => {
-            if (!r.ok) throw new Error(`Failed to load yearly.json: ${r.status}`)
-            return r.json()
-          }),
-          fetch(`${basePath}/data/vastgoed-verkopen/municipalities.json`).then(r => {
-            if (!r.ok) throw new Error(`Failed to load municipalities.json: ${r.status}`)
-            return r.json()
-          }),
-          fetch(`${basePath}/data/vastgoed-verkopen/lookups.json`).then(r => {
-            if (!r.ok) throw new Error(`Failed to load lookups.json: ${r.status}`)
-            return r.json()
-          }),
+          fetchWithTimeout(`${basePath}/data/vastgoed-verkopen/yearly.json`),
+          fetchWithTimeout(`${basePath}/data/vastgoed-verkopen/municipalities.json`),
+          fetchWithTimeout(`${basePath}/data/vastgoed-verkopen/lookups.json`),
           ...Array.from({ length: metadata.quarterly_chunks }, (_, i) =>
-            fetch(`${basePath}/data/vastgoed-verkopen/quarterly_chunk_${i}.json`).then(r => {
-              if (!r.ok) throw new Error(`Failed to load chunk ${i}: ${r.status}`)
-              return r.json()
-            })
+            fetchWithTimeout(`${basePath}/data/vastgoed-verkopen/quarterly_chunk_${i}.json`)
           )
         ])
 
@@ -158,19 +165,30 @@ function useVastgoedData() {
         const quarterly = quarterlyChunks.flat()
         console.log(`Loaded ${quarterly.length} quarterly records from ${metadata.quarterly_chunks} chunks`)
 
-        setYearlyData(yearly)
-        setQuarterlyData(quarterly)
-        setMunicipalitiesData(municipalities)
-        setLookupsData(lookups)
-        setLoading(false)
+        // Only update state if component is still mounted
+        if (isMounted) {
+          setYearlyData(yearly)
+          setQuarterlyData(quarterly)
+          setMunicipalitiesData(municipalities)
+          setLookupsData(lookups)
+          setLoading(false)
+        }
       } catch (err) {
         console.error("Error loading vastgoed data:", err)
-        setError(err instanceof Error ? err.message : "Failed to load data")
-        setLoading(false)
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : "Failed to load data")
+          setLoading(false)
+        }
       }
     }
 
     loadData()
+
+    // Cleanup function to prevent state updates on unmounted component
+    return () => {
+      isMounted = false
+      abortController.abort()
+    }
   }, [])
 
   return { yearlyData, quarterlyData, municipalitiesData, lookupsData, loading, error }
@@ -627,7 +645,7 @@ function MetricSection({
           <MapSection
             data={municipalitiesData}
             getGeoCode={(d: any) => d.nis}
-            getValue={(d: any) => d[label === "Mediane prijs" ? "p50" : "n"]}
+            getValue={(d: any) => (label === "Mediane prijs" ? d.p50 : d.n) ?? 0}
             getPeriod={(d: any) => d.y}
             periods={years}
             showTimeSlider={years.length > 1}
@@ -805,7 +823,7 @@ function QuarterlyMetricSection({
           <MapSection
             data={municipalitiesData}
             getGeoCode={(d: any) => d.nis}
-            getValue={(d: any) => d[label === "Mediane prijs" ? "p50" : "n"]}
+            getValue={(d: any) => (label === "Mediane prijs" ? d.p50 : d.n) ?? 0}
             getPeriod={(d: any) => d.y}
             periods={Array.from(new Set(municipalitiesData.map((d: any) => d.y))).sort()}
             showTimeSlider={true}
