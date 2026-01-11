@@ -1,0 +1,20 @@
+{
+  "nace": [
+    {"code": "F", "nl": "Bouwnijverheid", "en": "Construction"}
+  ],
+  "regions": [
+    {"code": "2000", "nl": "Vlaams Gewest", "en": "Flemish Region"},
+    {"code": "3000", "nl": "Waals Gewest", "en": "Walloon Region"},
+    {"code": "4000", "nl": "Brussels Hoofdstedelijk Gewest", "en": "Brussels Capital Region"}
+  ],
+  "gender": [
+    {"code": "M", "nl": "Mannelijk", "en": "Male"},
+    {"code": "F", "nl": "Vrouwelijk", "en": "Female"}
+  ],
+  "age_range": [
+    {"code": "1", "nl": "< 30 jaren", "en": "< 30 years"},
+    {"code": "2", "nl": "30-49 jaren", "en": "30-49 years"},
+    {"code": "3", "nl": "50-64 jaren", "en": "50-64 years"},
+    {"code": "4", "nl": "65+ jaren", "en": "65+ years"}
+  ]
+}

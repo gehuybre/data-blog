@@ -25,6 +25,7 @@ import {
   getScaledLabel,
   formatCurrency as formatFullCurrency,
 } from "@/lib/number-formatters"
+import { getPublicPath } from "@/lib/path-utils"
 
 interface BVLookups {
   domains: Array<{ BV_domein: string }>
@@ -74,10 +75,16 @@ function validateLookups(data: unknown): BVLookups {
   }
   const obj = data as Record<string, unknown>
   if (!Array.isArray(obj.domains) || !Array.isArray(obj.subdomeins) ||
-      !Array.isArray(obj.beleidsvelds) || typeof obj.municipalities !== 'object') {
+      !Array.isArray(obj.beleidsvelds) || !obj.municipalities || typeof obj.municipalities !== 'object') {
     throw new Error('Invalid lookups: missing or invalid fields')
   }
-  return obj as unknown as BVLookups
+  // More explicit structure validation
+  return {
+    domains: obj.domains as Array<{ BV_domein: string }>,
+    subdomeins: obj.subdomeins as Array<{ BV_domein: string; BV_subdomein: string }>,
+    beleidsvelds: obj.beleidsvelds as Array<{ BV_subdomein: string; Beleidsveld: string }>,
+    municipalities: obj.municipalities as Record<string, string>
+  }
 }
 
 function validateVlaanderenData(data: unknown): BVVlaanderenRecord[] {
@@ -114,13 +121,21 @@ export function InvesteringenBVSection() {
 
   // Load initial data and start chunk loading
   useEffect(() => {
+    let cancelled = false
+
     async function init() {
       try {
+        // Reset data to prevent double-loading on remount
+        setMuniData([])
+        setLoadedChunks(0)
+
         const [metaRes, lookupsRes, vlaanderenRes] = await Promise.all([
-          fetch('/data/gemeentelijke-investeringen/metadata.json'),
-          fetch('/data/gemeentelijke-investeringen/bv_lookups.json'),
-          fetch('/data/gemeentelijke-investeringen/bv_vlaanderen_data.json')
+          fetch(getPublicPath('/data/gemeentelijke-investeringen/metadata.json')),
+          fetch(getPublicPath('/data/gemeentelijke-investeringen/bv_lookups.json')),
+          fetch(getPublicPath('/data/gemeentelijke-investeringen/bv_vlaanderen_data.json'))
         ])
+
+        if (cancelled) return
 
         if (!metaRes.ok) throw new Error(`Failed to load metadata: ${metaRes.statusText}`)
         if (!lookupsRes.ok) throw new Error(`Failed to load lookups: ${lookupsRes.statusText}`)
@@ -130,28 +145,40 @@ export function InvesteringenBVSection() {
         const lookupsData = validateLookups(await lookupsRes.json())
         const vlaanderen = validateVlaanderenData(await vlaanderenRes.json())
 
+        if (cancelled) return
+
         setLookups(lookupsData)
         setVlaanderenData(vlaanderen)
         setTotalChunks(meta.bv_chunks)
         setIsLoading(false)
 
         // Load chunks sequentially
+        const allChunks: BVRecord[] = []
         for (let i = 0; i < meta.bv_chunks; i++) {
-          const chunkRes = await fetch(`/data/gemeentelijke-investeringen/bv_municipality_data_chunk_${i}.json`)
+          if (cancelled) return
+
+          const chunkRes = await fetch(getPublicPath(`/data/gemeentelijke-investeringen/bv_municipality_data_chunk_${i}.json`))
           if (!chunkRes.ok) {
             throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
           }
           const chunkData = validateChunkData(await chunkRes.json())
-          setMuniData(prev => [...prev, ...chunkData])
+          allChunks.push(...chunkData)
+          setMuniData([...allChunks])
           setLoadedChunks(i + 1)
         }
       } catch (err) {
-        console.error('Failed to load BV data:', err)
-        setError(err instanceof Error ? err.message : 'Fout bij het laden van de data')
-        setIsLoading(false)
+        if (!cancelled) {
+          console.error('Failed to load BV data:', err)
+          setError(err instanceof Error ? err.message : 'Fout bij het laden van de data')
+          setIsLoading(false)
+        }
       }
     }
     init()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // Get available options based on selections
