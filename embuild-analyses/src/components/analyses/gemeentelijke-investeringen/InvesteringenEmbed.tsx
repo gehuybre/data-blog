@@ -194,8 +194,12 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
   // Load initial data and start chunk loading
   useEffect(() => {
     let cancelled = false
+    let isDataLoaded = false // Track if data was already loaded
 
     async function init() {
+      // Prevent double loading
+      if (isDataLoaded) return
+
       try {
         // Reset data to prevent double-loading on remount
         setBVMuniData([])
@@ -215,9 +219,17 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
           if (!lookupsRes.ok) throw new Error(`Failed to load lookups: ${lookupsRes.statusText}`)
           if (!vlaanderenRes.ok) throw new Error(`Failed to load Vlaanderen data: ${vlaanderenRes.statusText}`)
 
-          const meta = validateMetadata(await metaRes.json())
-          const lookupsData = validateBVLookups(await lookupsRes.json())
-          const vlaanderen = validateBVVlaanderenData(await vlaanderenRes.json())
+          const [metaJson, lookupsJson, vlaanderenJson] = await Promise.all([
+            metaRes.json(),
+            lookupsRes.json(),
+            vlaanderenRes.json()
+          ])
+
+          if (cancelled) return
+
+          const meta = validateMetadata(metaJson)
+          const lookupsData = validateBVLookups(lookupsJson)
+          const vlaanderen = validateBVVlaanderenData(vlaanderenJson)
 
           if (cancelled) return
 
@@ -226,20 +238,30 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
           setTotalChunks(meta.bv_chunks)
           setIsLoading(false)
 
-          // Load chunks sequentially
-          const allChunks: BVRecord[] = []
-          for (let i = 0; i < meta.bv_chunks; i++) {
-            if (cancelled) return
+          // Load chunks in parallel
+          const chunkPromises = Array.from({ length: meta.bv_chunks }, (_, i) =>
+            fetch(getPublicPath(`/data/gemeentelijke-investeringen/bv_municipality_data_chunk_${i}.json`))
+              .then(async (res) => {
+                if (cancelled) return null
+                if (!res.ok) throw new Error(`Failed to load chunk ${i}: ${res.statusText}`)
+                const json = await res.json()
+                if (cancelled) return null
+                return { index: i, data: validateBVChunkData(json) }
+              })
+          )
 
-            const chunkRes = await fetch(getPublicPath(`/data/gemeentelijke-investeringen/bv_municipality_data_chunk_${i}.json`))
-            if (!chunkRes.ok) {
-              throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
-            }
-            const chunkData = validateBVChunkData(await chunkRes.json())
-            allChunks.push(...chunkData)
-            setBVMuniData([...allChunks])
-            setLoadedChunks(i + 1)
-          }
+          const chunks = await Promise.all(chunkPromises)
+          if (cancelled) return
+
+          // Sort chunks by index and combine
+          const sortedChunks = chunks
+            .filter((chunk): chunk is { index: number; data: BVRecord[] } => chunk !== null)
+            .sort((a, b) => a.index - b.index)
+
+          const allChunks = sortedChunks.flatMap(chunk => chunk.data)
+          setBVMuniData(allChunks)
+          setLoadedChunks(meta.bv_chunks)
+          isDataLoaded = true
         } else {
           // REK perspective
           const [metaRes, lookupsRes, vlaanderenRes] = await Promise.all([
@@ -254,9 +276,17 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
           if (!lookupsRes.ok) throw new Error(`Failed to load lookups: ${lookupsRes.statusText}`)
           if (!vlaanderenRes.ok) throw new Error(`Failed to load Vlaanderen data: ${vlaanderenRes.statusText}`)
 
-          const meta = validateMetadata(await metaRes.json())
-          const lookupsData = validateREKLookups(await lookupsRes.json())
-          const vlaanderen = validateREKVlaanderenData(await vlaanderenRes.json())
+          const [metaJson, lookupsJson, vlaanderenJson] = await Promise.all([
+            metaRes.json(),
+            lookupsRes.json(),
+            vlaanderenRes.json()
+          ])
+
+          if (cancelled) return
+
+          const meta = validateMetadata(metaJson)
+          const lookupsData = validateREKLookups(lookupsJson)
+          const vlaanderen = validateREKVlaanderenData(vlaanderenJson)
 
           if (cancelled) return
 
@@ -265,20 +295,30 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
           setTotalChunks(meta.rek_chunks)
           setIsLoading(false)
 
-          // Load chunks sequentially
-          const allChunks: REKRecord[] = []
-          for (let i = 0; i < meta.rek_chunks; i++) {
-            if (cancelled) return
+          // Load chunks in parallel
+          const chunkPromises = Array.from({ length: meta.rek_chunks }, (_, i) =>
+            fetch(getPublicPath(`/data/gemeentelijke-investeringen/rek_municipality_data_chunk_${i}.json`))
+              .then(async (res) => {
+                if (cancelled) return null
+                if (!res.ok) throw new Error(`Failed to load chunk ${i}: ${res.statusText}`)
+                const json = await res.json()
+                if (cancelled) return null
+                return { index: i, data: validateREKChunkData(json) }
+              })
+          )
 
-            const chunkRes = await fetch(getPublicPath(`/data/gemeentelijke-investeringen/rek_municipality_data_chunk_${i}.json`))
-            if (!chunkRes.ok) {
-              throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
-            }
-            const chunkData = validateREKChunkData(await chunkRes.json())
-            allChunks.push(...chunkData)
-            setREKMuniData([...allChunks])
-            setLoadedChunks(i + 1)
-          }
+          const chunks = await Promise.all(chunkPromises)
+          if (cancelled) return
+
+          // Sort chunks by index and combine
+          const sortedChunks = chunks
+            .filter((chunk): chunk is { index: number; data: REKRecord[] } => chunk !== null)
+            .sort((a, b) => a.index - b.index)
+
+          const allChunks = sortedChunks.flatMap(chunk => chunk.data)
+          setREKMuniData(allChunks)
+          setLoadedChunks(meta.rek_chunks)
+          isDataLoaded = true
         }
       } catch (err) {
         if (!cancelled) {
