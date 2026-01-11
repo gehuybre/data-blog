@@ -5,9 +5,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnalysisSection } from "../shared/AnalysisSection"
 import { GeoProviderWithDefaults } from "../shared/GeoContext"
 
-// Data is now lazy-loaded from public/data/vergunningen-goedkeuringen/
-// Static imports replaced to reduce JavaScript bundle size by 3.8 MB
-
 type PeriodType = "year" | "quarter"
 
 type DataRow = {
@@ -18,8 +15,64 @@ type DataRow = {
   new: number
 }
 
+type MunicipalityData = {
+  m: number
+  name: string
+}
+
 export function VergunningenDashboard() {
   const [periodType, setPeriodType] = React.useState<PeriodType>("quarter")
+  const [data, setData] = React.useState<DataRow[] | null>(null)
+  const [municipalities, setMunicipalities] = React.useState<MunicipalityData[] | null>(null)
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+
+  // Lazy-load data from public directory to reduce JavaScript bundle size by 3.8 MB
+  React.useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        // Use environment variable for basePath (empty in dev, /data-blog in production)
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+
+        const [dataResponse, municipalitiesResponse] = await Promise.all([
+          fetch(`${basePath}/data/vergunningen-goedkeuringen/data_quarterly.json`),
+          fetch(`${basePath}/data/vergunningen-goedkeuringen/municipalities.json`),
+        ])
+
+        if (!dataResponse.ok) {
+          throw new Error(`Kon data_quarterly.json niet laden (HTTP ${dataResponse.status})`)
+        }
+        if (!municipalitiesResponse.ok) {
+          throw new Error(`Kon municipalities.json niet laden (HTTP ${municipalitiesResponse.status})`)
+        }
+
+        const [dataJson, municipalitiesJson] = await Promise.all([
+          dataResponse.json(),
+          municipalitiesResponse.json(),
+        ])
+
+        // Validate data is an array
+        if (!Array.isArray(dataJson)) {
+          throw new Error("Ongeldige data formaat voor data_quarterly.json")
+        }
+        if (!Array.isArray(municipalitiesJson)) {
+          throw new Error("Ongeldige data formaat voor municipalities.json")
+        }
+
+        setData(dataJson)
+        setMunicipalities(municipalitiesJson)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Kon databestanden niet laden")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
 
   // Define period configurations for different aggregation levels
   const periodConfig = React.useMemo(() => {
@@ -47,6 +100,29 @@ export function VergunningenDashboard() {
     }
   }, [periodType])
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center space-y-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-sm text-muted-foreground">Data laden...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error || !data || !municipalities) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center space-y-3">
+          <p className="text-sm text-destructive">Fout bij het laden van data: {error || "Data niet gevonden"}</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <GeoProviderWithDefaults initialLevel="province" initialRegion="1000" initialProvince={null} initialMunicipality={null}>
       <div className="space-y-8">
@@ -67,7 +143,7 @@ export function VergunningenDashboard() {
 
         <AnalysisSection
           title="Renovatie (Gebouwen)"
-          data={data as DataRow[]}
+          data={data}
           municipalities={municipalities}
           metric="ren"
           label="Aantal"
@@ -81,7 +157,7 @@ export function VergunningenDashboard() {
 
         <AnalysisSection
           title="Nieuwbouw (Gebouwen)"
-          data={data as DataRow[]}
+          data={data}
           municipalities={municipalities}
           metric="new"
           label="Aantal"
