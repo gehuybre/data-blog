@@ -14,10 +14,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { MunicipalityMap } from "../shared/MunicipalityMap"
 import { SimpleGeoFilter } from "./SimpleGeoFilter"
 import { SimpleGeoContext } from "../shared/GeoContext"
-import { ExportButtons } from "../shared/ExportButtons"
 import { HierarchicalFilter } from "../shared/HierarchicalFilter"
 import { getMunicipalityName } from "./nisUtils"
 import {
@@ -34,12 +32,30 @@ interface BVLookups {
   municipalities: Record<string, string>
 }
 
+interface REKLookups {
+  hoofdrekeningen: Array<{ Economische_rekening_hoofdrekening: string }>
+  rubrieken: Array<{
+    Economische_rekening_hoofdrekening: string
+    Economische_rekening_rubriek: string
+  }>
+  municipalities: Record<string, string>
+}
+
 interface BVRecord {
   NIS_code: string
   Rapportjaar: number
   BV_domein: string
   BV_subdomein: string
   Beleidsveld: string
+  Totaal: number
+  Per_inwoner: number
+}
+
+interface REKRecord {
+  NIS_code: string
+  Rapportjaar: number
+  Economische_rekening_hoofdrekening: string
+  Economische_rekening_rubriek: string
   Totaal: number
   Per_inwoner: number
 }
@@ -53,9 +69,21 @@ interface BVVlaanderenRecord {
   Per_inwoner: number
 }
 
+interface REKVlaanderenRecord {
+  Rapportjaar: number
+  Economische_rekening_hoofdrekening: string
+  Economische_rekening_rubriek: string
+  Totaal: number
+  Per_inwoner: number
+}
 
+type ViewType = "chart" | "table"
+type Perspective = "bv" | "rek"
 
-// Removed local formatters - using centralized formatters from @/lib/number-formatters
+interface InvesteringenEmbedProps {
+  section: "investments-bv" | "investments-rek"
+  viewType?: ViewType
+}
 
 // Runtime validation helpers
 function validateMetadata(data: unknown): { bv_chunks: number; rek_chunks: number } {
@@ -69,16 +97,15 @@ function validateMetadata(data: unknown): { bv_chunks: number; rek_chunks: numbe
   return obj as { bv_chunks: number; rek_chunks: number }
 }
 
-function validateLookups(data: unknown): BVLookups {
+function validateBVLookups(data: unknown): BVLookups {
   if (!data || typeof data !== 'object') {
-    throw new Error('Invalid lookups: expected object')
+    throw new Error('Invalid BV lookups: expected object')
   }
   const obj = data as Record<string, unknown>
   if (!Array.isArray(obj.domains) || !Array.isArray(obj.subdomeins) ||
       !Array.isArray(obj.beleidsvelds) || !obj.municipalities || typeof obj.municipalities !== 'object') {
-    throw new Error('Invalid lookups: missing or invalid fields')
+    throw new Error('Invalid BV lookups: missing or invalid fields')
   }
-  // More explicit structure validation
   return {
     domains: obj.domains as Array<{ BV_domein: string }>,
     subdomeins: obj.subdomeins as Array<{ BV_domein: string; BV_subdomein: string }>,
@@ -87,37 +114,82 @@ function validateLookups(data: unknown): BVLookups {
   }
 }
 
-function validateVlaanderenData(data: unknown): BVVlaanderenRecord[] {
+function validateREKLookups(data: unknown): REKLookups {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid REK lookups: expected object')
+  }
+  const obj = data as Record<string, unknown>
+  if (!Array.isArray(obj.hoofdrekeningen) || !Array.isArray(obj.rubrieken) ||
+      !obj.municipalities || typeof obj.municipalities !== 'object') {
+    throw new Error('Invalid REK lookups: missing or invalid fields')
+  }
+  return {
+    hoofdrekeningen: obj.hoofdrekeningen as Array<{ Economische_rekening_hoofdrekening: string }>,
+    rubrieken: obj.rubrieken as Array<{
+      Economische_rekening_hoofdrekening: string
+      Economische_rekening_rubriek: string
+    }>,
+    municipalities: obj.municipalities as Record<string, string>
+  }
+}
+
+function validateBVVlaanderenData(data: unknown): BVVlaanderenRecord[] {
   if (!Array.isArray(data)) {
-    throw new Error('Invalid Vlaanderen data: expected array')
+    throw new Error('Invalid BV Vlaanderen data: expected array')
   }
   return data as BVVlaanderenRecord[]
 }
 
-function validateChunkData(data: unknown): BVRecord[] {
+function validateREKVlaanderenData(data: unknown): REKVlaanderenRecord[] {
   if (!Array.isArray(data)) {
-    throw new Error('Invalid chunk data: expected array')
+    throw new Error('Invalid REK Vlaanderen data: expected array')
+  }
+  return data as REKVlaanderenRecord[]
+}
+
+function validateBVChunkData(data: unknown): BVRecord[] {
+  if (!Array.isArray(data)) {
+    throw new Error('Invalid BV chunk data: expected array')
   }
   return data as BVRecord[]
 }
 
-export function InvesteringenBVSection() {
-  const [lookups, setLookups] = useState<BVLookups | null>(null)
-  const [vlaanderenData, setVlaanderenData] = useState<BVVlaanderenRecord[]>([])
-  const [muniData, setMuniData] = useState<BVRecord[]>([])
+function validateREKChunkData(data: unknown): REKRecord[] {
+  if (!Array.isArray(data)) {
+    throw new Error('Invalid REK chunk data: expected array')
+  }
+  return data as REKRecord[]
+}
+
+export function InvesteringenEmbed({ section, viewType = "chart" }: InvesteringenEmbedProps) {
+  const perspective: Perspective = section === "investments-bv" ? "bv" : "rek"
+
+  const [bvLookups, setBVLookups] = useState<BVLookups | null>(null)
+  const [rekLookups, setREKLookups] = useState<REKLookups | null>(null)
+  const [bvVlaanderenData, setBVVlaanderenData] = useState<BVVlaanderenRecord[]>([])
+  const [rekVlaanderenData, setREKVlaanderenData] = useState<REKVlaanderenRecord[]>([])
+  const [bvMuniData, setBVMuniData] = useState<BVRecord[]>([])
+  const [rekMuniData, setREKMuniData] = useState<REKRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadedChunks, setLoadedChunks] = useState(0)
   const [totalChunks, setTotalChunks] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
+  // BV filters
   const [selectedDomain, setSelectedDomain] = useState<string>('')
   const [selectedSubdomein, setSelectedSubdomein] = useState<string>('')
   const [selectedBeleidsveld, setSelectedBeleidsveld] = useState<string>('')
+
+  // REK filters
+  const [selectedHoofdrekening, setSelectedHoofdrekening] = useState<string>('')
+  const [selectedRubriek, setSelectedRubriek] = useState<string>('')
+
   const [selectedMetric, setSelectedMetric] = useState<'Totaal' | 'Per_inwoner'>('Totaal')
   const [geoSelection, setGeoSelection] = useState<{
     type: 'all' | 'region' | 'province' | 'municipality'
     code?: string
   }>({ type: 'all' })
+  const [currentView, setCurrentView] = useState<ViewType>(viewType)
 
   // Load initial data and start chunk loading
   useEffect(() => {
@@ -126,49 +198,91 @@ export function InvesteringenBVSection() {
     async function init() {
       try {
         // Reset data to prevent double-loading on remount
-        setMuniData([])
+        setBVMuniData([])
+        setREKMuniData([])
         setLoadedChunks(0)
 
-        const [metaRes, lookupsRes, vlaanderenRes] = await Promise.all([
-          fetch(getPublicPath('/data/gemeentelijke-investeringen/metadata.json')),
-          fetch(getPublicPath('/data/gemeentelijke-investeringen/bv_lookups.json')),
-          fetch(getPublicPath('/data/gemeentelijke-investeringen/bv_vlaanderen_data.json'))
-        ])
+        if (perspective === "bv") {
+          const [metaRes, lookupsRes, vlaanderenRes] = await Promise.all([
+            fetch(getPublicPath('/data/gemeentelijke-investeringen/metadata.json')),
+            fetch(getPublicPath('/data/gemeentelijke-investeringen/bv_lookups.json')),
+            fetch(getPublicPath('/data/gemeentelijke-investeringen/bv_vlaanderen_data.json'))
+          ])
 
-        if (cancelled) return
-
-        if (!metaRes.ok) throw new Error(`Failed to load metadata: ${metaRes.statusText}`)
-        if (!lookupsRes.ok) throw new Error(`Failed to load lookups: ${lookupsRes.statusText}`)
-        if (!vlaanderenRes.ok) throw new Error(`Failed to load Vlaanderen data: ${vlaanderenRes.statusText}`)
-
-        const meta = validateMetadata(await metaRes.json())
-        const lookupsData = validateLookups(await lookupsRes.json())
-        const vlaanderen = validateVlaanderenData(await vlaanderenRes.json())
-
-        if (cancelled) return
-
-        setLookups(lookupsData)
-        setVlaanderenData(vlaanderen)
-        setTotalChunks(meta.bv_chunks)
-        setIsLoading(false)
-
-        // Load chunks sequentially
-        const allChunks: BVRecord[] = []
-        for (let i = 0; i < meta.bv_chunks; i++) {
           if (cancelled) return
 
-          const chunkRes = await fetch(getPublicPath(`/data/gemeentelijke-investeringen/bv_municipality_data_chunk_${i}.json`))
-          if (!chunkRes.ok) {
-            throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
+          if (!metaRes.ok) throw new Error(`Failed to load metadata: ${metaRes.statusText}`)
+          if (!lookupsRes.ok) throw new Error(`Failed to load lookups: ${lookupsRes.statusText}`)
+          if (!vlaanderenRes.ok) throw new Error(`Failed to load Vlaanderen data: ${vlaanderenRes.statusText}`)
+
+          const meta = validateMetadata(await metaRes.json())
+          const lookupsData = validateBVLookups(await lookupsRes.json())
+          const vlaanderen = validateBVVlaanderenData(await vlaanderenRes.json())
+
+          if (cancelled) return
+
+          setBVLookups(lookupsData)
+          setBVVlaanderenData(vlaanderen)
+          setTotalChunks(meta.bv_chunks)
+          setIsLoading(false)
+
+          // Load chunks sequentially
+          const allChunks: BVRecord[] = []
+          for (let i = 0; i < meta.bv_chunks; i++) {
+            if (cancelled) return
+
+            const chunkRes = await fetch(getPublicPath(`/data/gemeentelijke-investeringen/bv_municipality_data_chunk_${i}.json`))
+            if (!chunkRes.ok) {
+              throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
+            }
+            const chunkData = validateBVChunkData(await chunkRes.json())
+            allChunks.push(...chunkData)
+            setBVMuniData([...allChunks])
+            setLoadedChunks(i + 1)
           }
-          const chunkData = validateChunkData(await chunkRes.json())
-          allChunks.push(...chunkData)
-          setMuniData([...allChunks])
-          setLoadedChunks(i + 1)
+        } else {
+          // REK perspective
+          const [metaRes, lookupsRes, vlaanderenRes] = await Promise.all([
+            fetch(getPublicPath('/data/gemeentelijke-investeringen/metadata.json')),
+            fetch(getPublicPath('/data/gemeentelijke-investeringen/rek_lookups.json')),
+            fetch(getPublicPath('/data/gemeentelijke-investeringen/rek_vlaanderen_data.json'))
+          ])
+
+          if (cancelled) return
+
+          if (!metaRes.ok) throw new Error(`Failed to load metadata: ${metaRes.statusText}`)
+          if (!lookupsRes.ok) throw new Error(`Failed to load lookups: ${lookupsRes.statusText}`)
+          if (!vlaanderenRes.ok) throw new Error(`Failed to load Vlaanderen data: ${vlaanderenRes.statusText}`)
+
+          const meta = validateMetadata(await metaRes.json())
+          const lookupsData = validateREKLookups(await lookupsRes.json())
+          const vlaanderen = validateREKVlaanderenData(await vlaanderenRes.json())
+
+          if (cancelled) return
+
+          setREKLookups(lookupsData)
+          setREKVlaanderenData(vlaanderen)
+          setTotalChunks(meta.rek_chunks)
+          setIsLoading(false)
+
+          // Load chunks sequentially
+          const allChunks: REKRecord[] = []
+          for (let i = 0; i < meta.rek_chunks; i++) {
+            if (cancelled) return
+
+            const chunkRes = await fetch(getPublicPath(`/data/gemeentelijke-investeringen/rek_municipality_data_chunk_${i}.json`))
+            if (!chunkRes.ok) {
+              throw new Error(`Failed to load chunk ${i}: ${chunkRes.statusText}`)
+            }
+            const chunkData = validateREKChunkData(await chunkRes.json())
+            allChunks.push(...chunkData)
+            setREKMuniData([...allChunks])
+            setLoadedChunks(i + 1)
+          }
         }
       } catch (err) {
         if (!cancelled) {
-          console.error('Failed to load BV data:', err)
+          console.error('Failed to load data:', err)
           setError(err instanceof Error ? err.message : 'Fout bij het laden van de data')
           setIsLoading(false)
         }
@@ -179,35 +293,50 @@ export function InvesteringenBVSection() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [perspective])
 
-  // Get available options based on selections
-  const domainOptions = useMemo(() => {
-    if (!lookups) return []
-    return lookups.domains.map(d => d.BV_domein).sort()
-  }, [lookups])
+  // BV filtering logic
+  const bvDomainOptions = useMemo(() => {
+    if (!bvLookups) return []
+    return bvLookups.domains.map(d => d.BV_domein).sort()
+  }, [bvLookups])
 
-  const subdomeinOptions = useMemo(() => {
-    if (!lookups) return []
-    let options = lookups.subdomeins
+  const bvSubdomeinOptions = useMemo(() => {
+    if (!bvLookups) return []
+    let options = bvLookups.subdomeins
     if (selectedDomain) {
       options = options.filter(s => s.BV_domein === selectedDomain)
     }
     return options.map(s => s.BV_subdomein).sort()
-  }, [lookups, selectedDomain])
+  }, [bvLookups, selectedDomain])
 
-  const beleidsveldOptions = useMemo(() => {
-    if (!lookups) return []
-    let options = lookups.beleidsvelds
+  const bvBeleidsveldOptions = useMemo(() => {
+    if (!bvLookups) return []
+    let options = bvLookups.beleidsvelds
     if (selectedSubdomein) {
       options = options.filter(b => b.BV_subdomein === selectedSubdomein)
     }
     return options.map(b => b.Beleidsveld).sort()
-  }, [lookups, selectedSubdomein])
+  }, [bvLookups, selectedSubdomein])
 
-  // Filter data based on BV selections (without geo filter)
-  const dataWithoutGeoFilter = useMemo(() => {
-    let data = muniData
+  // REK filtering logic
+  const rekHoofdrekenOptions = useMemo(() => {
+    if (!rekLookups) return []
+    return rekLookups.hoofdrekeningen.map(h => h.Economische_rekening_hoofdrekening).sort()
+  }, [rekLookups])
+
+  const rekRubriekOptions = useMemo(() => {
+    if (!rekLookups) return []
+    let options = rekLookups.rubrieken
+    if (selectedHoofdrekening) {
+      options = options.filter(r => r.Economische_rekening_hoofdrekening === selectedHoofdrekening)
+    }
+    return options.map(r => r.Economische_rekening_rubriek).sort()
+  }, [rekLookups, selectedHoofdrekening])
+
+  // Filter data based on selections
+  const filteredBVData = useMemo(() => {
+    let data = bvMuniData
 
     if (selectedDomain) {
       data = data.filter(d => d.BV_domein === selectedDomain)
@@ -219,12 +348,23 @@ export function InvesteringenBVSection() {
       data = data.filter(d => d.Beleidsveld === selectedBeleidsveld)
     }
 
-    return data
-  }, [muniData, selectedDomain, selectedSubdomein, selectedBeleidsveld])
+    // Apply geo filter
+    if (geoSelection.type === 'municipality' && geoSelection.code) {
+      data = data.filter(d => d.NIS_code === geoSelection.code)
+    }
 
-  // Filter data based on selections (including geo filter)
-  const filteredData = useMemo(() => {
-    let data = dataWithoutGeoFilter
+    return data
+  }, [bvMuniData, selectedDomain, selectedSubdomein, selectedBeleidsveld, geoSelection])
+
+  const filteredREKData = useMemo(() => {
+    let data = rekMuniData
+
+    if (selectedHoofdrekening) {
+      data = data.filter(d => d.Economische_rekening_hoofdrekening === selectedHoofdrekening)
+    }
+    if (selectedRubriek) {
+      data = data.filter(d => d.Economische_rekening_rubriek === selectedRubriek)
+    }
 
     // Apply geo filter
     if (geoSelection.type === 'municipality' && geoSelection.code) {
@@ -232,17 +372,15 @@ export function InvesteringenBVSection() {
     }
 
     return data
-  }, [dataWithoutGeoFilter, geoSelection])
+  }, [rekMuniData, selectedHoofdrekening, selectedRubriek, geoSelection])
+
+  const filteredData = perspective === "bv" ? filteredBVData : filteredREKData
 
   // Chart data: Vlaanderen totals or municipality average
   const chartData = useMemo(() => {
     const byYear: Record<number, { Rapportjaar: number; value: number }> = {}
 
     if (geoSelection.type === 'all') {
-      // For "all" view with filters, aggregate per municipality first to avoid double counting.
-      // Why: A single municipality can have multiple records (one per domain/subdomein/beleidsveld).
-      // If we sum directly, we'd count municipality data multiple times per year.
-      // Instead, we first aggregate per municipality+year, then sum across municipalities.
       const perMuniYear: Record<string, number> = {}
 
       filteredData.forEach(record => {
@@ -250,7 +388,6 @@ export function InvesteringenBVSection() {
         perMuniYear[key] = (perMuniYear[key] || 0) + record[selectedMetric]
       })
 
-      // Then aggregate across municipalities
       Object.entries(perMuniYear).forEach(([key, value]) => {
         const year = parseInt(key.split('_')[1])
         if (!byYear[year]) {
@@ -259,9 +396,6 @@ export function InvesteringenBVSection() {
         byYear[year].value += value
       })
 
-      // For Per_inwoner metric, calculate average across municipalities (not sum)
-      // Why: Per_inwoner values are already normalized per municipality population.
-      // Summing them would be meaningless - we need the average to show typical spending.
       if (selectedMetric === 'Per_inwoner') {
         const municipalityCounts: Record<number, Set<string>> = {}
         filteredData.forEach(record => {
@@ -279,8 +413,6 @@ export function InvesteringenBVSection() {
         })
       }
     } else {
-      // For specific region/province/municipality selection, sum all matching records.
-      // This is safe because filteredData already contains only records for that selection.
       filteredData.forEach(record => {
         if (!byYear[record.Rapportjaar]) {
           byYear[record.Rapportjaar] = { Rapportjaar: record.Rapportjaar, value: 0 }
@@ -292,18 +424,17 @@ export function InvesteringenBVSection() {
     return Object.values(byYear).sort((a, b) => a.Rapportjaar - b.Rapportjaar)
   }, [filteredData, selectedMetric, geoSelection])
 
-  // Auto-scale formatter for Y-axis to prevent label overflow
+  // Auto-scale formatter for Y-axis
   const { formatter: yAxisFormatter, scale: yAxisScale } = useMemo(() => {
     const values = chartData.map(d => d.value)
-    return createAutoScaledFormatter(values, true) // true = currency
+    return createAutoScaledFormatter(values, true)
   }, [chartData])
 
-  // Table data: By municipality
+  // Table data: By municipality (latest year)
   const tableData = useMemo(() => {
     const byMuni: Record<string, { municipality: string; total: number; count: number }> = {}
 
     filteredData.forEach(record => {
-      // Show latest year for table
       if (record.Rapportjaar !== 2026) return
 
       if (!byMuni[record.NIS_code]) {
@@ -322,28 +453,11 @@ export function InvesteringenBVSection() {
       .slice(0, 50)
   }, [filteredData, selectedMetric])
 
-  // Map data: Latest rapportjaar (2026)
-  const mapData = useMemo(() => {
-    const latestYear = 2026
-    const byMuni: Record<string, { municipalityCode: string; value: number }> = {}
-
-    filteredData
-      .filter(d => d.Rapportjaar === latestYear)
-      .forEach(record => {
-        if (!byMuni[record.NIS_code]) {
-          byMuni[record.NIS_code] = { municipalityCode: record.NIS_code, value: 0 }
-        }
-        byMuni[record.NIS_code].value += record[selectedMetric]
-      })
-
-    return Object.values(byMuni)
-  }, [filteredData, selectedMetric])
-
-  // Get available municipalities from the filtered data (without geo filter)
+  // Get available municipalities from the filtered data
   const availableMunicipalities = useMemo(() => {
-    const nisCodesSet = new Set(dataWithoutGeoFilter.map(d => d.NIS_code))
+    const nisCodesSet = new Set(filteredData.map(d => d.NIS_code))
     return Array.from(nisCodesSet)
-  }, [dataWithoutGeoFilter])
+  }, [filteredData])
 
   if (error) {
     return (
@@ -359,12 +473,14 @@ export function InvesteringenBVSection() {
     )
   }
 
-  if (isLoading || !lookups) {
+  if (isLoading || (perspective === "bv" && !bvLookups) || (perspective === "rek" && !rekLookups)) {
     return (
       <Card>
         <CardContent className="h-64 flex flex-col items-center justify-center space-y-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground italic">Laden van Investeringen per Beleidsdomein...</p>
+          <p className="text-sm text-muted-foreground italic">
+            Laden van {perspective === "bv" ? "Beleidsdomein" : "Economische Rekening"} data...
+          </p>
         </CardContent>
       </Card>
     )
@@ -374,27 +490,15 @@ export function InvesteringenBVSection() {
     <SimpleGeoContext.Provider value={{ selection: geoSelection, setSelection: setGeoSelection }}>
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Investeringen per Beleidsdomein (BV)</CardTitle>
-            <div className="flex items-center gap-4">
-              {loadedChunks < totalChunks && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Laden data: {Math.round((loadedChunks / totalChunks) * 100)}%
-                </div>
-              )}
-              <ExportButtons
-                title="Investeringen per Beleidsdomein"
-                slug="gemeentelijke-investeringen"
-                sectionId="investments-bv"
-                viewType="table"
-                data={tableData.map(d => ({ label: d.municipality, value: d.total }))}
-              />
+          <CardTitle>
+            {perspective === "bv" ? "Investeringen per Beleidsdomein (BV)" : "Investeringen per Economische Rekening (REK)"}
+          </CardTitle>
+          {loadedChunks < totalChunks && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Laden data: {Math.round((loadedChunks / totalChunks) * 100)}%
             </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Filter op domein, subdomein en beleidsveld om de investeringen per gemeente te bekijken.
-          </p>
+          )}
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -419,42 +523,68 @@ export function InvesteringenBVSection() {
                 </Button>
               </div>
               <SimpleGeoFilter availableMunicipalities={availableMunicipalities} />
-              <HierarchicalFilter
-                value={selectedDomain}
-                onChange={(v) => {
-                  setSelectedDomain(v)
-                  setSelectedSubdomein('')
-                  setSelectedBeleidsveld('')
-                }}
-                options={domainOptions}
-                placeholder="Selecteer domein"
-              />
-              {selectedDomain && (
-                <HierarchicalFilter
-                  value={selectedSubdomein}
-                  onChange={(v) => {
-                    setSelectedSubdomein(v)
-                    setSelectedBeleidsveld('')
-                  }}
-                  options={subdomeinOptions}
-                  placeholder="Selecteer subdomein"
-                />
+
+              {perspective === "bv" && (
+                <>
+                  <HierarchicalFilter
+                    value={selectedDomain}
+                    onChange={(v) => {
+                      setSelectedDomain(v)
+                      setSelectedSubdomein('')
+                      setSelectedBeleidsveld('')
+                    }}
+                    options={bvDomainOptions}
+                    placeholder="Selecteer domein"
+                  />
+                  {selectedDomain && (
+                    <HierarchicalFilter
+                      value={selectedSubdomein}
+                      onChange={(v) => {
+                        setSelectedSubdomein(v)
+                        setSelectedBeleidsveld('')
+                      }}
+                      options={bvSubdomeinOptions}
+                      placeholder="Selecteer subdomein"
+                    />
+                  )}
+                  {selectedSubdomein && (
+                    <HierarchicalFilter
+                      value={selectedBeleidsveld}
+                      onChange={setSelectedBeleidsveld}
+                      options={bvBeleidsveldOptions}
+                      placeholder="Selecteer beleidsveld"
+                    />
+                  )}
+                </>
               )}
-              {selectedSubdomein && (
-                <HierarchicalFilter
-                  value={selectedBeleidsveld}
-                  onChange={setSelectedBeleidsveld}
-                  options={beleidsveldOptions}
-                  placeholder="Selecteer beleidsveld"
-                />
+
+              {perspective === "rek" && (
+                <>
+                  <HierarchicalFilter
+                    value={selectedHoofdrekening}
+                    onChange={(v) => {
+                      setSelectedHoofdrekening(v)
+                      setSelectedRubriek('')
+                    }}
+                    options={rekHoofdrekenOptions}
+                    placeholder="Selecteer hoofdrekening"
+                  />
+                  {selectedHoofdrekening && (
+                    <HierarchicalFilter
+                      value={selectedRubriek}
+                      onChange={setSelectedRubriek}
+                      options={rekRubriekOptions}
+                      placeholder="Selecteer rubriek"
+                    />
+                  )}
+                </>
               )}
             </div>
 
-            <Tabs defaultValue="chart" className="w-full">
+            <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as ViewType)} className="w-full">
               <TabsList>
                 <TabsTrigger value="chart">Grafiek</TabsTrigger>
                 <TabsTrigger value="table">Tabel</TabsTrigger>
-                <TabsTrigger value="map">Kaart</TabsTrigger>
               </TabsList>
 
               <TabsContent value="chart" className="mt-4">
@@ -490,7 +620,7 @@ export function InvesteringenBVSection() {
                     ? selectedMetric === 'Totaal'
                       ? 'Som van alle gemeenten'
                       : 'Gemiddelde over alle gemeenten'
-                    : 'Geselecteerde regio/provincie/gemeente'
+                    : 'Geselecteerde gemeente'
                   }
                 </p>
               </TabsContent>
@@ -531,19 +661,6 @@ export function InvesteringenBVSection() {
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
                   Top 50 gemeenten (rapportjaar 2026)
-                </p>
-              </TabsContent>
-
-              <TabsContent value="map" className="mt-4">
-                <MunicipalityMap
-                  data={mapData}
-                  getGeoCode={(d) => d.municipalityCode}
-                  getValue={(d) => d.value}
-                  colorScheme="blue"
-                  showProvinceBoundaries={true}
-                />
-                <p className="text-sm text-muted-foreground mt-2">
-                  Rapportjaar 2026 - {selectedMetric === 'Totaal' ? 'Totale uitgave' : 'Uitgave per inwoner'}
                 </p>
               </TabsContent>
             </Tabs>
