@@ -4,6 +4,7 @@ import * as React from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnalysisSection } from "../shared/AnalysisSection"
 import { GeoProviderWithDefaults } from "../shared/GeoContext"
+import { getBasePath } from "@/lib/path-utils"
 
 // Data is now lazy-loaded from public/data/vergunningen-goedkeuringen/
 // Static imports replaced to reduce JavaScript bundle size by 3.8 MB
@@ -18,8 +19,51 @@ type DataRow = {
   new: number
 }
 
+type MunicipalityData = {
+  code: number
+  name: string
+}
+
 export function VergunningenDashboard() {
   const [periodType, setPeriodType] = React.useState<PeriodType>("quarter")
+  const [data, setData] = React.useState<DataRow[] | null>(null)
+  const [municipalities, setMunicipalities] = React.useState<MunicipalityData[] | null>(null)
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    let isMounted = true
+    const abortController = new AbortController()
+
+    async function loadData() {
+      try {
+        const basePath = getBasePath()
+
+        const [dataQuarterly, municipalitiesData] = await Promise.all([
+          fetch(`${basePath}/data/vergunningen-goedkeuringen/data_quarterly.json`, { signal: abortController.signal }).then(r => r.json()),
+          fetch(`${basePath}/data/vergunningen-goedkeuringen/municipalities.json`, { signal: abortController.signal }).then(r => r.json()),
+        ])
+
+        if (!isMounted) return
+
+        setData(dataQuarterly)
+        setMunicipalities(municipalitiesData)
+        setLoading(false)
+      } catch (err) {
+        if (!isMounted) return
+        console.error("Failed to load vergunningen data:", err)
+        setError(err instanceof Error ? err.message : "Failed to load data")
+        setLoading(false)
+      }
+    }
+
+    loadData()
+
+    return () => {
+      isMounted = false
+      abortController.abort()
+    }
+  }, [])
 
   // Define period configurations for different aggregation levels
   const periodConfig = React.useMemo(() => {
@@ -47,6 +91,28 @@ export function VergunningenDashboard() {
     }
   }, [periodType])
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-sm text-muted-foreground">Data laden...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !data || !municipalities) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <p className="text-sm text-destructive mb-2">Fout bij het laden van de data</p>
+          {error && <p className="text-xs text-muted-foreground">{error}</p>}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <GeoProviderWithDefaults initialLevel="province" initialRegion="1000" initialProvince={null} initialMunicipality={null}>
       <div className="space-y-8">
@@ -67,7 +133,7 @@ export function VergunningenDashboard() {
 
         <AnalysisSection
           title="Renovatie (Gebouwen)"
-          data={data as DataRow[]}
+          data={data}
           municipalities={municipalities}
           metric="ren"
           label="Aantal"
@@ -81,7 +147,7 @@ export function VergunningenDashboard() {
 
         <AnalysisSection
           title="Nieuwbouw (Gebouwen)"
-          data={data as DataRow[]}
+          data={data}
           municipalities={municipalities}
           metric="new"
           label="Aantal"

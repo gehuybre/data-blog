@@ -3,6 +3,7 @@
 import { useMemo } from "react"
 import { FilterableChart } from "../shared/FilterableChart"
 import { FilterableTable } from "../shared/FilterableTable"
+import { getBasePath } from "@/lib/path-utils"
 
 import municipalitiesRaw from "../../../../analyses/huishoudensgroei/results/municipalities.json"
 import provincesRaw from "../../../../analyses/huishoudensgroei/results/provinces.json"
@@ -206,7 +207,7 @@ export function HuishoudensgroeiEmbed({
 
       <div className="mt-4 text-xs text-muted-foreground text-center">
         <a
-          href={typeof window !== "undefined" ? window.location.origin + (process.env.NODE_ENV === "production" ? "/data-blog" : "") : "#"}
+          href={typeof window !== "undefined" ? window.location.origin + getBasePath() : "#"}
           target="_blank"
           rel="noopener noreferrer"
           className="hover:underline"
