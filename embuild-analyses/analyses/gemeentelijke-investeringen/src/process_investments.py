@@ -205,6 +205,9 @@ def process_bv_file(file_path, rapportjaar, chunk_size=200):
     
     nis_code_header = pd.read_csv(file_path, sep=';', skiprows=nis_row_idx, nrows=1, header=None).iloc[0, 1:].tolist()
 
+    # Required output columns
+    required_cols = ['NIS_code', 'Rapportjaar', 'Boekjaar', 'BV_domein', 'BV_subdomein', 'Beleidsveld', 'Totaal', 'Per_inwoner']
+
     # Process data in chunks
     all_chunks = []
     chunk_num = 0
@@ -282,7 +285,6 @@ def process_bv_file(file_path, rapportjaar, chunk_size=200):
     df_combined = pd.concat(all_chunks, ignore_index=True)
     
     # Ensure all required columns exist
-    required_cols = ['NIS_code', 'Rapportjaar', 'Boekjaar', 'BV_domein', 'BV_subdomein', 'Beleidsveld', 'Totaal', 'Per_inwoner']
     for col in required_cols:
         if col not in df_combined.columns:
             df_combined[col] = 0 if col in ['Totaal', 'Per_inwoner'] else None
