@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"
 import { ExportButtons } from "../shared/ExportButtons"
 import { formatCurrency } from "@/lib/number-formatters"
 import { getMunicipalityName, getAllMunicipalities } from "./nisUtils"
+import { stripPrefix } from "./labelUtils"
 import { getPublicPath } from "@/lib/path-utils"
 
 interface REKLookups {
@@ -37,11 +38,20 @@ interface REKRecord {
 // Runtime validation helpers
 function validateLookups(data: unknown): REKLookups {
   if (!data || typeof data !== 'object') {
+    console.error('[REK Validation] Invalid lookups: expected object, got:', typeof data, data)
     throw new Error('Invalid lookups: expected object')
   }
   const obj = data as Record<string, unknown>
+  
+  // Debug log
+  console.log('[REK Validation] Received keys:', Object.keys(obj))
+  console.log('[REK Validation] niveau3s:', Array.isArray(obj.niveau3s) ? `Array[${obj.niveau3s.length}]` : typeof obj.niveau3s)
+  console.log('[REK Validation] alg_rekenings:', Array.isArray(obj.alg_rekenings) ? `Array[${obj.alg_rekenings.length}]` : typeof obj.alg_rekenings)
+  console.log('[REK Validation] municipalities:', typeof obj.municipalities)
+  
   if (!Array.isArray(obj.niveau3s) || !Array.isArray(obj.alg_rekenings) ||
-      typeof obj.municipalities !== 'object') {
+    (typeof obj.municipalities !== 'object' || obj.municipalities === null)) {
+    console.error('[REK Validation] Validation failed')
     throw new Error('Invalid lookups: missing or invalid fields')
   }
   return obj as unknown as REKLookups
@@ -210,7 +220,7 @@ export function InvesteringenREKCategorySection() {
     const byCategory: Record<string, { label: string; value: number }> = {}
 
     filteredData.forEach(record => {
-      const category = record.Alg_rekening
+      const category = stripPrefix(record.Alg_rekening)
       if (!byCategory[category]) {
         byCategory[category] = { label: category, value: 0 }
       }

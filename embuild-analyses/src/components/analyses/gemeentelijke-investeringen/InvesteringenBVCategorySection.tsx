@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"
 import { ExportButtons } from "../shared/ExportButtons"
 import { formatCurrency } from "@/lib/number-formatters"
 import { getMunicipalityName, getAllMunicipalities } from "./nisUtils"
+import { stripPrefix } from "./labelUtils"
 import { getPublicPath } from "@/lib/path-utils"
 
 interface BVLookups {
@@ -43,7 +44,7 @@ function validateLookups(data: unknown): BVLookups {
   }
   const obj = data as Record<string, unknown>
   if (!Array.isArray(obj.domains) || !Array.isArray(obj.subdomeins) ||
-      !Array.isArray(obj.beleidsvelds) || typeof obj.municipalities !== 'object') {
+    !Array.isArray(obj.beleidsvelds) || typeof obj.municipalities !== 'object') {
     throw new Error('Invalid lookups: missing or invalid fields')
   }
   return obj as unknown as BVLookups
@@ -212,7 +213,7 @@ export function InvesteringenBVCategorySection() {
     const byCategory: Record<string, { label: string; value: number }> = {}
 
     filteredData.forEach(record => {
-      const category = record.Beleidsveld
+      const category = stripPrefix(record.Beleidsveld)
       if (!byCategory[category]) {
         byCategory[category] = { label: category, value: 0 }
       }
