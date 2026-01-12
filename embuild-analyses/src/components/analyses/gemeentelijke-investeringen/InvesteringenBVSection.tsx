@@ -152,11 +152,6 @@ export function InvesteringenBVSection() {
         setVlaanderenData(vlaanderen)
         setTotalChunks(meta.bv_chunks)
 
-        // Set default domain to first stripped value if none selected
-        if (!selectedDomain && lookupsData.domains.length > 0) {
-          setSelectedDomain(stripPrefix(lookupsData.domains[0].BV_domein))
-        }
-
         setIsLoading(false)
 
         // Load chunks sequentially
