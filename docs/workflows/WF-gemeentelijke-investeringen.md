@@ -20,17 +20,23 @@ outputs:
     type: json
     schema: Data quality metrics and truncation flags
 entrypoints:
-  - embuild-analyses/analyses/gemeentelijke-investeringen/src/process_data.py
+  - embuild-analyses/analyses/gemeentelijke-investeringen/src/process_investments.py
+  - embuild-analyses/analyses/gemeentelijke-investeringen/src/prepare_visualizations.py
 files:
-  - embuild-analyses/analyses/gemeentelijke-investeringen/src/process_data.py
-  - embuild-analyses/analyses/gemeentelijke-investeringen/src/nis_mapping.py
-  - embuild-analyses/analyses/gemeentelijke-investeringen/data/meerjarenplan per bv totaal.xlsx
-  - embuild-analyses/analyses/gemeentelijke-investeringen/data/meerjarenplan per bv per inw.xlsx
-  - embuild-analyses/analyses/gemeentelijke-investeringen/data/meerjarenplan kostenpost totaal.xlsx
-  - embuild-analyses/analyses/gemeentelijke-investeringen/data/meerjarenplan kostenpost per inwoner.xlsx
+  - embuild-analyses/analyses/gemeentelijke-investeringen/src/process_investments.py
+  - embuild-analyses/analyses/gemeentelijke-investeringen/src/prepare_visualizations.py
+  - embuild-analyses/analyses/gemeentelijke-investeringen/src/check_data.py
+  - embuild-analyses/analyses/gemeentelijke-investeringen/data/mjp 2014 bv.csv
+  - embuild-analyses/analyses/gemeentelijke-investeringen/data/mjp 2020 bv.csv
+  - embuild-analyses/analyses/gemeentelijke-investeringen/data/mjp bv 26.csv
+  - embuild-analyses/analyses/gemeentelijke-investeringen/data/mjp rek 2014.csv
+  - embuild-analyses/analyses/gemeentelijke-investeringen/data/mjp rek 2020.csv
+  - embuild-analyses/analyses/gemeentelijke-investeringen/data/mjp rek 2026.csv
   - embuild-analyses/analyses/gemeentelijke-investeringen/results/
+  - embuild-analyses/public/data/gemeentelijke-investeringen/
   - embuild-analyses/analyses/gemeentelijke-investeringen/content.mdx
-last_reviewed: 2026-01-07
+  - .github/workflows/update-gemeentelijke-investeringen-data.yml
+last_reviewed: 2026-01-12
 ---
 
 # WF: Gemeentelijke Investeringen Data Processing
@@ -48,44 +54,43 @@ Manual execution. The data is sourced from BI application exports from the BBC-D
 ## Inputs
 
 ### Source Data Files
-Four Excel files downloaded from the Agentschap Binnenlands Bestuur BI application:
+Six CSV files exported from the Agentschap Binnenlands Bestuur BI application for three rapportjaren (2014, 2020, 2026):
 
-1. **meerjarenplan per bv totaal.xlsx**: Total investments by policy domain (beleidsdomein/subdomein)
-2. **meerjarenplan per bv per inw.xlsx**: Per capita investments by policy domain
-3. **meerjarenplan kostenpost totaal.xlsx**: Total investments by cost category (kostenpost)
-4. **meerjarenplan kostenpost per inwoner.xlsx**: Per capita investments by cost category
+**BV (Beleidsdomein) Files:**
+1. **mjp 2014 bv.csv**: Legislatuur 2014-2020 investments by policy domain (BV_domein/BV_subdomein/Beleidsveld)
+2. **mjp 2020 bv.csv**: Legislatuur 2020-2026 investments by policy domain
+3. **mjp bv 26.csv**: Legislatuur 2026-2032 investments by policy domain
 
-Each file contains multi-year planning data (meerjarenplan) spanning 2014-2033.
+**REK (Economische Rekening) Files:**
+4. **mjp rek 2014.csv**: Legislatuur 2014-2020 investments by accounting category (Niveau 1-3, Alg. rekening)
+5. **mjp rek 2020.csv**: Legislatuur 2020-2026 investments by accounting category
+6. **mjp rek 2026.csv**: Legislatuur 2026-2032 investments by accounting category
 
-### Reference Data
-- **shared-data/refnis.csv**: NIS code mappings for Belgian municipalities (used by nis_mapping.py)
+Each file contains:
+- Metadata rows (Type rapport, Rapportjaar, Boekjaar, hierarchical codes)
+- NIIntermediate Parquet Files (results/)
+- `investments_bv.parquet`: Processed BV data (all rapportjaren, ~125k records)
+- `investments_rek.parquet`: Processed REK data (all rapportjaren, ~90k records)
 
-## Outputs
+### Visualization Data Files (public/data/gemeentelijke-investeringen/)
 
-### Aggregated Data Files (JSON)
+**BV (Beleidsdomein) Data:**
+- `bv_lookups.json`: Lookup tables for BV_domein, BV_subdomein, Beleidsveld, and municipalities
+- `bv_vlaanderen_data.json`: Aggregated Vlaanderen-level totals per rapportjaar
+- `bv_municipality_data_chunk_*.json`: Municipality-level data split into chunks (5000 records each)
 
-**Time Series (Vlaanderen-level aggregates):**
-- `investments_by_domain_vlaanderen.json`: Yearly totals by domain for all Flanders
-- `investments_by_category_vlaanderen.json`: Yearly totals by cost category for all Flanders
-
-**Municipality-level (Latest Year):**
-- `investments_by_municipality_domain.json`: Investments per municipality per domain (with NIS codes)
-- `investments_by_municipality_total.json`: Total investments per municipality (with NIS codes)
-- `investments_by_municipality_category.json`: Investments per municipality per cost category (with NIS codes)
-
-**Summary Statistics:**
-- `domain_summary.json`: Aggregate statistics per domain (total, average, count)
-- `category_summary.json`: Aggregate statistics per cost category
-- `investments_municipality_top_domains.json`: Time series for top 5 strategic domains
-
-**Lookup Tables:**
-- `lookups.json`: Domain/subdomain codes and names, cost categories, available years
+**REK (Economische Rekening) Data:**
+- `rek_lookups.json`: Lookup tables for Niveau_3, Alg_rekening, and municipalities  
+- `rek_vlaanderen_data.json`: Aggregated Vlaanderen-level totals per rapportjaar
+- `rek_municipality_data_chunk_*.json`: Municipality-level data split into chunks (5000 records each)
 
 **Metadata:**
 - `metadata.json`: Data quality metrics including:
-  - Latest year available
+  - Rapportjaren available (2014, 2020, 2026)
   - Total municipalities covered
-  - Record counts for BV and kostenpost data
+  - Counts of BV domains, subdomeins, beleidsvelds
+  - Counts of REK niveau3s and alg_rekenings
+  - Chunk information for data loading
   - **is_kostenpost_truncated**: Explicit flag indicating if kostenpost data is incomplete
   - **kostenpost_municipalities**: Count of municipalities with kostenpost data
 
@@ -108,19 +113,57 @@ Each file contains multi-year planning data (meerjarenplan) spanning 2014-2033.
 8. **Write Outputs**: Serialize to JSON with proper formatting and update metadata
 
 ## Data Quality Notes
+### 1. process_investments.py
 
-**Known Limitations:**
-- Kostenpost data is frequently truncated to ~50 municipalities due to BI export limits
-- The dashboard displays a warning alert when `is_kostenpost_truncated` is true
-- BV (beleidsdomein) data is consistently complete for all 285+ municipalities
+**REK File Processing:**
+1. Locate NIS-code row in CSV (typically row 12)
+2. Extract metadata rows (Boekjaar, Niveau 1-3, Alg. rekening)
+3. Filter for:
+   - Flemish municipalities only (NIS codes starting with 1,2,3,4,7)
+   - Investeringen only (any Niveau contains "investering")
+   - Positive values only
+4. Apply 2026 municipality mergers (NIS_MERGERS mapping)
+5. Pivot to wide format with Totaal and Per_inwoner columns
+6. Save to `investments_rek.parquet`
 
-**Validation:**
-- Cross-consistency check ensures Beleidsveld and Kostenpost totals align within 1% margin
-- NIS mapping logs unmatched municipalities for manual review
+**BV File Processing:**
+1. Locate NIS-code row in CSV (typically row 6)
+2. Extract metadata rows (Boekjaar, BV_domein, BV_subdomein, Beleidsveld)
+3. Process in chunks (200 rows) to handle large files
+4. Filter for:
+   - Flemish municipalities only
+   - Positive values only
+5. Apply 2026 municipality mergers
+6. Pivot to wide format with Totaal and Per_inwoner columns
+7. Save to `investments_bv.parquet`
 
-## Files involved
+**Note:** All jaren (2014, 2020, 2026) have complete Beleidsveld data in column 6.
 
-- `embuild-analyses/analyses/gemeentelijke-investeringen/src/process_data.py`: Main processing script
-- `embuild-analyses/analyses/gemeentelijke-investeringen/src/nis_mapping.py`: Municipality name → NIS code mapper with normalization
-- Input Excel files (see Inputs section)
-- Output JSON/CSV files (see Outputs section)
+### 2. prepare_visualizations.py
+
+1. Load parquet files
+2. **Aggregate by Rapportjaar**: Sum all boekjaren within each 6-year legislatuur
+3. **Create Lookups**: Extract unique BV_domein, BV_subdomein, Beleidsveld, Niveau_3, Alg_rekening
+4. **Generate Municipality Data**: Full dataset per rapportjaar with NIS codes
+5. **Generate Vlaanderen Totals**: Sum across all municipalities per rapportjaar
+6. **Apply 2025 Municipality Mergers**: Use NIS_MERGERS_LOOKUP and NEW_MUNI_NAMES
+7. **Chunk Large Files**: Split municipality data into 5000-record chunks
+8. **Write JSON**: Save with NaN handling and pretty formatting
+
+## Data Quality Notes
+
+**Beleidsveld Coverage (verified 2026-01-12):**
+- 2014: 138/138 records (100%)
+- 2020: 141/141 records (100%)  
+- 2026: 136/136 records (100%)
+- Total unique beleidsvelds: 145 across all years
+
+**Municipality Coverage:**
+- 285 Flemish municipalities across all rapportjaren
+- NIS 2026 mergers applied: 13 source municipalities → 12 target municipalities
+- All data aggregated to post-2026 municipality boundaries
+
+**Data Structure:**
+- REK data: ~90k records → 18.6k aggregated records (per rapportjaar)
+- BV data: ~125k records → 29.7k aggregated records (per rapportjaar)
+- Chunk size: 5000 records per JSON file for efficient loading
