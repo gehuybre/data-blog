@@ -147,6 +147,47 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     setUrlParams(getParamsFromUrl())
   }, [])
 
+  // Auto-resize iframe via postMessage
+  useEffect(() => {
+    if (typeof window === "undefined" || window.self === window.top) {
+      // Not in an iframe or no parent window
+      return
+    }
+
+    const sendHeight = () => {
+      const height = document.documentElement.scrollHeight
+      window.parent.postMessage(
+        {
+          type: "data-blog-embed:resize",
+          height,
+        },
+        "*"
+      )
+    }
+
+    // Send initial height
+    sendHeight()
+
+    // Observe DOM changes and resize events
+    const resizeObserver = new ResizeObserver(() => {
+      sendHeight()
+    })
+
+    resizeObserver.observe(document.body)
+
+    // Also listen to window resize (for responsive layouts)
+    window.addEventListener("resize", sendHeight)
+
+    // Send height after a short delay to catch lazy-rendered content
+    const timeoutId = setTimeout(sendHeight, 100)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener("resize", sendHeight)
+      clearTimeout(timeoutId)
+    }
+  }, [embedData.loading, urlParams.view])
+
   // Load data from registry for standard embeds
   useEffect(() => {
     const config = getEmbedConfig(slug, section)
