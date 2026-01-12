@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -174,6 +174,7 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
   const [loadedChunks, setLoadedChunks] = useState(0)
   const [totalChunks, setTotalChunks] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
 
   // BV filters
   const [selectedDomain, setSelectedDomain] = useState<string>('')
@@ -191,14 +192,16 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
   }>({ type: 'all' })
   const [currentView, setCurrentView] = useState<ViewType>(viewType)
 
+  // Track if data was already loaded to prevent double loading
+  const isDataLoadedRef = useRef(false)
+
   // Load initial data and start chunk loading
   useEffect(() => {
     let cancelled = false
-    let isDataLoaded = false // Track if data was already loaded
 
     async function init() {
       // Prevent double loading
-      if (isDataLoaded) return
+      if (isDataLoadedRef.current) return
 
       try {
         // Reset data to prevent double-loading on remount
@@ -261,7 +264,7 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
           const allChunks = sortedChunks.flatMap(chunk => chunk.data)
           setBVMuniData(allChunks)
           setLoadedChunks(meta.bv_chunks)
-          isDataLoaded = true
+          isDataLoadedRef.current = true
         } else {
           // REK perspective
           const [metaRes, lookupsRes, vlaanderenRes] = await Promise.all([
@@ -318,7 +321,7 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
           const allChunks = sortedChunks.flatMap(chunk => chunk.data)
           setREKMuniData(allChunks)
           setLoadedChunks(meta.rek_chunks)
-          isDataLoaded = true
+          isDataLoadedRef.current = true
         }
       } catch (err) {
         if (!cancelled) {
@@ -333,7 +336,7 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
     return () => {
       cancelled = true
     }
-  }, [perspective])
+  }, [perspective, retryCount])
 
   // BV filtering logic
   const bvDomainOptions = useMemo(() => {
@@ -374,8 +377,8 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
     return options.map(r => r.Economische_rekening_rubriek).sort()
   }, [rekLookups, selectedHoofdrekening])
 
-  // Filter data based on selections
-  const filteredBVData = useMemo(() => {
+  // BV: Filter data based on category selections (without geo filter)
+  const bvDataWithoutGeoFilter = useMemo(() => {
     let data = bvMuniData
 
     if (selectedDomain) {
@@ -388,15 +391,22 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
       data = data.filter(d => d.Beleidsveld === selectedBeleidsveld)
     }
 
-    // Apply geo filter
+    return data
+  }, [bvMuniData, selectedDomain, selectedSubdomein, selectedBeleidsveld])
+
+  // BV: Apply geo filter on top of category-filtered data
+  const filteredBVData = useMemo(() => {
+    let data = bvDataWithoutGeoFilter
+
     if (geoSelection.type === 'municipality' && geoSelection.code) {
       data = data.filter(d => d.NIS_code === geoSelection.code)
     }
 
     return data
-  }, [bvMuniData, selectedDomain, selectedSubdomein, selectedBeleidsveld, geoSelection])
+  }, [bvDataWithoutGeoFilter, geoSelection])
 
-  const filteredREKData = useMemo(() => {
+  // REK: Filter data based on category selections (without geo filter)
+  const rekDataWithoutGeoFilter = useMemo(() => {
     let data = rekMuniData
 
     if (selectedHoofdrekening) {
@@ -406,14 +416,21 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
       data = data.filter(d => d.Economische_rekening_rubriek === selectedRubriek)
     }
 
-    // Apply geo filter
+    return data
+  }, [rekMuniData, selectedHoofdrekening, selectedRubriek])
+
+  // REK: Apply geo filter on top of category-filtered data
+  const filteredREKData = useMemo(() => {
+    let data = rekDataWithoutGeoFilter
+
     if (geoSelection.type === 'municipality' && geoSelection.code) {
       data = data.filter(d => d.NIS_code === geoSelection.code)
     }
 
     return data
-  }, [rekMuniData, selectedHoofdrekening, selectedRubriek, geoSelection])
+  }, [rekDataWithoutGeoFilter, geoSelection])
 
+  const dataWithoutGeoFilter = perspective === "bv" ? bvDataWithoutGeoFilter : rekDataWithoutGeoFilter
   const filteredData = perspective === "bv" ? filteredBVData : filteredREKData
 
   // Chart data: Vlaanderen totals or municipality average
@@ -470,12 +487,18 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
     return createAutoScaledFormatter(values, true)
   }, [chartData])
 
+  // Get the latest year from the data
+  const latestYear = useMemo(() => {
+    if (filteredData.length === 0) return new Date().getFullYear()
+    return Math.max(...filteredData.map(d => d.Rapportjaar))
+  }, [filteredData])
+
   // Table data: By municipality (latest year)
   const tableData = useMemo(() => {
     const byMuni: Record<string, { municipality: string; total: number; count: number }> = {}
 
     filteredData.forEach(record => {
-      if (record.Rapportjaar !== 2026) return
+      if (record.Rapportjaar !== latestYear) return
 
       if (!byMuni[record.NIS_code]) {
         byMuni[record.NIS_code] = {
@@ -491,13 +514,21 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
     return Object.values(byMuni)
       .sort((a, b) => b.total - a.total)
       .slice(0, 50)
-  }, [filteredData, selectedMetric])
+  }, [filteredData, selectedMetric, latestYear])
 
-  // Get available municipalities from the filtered data
+  // Get available municipalities from the filtered data (without geo filter)
+  // This ensures the municipality dropdown shows all municipalities with data for the selected category
   const availableMunicipalities = useMemo(() => {
-    const nisCodesSet = new Set(filteredData.map(d => d.NIS_code))
+    const nisCodesSet = new Set(dataWithoutGeoFilter.map(d => d.NIS_code))
     return Array.from(nisCodesSet)
-  }, [filteredData])
+  }, [dataWithoutGeoFilter])
+
+  const handleRetry = () => {
+    setError(null)
+    setIsLoading(true)
+    isDataLoadedRef.current = false
+    setRetryCount(prev => prev + 1)
+  }
 
   if (error) {
     return (
@@ -505,7 +536,7 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
         <CardContent className="h-64 flex flex-col items-center justify-center space-y-4">
           <p className="text-sm text-destructive font-medium">Fout bij het laden van de data</p>
           <p className="text-xs text-muted-foreground">{error}</p>
-          <Button onClick={() => window.location.reload()} size="sm">
+          <Button onClick={handleRetry} size="sm">
             Opnieuw proberen
           </Button>
         </CardContent>
@@ -700,7 +731,7 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
                   </table>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Top 50 gemeenten (rapportjaar 2026)
+                  Top 50 gemeenten (rapportjaar {latestYear})
                 </p>
               </TabsContent>
             </Tabs>
