@@ -3,8 +3,7 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Loader2, Search } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import {
   ScatterChart,
   Scatter,
@@ -17,7 +16,8 @@ import {
 } from 'recharts'
 import { ExportButtons } from "../shared/ExportButtons"
 import { HierarchicalFilter } from "../shared/HierarchicalFilter"
-import { getMunicipalityName } from "./nisUtils"
+import { MunicipalitySearch } from "../shared/MunicipalitySearch"
+import { getMunicipalityName, getAllMunicipalities } from "./nisUtils"
 import { stripPrefix } from "./labelUtils"
 import {
   createAutoScaledFormatter,
@@ -115,7 +115,7 @@ export function InvesteringenBVScatterSection() {
 
   const [selectedDomain, setSelectedDomain] = useState<string>('')
   const [selectedMetric, setSelectedMetric] = useState<'Totaal' | 'Per_inwoner'>('Totaal')
-  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [selectedMunicipality, setSelectedMunicipality] = useState<string | null>(null)
 
   // Fixed year: only 2026 data available
   const selectedYear = 2026
@@ -147,10 +147,8 @@ export function InvesteringenBVScatterSection() {
         setLookups(lookupsData)
         setTotalChunks(meta.bv_chunks)
 
-        // Set default domain to first stripped value
-        if (lookupsData.domains.length > 0) {
-          setSelectedDomain(stripPrefix(lookupsData.domains[0].BV_domein))
-        }
+        // Set default domain to empty string (Alle)
+        setSelectedDomain('')
 
         setIsLoading(false)
 
@@ -189,74 +187,108 @@ export function InvesteringenBVScatterSection() {
     return lookups.domains.map(d => stripPrefix(d.BV_domein)).sort()
   }, [lookups])
 
+  // Get all municipalities for search
+  const allMunicipalities = useMemo(() => {
+    return getAllMunicipalities().map(m => ({
+      code: m.nisCode,
+      name: m.name
+    }))
+  }, [])
+
   // Scatter data: aggregate by municipality for selected year and domain
   const scatterData = useMemo(() => {
-    if (!selectedDomain || !lookups) return []
-
-    // Find original domain value (with prefix) for filtering
-    const originalDomain = lookups.domains.find(
-      d => stripPrefix(d.BV_domein) === selectedDomain
-    )?.BV_domein
-
-    if (!originalDomain) return []
+    if (!lookups) return []
 
     const byMuni: Record<string, number> = {}
 
-    muniData
-      .filter(d => d.Rapportjaar === selectedYear && d.BV_domein === originalDomain)
-      .forEach(record => {
-        if (!byMuni[record.NIS_code]) {
-          byMuni[record.NIS_code] = 0
-        }
-        byMuni[record.NIS_code] += record[selectedMetric]
-      })
+    if (!selectedDomain || selectedDomain === '') {
+      // Aggregate all domains ("Alle" option)
+      muniData
+        .filter(d => d.Rapportjaar === selectedYear)
+        .forEach(record => {
+          if (!byMuni[record.NIS_code]) {
+            byMuni[record.NIS_code] = 0
+          }
+          byMuni[record.NIS_code] += record[selectedMetric]
+        })
+    } else {
+      // Find original domain value (with prefix) for filtering
+      const originalDomain = lookups.domains.find(
+        d => stripPrefix(d.BV_domein) === selectedDomain
+      )?.BV_domein
+
+      if (!originalDomain) return []
+
+      muniData
+        .filter(d => d.Rapportjaar === selectedYear && d.BV_domein === originalDomain)
+        .forEach(record => {
+          if (!byMuni[record.NIS_code]) {
+            byMuni[record.NIS_code] = 0
+          }
+          byMuni[record.NIS_code] += record[selectedMetric]
+        })
+    }
 
     return Object.entries(byMuni)
-      .map(([nisCode, value], index) => ({
+      .map(([nisCode, value]) => ({
         municipality: getMunicipalityName(nisCode),
         NIS_code: nisCode,
         value,
-        x: index,
+        x: 0, // Will be reassigned after sorting
       }))
-      .sort((a, b) => a.municipality.localeCompare(b.municipality))
+      .sort((a, b) => a.value - b.value) // Sort by value: small to large
       .map((item, index) => ({ ...item, x: index }))
   }, [muniData, selectedDomain, selectedMetric, selectedYear, lookups])
 
-  // Calculate percentiles for dynamic axis scaling
+  // Calculate Y-axis range: always start at 0, max value + 10% padding
   const { yMin, yMax } = useMemo(() => {
     if (scatterData.length === 0) return { yMin: 0, yMax: 100 }
 
-    const values = scatterData.map(d => d.value).sort((a, b) => a - b)
-    const p5 = values[Math.floor(values.length * 0.05)] || 0
-    const p95 = values[Math.floor(values.length * 0.95)] || values[values.length - 1]
+    const maxValue = Math.max(...scatterData.map(d => d.value))
 
-    // Add 10% padding
-    const padding = (p95 - p5) * 0.1
+    // If all values are zero, use default range
+    if (maxValue === 0) {
+      return { yMin: 0, yMax: 100 }
+    }
+
+    // Always start at 0, add 10% padding to max for better visibility
+    const calculatedMax = maxValue * 1.1
+
     return {
-      yMin: Math.max(0, p5 - padding),
-      yMax: p95 + padding
+      yMin: 0,
+      yMax: calculatedMax
     }
   }, [scatterData])
 
   // Auto-scale formatters
-  const { formatter: valueFormatter } = useMemo(() => {
+  const { formatter: valueFormatter, scale: valueScale } = useMemo(() => {
     const values = scatterData.map(d => d.value)
     return createAutoScaledFormatter(values, selectedMetric === 'Totaal')
   }, [scatterData, selectedMetric])
 
+  // Y-axis label with scale
+  const yAxisLabel = useMemo(() => {
+    const baseLabel = selectedMetric === 'Totaal' ? 'Totale uitgave' : 'Uitgave per inwoner'
+    const scaleText = valueScale ? ` (€${valueScale})` : ' (€)'
+    return baseLabel + scaleText
+  }, [selectedMetric, valueScale])
+
   // Filtered data with search highlighting
   const { displayData, highlightedIndex } = useMemo(() => {
-    if (!searchQuery.trim()) {
+    if (!selectedMunicipality) {
       return { displayData: scatterData, highlightedIndex: -1 }
     }
 
-    const query = searchQuery.toLowerCase()
-    const index = scatterData.findIndex(d =>
-      d.municipality.toLowerCase().includes(query)
-    )
-
+    const index = scatterData.findIndex(d => d.NIS_code === selectedMunicipality)
+    console.log('Highlighting municipality:', {
+      selectedMunicipality,
+      index,
+      found: index >= 0,
+      municipality: index >= 0 ? scatterData[index]?.municipality : 'not found',
+      value: index >= 0 ? scatterData[index]?.value : null
+    })
     return { displayData: scatterData, highlightedIndex: index }
-  }, [scatterData, searchQuery])
+  }, [scatterData, selectedMunicipality])
 
   // Export data
   const exportData = useMemo(() => {
@@ -295,7 +327,7 @@ export function InvesteringenBVScatterSection() {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Gemeentelijke Investeringen per Beleidsdomein - Scatter Plot</CardTitle>
+          <CardTitle>Gemeentelijke Investeringen per Beleidsdomein</CardTitle>
           <div className="flex items-center gap-4">
             {loadedChunks < totalChunks && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
@@ -344,13 +376,12 @@ export function InvesteringenBVScatterSection() {
               options={domainOptions}
               placeholder="Selecteer domein"
             />
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Zoek gemeente..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 h-9"
+            <div className="flex-1 min-w-[200px]">
+              <MunicipalitySearch
+                selectedMunicipality={selectedMunicipality}
+                onSelect={setSelectedMunicipality}
+                municipalities={allMunicipalities}
+                placeholder="Selecteer gemeente..."
               />
             </div>
           </div>
@@ -373,7 +404,7 @@ export function InvesteringenBVScatterSection() {
                   tickFormatter={valueFormatter}
                 >
                   <Label
-                    value={selectedMetric === 'Totaal' ? 'Totale uitgave (€)' : 'Uitgave per inwoner (€)'}
+                    value={yAxisLabel}
                     angle={-90}
                     position="insideLeft"
                     offset={10}
@@ -397,7 +428,7 @@ export function InvesteringenBVScatterSection() {
             </ResponsiveContainer>
           </div>
           <p className="text-sm text-muted-foreground mt-2">
-            Domein: <strong>{selectedDomain}</strong> | Rapportjaar: <strong>2026</strong> | {selectedMetric === 'Totaal' ? 'Totale uitgave' : 'Uitgave per inwoner'} | {displayData.length} gemeenten
+            Domein: <strong>{selectedDomain || 'Alle'}</strong> | Rapportjaar: <strong>2026</strong> | {selectedMetric === 'Totaal' ? 'Totale uitgave' : 'Uitgave per inwoner'} | {displayData.length} gemeenten
           </p>
           {highlightedIndex >= 0 && (
             <p className="text-sm text-primary mt-1">
