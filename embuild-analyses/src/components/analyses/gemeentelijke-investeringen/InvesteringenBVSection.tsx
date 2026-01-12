@@ -20,6 +20,7 @@ import { SimpleGeoContext } from "../shared/GeoContext"
 import { ExportButtons } from "../shared/ExportButtons"
 import { HierarchicalFilter } from "../shared/HierarchicalFilter"
 import { getMunicipalityName } from "./nisUtils"
+import { stripPrefix } from "./labelUtils"
 import {
   createAutoScaledFormatter,
   getScaledLabel,
@@ -150,6 +151,12 @@ export function InvesteringenBVSection() {
         setLookups(lookupsData)
         setVlaanderenData(vlaanderen)
         setTotalChunks(meta.bv_chunks)
+
+        // Set default domain to first stripped value if none selected
+        if (!selectedDomain && lookupsData.domains.length > 0) {
+          setSelectedDomain(stripPrefix(lookupsData.domains[0].BV_domein))
+        }
+
         setIsLoading(false)
 
         // Load chunks sequentially
@@ -181,42 +188,45 @@ export function InvesteringenBVSection() {
     }
   }, [])
 
-  // Get available options based on selections
+  // Get available options based on selections (with prefixes stripped)
   const domainOptions = useMemo(() => {
     if (!lookups) return []
-    return lookups.domains.map(d => d.BV_domein).sort()
+    return lookups.domains.map(d => stripPrefix(d.BV_domein)).sort()
   }, [lookups])
 
   const subdomeinOptions = useMemo(() => {
     if (!lookups) return []
     let options = lookups.subdomeins
     if (selectedDomain) {
-      options = options.filter(s => s.BV_domein === selectedDomain)
+      // Match by stripped prefix
+      options = options.filter(s => stripPrefix(s.BV_domein) === selectedDomain)
     }
-    return options.map(s => s.BV_subdomein).sort()
+    return options.map(s => stripPrefix(s.BV_subdomein)).sort()
   }, [lookups, selectedDomain])
 
   const beleidsveldOptions = useMemo(() => {
     if (!lookups) return []
     let options = lookups.beleidsvelds
     if (selectedSubdomein) {
-      options = options.filter(b => b.BV_subdomein === selectedSubdomein)
+      // Match by stripped prefix
+      options = options.filter(b => stripPrefix(b.BV_subdomein) === selectedSubdomein)
     }
-    return options.map(b => b.Beleidsveld).sort()
+    return options.map(b => stripPrefix(b.Beleidsveld)).sort()
   }, [lookups, selectedSubdomein])
 
   // Filter data based on BV selections (without geo filter)
+  // Match by stripped labels since user sees stripped versions
   const dataWithoutGeoFilter = useMemo(() => {
     let data = muniData
 
     if (selectedDomain) {
-      data = data.filter(d => d.BV_domein === selectedDomain)
+      data = data.filter(d => stripPrefix(d.BV_domein) === selectedDomain)
     }
     if (selectedSubdomein) {
-      data = data.filter(d => d.BV_subdomein === selectedSubdomein)
+      data = data.filter(d => stripPrefix(d.BV_subdomein) === selectedSubdomein)
     }
     if (selectedBeleidsveld) {
-      data = data.filter(d => d.Beleidsveld === selectedBeleidsveld)
+      data = data.filter(d => stripPrefix(d.Beleidsveld) === selectedBeleidsveld)
     }
 
     return data
