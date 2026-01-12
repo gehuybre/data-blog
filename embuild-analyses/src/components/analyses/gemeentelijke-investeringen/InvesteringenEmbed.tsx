@@ -18,6 +18,7 @@ import { SimpleGeoFilter } from "./SimpleGeoFilter"
 import { SimpleGeoContext } from "../shared/GeoContext"
 import { HierarchicalFilter } from "../shared/HierarchicalFilter"
 import { getMunicipalityName } from "./nisUtils"
+import { stripPrefix } from "./labelUtils"
 import {
   createAutoScaledFormatter,
   getScaledLabel,
@@ -103,7 +104,7 @@ function validateBVLookups(data: unknown): BVLookups {
   }
   const obj = data as Record<string, unknown>
   if (!Array.isArray(obj.domains) || !Array.isArray(obj.subdomeins) ||
-      !Array.isArray(obj.beleidsvelds) || !obj.municipalities || typeof obj.municipalities !== 'object') {
+    !Array.isArray(obj.beleidsvelds) || !obj.municipalities || typeof obj.municipalities !== 'object') {
     throw new Error('Invalid BV lookups: missing or invalid fields')
   }
   return {
@@ -119,16 +120,17 @@ function validateREKLookups(data: unknown): REKLookups {
     throw new Error('Invalid REK lookups: expected object')
   }
   const obj = data as Record<string, unknown>
-  if (!Array.isArray(obj.hoofdrekeningen) || !Array.isArray(obj.rubrieken) ||
-      !obj.municipalities || typeof obj.municipalities !== 'object') {
+  // Support both key styles for robustness
+  const hoofdrekeningen = obj.hoofdrekeningen || obj.niveau3s
+  const rubrieken = obj.rubrieken || obj.alg_rekenings
+
+  if (!Array.isArray(hoofdrekeningen) || !Array.isArray(rubrieken) ||
+    !obj.municipalities || typeof obj.municipalities !== 'object') {
     throw new Error('Invalid REK lookups: missing or invalid fields')
   }
   return {
-    hoofdrekeningen: obj.hoofdrekeningen as Array<{ Economische_rekening_hoofdrekening: string }>,
-    rubrieken: obj.rubrieken as Array<{
-      Economische_rekening_hoofdrekening: string
-      Economische_rekening_rubriek: string
-    }>,
+    hoofdrekeningen: hoofdrekeningen as any,
+    rubrieken: rubrieken as any,
     municipalities: obj.municipalities as Record<string, string>
   }
 }
@@ -241,6 +243,11 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
           setTotalChunks(meta.bv_chunks)
           setIsLoading(false)
 
+          // Set default domain
+          if (lookupsData.domains.length > 0) {
+            setSelectedDomain(stripPrefix(lookupsData.domains[0].BV_domein))
+          }
+
           // Load chunks in parallel
           const chunkPromises = Array.from({ length: meta.bv_chunks }, (_, i) =>
             fetch(getPublicPath(`/data/gemeentelijke-investeringen/bv_municipality_data_chunk_${i}.json`))
@@ -298,6 +305,13 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
           setTotalChunks(meta.rek_chunks)
           setIsLoading(false)
 
+          // Set default hoofdrekening
+          const hoofdrekeningen = lookupsData.hoofdrekeningen || (lookupsData as any).niveau3s
+          if (hoofdrekeningen && hoofdrekeningen.length > 0) {
+            const first = hoofdrekeningen[0]
+            setSelectedHoofdrekening(stripPrefix(first.Economische_rekening_hoofdrekening || first.Niveau_3))
+          }
+
           // Load chunks in parallel
           const chunkPromises = Array.from({ length: meta.rek_chunks }, (_, i) =>
             fetch(getPublicPath(`/data/gemeentelijke-investeringen/rek_municipality_data_chunk_${i}.json`))
@@ -341,40 +355,44 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
   // BV filtering logic
   const bvDomainOptions = useMemo(() => {
     if (!bvLookups) return []
-    return bvLookups.domains.map(d => d.BV_domein).sort()
+    return bvLookups.domains.map(d => stripPrefix(d.BV_domein)).sort()
   }, [bvLookups])
 
   const bvSubdomeinOptions = useMemo(() => {
     if (!bvLookups) return []
     let options = bvLookups.subdomeins
     if (selectedDomain) {
-      options = options.filter(s => s.BV_domein === selectedDomain)
+      options = options.filter(s => stripPrefix(s.BV_domein) === selectedDomain)
     }
-    return options.map(s => s.BV_subdomein).sort()
+    return options.map(s => stripPrefix(s.BV_subdomein)).sort()
   }, [bvLookups, selectedDomain])
 
   const bvBeleidsveldOptions = useMemo(() => {
     if (!bvLookups) return []
     let options = bvLookups.beleidsvelds
     if (selectedSubdomein) {
-      options = options.filter(b => b.BV_subdomein === selectedSubdomein)
+      options = options.filter(b => stripPrefix(b.BV_subdomein) === selectedSubdomein)
     }
-    return options.map(b => b.Beleidsveld).sort()
+    return options.map(b => stripPrefix(b.Beleidsveld)).sort()
   }, [bvLookups, selectedSubdomein])
 
-  // REK filtering logic
+  // REK filtering logic - updated to handle keys correctly
   const rekHoofdrekenOptions = useMemo(() => {
     if (!rekLookups) return []
-    return rekLookups.hoofdrekeningen.map(h => h.Economische_rekening_hoofdrekening).sort()
+    // Support both key styles for robustness
+    const items = rekLookups.hoofdrekeningen || (rekLookups as any).niveau3s || []
+    return items.map((h: any) => stripPrefix(h.Economische_rekening_hoofdrekening || h.Niveau_3)).sort()
   }, [rekLookups])
 
   const rekRubriekOptions = useMemo(() => {
     if (!rekLookups) return []
-    let options = rekLookups.rubrieken
+    let options = rekLookups.rubrieken || (rekLookups as any).alg_rekenings || []
     if (selectedHoofdrekening) {
-      options = options.filter(r => r.Economische_rekening_hoofdrekening === selectedHoofdrekening)
+      options = options.filter((r: any) =>
+        stripPrefix(r.Economische_rekening_hoofdrekening || r.Niveau_3) === selectedHoofdrekening
+      )
     }
-    return options.map(r => r.Economische_rekening_rubriek).sort()
+    return options.map((r: any) => stripPrefix(r.Economische_rekening_rubriek || r.Alg_rekening)).sort()
   }, [rekLookups, selectedHoofdrekening])
 
   // BV: Filter data based on category selections (without geo filter)
@@ -382,13 +400,13 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
     let data = bvMuniData
 
     if (selectedDomain) {
-      data = data.filter(d => d.BV_domein === selectedDomain)
+      data = data.filter(d => stripPrefix(d.BV_domein) === selectedDomain)
     }
     if (selectedSubdomein) {
-      data = data.filter(d => d.BV_subdomein === selectedSubdomein)
+      data = data.filter(d => stripPrefix(d.BV_subdomein) === selectedSubdomein)
     }
     if (selectedBeleidsveld) {
-      data = data.filter(d => d.Beleidsveld === selectedBeleidsveld)
+      data = data.filter(d => stripPrefix(d.Beleidsveld) === selectedBeleidsveld)
     }
 
     return data
@@ -410,10 +428,10 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
     let data = rekMuniData
 
     if (selectedHoofdrekening) {
-      data = data.filter(d => d.Economische_rekening_hoofdrekening === selectedHoofdrekening)
+      data = data.filter(d => stripPrefix((d as any).Economische_rekening_hoofdrekening || (d as any).Niveau_3) === selectedHoofdrekening)
     }
     if (selectedRubriek) {
-      data = data.filter(d => d.Economische_rekening_rubriek === selectedRubriek)
+      data = data.filter(d => stripPrefix((d as any).Economische_rekening_rubriek || (d as any).Alg_rekening) === selectedRubriek)
     }
 
     return data

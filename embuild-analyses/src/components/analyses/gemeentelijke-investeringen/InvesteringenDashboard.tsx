@@ -1,5 +1,6 @@
 "use client"
 
+// CACHE BUSTER v2.0 - Force reload of scatter components
 import React, { useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -7,6 +8,8 @@ import { InvesteringenBVSection } from "./InvesteringenBVSection"
 import { InvesteringenREKSection } from "./InvesteringenREKSection"
 import { InvesteringenBVCategorySection } from "./InvesteringenBVCategorySection"
 import { InvesteringenREKCategorySection } from "./InvesteringenREKCategorySection"
+import { InvesteringenBVScatterSection } from "./InvesteringenBVScatterSection"
+import { InvesteringenREKScatterSection } from "./InvesteringenREKScatterSection"
 
 export function InvesteringenDashboard() {
   return (
@@ -53,6 +56,14 @@ export function InvesteringenDashboard() {
 
       <div className="border-t pt-16" id="rek-category-breakdown">
         <InvesteringenREKCategorySection />
+      </div>
+
+      <div className="border-t pt-16" id="investments-bv-scatter">
+        <InvesteringenBVScatterSection />
+      </div>
+
+      <div className="border-t pt-16" id="investments-rek-scatter">
+        <InvesteringenREKScatterSection />
       </div>
     </div>
   )

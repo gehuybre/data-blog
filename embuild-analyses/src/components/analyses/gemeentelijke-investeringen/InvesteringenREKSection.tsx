@@ -20,6 +20,7 @@ import { SimpleGeoContext } from "../shared/GeoContext"
 import { ExportButtons } from "../shared/ExportButtons"
 import { HierarchicalFilter } from "../shared/HierarchicalFilter"
 import { getMunicipalityName } from "./nisUtils"
+import { stripPrefix } from "./labelUtils"
 import {
   createAutoScaledFormatter,
   getScaledLabel,
@@ -145,6 +146,12 @@ export function InvesteringenREKSection() {
         setLookups(lookupsData)
         setVlaanderenData(vlaanderen)
         setTotalChunks(meta.rek_chunks)
+
+        // Set default niveau3 to first stripped value if none selected
+        if (!selectedNiveau3 && lookupsData.niveau3s.length > 0) {
+          setSelectedNiveau3(stripPrefix(lookupsData.niveau3s[0].Niveau_3))
+        }
+
         setIsLoading(false)
 
         // Load chunks sequentially
@@ -176,30 +183,32 @@ export function InvesteringenREKSection() {
     }
   }, [])
 
-  // Get available options based on selections
+  // Get available options based on selections (with prefixes stripped)
   const niveau3Options = useMemo(() => {
     if (!lookups) return []
-    return lookups.niveau3s.map(n => n.Niveau_3).sort()
+    return lookups.niveau3s.map(n => stripPrefix(n.Niveau_3)).sort()
   }, [lookups])
 
   const algRekeningOptions = useMemo(() => {
     if (!lookups) return []
     let options = lookups.alg_rekenings
     if (selectedNiveau3) {
-      options = options.filter(a => a.Niveau_3 === selectedNiveau3)
+      // Match by stripped prefix
+      options = options.filter(a => stripPrefix(a.Niveau_3) === selectedNiveau3)
     }
-    return options.map(a => a.Alg_rekening).sort()
+    return options.map(a => stripPrefix(a.Alg_rekening)).sort()
   }, [lookups, selectedNiveau3])
 
   // Filter data based on REK selections (without geo filter)
+  // Match by stripped labels since user sees stripped versions
   const dataWithoutGeoFilter = useMemo(() => {
     let data = muniData
 
     if (selectedNiveau3) {
-      data = data.filter(d => d.Niveau_3 === selectedNiveau3)
+      data = data.filter(d => stripPrefix(d.Niveau_3) === selectedNiveau3)
     }
     if (selectedAlgRekening) {
-      data = data.filter(d => d.Alg_rekening === selectedAlgRekening)
+      data = data.filter(d => stripPrefix(d.Alg_rekening) === selectedAlgRekening)
     }
 
     return data
