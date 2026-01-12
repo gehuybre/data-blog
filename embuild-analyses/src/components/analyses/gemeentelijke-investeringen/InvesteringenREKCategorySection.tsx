@@ -1,24 +1,17 @@
 "use client"
 
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect, useContext } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Loader2, Check, ChevronsUpDown } from 'lucide-react'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Loader2 } from 'lucide-react'
 import { cn } from "@/lib/utils"
 import { ExportButtons } from "../shared/ExportButtons"
 import { formatCurrency } from "@/lib/number-formatters"
-import { getMunicipalityName, getAllMunicipalities } from "./nisUtils"
+import { getMunicipalityName } from "./nisUtils"
 import { stripPrefix } from "./labelUtils"
 import { getPublicPath } from "@/lib/path-utils"
+import { SimpleGeoFilter } from "./SimpleGeoFilter"
+import { SimpleGeoContext } from "../shared/GeoContext"
 
 interface REKLookups {
   niveau3s: Array<{ Niveau_3: string }>
@@ -75,66 +68,7 @@ function validateMetadata(data: unknown): { bv_chunks: number; rek_chunks: numbe
   return obj as { bv_chunks: number; rek_chunks: number }
 }
 
-// Municipality filter component
-function MunicipalityFilter({
-  selectedMuni,
-  onChange,
-}: {
-  selectedMuni: string | null
-  onChange: (code: string | null) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const municipalities = getAllMunicipalities()
 
-  const currentLabel = useMemo(() => {
-    if (!selectedMuni) return "Alle gemeenten"
-    return getMunicipalityName(selectedMuni)
-  }, [selectedMuni])
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" role="combobox" aria-expanded={open} className="h-9 gap-1 min-w-[180px]">
-          <span className="truncate max-w-[180px]">{currentLabel}</span>
-          <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Zoek gemeente..." />
-          <CommandList>
-            <CommandEmpty>Geen gemeente gevonden.</CommandEmpty>
-            <CommandGroup>
-              <CommandItem
-                value="Alle gemeenten"
-                onSelect={() => {
-                  onChange(null)
-                  setOpen(false)
-                }}
-              >
-                <Check className={cn("mr-2 h-4 w-4", !selectedMuni ? "opacity-100" : "opacity-0")} />
-                Alle gemeenten
-              </CommandItem>
-              {municipalities.map((m) => (
-                <CommandItem
-                  key={m.nisCode}
-                  value={m.name}
-                  onSelect={() => {
-                    onChange(m.nisCode)
-                    setOpen(false)
-                  }}
-                >
-                  <Check className={cn("mr-2 h-4 w-4", selectedMuni === m.nisCode ? "opacity-100" : "opacity-0")} />
-                  {m.name}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  )
-}
 
 export function InvesteringenREKCategorySection() {
   const [lookups, setLookups] = useState<REKLookups | null>(null)
@@ -144,7 +78,10 @@ export function InvesteringenREKCategorySection() {
   const [totalChunks, setTotalChunks] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
-  const [selectedMuni, setSelectedMuni] = useState<string | null>(null)
+  const [geoSelection, setGeoSelection] = useState<{
+    type: 'all' | 'region' | 'province' | 'municipality'
+    code?: string
+  }>({ type: 'all' })
   const [selectedMetric, setSelectedMetric] = useState<'Totaal' | 'Per_inwoner'>('Totaal')
   const [selectedYear, setSelectedYear] = useState<number>(2026)
 
@@ -206,14 +143,24 @@ export function InvesteringenREKCategorySection() {
     }
   }, [])
 
+  // Get available municipalities for the selected year
+  const availableMunicipalities = useMemo(() => {
+    const nisCodesSet = new Set(
+      muniData
+        .filter(d => d.Rapportjaar === selectedYear)
+        .map(d => d.NIS_code)
+    )
+    return Array.from(nisCodesSet)
+  }, [muniData, selectedYear])
+
   // Category breakdown: Top 9 + Other
   const categoryData = useMemo(() => {
     if (!lookups || muniData.length === 0) return []
 
     // Filter by year and municipality
     let filteredData = muniData.filter(d => d.Rapportjaar === selectedYear)
-    if (selectedMuni) {
-      filteredData = filteredData.filter(d => d.NIS_code === selectedMuni)
+    if (geoSelection.type === 'municipality' && geoSelection.code) {
+      filteredData = filteredData.filter(d => d.NIS_code === geoSelection.code)
     }
 
     // Aggregate by Alg_rekening (highest detail level)
@@ -241,7 +188,7 @@ export function InvesteringenREKCategorySection() {
     }
 
     return result
-  }, [lookups, muniData, selectedYear, selectedMuni, selectedMetric])
+  }, [lookups, muniData, selectedYear, geoSelection, selectedMetric])
 
   // Calculate max value for bar chart scaling
   const maxValue = useMemo(() => {
@@ -274,7 +221,8 @@ export function InvesteringenREKCategorySection() {
   }
 
   return (
-    <Card>
+    <SimpleGeoContext.Provider value={{ selection: geoSelection, setSelection: setGeoSelection }}>
+      <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Verdeling per Algemene Rekening (REK)</CardTitle>
@@ -346,7 +294,7 @@ export function InvesteringenREKCategorySection() {
                 2026
               </Button>
             </div>
-            <MunicipalityFilter selectedMuni={selectedMuni} onChange={setSelectedMuni} />
+            <SimpleGeoFilter availableMunicipalities={availableMunicipalities} />
           </div>
 
           {/* Category breakdown */}
@@ -384,13 +332,14 @@ export function InvesteringenREKCategorySection() {
           </div>
 
           <p className="text-sm text-muted-foreground mt-4">
-            {selectedMuni
-              ? `Investeringen voor ${getMunicipalityName(selectedMuni)} in ${selectedYear}`
+            {geoSelection.type === 'municipality' && geoSelection.code
+              ? `Investeringen voor ${getMunicipalityName(geoSelection.code)} in ${selectedYear}`
               : `Totale investeringen over alle gemeenten in ${selectedYear}`
             }
           </p>
         </div>
       </CardContent>
     </Card>
+    </SimpleGeoContext.Provider>
   )
 }
