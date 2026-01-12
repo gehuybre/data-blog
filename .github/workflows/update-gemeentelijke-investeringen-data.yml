@@ -111,10 +111,10 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "chore(data): update gemeentelijke-investeringen visualization data
-
-Generated from latest BBC-DR data export
-- Processed BV (beleidsdomein) data for rapportjaren: 2014, 2020, 2026
-- Processed REK (economische rekening) data for rapportjaren: 2014, 2020, 2026
-- Updated municipality aggregations and lookups"
+            
+            Generated from latest BBC-DR data export
+            - Processed BV (beleidsdomein) data for rapportjaren: 2014, 2020, 2026
+            - Processed REK (economische rekening) data for rapportjaren: 2014, 2020, 2026
+            - Updated municipality aggregations and lookups"
             git push
           fi
