@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useMemo } from 'react'
 import { Button } from "@/components/ui/button"
 import { Check, ChevronsUpDown } from 'lucide-react'
 import {
@@ -16,16 +16,28 @@ import { cn } from "@/lib/utils"
 import { SimpleGeoContext } from "../shared/GeoContext"
 import { getAllMunicipalities } from "./nisUtils"
 
-export function SimpleGeoFilter() {
+interface SimpleGeoFilterProps {
+  availableMunicipalities?: string[]
+}
+
+export function SimpleGeoFilter({ availableMunicipalities }: SimpleGeoFilterProps = {}) {
   const { selection, setSelection } = useContext(SimpleGeoContext)
   const [open, setOpen] = useState(false)
 
-  const allMunicipalities = getAllMunicipalities()
+  const allMunicipalities = useMemo(() => getAllMunicipalities(), [])
+
+  // Filter municipalities if availableMunicipalities is provided
+  const municipalities = useMemo(() =>
+    availableMunicipalities
+      ? allMunicipalities.filter(m => availableMunicipalities.includes(m.nisCode))
+      : allMunicipalities,
+    [allMunicipalities, availableMunicipalities]
+  )
 
   const getLabel = () => {
     if (selection.type === 'all') return 'Heel Vlaanderen'
     if (selection.type === 'municipality' && selection.code) {
-      const muni = allMunicipalities.find(m => m.nisCode === selection.code)
+      const muni = municipalities.find(m => m.nisCode === selection.code)
       return muni?.name || selection.code
     }
     return 'Selecteer locatie'
@@ -61,7 +73,7 @@ export function SimpleGeoFilter() {
                 <Check className={cn("mr-2 h-4 w-4", selection.type === 'all' ? "opacity-100" : "opacity-0")} />
                 Heel Vlaanderen
               </CommandItem>
-              {allMunicipalities.map((muni) => (
+              {municipalities.map((muni) => (
                 <CommandItem
                   key={muni.nisCode}
                   value={muni.name}

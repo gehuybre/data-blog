@@ -9,6 +9,9 @@ import { HuishoudensgroeiEmbed } from "@/components/analyses/huishoudensgroei/Hu
 import { EnergiekaartPremiesEmbed } from "@/components/analyses/energiekaart-premies/EnergiekaartPremiesEmbed"
 import { VergunningenAanvragenEmbed } from "@/components/analyses/vergunningen-aanvragen/VergunningenAanvragenEmbed"
 import { GebouwenparkEmbed } from "@/components/analyses/gebouwenpark/GebouwenparkEmbed"
+import { InvesteringenEmbed } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenEmbed"
+import { InvesteringenBVCategorySection } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenBVCategorySection"
+import { InvesteringenREKCategorySection } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenREKCategorySection"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig, getValidSections } from "@/lib/embed-config"
 import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
@@ -391,6 +394,49 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
           section={section as "evolutie"}
         />
       )
+    }
+
+    // Handle InvesteringenEmbed
+    if (config.component === "InvesteringenEmbed") {
+      const validSections = getValidSections(slug)
+      if (!validSections.includes(section)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}. Geldige opties: {validSections.join(", ")}
+            </p>
+          </div>
+        )
+      }
+
+      return (
+        <InvesteringenEmbed
+          section={section as "investments-bv" | "investments-rek"}
+          viewType={toChartOrTableViewType(urlParams.view)}
+        />
+      )
+    }
+
+    // Handle InvesteringenCategoryEmbed
+    if (config.component === "InvesteringenCategoryEmbed") {
+      const validSections = getValidSections(slug)
+      if (!validSections.includes(section)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}. Geldige opties: {validSections.join(", ")}
+            </p>
+          </div>
+        )
+      }
+
+      if (section === "bv-category-breakdown") {
+        return <InvesteringenBVCategorySection />
+      }
+
+      if (section === "rek-category-breakdown") {
+        return <InvesteringenREKCategorySection />
+      }
     }
 
     // Unknown custom component
