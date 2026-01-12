@@ -2,7 +2,7 @@ name: Update gemeentelijke-investeringen data
 
 on:
   # Manual trigger only - data files need to be manually exported from BI application
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 permissions:
   contents: write
