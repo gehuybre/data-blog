@@ -404,7 +404,7 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
   // BV: Filter data based on category selections (without geo filter)
   const bvDataWithoutGeoFilter = useMemo(() => {
     let data = bvMuniData
-
+    
     if (selectedDomain) {
       data = data.filter(d => stripPrefix(d.BV_domein) === selectedDomain)
     }
