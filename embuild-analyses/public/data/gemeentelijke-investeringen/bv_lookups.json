@@ -287,20 +287,12 @@
       "Beleidsveld": "0090 Overige algemene financiering"
     },
     {
-      "BV_subdomein": "00 Algemene financiering",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "010 Politieke organen",
       "Beleidsveld": "0100 Politieke organen"
     },
     {
       "BV_subdomein": "010 Politieke organen",
       "Beleidsveld": "0101 Officieel ceremonieel"
-    },
-    {
-      "BV_subdomein": "010 Politieke organen",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "011 Algemene diensten",
@@ -331,28 +323,16 @@
       "Beleidsveld": "0119 Overige algemene diensten"
     },
     {
-      "BV_subdomein": "011 Algemene diensten",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "013 Administratieve dienstverlening",
       "Beleidsveld": "0130 Administratieve dienstverlening"
     },
     {
-      "BV_subdomein": "013 Administratieve dienstverlening",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "015 Internationale samenwerking",
-      "Beleidsveld": "None"
+      "Beleidsveld": "0150 Internationale relaties"
     },
     {
       "BV_subdomein": "016 Hulp aan het buitenland",
       "Beleidsveld": "0160 Hulp aan het buitenland"
-    },
-    {
-      "BV_subdomein": "016 Hulp aan het buitenland",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "017 Binnengemeentelijke decentralisatie",
@@ -363,16 +343,8 @@
       "Beleidsveld": "0171 Gemeentelijk/stedelijk wijkoverleg"
     },
     {
-      "BV_subdomein": "017 Binnengemeentelijke decentralisatie",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "019 Overig algemeen bestuur",
       "Beleidsveld": "0190 Overig algemeen bestuur"
-    },
-    {
-      "BV_subdomein": "019 Overig algemeen bestuur",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
@@ -391,20 +363,12 @@
       "Beleidsveld": "0290 Overige mobiliteit en verkeer"
     },
     {
-      "BV_subdomein": "02 Zich verplaatsen en mobiliteit",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "030 Afval- en materialenbeheer",
       "Beleidsveld": "0300 Ophalen en verwerken van huishoudelijk afval"
     },
     {
       "BV_subdomein": "030 Afval- en materialenbeheer",
       "Beleidsveld": "0309 Overig afval- en materialenbeheer"
-    },
-    {
-      "BV_subdomein": "030 Afval- en materialenbeheer",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "031 Waterbeheer",
@@ -415,20 +379,12 @@
       "Beleidsveld": "0319 Overig waterbeheer"
     },
     {
-      "BV_subdomein": "031 Waterbeheer",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "032 Vermindering van de milieuverontreiniging",
       "Beleidsveld": "0320 Sanering van bodemverontreiniging"
     },
     {
       "BV_subdomein": "032 Vermindering van de milieuverontreiniging",
       "Beleidsveld": "0329 Overige vermindering van milieuverontreiniging"
-    },
-    {
-      "BV_subdomein": "032 Vermindering van de milieuverontreiniging",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "034 Bescherming van biodiversiteit, landschappen en bodem",
@@ -443,16 +399,8 @@
       "Beleidsveld": "0349 Overige bescherming van biodiversiteit, landschappen en bodem"
     },
     {
-      "BV_subdomein": "034 Bescherming van biodiversiteit, landschappen en bodem",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "035 Klimaat en energie",
       "Beleidsveld": "0350 Klimaat en energie"
-    },
-    {
-      "BV_subdomein": "035 Klimaat en energie",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "038/9 Overige milieubescherming",
@@ -467,24 +415,12 @@
       "Beleidsveld": "0390 Overige milieubescherming"
     },
     {
-      "BV_subdomein": "038/9 Overige milieubescherming",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "040 Politiediensten",
       "Beleidsveld": "0400 Politiediensten"
     },
     {
-      "BV_subdomein": "040 Politiediensten",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "041 Brandweer",
       "Beleidsveld": "0410 Brandweer"
-    },
-    {
-      "BV_subdomein": "041 Brandweer",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "042/4 Overige hulpdiensten",
@@ -499,8 +435,8 @@
       "Beleidsveld": "0440 Overige hulpdiensten"
     },
     {
-      "BV_subdomein": "042/4 Overige hulpdiensten",
-      "Beleidsveld": "None"
+      "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid",
+      "Beleidsveld": "0450 Rechtspleging"
     },
     {
       "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid",
@@ -515,24 +451,12 @@
       "Beleidsveld": "0490 Overige elementen van openbare orde en veiligheid"
     },
     {
-      "BV_subdomein": "045/9 Overige elementen van openbare orde en veiligheid",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "050 Handel en middenstand",
       "Beleidsveld": "0500 Handel en middenstand"
     },
     {
-      "BV_subdomein": "050 Handel en middenstand",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "051 Nijverheid",
       "Beleidsveld": "0510 Nijverheid"
-    },
-    {
-      "BV_subdomein": "051 Nijverheid",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "052 Toerisme",
@@ -551,56 +475,28 @@
       "Beleidsveld": "0529 Overige activiteiten inzake toerisme"
     },
     {
-      "BV_subdomein": "052 Toerisme",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "053 Land-, tuin- en bosbouw",
       "Beleidsveld": "0530 Land-, tuin- en bosbouw"
-    },
-    {
-      "BV_subdomein": "053 Land-, tuin- en bosbouw",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "054 Visvangst",
       "Beleidsveld": "0540 Visvangst"
     },
     {
-      "BV_subdomein": "054 Visvangst",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "055 Werkgelegenheid",
       "Beleidsveld": "0550 Tewerkstelling en activering"
-    },
-    {
-      "BV_subdomein": "055 Werkgelegenheid",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "059 Overige economische zaken",
       "Beleidsveld": "0590 Overige economische zaken"
     },
     {
-      "BV_subdomein": "059 Overige economische zaken",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "060 Ruimtelijke planning",
       "Beleidsveld": "0600 Ruimtelijke planning"
     },
     {
-      "BV_subdomein": "060 Ruimtelijke planning",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "061 Gebiedsontwikkeling",
       "Beleidsveld": "0610 Gebiedsontwikkeling"
-    },
-    {
-      "BV_subdomein": "061 Gebiedsontwikkeling",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "062 Woonbeleid",
@@ -619,64 +515,32 @@
       "Beleidsveld": "0629 Overig woonbeleid"
     },
     {
-      "BV_subdomein": "062 Woonbeleid",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "063 Watervoorziening",
       "Beleidsveld": "0630 Watervoorziening"
-    },
-    {
-      "BV_subdomein": "063 Watervoorziening",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "064 Elektriciteitsvoorziening",
       "Beleidsveld": "0640 Elektriciteitsvoorziening"
     },
     {
-      "BV_subdomein": "064 Elektriciteitsvoorziening",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "065 Gasvoorziening",
       "Beleidsveld": "0650 Gasvoorziening"
-    },
-    {
-      "BV_subdomein": "065 Gasvoorziening",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "066 Communicatievoorzieningen",
       "Beleidsveld": "0660 Communicatievoorzieningen"
     },
     {
-      "BV_subdomein": "066 Communicatievoorzieningen",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "067 Straatverlichting",
       "Beleidsveld": "0670 Straatverlichting"
-    },
-    {
-      "BV_subdomein": "067 Straatverlichting",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "068 Groene ruimte",
       "Beleidsveld": "0680 Groene ruimte"
     },
     {
-      "BV_subdomein": "068 Groene ruimte",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "069 Overige nutsvoorzieningen",
       "Beleidsveld": "0690 Overige nutsvoorzieningen"
-    },
-    {
-      "BV_subdomein": "069 Overige nutsvoorzieningen",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "070 Culturele instellingen",
@@ -696,15 +560,15 @@
     },
     {
       "BV_subdomein": "070 Culturele instellingen",
+      "Beleidsveld": "0704 Letterkunde, gespecialiseerde bibliotheken"
+    },
+    {
+      "BV_subdomein": "070 Culturele instellingen",
       "Beleidsveld": "0705 Gemeenschapscentrum"
     },
     {
       "BV_subdomein": "070 Culturele instellingen",
       "Beleidsveld": "0709 Overige culturele instellingen"
-    },
-    {
-      "BV_subdomein": "070 Culturele instellingen",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "071 Evenementen",
@@ -723,10 +587,6 @@
       "Beleidsveld": "0719 Overige evenementen"
     },
     {
-      "BV_subdomein": "071 Evenementen",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "072 Erfgoed",
       "Beleidsveld": "0720 Monumentenzorg"
     },
@@ -739,16 +599,8 @@
       "Beleidsveld": "0729 Overig beleid inzake het erfgoed"
     },
     {
-      "BV_subdomein": "072 Erfgoed",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "073 Overig kunst- en cultuurbeleid",
       "Beleidsveld": "0739 Overig kunst- en cultuurbeleid"
-    },
-    {
-      "BV_subdomein": "073 Overig kunst- en cultuurbeleid",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "074 Sport",
@@ -767,10 +619,6 @@
       "Beleidsveld": "0749 Overig sportbeleid"
     },
     {
-      "BV_subdomein": "074 Sport",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "075 Jeugd",
       "Beleidsveld": "0750 Jeugdsector- en verenigingsondersteuning"
     },
@@ -787,10 +635,6 @@
       "Beleidsveld": "0759 Overige activiteiten met betrekking tot jeugd"
     },
     {
-      "BV_subdomein": "075 Jeugd",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "079 Erediensten  en niet-confessionele levensbeschouwelijke gemeenschappen",
       "Beleidsveld": "0790 Erediensten"
     },
@@ -799,20 +643,12 @@
       "Beleidsveld": "0791 Niet-confessionele levensbeschouwelijke gemeenschappen"
     },
     {
-      "BV_subdomein": "079 Erediensten  en niet-confessionele levensbeschouwelijke gemeenschappen",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "080 Basisonderwijs",
       "Beleidsveld": "0800 Gewoon basisonderwijs"
     },
     {
       "BV_subdomein": "080 Basisonderwijs",
       "Beleidsveld": "0801 Buitengewoon basisonderwijs"
-    },
-    {
-      "BV_subdomein": "080 Basisonderwijs",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "081 Secundair onderwijs",
@@ -827,16 +663,8 @@
       "Beleidsveld": "0815 Buitengewoon secundair onderwijs"
     },
     {
-      "BV_subdomein": "081 Secundair onderwijs",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "082 Deeltijds kunstonderwijs",
       "Beleidsveld": "0820 Deeltijds kunstonderwijs"
-    },
-    {
-      "BV_subdomein": "082 Deeltijds kunstonderwijs",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "083 Hoger en Volwassenenonderwijs",
@@ -844,15 +672,19 @@
     },
     {
       "BV_subdomein": "083 Hoger en Volwassenenonderwijs",
-      "Beleidsveld": "None"
+      "Beleidsveld": "0835 Hoger onderwijs"
+    },
+    {
+      "BV_subdomein": "086 Ondersteunende diensten voor het onderwijs",
+      "Beleidsveld": "0860 Centra voor leerlingenbegeleiding"
+    },
+    {
+      "BV_subdomein": "086 Ondersteunende diensten voor het onderwijs",
+      "Beleidsveld": "0862 Huisvesting voor schoolgaanden"
     },
     {
       "BV_subdomein": "086 Ondersteunende diensten voor het onderwijs",
       "Beleidsveld": "0869 Overige ondersteunende diensten voor het onderwijs"
-    },
-    {
-      "BV_subdomein": "086 Ondersteunende diensten voor het onderwijs",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "087/8 Algemeen onderwijsbeleid",
@@ -867,12 +699,12 @@
       "Beleidsveld": "0889 Ondersteunende diensten voor het algemeen onderwijsbeleid"
     },
     {
-      "BV_subdomein": "087/8 Algemeen onderwijsbeleid",
-      "Beleidsveld": "None"
+      "BV_subdomein": "090 Sociaal beleid",
+      "Beleidsveld": "0900 Sociale bijstand"
     },
     {
       "BV_subdomein": "090 Sociaal beleid",
-      "Beleidsveld": "0900 Sociale bijstand"
+      "Beleidsveld": "0901 Voorschotten"
     },
     {
       "BV_subdomein": "090 Sociaal beleid",
@@ -891,10 +723,6 @@
       "Beleidsveld": "0909 Overige verrichtingen inzake sociaal beleid"
     },
     {
-      "BV_subdomein": "090 Sociaal beleid",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "091 Ziekte- en invaliditeit",
       "Beleidsveld": "0910 Woningen voor personen met een handicap"
     },
@@ -904,19 +732,15 @@
     },
     {
       "BV_subdomein": "091 Ziekte- en invaliditeit",
-      "Beleidsveld": "None"
+      "Beleidsveld": "0919 Overige activiteiten inzake ziekte en invaliditeit"
     },
     {
       "BV_subdomein": "092 Werkloosheid",
-      "Beleidsveld": "None"
+      "Beleidsveld": "0920 Werkloosheid"
     },
     {
       "BV_subdomein": "093 Sociale huisvesting",
       "Beleidsveld": "0930 Sociale huisvesting"
-    },
-    {
-      "BV_subdomein": "093 Sociale huisvesting",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "094 Gezin en kinderen",
@@ -955,10 +779,6 @@
       "Beleidsveld": "0949 Overige gezinshulp"
     },
     {
-      "BV_subdomein": "094 Gezin en kinderen",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "095 Ouderen",
       "Beleidsveld": "0950 Ouderenwoningen"
     },
@@ -981,10 +801,6 @@
     {
       "BV_subdomein": "095 Ouderen",
       "Beleidsveld": "0959 Overige verrichtingen betreffende ouderen"
-    },
-    {
-      "BV_subdomein": "095 Ouderen",
-      "Beleidsveld": "None"
     },
     {
       "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
@@ -1015,10 +831,6 @@
       "Beleidsveld": "0989 Overige dienstverlening inzake volksgezondheid"
     },
     {
-      "BV_subdomein": "098 Dienstverlening inzake volksgezondheid",
-      "Beleidsveld": "None"
-    },
-    {
       "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging",
       "Beleidsveld": "0990 Begraafplaatsen"
     },
@@ -1029,10 +841,6 @@
     {
       "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging",
       "Beleidsveld": "0992 Lijkbezorging"
-    },
-    {
-      "BV_subdomein": "099 Begraafplaatsen, crematoria en lijkbezorging",
-      "Beleidsveld": "None"
     }
   ],
   "municipalities": {
