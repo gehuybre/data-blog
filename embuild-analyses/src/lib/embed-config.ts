@@ -240,6 +240,18 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
         component: "InvesteringenEmbed",
         height: 700,
       },
+      "bv-category-breakdown": {
+        type: "custom",
+        title: "Verdeling per Beleidsveld (BV)",
+        component: "InvesteringenCategoryEmbed",
+        height: 800,
+      },
+      "rek-category-breakdown": {
+        type: "custom",
+        title: "Verdeling per Algemene Rekening (REK)",
+        component: "InvesteringenCategoryEmbed",
+        height: 800,
+      },
     },
   },
 ]
