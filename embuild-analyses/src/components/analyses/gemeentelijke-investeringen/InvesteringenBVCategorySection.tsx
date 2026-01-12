@@ -189,7 +189,8 @@ export function InvesteringenBVCategorySection() {
     const result = [...top9]
     if (other.length > 0) {
       const otherSum = other.reduce((sum, item) => sum + item.value, 0)
-      result.push({ label: 'Overige', value: otherSum })
+      const otherCount = other.reduce((sum, item) => sum + item.count, 0)
+      result.push({ label: 'Overige', value: otherSum, count: otherCount })
     }
 
     return result
