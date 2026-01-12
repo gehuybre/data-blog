@@ -252,6 +252,18 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
         component: "InvesteringenCategoryEmbed",
         height: 800,
       },
+      "investments-bv-scatter": {
+        type: "custom",
+        title: "Gemeentelijke Investeringen per Domein - Scatter Plot",
+        component: "InvesteringenBVScatterEmbed",
+        height: 800,
+      },
+      "investments-rek-scatter": {
+        type: "custom",
+        title: "Gemeentelijke Investeringen per Rekening - Scatter Plot",
+        component: "InvesteringenREKScatterEmbed",
+        height: 800,
+      },
     },
   },
 ]

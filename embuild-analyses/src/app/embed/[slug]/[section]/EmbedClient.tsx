@@ -12,6 +12,8 @@ import { GebouwenparkEmbed } from "@/components/analyses/gebouwenpark/Gebouwenpa
 import { InvesteringenEmbed } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenEmbed"
 import { InvesteringenBVCategorySection } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenBVCategorySection"
 import { InvesteringenREKCategorySection } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenREKCategorySection"
+import { InvesteringenBVScatterSection } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenBVScatterSection"
+import { InvesteringenREKScatterSection } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenREKScatterSection"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig, getValidSections } from "@/lib/embed-config"
 import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
@@ -478,6 +480,16 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
       if (section === "rek-category-breakdown") {
         return <InvesteringenREKCategorySection />
       }
+    }
+
+    // Handle InvesteringenBVScatterEmbed
+    if (config.component === "InvesteringenBVScatterEmbed") {
+      return <InvesteringenBVScatterSection />
+    }
+
+    // Handle InvesteringenREKScatterEmbed
+    if (config.component === "InvesteringenREKScatterEmbed") {
+      return <InvesteringenREKScatterSection />
     }
 
     // Unknown custom component
