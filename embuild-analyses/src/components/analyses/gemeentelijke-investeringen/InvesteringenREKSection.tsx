@@ -147,11 +147,6 @@ export function InvesteringenREKSection() {
         setVlaanderenData(vlaanderen)
         setTotalChunks(meta.rek_chunks)
 
-        // Set default niveau3 to first stripped value if none selected
-        if (!selectedNiveau3 && lookupsData.niveau3s.length > 0) {
-          setSelectedNiveau3(stripPrefix(lookupsData.niveau3s[0].Niveau_3))
-        }
-
         setIsLoading(false)
 
         // Load chunks sequentially
