@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useMemo } from 'react'
 import { Button } from "@/components/ui/button"
 import { Check, ChevronsUpDown } from 'lucide-react'
 import {
@@ -24,12 +24,15 @@ export function SimpleGeoFilter({ availableMunicipalities }: SimpleGeoFilterProp
   const { selection, setSelection } = useContext(SimpleGeoContext)
   const [open, setOpen] = useState(false)
 
-  const allMunicipalities = getAllMunicipalities()
+  const allMunicipalities = useMemo(() => getAllMunicipalities(), [])
 
   // Filter municipalities if availableMunicipalities is provided
-  const municipalities = availableMunicipalities
-    ? allMunicipalities.filter(m => availableMunicipalities.includes(m.nisCode))
-    : allMunicipalities
+  const municipalities = useMemo(() =>
+    availableMunicipalities
+      ? allMunicipalities.filter(m => availableMunicipalities.includes(m.nisCode))
+      : allMunicipalities,
+    [allMunicipalities, availableMunicipalities]
+  )
 
   const getLabel = () => {
     if (selection.type === 'all') return 'Heel Vlaanderen'
