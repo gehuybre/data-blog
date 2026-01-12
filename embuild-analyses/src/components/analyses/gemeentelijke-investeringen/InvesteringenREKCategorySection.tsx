@@ -164,15 +164,27 @@ export function InvesteringenREKCategorySection() {
     }
 
     // Aggregate by Alg_rekening (highest detail level)
-    const byCategory: Record<string, { label: string; value: number }> = {}
+    const byCategory: Record<string, { label: string; value: number; count: number }> = {}
 
     filteredData.forEach(record => {
       const category = stripPrefix(record.Alg_rekening)
       if (!byCategory[category]) {
-        byCategory[category] = { label: category, value: 0 }
+        byCategory[category] = { label: category, value: 0, count: 0 }
       }
       byCategory[category].value += record[selectedMetric]
+      byCategory[category].count += 1
     })
+
+    // For Per_inwoner metric, calculate average across municipalities (not sum)
+    // Why: Per_inwoner values are already normalized per municipality population.
+    // Summing them would be meaningless - we need the average to show typical spending.
+    if (selectedMetric === 'Per_inwoner') {
+      Object.values(byCategory).forEach(cat => {
+        if (cat.count > 0) {
+          cat.value = cat.value / cat.count
+        }
+      })
+    }
 
     // Sort by value descending
     const sorted = Object.values(byCategory).sort((a, b) => b.value - a.value)
@@ -205,14 +217,27 @@ export function InvesteringenREKCategorySection() {
       }
 
       // Aggregate by Alg_rekening
-      const byCategory: Record<string, number> = {}
+      const byCategory: Record<string, { value: number; count: number }> = {}
       filteredData.forEach(record => {
         const category = stripPrefix(record.Alg_rekening)
-        byCategory[category] = (byCategory[category] || 0) + record[selectedMetric]
+        if (!byCategory[category]) {
+          byCategory[category] = { value: 0, count: 0 }
+        }
+        byCategory[category].value += record[selectedMetric]
+        byCategory[category].count += 1
       })
 
+      // For Per_inwoner, calculate average
+      if (selectedMetric === 'Per_inwoner') {
+        Object.values(byCategory).forEach(cat => {
+          if (cat.count > 0) {
+            cat.value = cat.value / cat.count
+          }
+        })
+      }
+
       // Get top 9 + other
-      const sorted = Object.values(byCategory).sort((a, b) => b - a)
+      const sorted = Object.values(byCategory).map(c => c.value).sort((a, b) => b - a)
       const top9 = sorted.slice(0, 9)
       const other = sorted.slice(9)
       const values = [...top9]
