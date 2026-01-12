@@ -34,7 +34,10 @@ interface BVLookups {
 }
 
 interface REKLookups {
-  hoofdrekeningen: Array<{ Economische_rekening_hoofdrekening: string }>
+  hoofdrekeningen: Array<{ 
+    Economische_rekening_hoofdrekening?: string
+    Niveau_3?: string
+  }>
   rubrieken: Array<{
     Economische_rekening_hoofdrekening: string
     Economische_rekening_rubriek: string
@@ -309,7 +312,10 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
           const hoofdrekeningen = lookupsData.hoofdrekeningen || (lookupsData as any).niveau3s
           if (hoofdrekeningen && hoofdrekeningen.length > 0) {
             const first = hoofdrekeningen[0]
-            setSelectedHoofdrekening(stripPrefix(first.Economische_rekening_hoofdrekening || first.Niveau_3))
+            const value = first.Economische_rekening_hoofdrekening || first.Niveau_3
+            if (value) {
+              setSelectedHoofdrekening(stripPrefix(value))
+            }
           }
 
           // Load chunks in parallel
