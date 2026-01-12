@@ -183,10 +183,42 @@ export function InvesteringenBVCategorySection() {
     return result
   }, [lookups, muniData, selectedYear, geoSelection, selectedMetric])
 
-  // Calculate max value for bar chart scaling
+  // Calculate max value across ALL years for consistent bar chart scaling
   const maxValue = useMemo(() => {
-    return Math.max(...categoryData.map(d => d.value), 1)
-  }, [categoryData])
+    if (!lookups || muniData.length === 0) return 1
+
+    const years = [2014, 2020, 2026]
+    let globalMax = 1
+
+    years.forEach(year => {
+      // Filter by year and municipality (same logic as categoryData)
+      let filteredData = muniData.filter(d => d.Rapportjaar === year)
+      if (geoSelection.type === 'municipality' && geoSelection.code) {
+        filteredData = filteredData.filter(d => d.NIS_code === geoSelection.code)
+      }
+
+      // Aggregate by Beleidsveld
+      const byCategory: Record<string, number> = {}
+      filteredData.forEach(record => {
+        const category = stripPrefix(record.Beleidsveld)
+        byCategory[category] = (byCategory[category] || 0) + record[selectedMetric]
+      })
+
+      // Get top 9 + other
+      const sorted = Object.values(byCategory).sort((a, b) => b - a)
+      const top9 = sorted.slice(0, 9)
+      const other = sorted.slice(9)
+      const values = [...top9]
+      if (other.length > 0) {
+        values.push(other.reduce((sum, val) => sum + val, 0))
+      }
+
+      const yearMax = Math.max(...values, 1)
+      globalMax = Math.max(globalMax, yearMax)
+    })
+
+    return globalMax
+  }, [lookups, muniData, geoSelection, selectedMetric])
 
   if (error) {
     return (
