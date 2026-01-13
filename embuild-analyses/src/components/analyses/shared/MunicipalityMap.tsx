@@ -7,6 +7,7 @@ import { geoBounds } from "d3-geo"
 import { Loader2, TrendingUp, TrendingDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getBasePath } from "@/lib/path-utils"
+import { isFlemishMunicipality } from "@/lib/geo-utils"
 import { TimeSlider } from "./TimeSlider"
 import { MapLegend, NoDataIndicator } from "./MapLegend"
 import { MapControls } from "./MapControls"
@@ -243,17 +244,8 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
     const codes = Array.from(valueByGeoCode.keys())
     if (codes.length === 0) return false
 
-    // Check if any municipality is from Wallonia (5,6,8,9) or Brussels (21)
-    const hasNonFlemish = codes.some((code) => {
-      const firstChar = code.charAt(0)
-      const firstTwo = code.substring(0, 2)
-      // Walloon municipalities start with 5, 6, 8, 9
-      // Brussels municipalities start with 21
-      // Walloon Brabant starts with 25
-      return ['5', '6', '8', '9'].includes(firstChar) || firstTwo === '21' || firstTwo === '25'
-    })
-
-    console.log(`[MunicipalityMap] isFlandersOnly check: codes=${codes.length}, hasNonFlemish=${hasNonFlemish} -> ${!hasNonFlemish}`)
+    // Check if any municipality is not Flemish
+    const hasNonFlemish = codes.some((code) => !isFlemishMunicipality(code))
     return !hasNonFlemish
   }, [valueByGeoCode])
 
@@ -285,31 +277,18 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
   // Filter provinces if needed
   const filteredProvincesGeo = useMemo(() => {
     if (!provincesGeo) return null
-    if (!isFlandersOnly) {
-      console.log("[MunicipalityMap] Not Flanders only, returning all provinces")
-      return provincesGeo
-    }
+    if (!isFlandersOnly) return provincesGeo
 
-    // Flemish province codes: Antwerpen (10000), Vl-Brabant (20001), W-Vl (3xxxx), O-Vl (4xxxx), Limburg (7xxxx)
-    // Note: 25000 is Walloon Brabant - DO NOT INCLUDE
-    // GeoJSON codes often use: 10000 (Ant), 20001 (VlB), 30000 (WVl), 40000 (OVl), 70000 (Lim)
+    // Flemish province codes: Antwerpen (10000), Vl-Brabant (20001), W-Vl (30000), O-Vl (40000), Limburg (70000)
     const flemishProvinceCodes = ['10000', '20001', '30000', '40000', '70000']
 
-    // Deep clone to avoid mutating state
-    const filtered = JSON.parse(JSON.stringify(provincesGeo))
-
-    // Handle both TopoJSON objects (if used) or GeoJSON features
-    if (filtered.features) {
-      const originalCount = filtered.features.length
-      filtered.features = filtered.features.filter((f: any) =>
+    // Use shallow clone for better performance
+    return {
+      ...provincesGeo,
+      features: provincesGeo.features.filter((f: any) =>
         flemishProvinceCodes.includes(String(f.properties?.code))
       )
-      console.log(`[MunicipalityMap] Filtered provinces (GeoJSON): ${originalCount} -> ${filtered.features.length}`)
-    } else {
-      console.log("[MunicipalityMap] Provinces format not recognized as GeoJSON features")
     }
-
-    return filtered
   }, [provincesGeo, isFlandersOnly])
 
   // Update center when projection config changes (when data scope is detected)
@@ -525,13 +504,8 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
                   const value = valueByGeoCode.get(rawCode)
                   const isActive = selectedMunicipality && String(selectedMunicipality) === rawCode
 
-                  // Determine if this municipality is Flemish
-                  const firstChar = rawCode.charAt(0)
-                  const firstTwo = rawCode.substring(0, 2)
-                  const isFlemish = !(['5', '6', '8', '9'].includes(firstChar) || firstTwo === '21' || firstTwo === '25')
-
                   // If data is Flanders-only and this is not a Flemish municipality, hide it
-                  const shouldHide = isFlandersOnly && !isFlemish
+                  const shouldHide = isFlandersOnly && !isFlemishMunicipality(rawCode)
 
                   // Choose fill color
                   let fill: string
