@@ -7,6 +7,7 @@ import { geoBounds } from "d3-geo"
 import { Loader2, TrendingUp, TrendingDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getBasePath } from "@/lib/path-utils"
+import { isFlemishMunicipality } from "@/lib/geo-utils"
 import { TimeSlider } from "./TimeSlider"
 import { MapLegend, NoDataIndicator } from "./MapLegend"
 import { MapControls } from "./MapControls"
@@ -243,15 +244,8 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
     const codes = Array.from(valueByGeoCode.keys())
     if (codes.length === 0) return false
 
-    // Check if any municipality is from Wallonia (5,6,8,9) or Brussels (21)
-    const hasNonFlemish = codes.some((code) => {
-      const firstChar = code.charAt(0)
-      const firstTwo = code.substring(0, 2)
-      // Walloon municipalities start with 5, 6, 8, 9
-      // Brussels municipalities start with 21
-      return firstChar === '5' || firstChar === '6' || firstChar === '8' || firstChar === '9' || firstTwo === '21'
-    })
-
+    // Check if any municipality is not Flemish
+    const hasNonFlemish = codes.some((code) => !isFlemishMunicipality(code))
     return !hasNonFlemish
   }, [valueByGeoCode])
 
@@ -279,6 +273,23 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
     if (!values.length) return null
     return scaleQuantile<string>().domain(values).range(MAP_COLOR_SCHEMES[colorScheme])
   }, [valueByGeoCode, colorScheme])
+
+  // Filter provinces if needed
+  const filteredProvincesGeo = useMemo(() => {
+    if (!provincesGeo) return null
+    if (!isFlandersOnly) return provincesGeo
+
+    // Flemish province codes: Antwerpen (10000), Vl-Brabant (20001), W-Vl (30000), O-Vl (40000), Limburg (70000)
+    const flemishProvinceCodes = ['10000', '20001', '30000', '40000', '70000']
+
+    // Use shallow clone for better performance
+    return {
+      ...provincesGeo,
+      features: provincesGeo.features.filter((f: any) =>
+        flemishProvinceCodes.includes(String(f.properties?.code))
+      )
+    }
+  }, [provincesGeo, isFlandersOnly])
 
   // Update center when projection config changes (when data scope is detected)
   useEffect(() => {
@@ -492,10 +503,19 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
                   const rawCode = String(geo.properties?.code ?? "")
                   const value = valueByGeoCode.get(rawCode)
                   const isActive = selectedMunicipality && String(selectedMunicipality) === rawCode
-                  const fill =
-                    value === undefined || !colorScale
-                      ? "#f3f4f6"
-                      : colorScale(value) ?? "#f3f4f6"
+
+                  // If data is Flanders-only and this is not a Flemish municipality, hide it
+                  const shouldHide = isFlandersOnly && !isFlemishMunicipality(rawCode)
+
+                  // Choose fill color
+                  let fill: string
+                  if (shouldHide) {
+                    fill = "transparent"
+                  } else if (value === undefined || !colorScale) {
+                    fill = "#f5f5f5"
+                  } else {
+                    fill = colorScale(value) ?? "#f5f5f5"
+                  }
 
                   const name = geo.properties?.LAU_NAME ?? rawCode
 
@@ -503,28 +523,32 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
                     <Geography
                       key={geo.rsmKey}
                       geography={geo}
-                      onClick={() => onSelectMunicipality?.(rawCode)}
-                      onMouseMove={(e) => handleMouseMove(e, rawCode, name)}
+                      onClick={() => !shouldHide && onSelectMunicipality?.(rawCode)}
+                      onMouseMove={(e) => !shouldHide && handleMouseMove(e, rawCode, name)}
                       onMouseLeave={handleMouseLeave}
                       style={{
                         default: {
                           fill,
-                          stroke: "#d1d5db",
-                          strokeWidth: 0.3 / zoom,
+                          // If hidden, no stroke. If visible, dark stroke for clear definition
+                          stroke: shouldHide ? "transparent" : "#333333",
+                          strokeWidth: shouldHide ? 0 : 0.3 / zoom, // Thinner, sharper dark border
                           outline: "none",
-                          cursor: onSelectMunicipality ? "pointer" : "default",
+                          cursor: shouldHide ? "default" : (onSelectMunicipality ? "pointer" : "default"),
                           transition: "fill 300ms ease-in-out",
                         },
                         hover: {
-                          fill: value === undefined || !colorScale ? "#e5e7eb" : fill,
-                          stroke: "#6b7280",
-                          strokeWidth: 0.8 / zoom,
+                          // On hover, darken slightly if it has data or is empty (but visible)
+                          fill: shouldHide ? "transparent" : (value === undefined || !colorScale ? "#e5e7eb" : fill),
+                          stroke: shouldHide ? "transparent" : "#111827", // Almost black on hover
+                          strokeWidth: shouldHide ? 0 : 0.6 / zoom,
                           outline: "none",
+                          // Opacity effect on hover for data-filled regions
+                          opacity: shouldHide || value === undefined ? 1 : 0.9,
                         },
                         pressed: {
                           fill,
-                          stroke: "#6b7280",
-                          strokeWidth: 0.8 / zoom,
+                          stroke: shouldHide ? "transparent" : "#111827",
+                          strokeWidth: shouldHide ? 0 : 0.6 / zoom,
                           outline: "none",
                         },
                       }}
@@ -537,8 +561,8 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
             </Geographies>
 
             {/* Province boundary overlay (optional) */}
-            {showProvinceBoundaries && provincesGeo && (
-              <Geographies geography={provincesGeo}>
+            {showProvinceBoundaries && filteredProvincesGeo && (
+              <Geographies geography={filteredProvincesGeo}>
                 {({ geographies }) =>
                   geographies.map((geo) => (
                     <Geography

@@ -68,3 +68,23 @@ export function getRegionForMunicipality(municipalityCode: number): RegionCode {
   const provCode = getProvinceForMunicipality(municipalityCode);
   return getRegionForProvince(provCode) || '1000';
 }
+
+/**
+ * Determines if a municipality code belongs to a Flemish municipality.
+ * Flemish municipalities are those NOT from Wallonia (5,6,8,9), Brussels (21), or Walloon Brabant (2x excluding 23/24).
+ *
+ * @param code - Municipality NIS code as string or number
+ * @returns true if municipality is in Flanders, false otherwise
+ */
+export function isFlemishMunicipality(code: string | number): boolean {
+  const codeStr = String(code);
+  const firstChar = codeStr.charAt(0);
+  const firstTwo = codeStr.substring(0, 2);
+
+  // Flemish = NOT (Walloon 5,6,8,9 OR Brussels 21 OR Walloon Brabant 2x excluding 23,24)
+  if (['5', '6', '8', '9'].includes(firstChar)) return false;
+  if (firstTwo === '21') return false;
+  if (firstChar === '2' && firstTwo !== '23' && firstTwo !== '24') return false;
+
+  return true;
+}
