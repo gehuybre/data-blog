@@ -8,67 +8,67 @@
     "wegenbouw": {
       "id": "wegenbouw",
       "label": "Wegenbouw & Infrastructuur",
-      "emoji": "🛣️",
+      "emoji": "",
       "project_count": 1390
     },
     "riolering": {
       "id": "riolering",
       "label": "Riolering & Waterbeheer",
-      "emoji": "💧",
+      "emoji": "",
       "project_count": 449
     },
     "scholenbouw": {
       "id": "scholenbouw",
       "label": "Scholenbouw",
-      "emoji": "🏫",
+      "emoji": "",
       "project_count": 287
     },
     "sport": {
       "id": "sport",
       "label": "Sportinfrastructuur",
-      "emoji": "⚽",
+      "emoji": "",
       "project_count": 306
     },
     "cultuur": {
       "id": "cultuur",
       "label": "Culturele Infrastructuur",
-      "emoji": "🎭",
+      "emoji": "",
       "project_count": 416
     },
     "gebouwen": {
       "id": "gebouwen",
       "label": "Administratieve & Publieke Gebouwen",
-      "emoji": "🏢",
+      "emoji": "",
       "project_count": 160
     },
     "verlichting": {
       "id": "verlichting",
       "label": "Straatverlichting & Signalisatie",
-      "emoji": "💡",
+      "emoji": "",
       "project_count": 202
     },
     "groen": {
       "id": "groen",
       "label": "Groene Ruimte & Parks",
-      "emoji": "🌳",
+      "emoji": "",
       "project_count": 940
     },
     "ruimtelijke-ordening": {
       "id": "ruimtelijke-ordening",
       "label": "Ruimtelijke Ordening & Gebiedsontwikkeling",
-      "emoji": "🏘️",
+      "emoji": "",
       "project_count": 223
     },
     "zorg": {
       "id": "zorg",
       "label": "Sociale Infrastructuur & Zorg",
-      "emoji": "♿",
+      "emoji": "",
       "project_count": 734
     },
     "overige": {
       "id": "overige",
       "label": "Overige",
-      "emoji": "📋",
+      "emoji": "",
       "project_count": 2792
     }
   }
