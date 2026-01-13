@@ -87,8 +87,7 @@ NIS_MERGERS_LOOKUP = {
     '37007': '37022', '37015': '37022', # Tielt
     '44012': '44086', '44048': '44086', # Nazareth-De Pinte
     '44034': '44087', '44073': '44087', # Lochristi
-    '46029': '46029', '44045': '46029', # Lokeren (note: 46029 is both source and target in some refs, but here target)
-    '46014': '46029', # Lokeren
+    '46014': '46029', '44045': '46029', # Lokeren
     '44040': '44088', '44043': '44088', # Merelbeke-Melle
     '46003': '46030', '46013': '46030', '11056': '46030', # Beveren-Kruibeke-Zwijndrecht
     '73006': '73110', '73032': '73110', # Bilzen-Hoeselt

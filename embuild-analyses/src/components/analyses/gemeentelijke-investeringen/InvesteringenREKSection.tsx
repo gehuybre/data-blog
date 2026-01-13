@@ -28,7 +28,7 @@ import {
   formatCurrency as formatFullCurrency,
 } from "@/lib/number-formatters"
 import { getPublicPath } from "@/lib/path-utils"
-import { normalizeNisCode, getFusionInfo } from "@/lib/nis-fusion-utils"
+import { normalizeNisCode, getFusionInfo, getConstituents } from "@/lib/nis-fusion-utils"
 
 interface REKLookups {
   niveau3s: Array<{ Niveau_3: string }>
@@ -217,9 +217,21 @@ export function InvesteringenREKSection() {
 
     // Apply geo filter
     if (geoSelection.type === 'municipality' && geoSelection.code) {
-      // Match if the record's normalized code equals the selection
-      // This ensures that selecting "Pajottegem" (23106) also includes data for "Galmaarden" (23023)
-      data = data.filter(d => (normalizeNisCode(d.NIS_code) || d.NIS_code) === geoSelection.code)
+      // Get constituent codes if this is a merged municipality
+      const constituents = getConstituents(geoSelection.code)
+
+      // Build list of codes to match (new code + all old constituent codes)
+      const codesToMatch = constituents.length > 0
+        ? [geoSelection.code, ...constituents]
+        : [geoSelection.code]
+
+      data = data.filter(d => {
+        // Normalize the record's code
+        const normalizedCode = normalizeNisCode(d.NIS_code) || d.NIS_code
+
+        // Match if either the normalized code OR the original code is in our list
+        return codesToMatch.includes(normalizedCode) || codesToMatch.includes(d.NIS_code)
+      })
     } else if (geoSelection.type === 'province' && geoSelection.code) {
       // Filter by province (first digit match for 1,3,4,7 or first 2 for 21/23/24/25 etc)
       // Simplistic implementation - assumes province code is passed correctly

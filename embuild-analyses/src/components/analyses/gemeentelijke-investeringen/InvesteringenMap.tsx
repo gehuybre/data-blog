@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react'
 import { MunicipalityMap } from "../shared/MunicipalityMap"
+import { getConstituents } from '@/lib/nis-fusion-utils'
 
 interface MapData {
   municipality: string
@@ -19,15 +20,29 @@ const formatNumber = (num: number) => new Intl.NumberFormat('nl-BE').format(Math
 const formatCurrency = (num: number) => `€ ${formatNumber(num)}`
 
 export function InvesteringenMap({ data, selectedMetric, title }: InvesteringenMapProps) {
-  // Transform data for map
+  // Transform data for map, expanding merged municipalities to constituent shapes
   const mapData = useMemo(() => {
     return data
       .filter(d => d.nis_code) // Only include municipalities with NIS codes
-      .map(d => ({
-        municipalityCode: d.nis_code!,
-        municipalityName: d.municipality,
-        value: d.value,
-      }))
+      .flatMap(d => {
+        const constituents = getConstituents(d.nis_code!)
+
+        // If merged municipality, distribute value to constituent shapes for rendering
+        if (constituents.length > 0) {
+          return constituents.map(oldCode => ({
+            municipalityCode: oldCode,
+            municipalityName: d.municipality,
+            value: d.value, // Same value shown for all constituent shapes
+          }))
+        }
+
+        // Regular municipality - pass through as-is
+        return [{
+          municipalityCode: d.nis_code!,
+          municipalityName: d.municipality,
+          value: d.value,
+        }]
+      })
   }, [data])
 
   const valueLabel = selectedMetric === 'total' ? 'Totale investering' : 'Investering per inwoner'
