@@ -262,12 +262,18 @@ def main():
     # Prepare BV data
     bv_results = prepare_bv_data()
     save_json(bv_results['lookups'], 'bv_lookups.json')
+    # Also save lookups to internal results dir for nisUtils.ts imports
+    save_json(bv_results['lookups'], RESULTS_INTERNAL_DIR / 'bv_lookups.json')
+    
     bv_chunks = save_json(bv_results['municipality_data'], 'bv_municipality_data.json', chunk_size=chunk_size)
     save_json(bv_results['vlaanderen_data'], 'bv_vlaanderen_data.json')
 
     # Prepare REK data
     rek_results = prepare_rek_data()
     save_json(rek_results['lookups'], 'rek_lookups.json')
+    # Also save lookups to internal results dir for nisUtils.ts imports
+    save_json(rek_results['lookups'], RESULTS_INTERNAL_DIR / 'rek_lookups.json')
+
     rek_chunks = save_json(rek_results['municipality_data'], 'rek_municipality_data.json', chunk_size=chunk_size)
     save_json(rek_results['vlaanderen_data'], 'rek_vlaanderen_data.json')
 
