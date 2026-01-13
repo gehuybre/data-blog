@@ -28,6 +28,7 @@ import {
   formatCurrency as formatFullCurrency,
 } from "@/lib/number-formatters"
 import { getPublicPath } from "@/lib/path-utils"
+import { normalizeNisCode, getFusionInfo, getConstituents } from "@/lib/nis-fusion-utils"
 
 interface BVLookups {
   domains: Array<{ BV_domein: string }>
@@ -234,7 +235,21 @@ export function InvesteringenBVSection() {
 
     // Apply geo filter
     if (geoSelection.type === 'municipality' && geoSelection.code) {
-      data = data.filter(d => d.NIS_code === geoSelection.code)
+      // Get constituent codes if this is a merged municipality
+      const constituents = getConstituents(geoSelection.code)
+
+      // Build list of codes to match (new code + all old constituent codes)
+      const codesToMatch = constituents.length > 0
+        ? [geoSelection.code, ...constituents]
+        : [geoSelection.code]
+
+      data = data.filter(d => {
+        // Normalize the record's code
+        const normalizedCode = normalizeNisCode(d.NIS_code) || d.NIS_code
+
+        // Match if either the normalized code OR the original code is in our list
+        return codesToMatch.includes(normalizedCode) || codesToMatch.includes(d.NIS_code)
+      })
     }
 
     return data
@@ -252,7 +267,8 @@ export function InvesteringenBVSection() {
       const perMuniYear: Record<string, number> = {}
 
       filteredData.forEach(record => {
-        const key = `${record.NIS_code}_${record.Rapportjaar}`
+        const normalizedCode = normalizeNisCode(record.NIS_code) || record.NIS_code
+        const key = `${normalizedCode}_${record.Rapportjaar}`
         perMuniYear[key] = (perMuniYear[key] || 0) + record[selectedMetric]
       })
 
@@ -274,7 +290,8 @@ export function InvesteringenBVSection() {
           if (!municipalityCounts[record.Rapportjaar]) {
             municipalityCounts[record.Rapportjaar] = new Set()
           }
-          municipalityCounts[record.Rapportjaar].add(record.NIS_code)
+          const normalizedCode = normalizeNisCode(record.NIS_code) || record.NIS_code
+          municipalityCounts[record.Rapportjaar].add(normalizedCode)
         })
         Object.keys(byYear).forEach(year => {
           const y = parseInt(year)
@@ -312,15 +329,21 @@ export function InvesteringenBVSection() {
       // Show latest year for table
       if (record.Rapportjaar !== 2026) return
 
-      if (!byMuni[record.NIS_code]) {
-        byMuni[record.NIS_code] = {
-          municipality: getMunicipalityName(record.NIS_code),
+      const normalizedCode = normalizeNisCode(record.NIS_code) || record.NIS_code
+
+      if (!byMuni[normalizedCode]) {
+        // Use fusion info for name if available
+        const fusion = getFusionInfo(normalizedCode)
+        const name = fusion ? fusion.newName : getMunicipalityName(normalizedCode)
+
+        byMuni[normalizedCode] = {
+          municipality: name,
           total: 0,
           count: 0
         }
       }
-      byMuni[record.NIS_code].total += record[selectedMetric]
-      byMuni[record.NIS_code].count += 1
+      byMuni[normalizedCode].total += record[selectedMetric]
+      byMuni[normalizedCode].count += 1
     })
 
     return Object.values(byMuni)
@@ -336,10 +359,18 @@ export function InvesteringenBVSection() {
     filteredData
       .filter(d => d.Rapportjaar === latestYear)
       .forEach(record => {
-        if (!byMuni[record.NIS_code]) {
-          byMuni[record.NIS_code] = { municipalityCode: record.NIS_code, value: 0 }
+        // Normalize NIS code to handle 2025 mergers
+        const normalizedCode = normalizeNisCode(record.NIS_code)
+        if (!normalizedCode) return
+
+        if (!byMuni[normalizedCode]) {
+          // If fusion, use the new name
+          const fusion = getFusionInfo(normalizedCode)
+          const name = fusion ? fusion.newName : getMunicipalityName(normalizedCode)
+
+          byMuni[normalizedCode] = { municipalityCode: normalizedCode, value: 0 }
         }
-        byMuni[record.NIS_code].value += record[selectedMetric]
+        byMuni[normalizedCode].value += record[selectedMetric]
       })
 
     return Object.values(byMuni)
@@ -347,8 +378,13 @@ export function InvesteringenBVSection() {
 
   // Get available municipalities from the filtered data (without geo filter)
   const availableMunicipalities = useMemo(() => {
-    const nisCodesSet = new Set(dataWithoutGeoFilter.map(d => d.NIS_code))
-    return Array.from(nisCodesSet)
+    // We normalize codes here too, so the user sees merged municipality names in the filter
+    const normalizedSet = new Set<string>()
+    dataWithoutGeoFilter.forEach(d => {
+      const c = normalizeNisCode(d.NIS_code)
+      if (c) normalizedSet.add(c)
+    })
+    return Array.from(normalizedSet)
   }, [dataWithoutGeoFilter])
 
   if (error) {
