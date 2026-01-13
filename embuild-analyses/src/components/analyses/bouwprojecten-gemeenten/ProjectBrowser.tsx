@@ -228,7 +228,7 @@ export function ProjectBrowser() {
     <div className="space-y-6">
       {/* Header */}
       <div className="rounded-lg border bg-card p-6">
-        <h2 className="text-2xl font-bold mb-2">🔍 Project Browser - Bouwkansen 2026-2031</h2>
+        <h2 className="text-2xl font-bold mb-2">Project Browser - Bouwkansen 2026-2031</h2>
         <p className="text-muted-foreground">
           Doorzoek concrete investeringsprojecten uit de meerjarenplannen van Vlaamse gemeenten.
           Gebruik de filters om projecten te vinden die relevant zijn voor jouw sector.
@@ -238,7 +238,7 @@ export function ProjectBrowser() {
       {/* Partial failure warning */}
       {error && projects.length > 0 && (
         <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-          <p className="text-yellow-800 text-sm">⚠️ {error}</p>
+          <p className="text-yellow-800 text-sm">{error}</p>
         </div>
       )}
 
