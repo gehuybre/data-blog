@@ -19,19 +19,6 @@ interface ProjectDetailModalProps {
   metadata: ProjectMetadata | null
 }
 
-const CATEGORY_EMOJIS: Record<string, string> = {
-  "wegenbouw": "🛣️",
-  "riolering": "💧",
-  "scholenbouw": "🏫",
-  "sport": "⚽",
-  "cultuur": "🎭",
-  "gebouwen": "🏢",
-  "verlichting": "💡",
-  "groen": "🌳",
-  "ruimtelijke-ordening": "🏘️",
-  "zorg": "♿",
-  "overige": "📋"
-}
 
 export function ProjectDetailModal({
   project,
@@ -74,7 +61,7 @@ export function ProjectDetailModal({
               const cat = metadata?.categories[catId]
               return (
                 <Badge key={catId} variant="secondary">
-                  {CATEGORY_EMOJIS[catId]} {cat?.label || catId}
+                  {cat?.label || catId}
                 </Badge>
               )
             })}

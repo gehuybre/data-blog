@@ -12,8 +12,18 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { X, Search } from "lucide-react"
+import { X, Search, Check, ChevronsUpDown } from "lucide-react"
 import { useMemo, useState } from "react"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
 
 interface ProjectFiltersComponentProps {
   filters: ProjectFilters
@@ -33,6 +43,7 @@ export function ProjectFiltersComponent({
   setSortOption,
 }: ProjectFiltersComponentProps) {
   const [searchInput, setSearchInput] = useState("")
+  const [muniOpen, setMuniOpen] = useState(false)
 
   // Get unique municipalities from loaded projects
   const municipalities = useMemo(() => {
@@ -121,22 +132,63 @@ export function ProjectFiltersComponent({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="municipality">Gemeente</Label>
-          <Select
-            value={filters.municipality || "all"}
-            onValueChange={handleMunicipalityChange}
-          >
-            <SelectTrigger id="municipality">
-              <SelectValue placeholder="Alle gemeenten" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alle gemeenten</SelectItem>
-              {municipalities.map(muni => (
-                <SelectItem key={muni} value={muni}>
-                  {muni}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover open={muniOpen} onOpenChange={setMuniOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={muniOpen}
+                className="w-full justify-between font-normal"
+                id="municipality"
+              >
+                {filters.municipality || "Alle gemeenten"}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Zoek gemeente..." />
+                <CommandList>
+                  <CommandEmpty>Geen gemeente gevonden.</CommandEmpty>
+                  <CommandGroup>
+                    <CommandItem
+                      value="all"
+                      onSelect={() => {
+                        handleMunicipalityChange("all")
+                        setMuniOpen(false)
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          !filters.municipality ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      Alle gemeenten
+                    </CommandItem>
+                    {municipalities.map((muni) => (
+                      <CommandItem
+                        key={muni}
+                        value={muni}
+                        onSelect={(currentValue) => {
+                          handleMunicipalityChange(currentValue)
+                          setMuniOpen(false)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            filters.municipality === muni ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {muni}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div>
@@ -171,7 +223,7 @@ export function ProjectFiltersComponent({
                     className="cursor-pointer hover:bg-primary/90"
                     onClick={() => handleCategoryToggle(id)}
                   >
-                    {cat.emoji} {cat.label} ({cat.project_count})
+                    {cat.label} ({cat.project_count})
                   </Badge>
                 )
               })}
@@ -200,7 +252,7 @@ export function ProjectFiltersComponent({
               const cat = metadata?.categories[catId]
               return (
                 <Badge key={catId} variant="secondary">
-                  {cat?.emoji} {cat?.label}
+                  {cat?.label}
                   <X
                     className="ml-1 h-3 w-3 cursor-pointer"
                     onClick={() => handleCategoryToggle(catId)}
