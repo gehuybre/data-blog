@@ -11,20 +11,6 @@ interface ProjectCardProps {
   onClick: () => void
 }
 
-const CATEGORY_EMOJIS: Record<string, string> = {
-  "wegenbouw": "🛣️",
-  "riolering": "💧",
-  "scholenbouw": "🏫",
-  "sport": "⚽",
-  "cultuur": "🎭",
-  "gebouwen": "🏢",
-  "verlichting": "💡",
-  "groen": "🌳",
-  "ruimtelijke-ordening": "🏘️",
-  "zorg": "♿",
-  "overige": "📋"
-}
-
 const CATEGORY_LABELS: Record<string, string> = {
   "wegenbouw": "Wegenbouw",
   "riolering": "Riolering",
@@ -75,7 +61,7 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
         <div className="flex flex-wrap gap-1 mb-3">
           {project.categories.map(cat => (
             <Badge key={cat} variant="secondary" className="text-xs">
-              {CATEGORY_EMOJIS[cat]} {CATEGORY_LABELS[cat] || cat}
+              {CATEGORY_LABELS[cat] || cat}
             </Badge>
           ))}
         </div>
