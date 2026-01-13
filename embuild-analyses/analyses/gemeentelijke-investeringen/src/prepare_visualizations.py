@@ -87,8 +87,7 @@ NIS_MERGERS_LOOKUP = {
     '37007': '37022', '37015': '37022', # Tielt
     '44012': '44086', '44048': '44086', # Nazareth-De Pinte
     '44034': '44087', '44073': '44087', # Lochristi
-    '46029': '46029', '44045': '46029', # Lokeren (note: 46029 is both source and target in some refs, but here target)
-    '46014': '46029', # Lokeren
+    '46014': '46029', '44045': '46029', # Lokeren
     '44040': '44088', '44043': '44088', # Merelbeke-Melle
     '46003': '46030', '46013': '46030', '11056': '46030', # Beveren-Kruibeke-Zwijndrecht
     '73006': '73110', '73032': '73110', # Bilzen-Hoeselt
@@ -262,12 +261,18 @@ def main():
     # Prepare BV data
     bv_results = prepare_bv_data()
     save_json(bv_results['lookups'], 'bv_lookups.json')
+    # Also save lookups to internal results dir for nisUtils.ts imports
+    save_json(bv_results['lookups'], RESULTS_INTERNAL_DIR / 'bv_lookups.json')
+    
     bv_chunks = save_json(bv_results['municipality_data'], 'bv_municipality_data.json', chunk_size=chunk_size)
     save_json(bv_results['vlaanderen_data'], 'bv_vlaanderen_data.json')
 
     # Prepare REK data
     rek_results = prepare_rek_data()
     save_json(rek_results['lookups'], 'rek_lookups.json')
+    # Also save lookups to internal results dir for nisUtils.ts imports
+    save_json(rek_results['lookups'], RESULTS_INTERNAL_DIR / 'rek_lookups.json')
+
     rek_chunks = save_json(rek_results['municipality_data'], 'rek_municipality_data.json', chunk_size=chunk_size)
     save_json(rek_results['vlaanderen_data'], 'rek_vlaanderen_data.json')
 
