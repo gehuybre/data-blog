@@ -15,6 +15,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { MunicipalityMap } from "../shared/MunicipalityMap"
+import { InvesteringenMap } from "./InvesteringenMap"
 import { SimpleGeoFilter } from "./SimpleGeoFilter"
 import { SimpleGeoContext } from "../shared/GeoContext"
 import { ExportButtons } from "../shared/ExportButtons"
@@ -76,7 +77,7 @@ function validateLookups(data: unknown): BVLookups {
   }
   const obj = data as Record<string, unknown>
   if (!Array.isArray(obj.domains) || !Array.isArray(obj.subdomeins) ||
-      !Array.isArray(obj.beleidsvelds) || !obj.municipalities || typeof obj.municipalities !== 'object') {
+    !Array.isArray(obj.beleidsvelds) || !obj.municipalities || typeof obj.municipalities !== 'object') {
     throw new Error('Invalid lookups: missing or invalid fields')
   }
   // More explicit structure validation
@@ -540,12 +541,13 @@ export function InvesteringenBVSection() {
               </TabsContent>
 
               <TabsContent value="map" className="mt-4">
-                <MunicipalityMap
-                  data={mapData}
-                  getGeoCode={(d) => d.municipalityCode}
-                  getValue={(d) => d.value}
-                  colorScheme="blue"
-                  showProvinceBoundaries={true}
+                <InvesteringenMap
+                  data={mapData.map(d => ({
+                    value: d.value,
+                    municipality: getMunicipalityName(d.municipalityCode),
+                    nis_code: d.municipalityCode
+                  }))}
+                  selectedMetric={selectedMetric === 'Totaal' ? 'total' : 'per_capita'}
                 />
                 <p className="text-sm text-muted-foreground mt-2">
                   Rapportjaar 2026 - {selectedMetric === 'Totaal' ? 'Totale uitgave' : 'Uitgave per inwoner'}
