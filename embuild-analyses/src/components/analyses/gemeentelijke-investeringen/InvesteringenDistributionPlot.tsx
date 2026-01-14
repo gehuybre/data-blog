@@ -23,6 +23,16 @@ interface DataPoint {
     value: number
 }
 
+interface BinData {
+    binIndex: number
+    min: number
+    max: number
+    count: number
+    isHighlighted: boolean
+    medianValue: number
+    percentileLabel: string
+}
+
 interface InvesteringenDistributionPlotProps {
     data: DataPoint[]
     selectedMetric: 'Totaal' | 'Per_inwoner'
@@ -39,7 +49,12 @@ export function InvesteringenDistributionPlot({
     // Define bins for the histogram
     const BIN_COUNT = 20
 
-    const { bins, selectedMuniValue, selectedMuniName, yMax } = useMemo(() => {
+    const { bins, selectedMuniValue, selectedMuniName, yMax } = useMemo((): {
+        bins: BinData[]
+        selectedMuniValue: number | null
+        selectedMuniName: string | null
+        yMax: number
+    } => {
         if (data.length === 0) return { bins: [], selectedMuniValue: null, selectedMuniName: null, yMax: 0 }
 
         const values = data.map(d => d.value)
@@ -116,15 +131,7 @@ export function InvesteringenDistributionPlot({
     interface TooltipProps {
         active?: boolean
         payload?: Array<{
-            payload: {
-                binIndex: number
-                min: number
-                max: number
-                count: number
-                isHighlighted: boolean
-                medianValue: number
-                percentileLabel: string
-            }
+            payload: BinData
         }>
     }
 
