@@ -78,7 +78,7 @@ export function ProjectBrowser() {
           // Prevent duplicates by appending only projects that are not already present
           // Use a short-circuit key map based on nis_code+ac_code+ac_short
           const existingKeys = new Set(prev.map(p => `${p.nis_code}||${p.ac_code}||${p.ac_short}`))
-          const toAdd = data.filter((p: any) => !existingKeys.has(`${p.nis_code}||${p.ac_code}||${p.ac_short}`))
+          const toAdd = data.filter((p: Project) => !existingKeys.has(`${p.nis_code}||${p.ac_code}||${p.ac_short}`))
           return [...prev, ...toAdd]
         })
         setLoadedChunks(prev => new Set([...prev, chunkIndex]))
