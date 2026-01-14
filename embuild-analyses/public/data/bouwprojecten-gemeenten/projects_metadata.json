@@ -1,75 +1,75 @@
 {
-  "total_projects": 6368,
-  "total_amount": 8208483758.0,
-  "municipalities": 133,
-  "chunks": 4,
+  "total_projects": 12692,
+  "total_amount": 17688434555.0,
+  "municipalities": 282,
+  "chunks": 7,
   "chunk_size": 2000,
   "categories": {
     "wegenbouw": {
       "id": "wegenbouw",
       "label": "wegenbouw & infrastructuur",
-      "emoji": "",
-      "project_count": 1390
+      "emoji": "🛣️",
+      "project_count": 2948
     },
     "riolering": {
       "id": "riolering",
       "label": "riolering & waterbeheer",
-      "emoji": "",
-      "project_count": 449
+      "emoji": "💧",
+      "project_count": 940
     },
     "scholenbouw": {
       "id": "scholenbouw",
       "label": "scholenbouw",
-      "emoji": "",
-      "project_count": 287
+      "emoji": "🏫",
+      "project_count": 604
     },
     "sport": {
       "id": "sport",
       "label": "sportinfrastructuur",
-      "emoji": "",
-      "project_count": 306
+      "emoji": "⚽",
+      "project_count": 698
     },
     "cultuur": {
       "id": "cultuur",
       "label": "culturele infrastructuur",
-      "emoji": "",
-      "project_count": 416
+      "emoji": "🎭",
+      "project_count": 933
     },
     "gebouwen": {
       "id": "gebouwen",
       "label": "administratieve & publieke gebouwen",
-      "emoji": "",
-      "project_count": 160
+      "emoji": "🏢",
+      "project_count": 336
     },
     "verlichting": {
       "id": "verlichting",
       "label": "straatverlichting & signalisatie",
-      "emoji": "",
-      "project_count": 202
+      "emoji": "💡",
+      "project_count": 497
     },
     "groen": {
       "id": "groen",
       "label": "groene ruimte & parken",
-      "emoji": "",
-      "project_count": 940
+      "emoji": "🌳",
+      "project_count": 1950
     },
     "ruimtelijke-ordening": {
       "id": "ruimtelijke-ordening",
       "label": "ruimtelijke ordening & gebiedsontwikkeling",
-      "emoji": "",
-      "project_count": 223
+      "emoji": "🏘️",
+      "project_count": 505
     },
     "zorg": {
       "id": "zorg",
       "label": "sociale infrastructuur & zorg",
-      "emoji": "",
-      "project_count": 734
+      "emoji": "♿",
+      "project_count": 1530
     },
     "overige": {
       "id": "overige",
-      "label": "overige",
-      "emoji": "",
-      "project_count": 2792
+      "label": "Overige",
+      "emoji": "📋",
+      "project_count": 5387
     }
   }
 }

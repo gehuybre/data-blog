@@ -58,26 +58,48 @@ export function InvesteringenDistributionPlot({
             max: (i + 1) * binSize,
             count: 0,
             isHighlighted: false,
+            medianValue: 0,
+            percentileLabel: `${i * 5}-${(i + 1) * 5}%`,
         }))
+
+        // Distribute data points into bins and calculate counts
+        for (const point of data) {
+            const binIdx = Math.min(Math.floor(point.value / binSize), BIN_COUNT - 1)
+            bins[binIdx].count++
+        }
+
+        // Calculate median value for each bin
+        for (let i = 0; i < bins.length; i++) {
+            const binData = data.filter(d => {
+                const binIdx = Math.min(Math.floor(d.value / binSize), BIN_COUNT - 1)
+                return binIdx === i
+            })
+            if (binData.length > 0) {
+                const sorted = binData.map(d => d.value).sort((a, b) => a - b)
+                const mid = Math.floor(sorted.length / 2)
+                bins[i].medianValue = sorted.length % 2 === 0
+                    ? (sorted[mid - 1] + sorted[mid]) / 2
+                    : sorted[mid]
+            }
+        }
 
         let selectedMuniValue = null
         let selectedMuniName = null
 
-        data.forEach(d => {
-            const binIdx = Math.min(Math.floor(d.value / binSize), BIN_COUNT - 1)
-            bins[binIdx].count++
-
-            if (d.NIS_code === selectedMunicipality) {
-                selectedMuniValue = d.value
-                selectedMuniName = d.municipality
+        if (selectedMunicipality) {
+            const muni = data.find(d => d.NIS_code === selectedMunicipality)
+            if (muni) {
+                selectedMuniValue = muni.value
+                selectedMuniName = muni.municipality
+                const binIdx = Math.min(Math.floor(selectedMuniValue / binSize), BIN_COUNT - 1)
                 bins[binIdx].isHighlighted = true
             }
-        })
+        }
 
-        const yMax = Math.max(...bins.map(b => b.count))
+        const yMax = Math.max(...bins.map(b => b.medianValue))
 
         return { bins, selectedMuniValue, selectedMuniName, yMax }
-    }, [data, selectedMunicipality, BIN_COUNT])
+    }, [data, selectedMunicipality])
 
     // Formatters
     const { formatter: valueFormatter, scale: valueScale } = useMemo(() => {
@@ -109,12 +131,15 @@ export function InvesteringenDistributionPlot({
             const bin = payload[0].payload
             return (
                 <div className="bg-background border border-border rounded-md shadow-lg p-3 text-sm">
-                    <p className="font-bold mb-1">Verdeling</p>
+                    <p className="font-bold mb-1">Percentiel Groep ({bin.percentileLabel})</p>
                     <p className="text-muted-foreground">
                         Bereik: {valueFormatter(bin.min)} - {valueFormatter(bin.max)}
                     </p>
                     <p className="font-medium mt-1">
-                        Aantal gemeenten: <span className="text-primary">{bin.count}</span>
+                        Mediaan in deze groep: <span className="text-primary">{valueFormatter(bin.medianValue)}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                        ({bin.count} gemeenten in deze schijf)
                     </p>
                     {bin.isHighlighted && selectedMuniName && (
                         <p className="text-destructive font-medium mt-2 border-t pt-1">
@@ -132,16 +157,15 @@ export function InvesteringenDistributionPlot({
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={bins} margin={{ top: 40, right: 30, bottom: 60, left: 40 }}>
                     <XAxis
-                        dataKey="min"
-                        tickFormatter={valueFormatter}
-                        label={{ value: selectedMetric === 'Totaal' ? `Investering (€${valueScale || ''})` : 'Investering per inwoner (€)', position: 'insideBottom', offset: -10 }}
+                        dataKey="percentileLabel"
+                        label={{ value: 'Percentiel (groepen van 5% van alle gemeenten)', position: 'insideBottom', offset: -10 }}
                     />
                     <YAxis
-                        label={{ value: 'Aantal gemeenten', angle: -90, position: 'insideLeft', offset: 10 }}
-                        allowDecimals={false}
+                        label={{ value: selectedMetric === 'Totaal' ? `Investering (€${valueScale || ''})` : 'Investering per inwoner (€)', angle: -90, position: 'insideLeft', offset: 10 }}
+                        tickFormatter={valueFormatter}
                     />
                     <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
-                    <Bar dataKey="count">
+                    <Bar dataKey="medianValue">
                         {bins.map((entry, index) => (
                             <Cell
                                 key={`cell-${index}`}
@@ -152,14 +176,14 @@ export function InvesteringenDistributionPlot({
                     </Bar>
                     {selectedMuniValue !== null && (
                         <ReferenceLine
-                            x={selectedMuniValue}
+                            y={selectedMuniValue}
                             stroke="#ef4444"
                             strokeWidth={2}
                             strokeDasharray="3 3"
                         >
                             <Label
                                 value={selectedMuniName || ''}
-                                position="top"
+                                position="right"
                                 fill="#ef4444"
                                 fontSize={12}
                                 className="font-bold"
