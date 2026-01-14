@@ -55,7 +55,7 @@ function validateLookups(data: unknown): BVLookups {
   }
   const obj = data as Record<string, unknown>
   if (!Array.isArray(obj.domains) || !Array.isArray(obj.subdomeins) ||
-      !Array.isArray(obj.beleidsvelds) || !obj.municipalities || typeof obj.municipalities !== 'object') {
+    !Array.isArray(obj.beleidsvelds) || !obj.municipalities || typeof obj.municipalities !== 'object') {
     throw new Error('Invalid lookups: missing or invalid fields')
   }
   return {
@@ -327,7 +327,7 @@ export function InvesteringenBVScatterSection() {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Gemeentelijke Investeringen per Beleidsdomein</CardTitle>
+          <CardTitle>Gemeentelijke investeringen per beleidsdomein</CardTitle>
           <div className="flex items-center gap-4">
             {loadedChunks < totalChunks && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
@@ -336,7 +336,7 @@ export function InvesteringenBVScatterSection() {
               </div>
             )}
             <ExportButtons
-              title="Investeringen per Beleidsdomein Scatter"
+              title="Investeringen per beleidsdomein scatter"
               slug="gemeentelijke-investeringen"
               sectionId="investments-bv-scatter"
               viewType="table"
