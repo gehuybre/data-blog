@@ -45,6 +45,15 @@ export function InvesteringenMap({ data, selectedMetric, title }: InvesteringenM
       })
   }, [data])
 
+  // Create a name lookup map (since multiple shapes can have the same code, we just need one name per code)
+  const nameLookup = useMemo(() => {
+    const m = new Map<string, string>()
+    mapData.forEach(d => {
+      m.set(d.municipalityCode, d.municipalityName)
+    })
+    return m
+  }, [mapData])
+
   const valueLabel = selectedMetric === 'total' ? 'Totale investering' : 'Investering per inwoner'
 
   if (mapData.length === 0) {
@@ -62,6 +71,7 @@ export function InvesteringenMap({ data, selectedMetric, title }: InvesteringenM
         data={mapData}
         getGeoCode={(d) => d.municipalityCode}
         getValue={(d) => d.value}
+        getGeoName={(code) => nameLookup.get(code) || null}
         formatValue={formatCurrency}
         tooltipLabel={valueLabel}
         colorScheme="blue"
