@@ -262,7 +262,7 @@ export function InvesteringenREKSection() {
       // Instead, we first aggregate per municipality+year, then sum across municipalities.
       const perMuniYear: Record<string, number> = {}
 
-      filteredData.forEach(record => {
+      dataWithoutGeoFilter.forEach(record => {
         const normalizedCode = normalizeNisCode(record.NIS_code) || record.NIS_code
         const key = `${normalizedCode}_${record.Rapportjaar}`
         perMuniYear[key] = (perMuniYear[key] || 0) + record[selectedMetric]
@@ -326,11 +326,12 @@ export function InvesteringenREKSection() {
     return createAutoScaledFormatter(values, true) // true = currency
   }, [chartData])
 
-  // Table data: By municipality
+  // Table data: By municipality with context window for selected municipality
   const tableData = useMemo(() => {
-    const byMuni: Record<string, { municipality: string; total: number; count: number }> = {}
+    const byMuni: Record<string, { municipality: string; total: number; count: number; nisCode: string }> = {}
 
-    filteredData.forEach(record => {
+    // Use dataWithoutGeoFilter to get all municipalities for ranking
+    dataWithoutGeoFilter.forEach(record => {
       // Show latest year for table
       if (record.Rapportjaar !== 2026) return
 
@@ -344,17 +345,45 @@ export function InvesteringenREKSection() {
         byMuni[normalizedCode] = {
           municipality: name,
           total: 0,
-          count: 0
+          count: 0,
+          nisCode: normalizedCode
         }
       }
       byMuni[normalizedCode].total += record[selectedMetric]
       byMuni[normalizedCode].count += 1
     })
 
-    return Object.values(byMuni)
+    // Sort all municipalities by total (high to low)
+    const allMunicipalities = Object.values(byMuni)
       .sort((a, b) => b.total - a.total)
-      .slice(0, 50)
-  }, [filteredData, selectedMetric])
+
+    // If a specific municipality is selected, show it with 19 others around it
+    if (geoSelection.type === 'municipality' && geoSelection.code) {
+      const selectedIndex = allMunicipalities.findIndex(
+        m => m.nisCode === geoSelection.code
+      )
+
+      if (selectedIndex !== -1) {
+        // Calculate window: show selected + 9 above + 10 below (or adjust if at edges)
+        const windowSize = 20
+        const halfWindow = 9 // municipalities above selected
+
+        let startIndex = Math.max(0, selectedIndex - halfWindow)
+        let endIndex = startIndex + windowSize
+
+        // Adjust if we're near the end
+        if (endIndex > allMunicipalities.length) {
+          endIndex = allMunicipalities.length
+          startIndex = Math.max(0, endIndex - windowSize)
+        }
+
+        return allMunicipalities.slice(startIndex, endIndex)
+      }
+    }
+
+    // Default: show top 20 municipalities
+    return allMunicipalities.slice(0, 20)
+  }, [dataWithoutGeoFilter, selectedMetric, geoSelection])
 
   // Map data: Latest rapportjaar (2026)
   const mapData = useMemo(() => {
@@ -568,7 +597,9 @@ export function InvesteringenREKSection() {
                   </table>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Top 50 gemeenten (rapportjaar 2026)
+                  {geoSelection.type === 'municipality' && geoSelection.code
+                    ? 'Top 20 gemeenten (inclusief geselecteerde gemeente, rapportjaar 2026)'
+                    : 'Top 20 gemeenten (rapportjaar 2026)'}
                 </p>
               </TabsContent>
 
