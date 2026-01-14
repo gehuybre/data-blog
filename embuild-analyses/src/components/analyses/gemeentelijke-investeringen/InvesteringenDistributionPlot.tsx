@@ -122,6 +122,8 @@ export function InvesteringenDistributionPlot({
                 max: number
                 count: number
                 isHighlighted: boolean
+                medianValue: number
+                percentileLabel: string
             }
         }>
     }
