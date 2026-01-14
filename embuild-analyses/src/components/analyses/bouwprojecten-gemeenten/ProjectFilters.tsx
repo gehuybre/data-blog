@@ -51,6 +51,34 @@ export function ProjectFiltersComponent({
     return unique.sort()
   }, [projects])
 
+  // Calculate project counts per category for the selected municipality
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+
+    // Initialize with 0 for all categories from metadata
+    if (metadata) {
+      Object.keys(metadata.categories).forEach(id => {
+        counts[id] = 0
+      })
+    }
+
+    // Filter projects by municipality if one is selected
+    const relevantProjects = filters.municipality
+      ? projects.filter(p => p.municipality === filters.municipality)
+      : projects
+
+    // Count categories in relevant projects
+    relevantProjects.forEach(project => {
+      project.categories.forEach(catId => {
+        if (counts[catId] !== undefined) {
+          counts[catId]++
+        }
+      })
+    })
+
+    return counts
+  }, [projects, filters.municipality, metadata])
+
   const handleMunicipalityChange = (value: string) => {
     if (value === "all") {
       const { municipality, ...rest } = filters
@@ -213,9 +241,20 @@ export function ProjectFiltersComponent({
           <Label className="mb-2 block">Categorieën</Label>
           <div className="flex flex-wrap gap-2">
             {Object.entries(metadata.categories)
-              .sort((a, b) => b[1].project_count - a[1].project_count)
+              .sort((a, b) => {
+                const countA = categoryCounts[a[0]] ?? 0
+                const countB = categoryCounts[b[0]] ?? 0
+                // Sort by current counts, then by label
+                if (countB !== countA) return countB - countA
+                return a[1].label.localeCompare(b[1].label)
+              })
               .map(([id, cat]) => {
                 const isActive = filters.categories?.includes(id)
+                const currentCount = categoryCounts[id] ?? 0
+
+                // Only show badge if count > 0 OR if it was already selected (to allow deselecting)
+                if (currentCount === 0 && !isActive) return null
+
                 return (
                   <Badge
                     key={id}
@@ -223,7 +262,7 @@ export function ProjectFiltersComponent({
                     className="cursor-pointer hover:bg-primary/90"
                     onClick={() => handleCategoryToggle(id)}
                   >
-                    {cat.label} ({cat.project_count})
+                    {cat.label} ({currentCount})
                   </Badge>
                 )
               })}
