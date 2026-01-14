@@ -7,7 +7,12 @@ import { ProjectFiltersComponent } from "./ProjectFilters"
 import { ProjectList } from "./ProjectList"
 import { ProjectDetailModal } from "./ProjectDetailModal"
 import { Button } from "@/components/ui/button"
-import { Download } from "lucide-react"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Download, Code, Check, Copy } from "lucide-react"
 import { getBasePath } from "@/lib/path-utils"
 
 const BASE_PATH = getBasePath()
@@ -25,6 +30,7 @@ export function ProjectBrowser() {
   const [filters, setFilters] = useState<ProjectFilters>({})
   const [sortOption, setSortOption] = useState<SortOption>("amount-desc")
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [copied, setCopied] = useState(false)
 
   // Load metadata and first chunk on mount
   useEffect(() => {
@@ -174,6 +180,65 @@ export function ProjectBrowser() {
     (filters.categories && filters.categories.length > 0) ||
     filters.searchQuery
 
+  const getEmbedCode = (): string => {
+    const baseUrl = typeof window !== "undefined"
+      ? window.location.origin + getBasePath()
+      : ""
+
+    const embedUrl = `${baseUrl}/embed/bouwprojecten-gemeenten/projectbrowser/`
+
+    return `<iframe
+  src="${embedUrl}"
+  data-data-blog-embed="true"
+  width="100%"
+  height="800"
+  style="border: 0;"
+  title="Projectbrowser - Gemeentelijke Investeringen"
+  loading="lazy"
+></iframe>
+<script>
+(function () {
+  if (window.__DATA_BLOG_EMBED_RESIZER__) return;
+  window.__DATA_BLOG_EMBED_RESIZER__ = true;
+
+  window.addEventListener("message", function (event) {
+    var data = event.data;
+    if (!data || data.type !== "data-blog-embed:resize") return;
+    var height = Number(data.height);
+    if (!isFinite(height) || height <= 0) return;
+
+    var iframes = document.querySelectorAll('iframe[data-data-blog-embed="true"]');
+    for (var i = 0; i < iframes.length; i++) {
+      var iframe = iframes[i];
+      if (iframe.contentWindow === event.source) {
+        iframe.style.height = Math.ceil(height) + "px";
+        return;
+      }
+    }
+  });
+})();
+</script>`
+  }
+
+  const copyEmbedCode = async () => {
+    const code = getEmbedCode()
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea")
+      textArea.value = code
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand("copy")
+      document.body.removeChild(textArea)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   const handleExportCSV = () => {
     const headers = [
       "Gemeente",
@@ -252,7 +317,6 @@ export function ProjectBrowser() {
         <h2 className="text-2xl font-bold mb-2">Projectbrowser - bouwkansen 2026-2031</h2>
         <p className="text-muted-foreground">
           Doorzoek concrete investeringsprojecten uit de meerjarenplannen van Vlaamse gemeenten.
-          Gebruik de filters om projecten te vinden die relevant zijn voor jouw sector.
         </p>
       </div>
 
@@ -278,7 +342,7 @@ export function ProjectBrowser() {
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-8 text-center">
           <p className="text-blue-900 font-medium mb-2">Selecteer een filter om projecten te tonen</p>
           <p className="text-blue-800 text-sm">
-            Kies een gemeente, categorie of voer een zoekterm in om relevante bouwprojecten te vinden.
+            Kies een gemeente, categorie of voer een zoekterm in.
           </p>
         </div>
       )}
@@ -311,13 +375,55 @@ export function ProjectBrowser() {
                   €{(totalFilteredAmount / 1_000_000).toFixed(1)}M
                 </p>
               </div>
-              <Button
-                onClick={handleExportCSV}
-                disabled={filteredAndSortedProjects.length === 0}
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Export naar csv
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={handleExportCSV}
+                  disabled={filteredAndSortedProjects.length === 0}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="hidden sm:inline">CSV</span>
+                </Button>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" title="Embed code">
+                      <Code className="h-4 w-4" />
+                      <span className="hidden sm:inline">Embed</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-96" align="end">
+                    <div className="space-y-3">
+                      <div className="font-medium text-sm">Embed deze projectbrowser</div>
+                      <p className="text-xs text-muted-foreground">
+                        Kopieer de onderstaande code om deze projectbrowser in je website te integreren.
+                      </p>
+                      <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto whitespace-pre-wrap break-all">
+                        {getEmbedCode()}
+                      </pre>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full"
+                        onClick={copyEmbedCode}
+                      >
+                        {copied ? (
+                          <>
+                            <Check className="h-4 w-4" />
+                            Gekopieerd!
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-4 w-4" />
+                            Kopieer code
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
           </div>
 
