@@ -4,16 +4,7 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from 'lucide-react'
-import {
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-  Label,
-} from 'recharts'
+import { InvesteringenDistributionPlot } from "./InvesteringenDistributionPlot"
 import { ExportButtons } from "../shared/ExportButtons"
 import { HierarchicalFilter } from "../shared/HierarchicalFilter"
 import { MunicipalitySearch } from "../shared/MunicipalitySearch"
@@ -84,26 +75,6 @@ function validateChunkData(data: unknown): BVRecord[] {
   return data as BVRecord[]
 }
 
-// Custom tooltip component
-const CustomTooltip = ({ active, payload, selectedMetric }: {
-  active?: boolean
-  payload?: Array<{ payload: ScatterDataPoint }>
-  selectedMetric: 'Totaal' | 'Per_inwoner'
-}) => {
-  if (!active || !payload || payload.length === 0) return null
-
-  const data = payload[0].payload
-  const formattedValue = selectedMetric === 'Totaal'
-    ? formatFullCurrency(data.value)
-    : `€ ${data.value.toFixed(2)}`
-
-  return (
-    <div className="bg-background border border-border rounded-md shadow-lg p-2 text-sm">
-      <p className="font-medium">{data.municipality}</p>
-      <p className="text-muted-foreground">{formattedValue}</p>
-    </div>
-  )
-}
 
 export function InvesteringenBVScatterSection() {
   const [lookups, setLookups] = useState<BVLookups | null>(null)
@@ -240,55 +211,6 @@ export function InvesteringenBVScatterSection() {
       .map((item, index) => ({ ...item, x: index }))
   }, [muniData, selectedDomain, selectedMetric, selectedYear, lookups])
 
-  // Calculate Y-axis range: always start at 0, max value + 10% padding
-  const { yMin, yMax } = useMemo(() => {
-    if (scatterData.length === 0) return { yMin: 0, yMax: 100 }
-
-    const maxValue = Math.max(...scatterData.map(d => d.value))
-
-    // If all values are zero, use default range
-    if (maxValue === 0) {
-      return { yMin: 0, yMax: 100 }
-    }
-
-    // Always start at 0, add 10% padding to max for better visibility
-    const calculatedMax = maxValue * 1.1
-
-    return {
-      yMin: 0,
-      yMax: calculatedMax
-    }
-  }, [scatterData])
-
-  // Auto-scale formatters
-  const { formatter: valueFormatter, scale: valueScale } = useMemo(() => {
-    const values = scatterData.map(d => d.value)
-    return createAutoScaledFormatter(values, selectedMetric === 'Totaal')
-  }, [scatterData, selectedMetric])
-
-  // Y-axis label with scale
-  const yAxisLabel = useMemo(() => {
-    const baseLabel = selectedMetric === 'Totaal' ? 'Totale uitgave' : 'Uitgave per inwoner'
-    const scaleText = valueScale ? ` (€${valueScale})` : ' (€)'
-    return baseLabel + scaleText
-  }, [selectedMetric, valueScale])
-
-  // Filtered data with search highlighting
-  const { displayData, highlightedIndex } = useMemo(() => {
-    if (!selectedMunicipality) {
-      return { displayData: scatterData, highlightedIndex: -1 }
-    }
-
-    const index = scatterData.findIndex(d => d.NIS_code === selectedMunicipality)
-    console.log('Highlighting municipality:', {
-      selectedMunicipality,
-      index,
-      found: index >= 0,
-      municipality: index >= 0 ? scatterData[index]?.municipality : 'not found',
-      value: index >= 0 ? scatterData[index]?.value : null
-    })
-    return { displayData: scatterData, highlightedIndex: index }
-  }, [scatterData, selectedMunicipality])
 
   // Export data
   const exportData = useMemo(() => {
@@ -336,16 +258,16 @@ export function InvesteringenBVScatterSection() {
               </div>
             )}
             <ExportButtons
-              title="Investeringen per beleidsdomein scatter"
+              title="Investeringen per beleidsdomein verdeling"
               slug="gemeentelijke-investeringen"
-              sectionId="investments-bv-scatter"
+              sectionId="investments-bv-distribution"
               viewType="table"
               data={exportData}
             />
           </div>
         </div>
         <p className="text-sm text-muted-foreground">
-          Vergelijk investeringen per gemeente voor een specifiek beleidsdomein. Enkel rapportjaar 2026 beschikbaar.
+          Dit histogram toont de verdeling van investeringen over alle Vlaamse gemeenten. Zoek een gemeente om haar positie in de verdeling te zien.
         </p>
       </CardHeader>
       <CardContent>
@@ -386,55 +308,18 @@ export function InvesteringenBVScatterSection() {
             </div>
           </div>
 
-          {/* Scatter Chart */}
+          {/* Distribution Plot */}
           <div className="w-full h-[500px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart margin={{ top: 20, right: 30, bottom: 60, left: 80 }}>
-                <XAxis
-                  type="number"
-                  dataKey="x"
-                  domain={[0, displayData.length - 1]}
-                  tick={false}
-                  label={{ value: 'Gemeenten', position: 'insideBottom', offset: -10 }}
-                />
-                <YAxis
-                  type="number"
-                  dataKey="value"
-                  domain={[yMin, yMax]}
-                  tickFormatter={valueFormatter}
-                >
-                  <Label
-                    value={yAxisLabel}
-                    angle={-90}
-                    position="insideLeft"
-                    offset={10}
-                  />
-                </YAxis>
-                <Tooltip
-                  content={<CustomTooltip selectedMetric={selectedMetric} />}
-                  cursor={{ strokeDasharray: '3 3' }}
-                />
-                <Scatter data={displayData} fill="#3b82f6">
-                  {displayData.map((_, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={index === highlightedIndex ? '#ef4444' : '#3b82f6'}
-                      opacity={highlightedIndex >= 0 && index !== highlightedIndex ? 0.3 : 1}
-                      r={index === highlightedIndex ? 6 : 4}
-                    />
-                  ))}
-                </Scatter>
-              </ScatterChart>
-            </ResponsiveContainer>
+            <InvesteringenDistributionPlot
+              data={scatterData}
+              selectedMetric={selectedMetric}
+              selectedMunicipality={selectedMunicipality}
+              color="#3b82f6"
+            />
           </div>
           <p className="text-sm text-muted-foreground mt-2">
-            Domein: <strong>{selectedDomain || 'Alle'}</strong> | Rapportjaar: <strong>2026</strong> | {selectedMetric === 'Totaal' ? 'Totale uitgave' : 'Uitgave per inwoner'} | {displayData.length} gemeenten
+            Domein: <strong>{selectedDomain || 'Alle'}</strong> | Rapportjaar: <strong>2026</strong> | {selectedMetric === 'Totaal' ? 'Totale uitgave' : 'Uitgave per inwoner'} | {scatterData.length} gemeenten
           </p>
-          {highlightedIndex >= 0 && (
-            <p className="text-sm text-primary mt-1">
-              Gemarkeerd: <strong>{displayData[highlightedIndex].municipality}</strong> - {selectedMetric === 'Totaal' ? formatFullCurrency(displayData[highlightedIndex].value) : `€ ${displayData[highlightedIndex].value.toFixed(2)}`}
-            </p>
-          )}
         </div>
       </CardContent>
     </Card>
