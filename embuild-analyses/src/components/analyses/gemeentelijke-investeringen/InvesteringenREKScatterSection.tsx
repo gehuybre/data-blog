@@ -53,7 +53,7 @@ function validateLookups(data: unknown): REKLookups {
   }
   const obj = data as Record<string, unknown>
   if (!Array.isArray(obj.niveau3s) || !Array.isArray(obj.alg_rekenings) ||
-      !obj.municipalities || typeof obj.municipalities !== 'object') {
+    !obj.municipalities || typeof obj.municipalities !== 'object') {
     throw new Error('Invalid lookups: missing or invalid fields')
   }
   return {
@@ -324,7 +324,7 @@ export function InvesteringenREKScatterSection() {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Gemeentelijke Investeringen per Economische Rekening</CardTitle>
+          <CardTitle>Gemeentelijke investeringen per economische rekening</CardTitle>
           <div className="flex items-center gap-4">
             {loadedChunks < totalChunks && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
@@ -333,7 +333,7 @@ export function InvesteringenREKScatterSection() {
               </div>
             )}
             <ExportButtons
-              title="Investeringen per Economische Rekening Scatter"
+              title="Investeringen per economische rekening scatter"
               slug="gemeentelijke-investeringen"
               sectionId="investments-rek-scatter"
               viewType="table"

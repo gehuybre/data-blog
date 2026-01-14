@@ -12,17 +12,17 @@ interface ProjectCardProps {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  "wegenbouw": "Wegenbouw",
-  "riolering": "Riolering",
-  "scholenbouw": "Scholenbouw",
-  "sport": "Sport",
-  "cultuur": "Cultuur",
-  "gebouwen": "Gebouwen",
-  "verlichting": "Verlichting",
-  "groen": "Groen",
-  "ruimtelijke-ordening": "Ruimtelijke ordening",
-  "zorg": "Zorg",
-  "overige": "Overige"
+  "wegenbouw": "wegenbouw",
+  "riolering": "riolering",
+  "scholenbouw": "scholenbouw",
+  "sport": "sport",
+  "cultuur": "cultuur",
+  "gebouwen": "gebouwen",
+  "verlichting": "verlichting",
+  "groen": "groen",
+  "ruimtelijke-ordening": "ruimtelijke ordening",
+  "zorg": "zorg",
+  "overige": "overige"
 }
 
 export function ProjectCard({ project, onClick }: ProjectCardProps) {

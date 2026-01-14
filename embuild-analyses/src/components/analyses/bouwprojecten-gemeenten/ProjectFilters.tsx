@@ -169,7 +169,7 @@ export function ProjectFiltersComponent({
                 className="w-full justify-between font-normal"
                 id="municipality"
               >
-                {filters.municipality || "Alle gemeenten"}
+                {filters.municipality || "alle gemeenten"}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
@@ -177,7 +177,7 @@ export function ProjectFiltersComponent({
               <Command>
                 <CommandInput placeholder="Zoek gemeente..." />
                 <CommandList>
-                  <CommandEmpty>Geen gemeente gevonden.</CommandEmpty>
+                  <CommandEmpty>geen gemeente gevonden.</CommandEmpty>
                   <CommandGroup>
                     <CommandItem
                       value="all"
@@ -226,10 +226,10 @@ export function ProjectFiltersComponent({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="amount-desc">Bedrag (hoog → laag)</SelectItem>
-              <SelectItem value="amount-asc">Bedrag (laag → hoog)</SelectItem>
-              <SelectItem value="municipality">Gemeente (A → Z)</SelectItem>
-              <SelectItem value="category">Categorie</SelectItem>
+              <SelectItem value="amount-desc">bedrag (hoog → laag)</SelectItem>
+              <SelectItem value="amount-asc">bedrag (laag → hoog)</SelectItem>
+              <SelectItem value="municipality">gemeente (a → z)</SelectItem>
+              <SelectItem value="category">categorie</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -238,7 +238,7 @@ export function ProjectFiltersComponent({
       {/* Categories */}
       {metadata && (
         <div>
-          <Label className="mb-2 block">Categorieën</Label>
+          <Label className="mb-2 block">categorieën</Label>
           <div className="flex flex-wrap gap-2">
             {Object.entries(metadata.categories)
               .sort((a, b) => {
@@ -273,7 +273,7 @@ export function ProjectFiltersComponent({
       {/* Active filters summary */}
       {hasActiveFilters && (
         <div className="pt-4 border-t">
-          <p className="text-sm text-muted-foreground mb-2">Actieve filters:</p>
+          <p className="text-sm text-muted-foreground mb-2">actieve filters:</p>
           <div className="flex flex-wrap gap-2">
             {filters.municipality && (
               <Badge variant="secondary">
