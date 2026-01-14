@@ -11,7 +11,7 @@ Each category has:
 CATEGORY_DEFINITIONS = {
     "wegenbouw": {
         "id": "wegenbouw",
-        "label": "Wegenbouw & Infrastructuur",
+        "label": "wegenbouw & infrastructuur",
         "emoji": "🛣️",
         "keywords": [
             "weg", "straat", "voetpad", "fietspad", "brug", "rijweg",
@@ -22,7 +22,7 @@ CATEGORY_DEFINITIONS = {
     },
     "riolering": {
         "id": "riolering",
-        "label": "Riolering & Waterbeheer",
+        "label": "riolering & waterbeheer",
         "emoji": "💧",
         "keywords": [
             "riolering", "afvalwater", "zuivering", "waterloop", "drainage",
@@ -32,7 +32,7 @@ CATEGORY_DEFINITIONS = {
     },
     "scholenbouw": {
         "id": "scholenbouw",
-        "label": "Scholenbouw",
+        "label": "scholenbouw",
         "emoji": "🏫",
         "keywords": [
             "school", "basisonderwijs", "secundair onderwijs", "kleuterschool",
@@ -42,7 +42,7 @@ CATEGORY_DEFINITIONS = {
     },
     "sport": {
         "id": "sport",
-        "label": "Sportinfrastructuur",
+        "label": "sportinfrastructuur",
         "emoji": "⚽",
         "keywords": [
             "sport", "sportzaal", "voetbal", "zwembad", "atletiek",
@@ -53,7 +53,7 @@ CATEGORY_DEFINITIONS = {
     },
     "cultuur": {
         "id": "cultuur",
-        "label": "Culturele Infrastructuur",
+        "label": "culturele infrastructuur",
         "emoji": "🎭",
         "keywords": [
             "cultu", "bibliotheek", "museum", "gemeenschapscentrum",
@@ -63,7 +63,7 @@ CATEGORY_DEFINITIONS = {
     },
     "gebouwen": {
         "id": "gebouwen",
-        "label": "Administratieve & Publieke Gebouwen",
+        "label": "administratieve & publieke gebouwen",
         "emoji": "🏢",
         "keywords": [
             "gemeentehuis", "administratief centrum", "stadsgebouw",
@@ -73,7 +73,7 @@ CATEGORY_DEFINITIONS = {
     },
     "verlichting": {
         "id": "verlichting",
-        "label": "Straatverlichting & Signalisatie",
+        "label": "straatverlichting & signalisatie",
         "emoji": "💡",
         "keywords": [
             "straatverlichting", "verlichtingstoestel", "verkeerslicht",
@@ -83,7 +83,7 @@ CATEGORY_DEFINITIONS = {
     },
     "groen": {
         "id": "groen",
-        "label": "Groene Ruimte & Parks",
+        "label": "groene ruimte & parken",
         "emoji": "🌳",
         "keywords": [
             "park", "groen", "natuur", "beplanting", "begraafplaats",
@@ -94,7 +94,7 @@ CATEGORY_DEFINITIONS = {
     },
     "ruimtelijke-ordening": {
         "id": "ruimtelijke-ordening",
-        "label": "Ruimtelijke Ordening & Gebiedsontwikkeling",
+        "label": "ruimtelijke ordening & gebiedsontwikkeling",
         "emoji": "🏘️",
         "keywords": [
             "ruimtelijke", "herinrichting", "gebiedsontwikkeling",
@@ -104,7 +104,7 @@ CATEGORY_DEFINITIONS = {
     },
     "zorg": {
         "id": "zorg",
-        "label": "Sociale Infrastructuur & Zorg",
+        "label": "sociale infrastructuur & zorg",
         "emoji": "♿",
         "keywords": [
             "woonzorgcentrum", "rusthuis", "zorg", "kinderopvang", "crèche",

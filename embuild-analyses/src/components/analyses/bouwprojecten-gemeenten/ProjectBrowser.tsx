@@ -228,7 +228,7 @@ export function ProjectBrowser() {
     <div className="space-y-6">
       {/* Header */}
       <div className="rounded-lg border bg-card p-6">
-        <h2 className="text-2xl font-bold mb-2">Project Browser - Bouwkansen 2026-2031</h2>
+        <h2 className="text-2xl font-bold mb-2">Projectbrowser - bouwkansen 2026-2031</h2>
         <p className="text-muted-foreground">
           Doorzoek concrete investeringsprojecten uit de meerjarenplannen van Vlaamse gemeenten.
           Gebruik de filters om projecten te vinden die relevant zijn voor jouw sector.
@@ -283,7 +283,7 @@ export function ProjectBrowser() {
             disabled={filteredAndSortedProjects.length === 0}
           >
             <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            Export naar csv
           </Button>
         </div>
       </div>

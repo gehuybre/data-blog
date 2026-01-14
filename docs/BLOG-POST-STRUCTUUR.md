@@ -42,3 +42,7 @@ Voor een consistente gebruikerservaring gebruiken we gedeelde componenten:
 - De `ExportButtons` component zorgt automatisch voor de juiste CSV-download en embed-codes.
 
 Zie ook de `ANALYSIS_TEMPLATE.md` in de root van de `embuild-analyses` map voor een technisch voorbeeld.
+
+## 4. Taal
+
+Gebruik hoofdletters volgens de Nederlandse spelling. Zet alleen een hoofdletter aan het begin van een zin en bij eigennamen. Schrijf titels en tussenkoppen in zinshoofdletters, niet in title case. Zelfstandige naamwoorden krijgen geen hoofdletter tenzij het een eigennaam is.
