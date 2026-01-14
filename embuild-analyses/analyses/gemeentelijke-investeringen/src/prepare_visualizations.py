@@ -131,6 +131,15 @@ def load_nis_lookups():
             continue
             
         name = row['TX_REFNIS_NL'].strip()
+        # Handle bilingual names (e.g., "Bruxelles / Brussel" or "Ronse / Renaix")
+        if '/' in name:
+            # For NL version, we usually want the second part if it's Brussels, 
+            # but for Flemish facilities it's the first part.
+            # However, looking at refnis.csv, TX_REFNIS_NL for Ronse is "Ronse (Renaix)" or "Ronse / Renaix"?
+            # Actually, most Flemish towns have only the Dutch name in TX_REFNIS_NL.
+            # Let's take the first part as a safe default for Dutch.
+            name = name.split('/')[0].strip()
+        
         if '(' in name:
             name = name.split('(')[0].strip()
         nis_lookup[nis_code] = name

@@ -73,6 +73,9 @@ interface MunicipalityMapProps<TData extends UnknownRecord = UnknownRecord> {
   /** Show province boundaries as overlay */
   showProvinceBoundaries?: boolean
 
+  /** Optional callback to get clear name for a geography code */
+  getGeoName?: (code: string) => string | null
+
   /** Optional class name */
   className?: string
 }
@@ -100,6 +103,7 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
   height = 450,
   colorScheme = "blue",
   showProvinceBoundaries = false,
+  getGeoName,
   className,
 }: MunicipalityMapProps<TData>) {
   // GeoJSON state
@@ -347,6 +351,33 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
     setCenter(projectionConfig.center)
   }, [projectionConfig.center])
 
+  // Clean municipality name (remove French/extra info)
+  const cleanMunicipalityName = useCallback((rawCode: string, rawName: string) => {
+    if (getGeoName) {
+      const customName = getGeoName(rawCode)
+      if (customName) return customName
+    }
+
+    if (!rawName) return rawCode
+
+    let cleanName = rawName
+
+    // 1. Handle bilingual names with "/"
+    if (cleanName.includes("/")) {
+      const parts = cleanName.split("/").map((s) => s.trim())
+      // For Flemish municipalities (which is our main focus), the first part is Dutch
+      // For others, we also stick to the first part for consistency or best effort
+      cleanName = parts[0]
+    }
+
+    // 2. Remove anything in parentheses (arrondissement, French aliases, etc.)
+    if (cleanName.includes("(")) {
+      cleanName = cleanName.split("(")[0].trim()
+    }
+
+    return cleanName
+  }, [getGeoName])
+
   // Tooltip handlers
   const handleMouseMove = useCallback(
     (e: React.MouseEvent, geoCode: string, name: string) => {
@@ -366,7 +397,7 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
         visible: true,
         x: e.clientX - rect.left,
         y: e.clientY - rect.top - 10,
-        name,
+        name: cleanMunicipalityName(geoCode, name),
         value,
         formattedValue: value !== null ? formatValue(value) : "Geen data",
         previousValue: prevValue,
@@ -374,7 +405,7 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
         period: String(currentPeriod),
       })
     },
-    [valueByGeoCode, previousValueByGeoCode, currentPeriod, formatValue]
+    [valueByGeoCode, previousValueByGeoCode, currentPeriod, formatValue, cleanMunicipalityName]
   )
 
   const handleMouseLeave = useCallback(() => {
@@ -517,7 +548,8 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
                     fill = colorScale(value) ?? "#f5f5f5"
                   }
 
-                  const name = geo.properties?.LAU_NAME ?? rawCode
+                  const rawName = geo.properties?.LAU_NAME ?? rawCode
+                  const name = cleanMunicipalityName(rawCode, rawName)
 
                   return (
                     <Geography
