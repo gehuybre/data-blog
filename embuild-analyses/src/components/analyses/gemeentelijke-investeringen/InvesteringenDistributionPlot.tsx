@@ -42,34 +42,23 @@ export function InvesteringenDistributionPlot({
     const { bins, selectedMuniValue, selectedMuniName, yMax } = useMemo(() => {
         if (data.length === 0) return { bins: [], selectedMuniValue: null, selectedMuniName: null, yMax: 0 }
 
-        // Sort data by value
-        const sortedData = [...data].sort((a, b) => a.value - b.value)
-        const totalCount = sortedData.length
+        const values = data.map(d => d.value)
+        const min = 0 // Always start from 0 for consistency
+        const max = Math.max(...values) * 1.05 // Add 5% padding
 
-        // Create 20 bins (5% each)
-        const BIN_COUNT = 20
-        const binSize = totalCount / BIN_COUNT
+        // Edge case: if all values are 0 or max is 0, return empty bins
+        if (max === 0) {
+            return { bins: [], selectedMuniValue: null, selectedMuniName: null, yMax: 0 }
+        }
 
-        const bins = Array.from({ length: BIN_COUNT }, (_, i) => {
-            const startIndex = Math.floor(i * binSize)
-            const endIndex = Math.min(Math.floor((i + 1) * binSize), totalCount)
-            const binData = sortedData.slice(startIndex, endIndex)
-
-            // Calculate median value for the bin
-            const medianValue = binData.length > 0
-                ? binData[Math.floor(binData.length / 2)].value
-                : 0
-
-            return {
-                binIndex: i,
-                percentileLabel: `${i * 5}-${(i + 1) * 5}%`,
-                medianValue,
-                count: binData.length,
-                isHighlighted: false,
-                min: binData.length > 0 ? binData[0].value : 0,
-                max: binData.length > 0 ? binData[binData.length - 1].value : 0
-            }
-        })
+        const binSize = max / BIN_COUNT
+        const bins = Array.from({ length: BIN_COUNT }, (_, i) => ({
+            binIndex: i,
+            min: i * binSize,
+            max: (i + 1) * binSize,
+            count: 0,
+            isHighlighted: false,
+        }))
 
         let selectedMuniValue = null
         let selectedMuniName = null
@@ -101,7 +90,20 @@ export function InvesteringenDistributionPlot({
             : `€ ${val.toFixed(2)}`
     }
 
-    const CustomTooltip = ({ active, payload }: any) => {
+    interface TooltipProps {
+        active?: boolean
+        payload?: Array<{
+            payload: {
+                binIndex: number
+                min: number
+                max: number
+                count: number
+                isHighlighted: boolean
+            }
+        }>
+    }
+
+    const CustomTooltip = ({ active, payload }: TooltipProps) => {
         if (active && payload && payload.length) {
             const bin = payload[0].payload
             return (
