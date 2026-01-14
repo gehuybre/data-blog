@@ -266,6 +266,17 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
       },
     },
   },
+  {
+    slug: "bouwprojecten-gemeenten",
+    sections: {
+      projectbrowser: {
+        type: "custom",
+        title: "Projectbrowser - Gemeentelijke Investeringen",
+        component: "BouwprojectenEmbed",
+        height: 800,
+      },
+    },
+  },
 ]
 
 /**

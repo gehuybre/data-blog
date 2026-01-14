@@ -14,6 +14,7 @@ import { InvesteringenBVCategorySection } from "@/components/analyses/gemeenteli
 import { InvesteringenREKCategorySection } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenREKCategorySection"
 import { InvesteringenBVScatterSection } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenBVScatterSection"
 import { InvesteringenREKScatterSection } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenREKScatterSection"
+import { BouwprojectenEmbed } from "@/components/analyses/bouwprojecten-gemeenten/BouwprojectenEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig, getValidSections } from "@/lib/embed-config"
 import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
@@ -490,6 +491,11 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     // Handle InvesteringenREKScatterEmbed
     if (config.component === "InvesteringenREKScatterEmbed") {
       return <InvesteringenREKScatterSection />
+    }
+
+    // Handle BouwprojectenEmbed
+    if (config.component === "BouwprojectenEmbed") {
+      return <BouwprojectenEmbed />
     }
 
     // Unknown custom component
