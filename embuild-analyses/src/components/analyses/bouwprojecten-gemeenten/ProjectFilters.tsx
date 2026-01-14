@@ -136,26 +136,6 @@ export function ProjectFiltersComponent({
         )}
       </div>
 
-      {/* Search */}
-      <form onSubmit={handleSearchSubmit} className="flex gap-2">
-        <div className="flex-1">
-          <Label htmlFor="search" className="sr-only">Zoeken</Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="search"
-              type="text"
-              placeholder="Zoek in projectnamen en beschrijvingen..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-9"
-              maxLength={200}
-            />
-          </div>
-        </div>
-        <Button type="submit">Zoeken</Button>
-      </form>
-
       {/* Municipality and Sort */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -315,6 +295,26 @@ export function ProjectFiltersComponent({
           </div>
         </div>
       )}
+
+      {/* Search - moved to bottom and made smaller */}
+      <form onSubmit={handleSearchSubmit} className="pt-4 border-t">
+        <Label htmlFor="search" className="text-sm mb-2 block">Zoeken in projectnamen en beschrijvingen</Label>
+        <div className="flex gap-2">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="search"
+              type="text"
+              placeholder="Zoekterm..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-9 h-9"
+              maxLength={200}
+            />
+          </div>
+          <Button type="submit" size="sm">Zoeken</Button>
+        </div>
+      </form>
     </div>
   )
 }
