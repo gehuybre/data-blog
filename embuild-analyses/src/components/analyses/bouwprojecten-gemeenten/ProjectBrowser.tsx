@@ -169,6 +169,11 @@ export function ProjectBrowser() {
     return filteredAndSortedProjects.reduce((sum, p) => sum + p.total_amount, 0)
   }, [filteredAndSortedProjects])
 
+  const hasActiveFilters =
+    filters.municipality ||
+    (filters.categories && filters.categories.length > 0) ||
+    filters.searchQuery
+
   const handleExportCSV = () => {
     const headers = [
       "Gemeente",
@@ -268,48 +273,62 @@ export function ProjectBrowser() {
         setSortOption={setSortOption}
       />
 
-      {/* Summary Stats */}
-      <div className="rounded-lg border bg-card p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">Gevonden projecten</p>
-            <p className="text-2xl font-bold">
-              {filteredAndSortedProjects.length.toLocaleString("nl-BE")}
-            </p>
-            {metadata && loadedChunks.size < metadata.chunks && (
-              <Button
-                variant="link"
-                size="sm"
-                onClick={loadAllChunks}
-                disabled={loading}
-                className="px-0 h-auto"
-              >
-                {loading ? "Laden..." : `Laad alle projecten (${projects.length}/${metadata.total_projects})`}
-              </Button>
-            )}
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Totaal bedrag</p>
-            <p className="text-2xl font-bold">
-              €{(totalFilteredAmount / 1_000_000).toFixed(1)}M
-            </p>
-          </div>
-          <Button
-            onClick={handleExportCSV}
-            disabled={filteredAndSortedProjects.length === 0}
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Export naar csv
-          </Button>
+      {/* Show explanation if no filters active */}
+      {!hasActiveFilters && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-8 text-center">
+          <p className="text-blue-900 font-medium mb-2">Selecteer een filter om projecten te tonen</p>
+          <p className="text-blue-800 text-sm">
+            Kies een gemeente, categorie of voer een zoekterm in om relevante bouwprojecten te vinden.
+          </p>
         </div>
-      </div>
+      )}
 
-      {/* Project List */}
-      <ProjectList
-        projects={filteredAndSortedProjects}
-        onProjectClick={setSelectedProject}
-        loading={loading}
-      />
+      {/* Summary Stats - only show when filters are active */}
+      {hasActiveFilters && (
+        <>
+          <div className="rounded-lg border bg-card p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Gevonden projecten</p>
+                <p className="text-2xl font-bold">
+                  {filteredAndSortedProjects.length.toLocaleString("nl-BE")}
+                </p>
+                {metadata && loadedChunks.size < metadata.chunks && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    onClick={loadAllChunks}
+                    disabled={loading}
+                    className="px-0 h-auto"
+                  >
+                    {loading ? "Laden..." : `Laad alle projecten (${projects.length}/${metadata.total_projects})`}
+                  </Button>
+                )}
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Totaal bedrag</p>
+                <p className="text-2xl font-bold">
+                  €{(totalFilteredAmount / 1_000_000).toFixed(1)}M
+                </p>
+              </div>
+              <Button
+                onClick={handleExportCSV}
+                disabled={filteredAndSortedProjects.length === 0}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Export naar csv
+              </Button>
+            </div>
+          </div>
+
+          {/* Project List */}
+          <ProjectList
+            projects={filteredAndSortedProjects}
+            onProjectClick={setSelectedProject}
+            loading={loading}
+          />
+        </>
+      )}
 
       {/* Detail Modal */}
       {selectedProject && (
