@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { useRef } from "react"
 import { Project, ProjectMetadata, ProjectFilters, SortOption } from "@/types/project-types"
 import { ProjectFiltersComponent } from "./ProjectFilters"
 import { ProjectList } from "./ProjectList"
@@ -16,6 +17,8 @@ export function ProjectBrowser() {
   const [metadata, setMetadata] = useState<ProjectMetadata | null>(null)
   const [loadedChunks, setLoadedChunks] = useState<Set<number>>(new Set())
   const [failedChunks, setFailedChunks] = useState<Set<number>>(new Set())
+  // Track in-flight chunk loads to avoid concurrent fetches for the same chunk
+  const loadingChunksRef = useRef<Set<number>>(new Set())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -51,6 +54,10 @@ export function ProjectBrowser() {
   const loadChunk = async (chunkIndex: number, retries = 3): Promise<boolean> => {
     if (loadedChunks.has(chunkIndex)) return true
     if (failedChunks.has(chunkIndex)) return false
+    if (loadingChunksRef.current.has(chunkIndex)) return true
+
+    // mark as in-flight
+    loadingChunksRef.current.add(chunkIndex)
 
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
@@ -66,8 +73,16 @@ export function ProjectBrowser() {
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         const data = await response.json()
 
-        setProjects(prev => [...prev, ...data])
+        // Append new projects and mark chunk as loaded
+        setProjects(prev => {
+          // Prevent duplicates by appending only projects that are not already present
+          // Use a short-circuit key map based on nis_code+ac_code+ac_short
+          const existingKeys = new Set(prev.map(p => `${p.nis_code}||${p.ac_code}||${p.ac_short}`))
+          const toAdd = data.filter((p: any) => !existingKeys.has(`${p.nis_code}||${p.ac_code}||${p.ac_short}`))
+          return [...prev, ...toAdd]
+        })
         setLoadedChunks(prev => new Set([...prev, chunkIndex]))
+        loadingChunksRef.current.delete(chunkIndex)
         return true
       } catch (err) {
         console.error(`Error loading chunk ${chunkIndex} (attempt ${attempt + 1}/${retries}):`, err)
@@ -78,6 +93,7 @@ export function ProjectBrowser() {
         } else {
           // Mark as failed after all retries
           setFailedChunks(prev => new Set([...prev, chunkIndex]))
+          loadingChunksRef.current.delete(chunkIndex)
           console.error(`Failed to load chunk ${chunkIndex} after ${retries} attempts`)
           return false
         }
