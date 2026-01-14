@@ -348,9 +348,10 @@ export function InvesteringenBVSection() {
       byMuni[normalizedCode].count += 1
     })
 
-    // Sort all municipalities by total (high to low)
+    // Sort all municipalities by total (high to low) and assign ranks
     const allMunicipalities = Object.values(byMuni)
       .sort((a, b) => b.total - a.total)
+      .map((m, index) => ({ ...m, rank: index + 1 }))
 
     // If a specific municipality is selected, show it with 19 others around it
     if (geoSelection.type === 'municipality' && geoSelection.code) {
@@ -571,6 +572,7 @@ export function InvesteringenBVSection() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b bg-muted/50">
+                        <th className="p-2 text-left font-medium w-16">Rank</th>
                         <th className="p-2 text-left font-medium">Gemeente</th>
                         <th className="p-2 text-right font-medium">
                           {selectedMetric === 'Totaal' ? 'Totaal' : 'Per inwoner'}
@@ -580,22 +582,26 @@ export function InvesteringenBVSection() {
                     <tbody>
                       {tableData.length === 0 ? (
                         <tr>
-                          <td colSpan={2} className="p-4 text-center text-muted-foreground italic">
+                          <td colSpan={3} className="p-4 text-center text-muted-foreground italic">
                             Data aan het laden...
                           </td>
                         </tr>
                       ) : (
-                        tableData.map((row, i) => (
-                          <tr key={i} className="border-b">
-                            <td className="p-2">{row.municipality}</td>
-                            <td className="p-2 text-right">
-                              {selectedMetric === 'Totaal'
-                                ? formatFullCurrency(row.total)
-                                : `€ ${row.total.toFixed(2)}`
-                              }
-                            </td>
-                          </tr>
-                        ))
+                        tableData.map((row, i) => {
+                          const isSelected = geoSelection.type === 'municipality' && geoSelection.code === row.nisCode
+                          return (
+                            <tr key={i} className={`border-b ${isSelected ? 'bg-primary/10 font-semibold' : ''}`}>
+                              <td className="p-2 text-center text-muted-foreground">{row.rank}</td>
+                              <td className="p-2">{row.municipality}</td>
+                              <td className="p-2 text-right">
+                                {selectedMetric === 'Totaal'
+                                  ? formatFullCurrency(row.total)
+                                  : `€ ${row.total.toFixed(2)}`
+                                }
+                              </td>
+                            </tr>
+                          )
+                        })
                       )}
                     </tbody>
                   </table>
