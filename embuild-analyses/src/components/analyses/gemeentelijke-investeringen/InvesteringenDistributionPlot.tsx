@@ -46,6 +46,11 @@ export function InvesteringenDistributionPlot({
         const min = 0 // Always start from 0 for consistency
         const max = Math.max(...values) * 1.05 // Add 5% padding
 
+        // Edge case: if all values are 0 or max is 0, return empty bins
+        if (max === 0) {
+            return { bins: [], selectedMuniValue: null, selectedMuniName: null, yMax: 0 }
+        }
+
         const binSize = max / BIN_COUNT
         const bins = Array.from({ length: BIN_COUNT }, (_, i) => ({
             binIndex: i,
@@ -86,7 +91,20 @@ export function InvesteringenDistributionPlot({
             : `€ ${val.toFixed(2)}`
     }
 
-    const CustomTooltip = ({ active, payload }: any) => {
+    interface TooltipProps {
+        active?: boolean
+        payload?: Array<{
+            payload: {
+                binIndex: number
+                min: number
+                max: number
+                count: number
+                isHighlighted: boolean
+            }
+        }>
+    }
+
+    const CustomTooltip = ({ active, payload }: TooltipProps) => {
         if (active && payload && payload.length) {
             const bin = payload[0].payload
             return (
