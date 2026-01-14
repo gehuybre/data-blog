@@ -58,17 +58,40 @@ export function InvesteringenDistributionPlot({
             max: (i + 1) * binSize,
             count: 0,
             isHighlighted: false,
+            medianValue: 0,
+            percentileLabel: `${i * 5}-${(i + 1) * 5}%`,
         }))
+
+        // Distribute data points into bins and calculate counts
+        for (const point of data) {
+            const binIdx = Math.min(Math.floor(point.value / binSize), BIN_COUNT - 1)
+            bins[binIdx].count++
+        }
+
+        // Calculate median value for each bin
+        for (let i = 0; i < bins.length; i++) {
+            const binData = data.filter(d => {
+                const binIdx = Math.min(Math.floor(d.value / binSize), BIN_COUNT - 1)
+                return binIdx === i
+            })
+            if (binData.length > 0) {
+                const sorted = binData.map(d => d.value).sort((a, b) => a - b)
+                const mid = Math.floor(sorted.length / 2)
+                bins[i].medianValue = sorted.length % 2 === 0
+                    ? (sorted[mid - 1] + sorted[mid]) / 2
+                    : sorted[mid]
+            }
+        }
 
         let selectedMuniValue = null
         let selectedMuniName = null
 
         if (selectedMunicipality) {
-            const muniIdx = sortedData.findIndex(d => d.NIS_code === selectedMunicipality)
-            if (muniIdx !== -1) {
-                selectedMuniValue = sortedData[muniIdx].value
-                selectedMuniName = sortedData[muniIdx].municipality
-                const binIdx = Math.min(Math.floor(muniIdx / binSize), BIN_COUNT - 1)
+            const muni = data.find(d => d.NIS_code === selectedMunicipality)
+            if (muni) {
+                selectedMuniValue = muni.value
+                selectedMuniName = muni.municipality
+                const binIdx = Math.min(Math.floor(selectedMuniValue / binSize), BIN_COUNT - 1)
                 bins[binIdx].isHighlighted = true
             }
         }
