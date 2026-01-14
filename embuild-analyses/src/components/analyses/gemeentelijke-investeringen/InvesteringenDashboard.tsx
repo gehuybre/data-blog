@@ -1,6 +1,6 @@
 "use client"
 
-// CACHE BUSTER v2.0 - Force reload of scatter components
+// CACHE BUSTER v3.0 - Switched from scatter to distribution view
 import React, { useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -58,11 +58,11 @@ export function InvesteringenDashboard() {
         <InvesteringenREKCategorySection />
       </div>
 
-      <div className="border-t pt-16" id="investments-bv-scatter">
+      <div className="border-t pt-16" id="investments-bv-distribution">
         <InvesteringenBVScatterSection />
       </div>
 
-      <div className="border-t pt-16" id="investments-rek-scatter">
+      <div className="border-t pt-16" id="investments-rek-distribution">
         <InvesteringenREKScatterSection />
       </div>
     </div>
