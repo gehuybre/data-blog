@@ -42,37 +42,52 @@ export function InvesteringenDistributionPlot({
     const { bins, selectedMuniValue, selectedMuniName, yMax } = useMemo(() => {
         if (data.length === 0) return { bins: [], selectedMuniValue: null, selectedMuniName: null, yMax: 0 }
 
-        const values = data.map(d => d.value)
-        const min = 0 // Always start from 0 for consistency
-        const max = Math.max(...values) * 1.05 // Add 5% padding
+        // Sort data by value
+        const sortedData = [...data].sort((a, b) => a.value - b.value)
+        const totalCount = sortedData.length
 
-        const binSize = max / BIN_COUNT
-        const bins = Array.from({ length: BIN_COUNT }, (_, i) => ({
-            binIndex: i,
-            min: i * binSize,
-            max: (i + 1) * binSize,
-            count: 0,
-            isHighlighted: false,
-        }))
+        // Create 20 bins (5% each)
+        const BIN_COUNT = 20
+        const binSize = totalCount / BIN_COUNT
+
+        const bins = Array.from({ length: BIN_COUNT }, (_, i) => {
+            const startIndex = Math.floor(i * binSize)
+            const endIndex = Math.min(Math.floor((i + 1) * binSize), totalCount)
+            const binData = sortedData.slice(startIndex, endIndex)
+
+            // Calculate median value for the bin
+            const medianValue = binData.length > 0
+                ? binData[Math.floor(binData.length / 2)].value
+                : 0
+
+            return {
+                binIndex: i,
+                percentileLabel: `${i * 5}-${(i + 1) * 5}%`,
+                medianValue,
+                count: binData.length,
+                isHighlighted: false,
+                min: binData.length > 0 ? binData[0].value : 0,
+                max: binData.length > 0 ? binData[binData.length - 1].value : 0
+            }
+        })
 
         let selectedMuniValue = null
         let selectedMuniName = null
 
-        data.forEach(d => {
-            const binIdx = Math.min(Math.floor(d.value / binSize), BIN_COUNT - 1)
-            bins[binIdx].count++
-
-            if (d.NIS_code === selectedMunicipality) {
-                selectedMuniValue = d.value
-                selectedMuniName = d.municipality
+        if (selectedMunicipality) {
+            const muniIdx = sortedData.findIndex(d => d.NIS_code === selectedMunicipality)
+            if (muniIdx !== -1) {
+                selectedMuniValue = sortedData[muniIdx].value
+                selectedMuniName = sortedData[muniIdx].municipality
+                const binIdx = Math.min(Math.floor(muniIdx / binSize), BIN_COUNT - 1)
                 bins[binIdx].isHighlighted = true
             }
-        })
+        }
 
-        const yMax = Math.max(...bins.map(b => b.count))
+        const yMax = Math.max(...bins.map(b => b.medianValue))
 
         return { bins, selectedMuniValue, selectedMuniName, yMax }
-    }, [data, selectedMunicipality, BIN_COUNT])
+    }, [data, selectedMunicipality])
 
     // Formatters
     const { formatter: valueFormatter, scale: valueScale } = useMemo(() => {
@@ -91,12 +106,15 @@ export function InvesteringenDistributionPlot({
             const bin = payload[0].payload
             return (
                 <div className="bg-background border border-border rounded-md shadow-lg p-3 text-sm">
-                    <p className="font-bold mb-1">Verdeling</p>
+                    <p className="font-bold mb-1">Percentiel Groep ({bin.percentileLabel})</p>
                     <p className="text-muted-foreground">
                         Bereik: {valueFormatter(bin.min)} - {valueFormatter(bin.max)}
                     </p>
                     <p className="font-medium mt-1">
-                        Aantal gemeenten: <span className="text-primary">{bin.count}</span>
+                        Mediaan in deze groep: <span className="text-primary">{valueFormatter(bin.medianValue)}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                        ({bin.count} gemeenten in deze schijf)
                     </p>
                     {bin.isHighlighted && selectedMuniName && (
                         <p className="text-destructive font-medium mt-2 border-t pt-1">
@@ -114,16 +132,15 @@ export function InvesteringenDistributionPlot({
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={bins} margin={{ top: 40, right: 30, bottom: 60, left: 40 }}>
                     <XAxis
-                        dataKey="min"
-                        tickFormatter={valueFormatter}
-                        label={{ value: selectedMetric === 'Totaal' ? `Investering (€${valueScale || ''})` : 'Investering per inwoner (€)', position: 'insideBottom', offset: -10 }}
+                        dataKey="percentileLabel"
+                        label={{ value: 'Percentiel (groepen van 5% van alle gemeenten)', position: 'insideBottom', offset: -10 }}
                     />
                     <YAxis
-                        label={{ value: 'Aantal gemeenten', angle: -90, position: 'insideLeft', offset: 10 }}
-                        allowDecimals={false}
+                        label={{ value: selectedMetric === 'Totaal' ? `Investering (€${valueScale || ''})` : 'Investering per inwoner (€)', angle: -90, position: 'insideLeft', offset: 10 }}
+                        tickFormatter={valueFormatter}
                     />
                     <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
-                    <Bar dataKey="count">
+                    <Bar dataKey="medianValue">
                         {bins.map((entry, index) => (
                             <Cell
                                 key={`cell-${index}`}
@@ -134,14 +151,14 @@ export function InvesteringenDistributionPlot({
                     </Bar>
                     {selectedMuniValue !== null && (
                         <ReferenceLine
-                            x={selectedMuniValue}
+                            y={selectedMuniValue}
                             stroke="#ef4444"
                             strokeWidth={2}
                             strokeDasharray="3 3"
                         >
                             <Label
                                 value={selectedMuniName || ''}
-                                position="top"
+                                position="right"
                                 fill="#ef4444"
                                 fontSize={12}
                                 className="font-bold"
