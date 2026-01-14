@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnalysisSection } from "../shared/AnalysisSection"
 import { GeoProviderWithDefaults } from "../shared/GeoContext"
 import { getBasePath } from "@/lib/path-utils"
+import { normalizeNisCode } from "@/lib/nis-fusion-utils"
 
 // Data is now lazy-loaded from public/data/vergunningen-goedkeuringen/
 // Static imports replaced to reduce JavaScript bundle size by 3.8 MB
@@ -14,7 +15,7 @@ type PeriodType = "year" | "quarter"
 type DataRow = {
   y: number
   q: number
-  m: number
+  m: number | string
   ren: number
   new: number
 }
@@ -46,7 +47,28 @@ export function VergunningenDashboard() {
 
         if (!isMounted) return
 
-        setData(dataQuarterly)
+        // Normalize municipality codes and aggregate per period so the map
+        // receives post-fusion, zero-padded 5-digit NIS codes (see nis-fusion-utils)
+        // Aggregate counts when multiple pre-fusion codes map to the same current code
+        const aggregatedMap = new Map<string, { y: number; q: number; m: number; ren: number; new: number }>()
+
+        for (const row of (dataQuarterly as DataRow[])) {
+          const normStr = normalizeNisCode(row.m) || String(row.m).padStart(5, "0")
+          const normNum = Number(normStr)
+          const key = `${row.y}-${row.q}|${normStr}`
+          const prev = aggregatedMap.get(key)
+          if (!prev) {
+            aggregatedMap.set(key, { y: row.y, q: row.q, m: normNum, ren: Number(row.ren) || 0, new: Number(row.new) || 0 })
+          } else {
+            prev.ren += Number(row.ren) || 0
+            prev.new += Number(row.new) || 0
+          }
+        }
+
+        const normalizedData = Array.from(aggregatedMap.values())
+
+        // Keep municipalities list as-is (numbers). They will be matched via numeric NIS codes.
+        setData(normalizedData)
         setMunicipalities(municipalitiesData)
         setLoading(false)
       } catch (err) {
@@ -143,6 +165,7 @@ export function VergunningenDashboard() {
           dataSourceUrl="https://statbel.fgov.be/nl/themas/bouwen-wonen/bouwvergunningen"
           showMap={true}
           period={periodConfig}
+          getMunicipalityCode={(d) => Number(d.m)}
         />
 
         <AnalysisSection
@@ -157,6 +180,7 @@ export function VergunningenDashboard() {
           dataSourceUrl="https://statbel.fgov.be/nl/themas/bouwen-wonen/bouwvergunningen"
           showMap={true}
           period={periodConfig}
+          getMunicipalityCode={(d) => Number(d.m)}
         />
       </div>
     </GeoProviderWithDefaults>
