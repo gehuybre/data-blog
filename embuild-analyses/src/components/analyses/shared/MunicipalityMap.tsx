@@ -84,6 +84,19 @@ interface MunicipalityMapProps<TData extends UnknownRecord = UnknownRecord> {
 const MUNICIPALITIES_GEO_URL = `${getBasePath()}/maps/belgium_municipalities.json`
 const PROVINCES_GEO_URL = `${getBasePath()}/maps/belgium_provinces.json`
 
+/**
+ * Notes:
+ * - If a dataset contains only Flemish municipalities, the component will
+ *   display a Flanders-focused viewport and hide municipalities from other
+ *   regions (visualized as transparent / no stroke). This keeps the map
+ *   readable for Flanders-only data.
+ * - For datasets with pre-fusion NIS codes (historical data), normalize or
+ *   aggregate codes before passing data to the map. Use
+ *   `normalizeNisCode` / `aggregateByNormalizedNis` from
+ *   `src/lib/nis-fusion-utils.ts`. See `analyses/gemeentelijke-investeringen`
+ *   for a canonical example.
+ */
+
 // Default formatters
 const defaultFormatValue = (n: number) =>
   new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(n)

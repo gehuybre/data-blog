@@ -56,6 +56,14 @@ interface MapSectionProps<TData extends UnknownRecord = UnknownRecord> {
  * - Data must have a municipality code field (5-digit NIS code)
  * - If you don't have municipality data, don't show a map
  *
+ * Note on fusions & Flanders-only datasets:
+ * - If your dataset uses pre-fusion NIS codes, normalize or aggregate codes
+ *   (see `normalizeNisCode` / `aggregateByNormalizedNis` in
+ *   `src/lib/nis-fusion-utils.ts`) so values map to current municipalities.
+ * - When a dataset contains only Flemish municipalities, the map will
+ *   automatically use a Flanders-focused viewport and hide non-Flemish
+ *   municipalities to avoid showing irrelevant empty borders.
+ *
  * Features:
  * - Municipality search/autocomplete
  * - Auto-zoom to selected municipality
