@@ -34,7 +34,7 @@ interface BVLookups {
 }
 
 interface REKLookups {
-  hoofdrekeningen: Array<{ 
+  hoofdrekeningen: Array<{
     Economische_rekening_hoofdrekening?: string
     Niveau_3?: string
   }>
@@ -404,7 +404,7 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
   // BV: Filter data based on category selections (without geo filter)
   const bvDataWithoutGeoFilter = useMemo(() => {
     let data = bvMuniData
-    
+
     if (selectedDomain) {
       data = data.filter(d => stripPrefix(d.BV_domein) === selectedDomain)
     }
@@ -574,7 +574,7 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
         <CardContent className="h-64 flex flex-col items-center justify-center space-y-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground italic">
-            Laden van {perspective === "bv" ? "Beleidsdomein" : "Economische Rekening"} data...
+            Laden van {perspective === "bv" ? "beleidsdomein" : "economische rekening"} data...
           </p>
         </CardContent>
       </Card>
@@ -586,7 +586,7 @@ export function InvesteringenEmbed({ section, viewType = "chart" }: Investeringe
       <Card>
         <CardHeader>
           <CardTitle>
-            {perspective === "bv" ? "Investeringen per Beleidsdomein (BV)" : "Investeringen per Economische Rekening (REK)"}
+            {perspective === "bv" ? "Investeringen per beleidsdomein (BV)" : "Investeringen per economische rekening (REK)"}
           </CardTitle>
           {loadedChunks < totalChunks && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">

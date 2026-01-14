@@ -412,7 +412,7 @@ export function InvesteringenREKSection() {
       <Card>
         <CardContent className="h-64 flex flex-col items-center justify-center space-y-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground italic">Laden van Investeringen per Economische Rekening...</p>
+          <p className="text-sm text-muted-foreground italic">Laden van investeringen per economische rekening...</p>
         </CardContent>
       </Card>
     )
@@ -423,7 +423,7 @@ export function InvesteringenREKSection() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Investeringen per Economische Rekening (REK)</CardTitle>
+            <CardTitle>Investeringen per economische rekening (REK)</CardTitle>
             <div className="flex items-center gap-4">
               {loadedChunks < totalChunks && (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
@@ -432,7 +432,7 @@ export function InvesteringenREKSection() {
                 </div>
               )}
               <ExportButtons
-                title="Investeringen per Economische Rekening"
+                title="Investeringen per economische rekening"
                 slug="gemeentelijke-investeringen"
                 sectionId="investments-rek"
                 viewType="table"

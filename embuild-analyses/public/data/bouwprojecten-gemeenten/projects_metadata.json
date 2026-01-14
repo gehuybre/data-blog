@@ -7,67 +7,67 @@
   "categories": {
     "wegenbouw": {
       "id": "wegenbouw",
-      "label": "Wegenbouw & Infrastructuur",
+      "label": "wegenbouw & infrastructuur",
       "emoji": "",
       "project_count": 1390
     },
     "riolering": {
       "id": "riolering",
-      "label": "Riolering & Waterbeheer",
+      "label": "riolering & waterbeheer",
       "emoji": "",
       "project_count": 449
     },
     "scholenbouw": {
       "id": "scholenbouw",
-      "label": "Scholenbouw",
+      "label": "scholenbouw",
       "emoji": "",
       "project_count": 287
     },
     "sport": {
       "id": "sport",
-      "label": "Sportinfrastructuur",
+      "label": "sportinfrastructuur",
       "emoji": "",
       "project_count": 306
     },
     "cultuur": {
       "id": "cultuur",
-      "label": "Culturele Infrastructuur",
+      "label": "culturele infrastructuur",
       "emoji": "",
       "project_count": 416
     },
     "gebouwen": {
       "id": "gebouwen",
-      "label": "Administratieve & Publieke Gebouwen",
+      "label": "administratieve & publieke gebouwen",
       "emoji": "",
       "project_count": 160
     },
     "verlichting": {
       "id": "verlichting",
-      "label": "Straatverlichting & Signalisatie",
+      "label": "straatverlichting & signalisatie",
       "emoji": "",
       "project_count": 202
     },
     "groen": {
       "id": "groen",
-      "label": "Groene Ruimte & Parks",
+      "label": "groene ruimte & parken",
       "emoji": "",
       "project_count": 940
     },
     "ruimtelijke-ordening": {
       "id": "ruimtelijke-ordening",
-      "label": "Ruimtelijke Ordening & Gebiedsontwikkeling",
+      "label": "ruimtelijke ordening & gebiedsontwikkeling",
       "emoji": "",
       "project_count": 223
     },
     "zorg": {
       "id": "zorg",
-      "label": "Sociale Infrastructuur & Zorg",
+      "label": "sociale infrastructuur & zorg",
       "emoji": "",
       "project_count": 734
     },
     "overige": {
       "id": "overige",
-      "label": "Overige",
+      "label": "overige",
       "emoji": "",
       "project_count": 2792
     }

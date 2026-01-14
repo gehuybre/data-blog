@@ -55,7 +55,7 @@ export function ProjectDetailModal({
 
         {/* Categories */}
         <div>
-          <h3 className="font-semibold mb-2">Categorieën</h3>
+          <h3 className="font-semibold mb-2">categorieën</h3>
           <div className="flex flex-wrap gap-2">
             {project.categories.map(catId => {
               const cat = metadata?.categories[catId]
@@ -72,7 +72,7 @@ export function ProjectDetailModal({
 
         {/* Total Amount */}
         <div>
-          <h3 className="font-semibold mb-2">Totaal Bedrag</h3>
+          <h3 className="font-semibold mb-2">totaal bedrag</h3>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold">
               €{formatNumber(project.total_amount)}
@@ -87,7 +87,7 @@ export function ProjectDetailModal({
 
         {/* Description */}
         <div>
-          <h3 className="font-semibold mb-2">Beschrijving</h3>
+          <h3 className="font-semibold mb-2">beschrijving</h3>
           <p className="text-sm leading-relaxed whitespace-pre-wrap">
             {project.ac_long}
           </p>
@@ -99,7 +99,7 @@ export function ProjectDetailModal({
         <div>
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            Planning per Jaar
+            planning per jaar
           </h3>
           <div className="space-y-2">
             {yearlyEntries.map(([year, amount]) => {
@@ -147,7 +147,7 @@ export function ProjectDetailModal({
               {project.ap_short && (
                 <div>
                   <h3 className="font-semibold mb-2 text-sm text-muted-foreground">
-                    Context: Actieplan
+                    Context: actieplan
                   </h3>
                   <div className="bg-muted/50 rounded-lg p-4">
                     <p className="font-medium mb-1">
@@ -166,7 +166,7 @@ export function ProjectDetailModal({
               {project.bd_short && (
                 <div>
                   <h3 className="font-semibold mb-2 text-sm text-muted-foreground">
-                    Context: Beleidsdoelstelling
+                    Context: beleidsdoelstelling
                   </h3>
                   <div className="bg-muted/50 rounded-lg p-4">
                     <p className="font-medium mb-1">

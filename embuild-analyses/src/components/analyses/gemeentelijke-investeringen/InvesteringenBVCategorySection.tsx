@@ -265,7 +265,7 @@ export function InvesteringenBVCategorySection() {
       <Card>
         <CardContent className="h-64 flex flex-col items-center justify-center space-y-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground italic">Laden van BV categorieën...</p>
+          <p className="text-sm text-muted-foreground italic">Laden van BV-categorieën...</p>
         </CardContent>
       </Card>
     )
@@ -274,123 +274,123 @@ export function InvesteringenBVCategorySection() {
   return (
     <SimpleGeoContext.Provider value={{ selection: geoSelection, setSelection: setGeoSelection }}>
       <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Verdeling per Beleidsveld (BV)</CardTitle>
-          <div className="flex items-center gap-4">
-            {loadedChunks < totalChunks && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                Laden data: {Math.round((loadedChunks / totalChunks) * 100)}%
-              </div>
-            )}
-            <ExportButtons
-              title="Verdeling per Beleidsveld"
-              slug="gemeentelijke-investeringen"
-              sectionId="bv-category-breakdown"
-              viewType="table"
-              data={categoryData.map(d => ({ label: d.label, value: d.value }))}
-            />
-          </div>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Top 9 beleidsvel den met hoogste investeringen + overige categorieën.
-        </p>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2">
-            <div className="flex gap-2">
-              <Button
-                variant={selectedMetric === 'Totaal' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedMetric('Totaal')}
-                className="h-9"
-              >
-                Totaal
-              </Button>
-              <Button
-                variant={selectedMetric === 'Per_inwoner' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedMetric('Per_inwoner')}
-                className="h-9"
-              >
-                Per inwoner
-              </Button>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={selectedYear === 2014 ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedYear(2014)}
-                className="h-9"
-              >
-                2014
-              </Button>
-              <Button
-                variant={selectedYear === 2020 ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedYear(2020)}
-                className="h-9"
-              >
-                2020
-              </Button>
-              <Button
-                variant={selectedYear === 2026 ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedYear(2026)}
-                className="h-9"
-              >
-                2026
-              </Button>
-            </div>
-            <SimpleGeoFilter availableMunicipalities={availableMunicipalities} />
-          </div>
-
-          {/* Category breakdown */}
-          <div className="space-y-4">
-            {categoryData.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground italic">
-                Geen data beschikbaar voor deze selectie.
-              </div>
-            ) : (
-              categoryData.map((item, index) => (
-                <div key={item.label} className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-sm">
-                      {index + 1}. {item.label}
-                    </span>
-                    <span className="font-bold text-sm">
-                      {selectedMetric === 'Totaal'
-                        ? formatCurrency(item.value)
-                        : `€ ${item.value.toFixed(2)}`
-                      }
-                    </span>
-                  </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className={cn(
-                        "h-full rounded-full transition-all",
-                        item.label === 'Overige' ? "bg-gray-400" : "bg-blue-500"
-                      )}
-                      style={{ width: `${(item.value / maxValue) * 100}%` }}
-                    />
-                  </div>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Verdeling per beleidsveld (BV)</CardTitle>
+            <div className="flex items-center gap-4">
+              {loadedChunks < totalChunks && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Laden data: {Math.round((loadedChunks / totalChunks) * 100)}%
                 </div>
-              ))
-            )}
+              )}
+              <ExportButtons
+                title="Verdeling per beleidsveld"
+                slug="gemeentelijke-investeringen"
+                sectionId="bv-category-breakdown"
+                viewType="table"
+                data={categoryData.map(d => ({ label: d.label, value: d.value }))}
+              />
+            </div>
           </div>
-
-          <p className="text-sm text-muted-foreground mt-4">
-            {geoSelection.type === 'municipality' && geoSelection.code
-              ? `Investeringen voor ${getMunicipalityName(geoSelection.code)} in ${selectedYear}`
-              : `Totale investeringen over alle gemeenten in ${selectedYear}`
-            }
+          <p className="text-sm text-muted-foreground">
+            Top 9 beleidsvel den met hoogste investeringen + overige categorieën.
           </p>
-        </div>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Filters */}
+            <div className="flex flex-wrap gap-2">
+              <div className="flex gap-2">
+                <Button
+                  variant={selectedMetric === 'Totaal' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedMetric('Totaal')}
+                  className="h-9"
+                >
+                  Totaal
+                </Button>
+                <Button
+                  variant={selectedMetric === 'Per_inwoner' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedMetric('Per_inwoner')}
+                  className="h-9"
+                >
+                  Per inwoner
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant={selectedYear === 2014 ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedYear(2014)}
+                  className="h-9"
+                >
+                  2014
+                </Button>
+                <Button
+                  variant={selectedYear === 2020 ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedYear(2020)}
+                  className="h-9"
+                >
+                  2020
+                </Button>
+                <Button
+                  variant={selectedYear === 2026 ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedYear(2026)}
+                  className="h-9"
+                >
+                  2026
+                </Button>
+              </div>
+              <SimpleGeoFilter availableMunicipalities={availableMunicipalities} />
+            </div>
+
+            {/* Category breakdown */}
+            <div className="space-y-4">
+              {categoryData.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground italic">
+                  Geen data beschikbaar voor deze selectie.
+                </div>
+              ) : (
+                categoryData.map((item, index) => (
+                  <div key={item.label} className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-sm">
+                        {index + 1}. {item.label}
+                      </span>
+                      <span className="font-bold text-sm">
+                        {selectedMetric === 'Totaal'
+                          ? formatCurrency(item.value)
+                          : `€ ${item.value.toFixed(2)}`
+                        }
+                      </span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all",
+                          item.label === 'Overige' ? "bg-gray-400" : "bg-blue-500"
+                        )}
+                        style={{ width: `${(item.value / maxValue) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <p className="text-sm text-muted-foreground mt-4">
+              {geoSelection.type === 'municipality' && geoSelection.code
+                ? `Investeringen voor ${getMunicipalityName(geoSelection.code)} in ${selectedYear}`
+                : `Totale investeringen over alle gemeenten in ${selectedYear}`
+              }
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </SimpleGeoContext.Provider>
   )
 }
