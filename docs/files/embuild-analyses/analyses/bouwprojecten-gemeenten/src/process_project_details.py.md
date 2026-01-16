@@ -10,6 +10,7 @@ What it does:
 - Parses yearly amounts (2026–2031) and computes totals & per-capita values
 - Classifies projects using `category_keywords.py`
 - Outputs chunked JSON files for the frontend in `public/data/bouwprojecten-gemeenten/` and a metadata file `projects_metadata.json`
+  - Note: `projects_metadata.json` now contains enhanced per-category summaries including `project_count`, `total_amount` and `largest_projects` (top N largest projects per category, with per-project totals and yearly breakdowns).
 
 Usage
 ------

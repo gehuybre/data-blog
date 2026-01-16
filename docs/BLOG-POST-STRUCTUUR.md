@@ -45,4 +45,4 @@ Zie ook de `ANALYSIS_TEMPLATE.md` in de root van de `embuild-analyses` map voor 
 
 ## 4. Taal
 
-Gebruik hoofdletters volgens de Nederlandse spelling. Zet alleen een hoofdletter aan het begin van een zin en bij eigennamen. Schrijf titels en tussenkoppen in zinshoofdletters, niet in title case. Zelfstandige naamwoorden krijgen geen hoofdletter tenzij het een eigennaam is.
+Gebruik hoofdletters volgens de Nederlandse spelling. Zet alleen een hoofdletter aan het begin van een zin of lijn en bij eigennamen. Schrijf titels en tussenkoppen in zinshoofdletters, niet in title case. Zelfstandige naamwoorden krijgen geen hoofdletter tenzij het een eigennaam is.

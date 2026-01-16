@@ -45,8 +45,16 @@ export interface ProjectMetadata {
     [key: string]: {
       id: string
       label: string
-      emoji: string
       project_count: number
+      total_amount: number
+      largest_projects: Array<{
+        ac_code: string
+        ac_short: string
+        municipality: string
+        nis_code: string
+        total_amount: number
+        yearly_amounts: Record<string, number>
+      }>
     }
   }
 }
