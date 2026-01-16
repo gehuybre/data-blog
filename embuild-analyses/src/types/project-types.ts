@@ -35,6 +35,21 @@ export interface Project {
   categories: string[]
 }
 
+export interface CategoryMetadata {
+  id: string
+  label: string
+  project_count: number
+  total_amount: number
+  largest_projects: Array<{
+    ac_code: string
+    ac_short: string
+    municipality: string
+    nis_code: string
+    total_amount: number
+    yearly_amounts: Record<string, number>
+  }>
+}
+
 export interface ProjectMetadata {
   total_projects: number
   total_amount: number
@@ -42,20 +57,7 @@ export interface ProjectMetadata {
   chunks: number
   chunk_size: number
   categories: {
-    [key: string]: {
-      id: string
-      label: string
-      project_count: number
-      total_amount: number
-      largest_projects: Array<{
-        ac_code: string
-        ac_short: string
-        municipality: string
-        nis_code: string
-        total_amount: number
-        yearly_amounts: Record<string, number>
-      }>
-    }
+    [key: string]: CategoryMetadata
   }
 }
 
