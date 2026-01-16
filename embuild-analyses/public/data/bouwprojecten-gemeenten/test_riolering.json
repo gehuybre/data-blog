@@ -1,0 +1,158 @@
+{
+  "id": "riolering",
+  "label": "riolering & waterbeheer",
+  "project_count": 846,
+  "total_amount": 1872969241.0,
+  "largest_projects": [
+    {
+      "ac_code": "AC000048",
+      "ac_short": "Blijven investeren in basisinfrastructuur door onderhouden van voetpaden, fietspaden en wegen.",
+      "municipality": "Leuven",
+      "nis_code": "24062",
+      "total_amount": 157471444.0,
+      "yearly_amounts": {
+        "2026": 21042493.0,
+        "2027": 27127646.0,
+        "2028": 26915305.0,
+        "2029": 25862000.0,
+        "2030": 26637000.0,
+        "2031": 29887000.0
+      }
+    },
+    {
+      "ac_code": "AC35132",
+      "ac_short": "Beheer van regen- en afvalwater",
+      "municipality": "Gent",
+      "nis_code": "44021",
+      "total_amount": 83535016.0,
+      "yearly_amounts": {
+        "2026": 1597081.0,
+        "2027": 12270945.0,
+        "2028": 15046193.0,
+        "2029": 17766933.0,
+        "2030": 17625852.0,
+        "2031": 19228012.0
+      }
+    },
+    {
+      "ac_code": "AC000079",
+      "ac_short": "(Her)aanleg van verouderde straten en pleinen over het volledige grondgebied van de stad Aalst",
+      "municipality": "Aalst",
+      "nis_code": "71001",
+      "total_amount": 60000000.0,
+      "yearly_amounts": {
+        "2026": 10000000.0,
+        "2027": 10000000.0,
+        "2028": 10000000.0,
+        "2029": 10000000.0,
+        "2030": 10000000.0,
+        "2031": 10000000.0
+      }
+    },
+    {
+      "ac_code": "AC000201",
+      "ac_short": "Weg- rioleringswerken",
+      "municipality": "Geel",
+      "nis_code": "13008",
+      "total_amount": 33133586.0,
+      "yearly_amounts": {
+        "2026": 9667293.0,
+        "2027": 9239262.0,
+        "2028": 6899838.0,
+        "2029": 6591754.0,
+        "2030": 691274.0,
+        "2031": 44165.0
+      }
+    },
+    {
+      "ac_code": "AC000509",
+      "ac_short": "Er is structureel overleg met Riopact om een correcte financi\u00eble rapportering, de kwaliteit van de d",
+      "municipality": "Vilvoorde",
+      "nis_code": "23088",
+      "total_amount": 29403468.0,
+      "yearly_amounts": {
+        "2026": 29090968.0,
+        "2027": 62500.0,
+        "2028": 62500.0,
+        "2029": 62500.0,
+        "2030": 62500.0,
+        "2031": 62500.0
+      }
+    },
+    {
+      "ac_code": "AC000080",
+      "ac_short": "Onderhoud op een structurele en planmatige manier van de openbare ruimtes",
+      "municipality": "Aalst",
+      "nis_code": "71001",
+      "total_amount": 27480000.0,
+      "yearly_amounts": {
+        "2026": 4580000.0,
+        "2027": 4580000.0,
+        "2028": 4580000.0,
+        "2029": 4580000.0,
+        "2030": 4580000.0,
+        "2031": 4580000.0
+      }
+    },
+    {
+      "ac_code": "AC000086",
+      "ac_short": "We investeren verder in de aanleg van gescheiden rioleringsstelsel",
+      "municipality": "Diest",
+      "nis_code": "24020",
+      "total_amount": 25230715.0,
+      "yearly_amounts": {
+        "2026": 6110543.0,
+        "2027": 5493389.0,
+        "2028": 4419924.0,
+        "2029": 2836192.0,
+        "2030": 2720597.0,
+        "2031": 3650070.0
+      }
+    },
+    {
+      "ac_code": "AC000485",
+      "ac_short": "Mechelen blijft investeren in het vernieuwen van straten en pleinen (incl. riolering).",
+      "municipality": "Mechelen",
+      "nis_code": "12025",
+      "total_amount": 24100000.0,
+      "yearly_amounts": {
+        "2026": 3300000.0,
+        "2027": 4800000.0,
+        "2028": 4830000.0,
+        "2029": 5970000.0,
+        "2030": 4325000.0,
+        "2031": 875000.0
+      }
+    },
+    {
+      "ac_code": "AC000092",
+      "ac_short": "uitvoering gesubsidieerde aquafinprojecten",
+      "municipality": "Haacht",
+      "nis_code": "24033",
+      "total_amount": 23270000.0,
+      "yearly_amounts": {
+        "2026": 1112000.0,
+        "2027": 4045000.0,
+        "2028": 7333000.0,
+        "2029": 6450000.0,
+        "2030": 4280000.0,
+        "2031": 50000.0
+      }
+    },
+    {
+      "ac_code": "S05B02AP01_S05B02AP01A02",
+      "ac_short": "Verdere uitvoer reeds opgestarte wegenis- en rioleringsproje",
+      "municipality": "Lokeren",
+      "nis_code": "46014",
+      "total_amount": 22979358.0,
+      "yearly_amounts": {
+        "2026": 13580738.0,
+        "2027": 7936644.0,
+        "2028": 1461976.0,
+        "2029": 0.0,
+        "2030": 0.0,
+        "2031": 0.0
+      }
+    }
+  ]
+}

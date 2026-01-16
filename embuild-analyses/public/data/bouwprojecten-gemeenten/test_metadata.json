@@ -1,0 +1,12 @@
+{
+  "id": "test",
+  "label": "Test Category",
+  "project_count": 10,
+  "total_amount": 123456.78,
+  "largest_projects": [
+    {
+      "name": "Test Project",
+      "amount": 1000
+    }
+  ]
+}

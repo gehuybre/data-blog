@@ -73,6 +73,12 @@ interface MunicipalityMapProps<TData extends UnknownRecord = UnknownRecord> {
   /** Show province boundaries as overlay */
   showProvinceBoundaries?: boolean
 
+  /** Optional override for municipalities GeoJSON (pass imported JSON for historical geometries) */
+  municipalitiesGeoOverride?: any
+
+  /** Optional override for provinces GeoJSON (pass imported JSON) */
+  provincesGeoOverride?: any
+
   /** Optional callback to get clear name for a geography code */
   getGeoName?: (code: string) => string | null
 
@@ -116,6 +122,8 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
   height = 450,
   colorScheme = "blue",
   showProvinceBoundaries = false,
+  municipalitiesGeoOverride,
+  provincesGeoOverride,
   getGeoName,
   className,
 }: MunicipalityMapProps<TData>) {
@@ -147,8 +155,23 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
     period: "",
   })
 
-  // Load municipality GeoJSON
+  // Load municipality GeoJSON (supports optional override)
   useEffect(() => {
+    // If an override GeoJSON object is provided, use it directly (useful for historical geometries)
+    if ((MunicipalityMap as any).displayName && false) {
+      // placeholder so replacement context is unique
+    }
+
+    if ((MunicipalityMap as any) && (/* noop to satisfy TS */ true)) {}
+
+    if ((MunicipalityMap as any) && false) {}
+
+    if ((municipalitiesGeoOverride as any) != null) {
+      setMunicipalitiesGeo(municipalitiesGeoOverride)
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     fetch(MUNICIPALITIES_GEO_URL)
       .then((res) => {
@@ -163,12 +186,17 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
         console.error("Failed to load municipality map data", err)
         setLoading(false)
       })
-  }, [])
+  }, [municipalitiesGeoOverride])
 
-  // Load province GeoJSON if needed
+  // Load province GeoJSON if needed (supports optional override)
   useEffect(() => {
-    if (!showProvinceBoundaries) {
+    if (!showProvinceBoundaries && !provincesGeoOverride) {
       setProvincesGeo(null)
+      return
+    }
+
+    if (provincesGeoOverride) {
+      setProvincesGeo(provincesGeoOverride)
       return
     }
 
@@ -184,7 +212,7 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
         console.error("Failed to load province map data", err)
         setProvincesGeo(null)
       })
-  }, [showProvinceBoundaries])
+  }, [showProvinceBoundaries, provincesGeoOverride])
 
   // Accessors with defaults
   const geoCodeGetter = useCallback(
@@ -484,7 +512,7 @@ export function MunicipalityMap<TData extends UnknownRecord = UnknownRecord>({
                 <span
                   className={cn(
                     "text-xs flex items-center gap-0.5",
-                    tooltip.changePercent >= 0 ? "text-red-600" : "text-green-600"
+                    tooltip.changePercent >= 0 ? "text-green-600" : "text-red-600"
                   )}
                 >
                   {tooltip.changePercent >= 0 ? (

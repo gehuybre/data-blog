@@ -52,6 +52,8 @@ Manual execution of the `process_data.py` script.
 ## Steps (high level)
 1.  **Read Data**: Loads the raw pipe-delimited text file.
 2.  **Filter**: Selects records for municipalities (Level 5) and excludes yearly totals.
+   
+    **Note**: In the raw data, `CD_PERIOD` = 0 represents yearly totals, which are excluded from the analysis.
 3.  **Transform**: Calculates quarters and aggregates renovation and new construction counts.
 4.  **Export**: Saves the aggregated data and municipality list to JSON files for the frontend.
 5.  **Visualize**: The React dashboard consumes these JSON files to render charts, tables, and maps. It uses `GeoContext` and `GeoFilter` to allow users to explore data at Region, Province, and Municipality levels.
