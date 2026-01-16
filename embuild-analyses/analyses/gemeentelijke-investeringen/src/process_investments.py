@@ -309,9 +309,9 @@ def main():
     ]
 
     bv_files = [
-        (DATA_DIR / 'mjp 2014 bv.csv', 2014),
-        (DATA_DIR / 'mjp 2020 bv.csv', 2020),
-        (DATA_DIR / 'mjp bv 26.csv', 2026),
+        (DATA_DIR / 'MJP BV 2014 MVA.csv', 2014),
+        (DATA_DIR / 'MJP BV 2020 MVA.csv', 2020),
+        (DATA_DIR / 'MJP BV 2026 MVA.csv', 2026),
     ]
 
     # Verwerk REK bestanden
