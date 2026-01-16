@@ -35,3 +35,6 @@ embuild-analyses/analyses/gemeentelijke-investeringen/results/rek_municipality_d
 
 # Local logs directory
 logs/
+
+# Temporary analysis files
+tmp/
