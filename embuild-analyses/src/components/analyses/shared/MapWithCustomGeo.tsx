@@ -2,7 +2,9 @@
 
 import { MunicipalityMap } from "./MunicipalityMap"
 
-interface MapWithCustomGeoProps<TData> {
+type UnknownRecord = Record<string, unknown>
+
+interface MapWithCustomGeoProps<TData extends UnknownRecord> {
   data: TData[]
   getGeoCode: (item: TData) => string
   getValue: (item: TData) => number
@@ -10,7 +12,7 @@ interface MapWithCustomGeoProps<TData> {
   municipalitiesGeo?: GeoJSON.FeatureCollection
 }
 
-export function MapWithCustomGeo<TData>({ 
+export function MapWithCustomGeo<TData extends UnknownRecord>({ 
   data, 
   getGeoCode, 
   getValue, 
