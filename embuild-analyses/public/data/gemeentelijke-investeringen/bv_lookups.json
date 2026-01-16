@@ -560,10 +560,6 @@
     },
     {
       "BV_subdomein": "070 Culturele instellingen",
-      "Beleidsveld": "0704 Letterkunde, gespecialiseerde bibliotheken"
-    },
-    {
-      "BV_subdomein": "070 Culturele instellingen",
       "Beleidsveld": "0705 Gemeenschapscentrum"
     },
     {
@@ -704,10 +700,6 @@
     },
     {
       "BV_subdomein": "090 Sociaal beleid",
-      "Beleidsveld": "0901 Voorschotten"
-    },
-    {
-      "BV_subdomein": "090 Sociaal beleid",
       "Beleidsveld": "0902 Integratie van personen met vreemde herkomst"
     },
     {
@@ -769,10 +761,6 @@
     {
       "BV_subdomein": "094 Gezin en kinderen",
       "Beleidsveld": "0947 Klusjesdienst"
-    },
-    {
-      "BV_subdomein": "094 Gezin en kinderen",
-      "Beleidsveld": "0948 Poetsdienst"
     },
     {
       "BV_subdomein": "094 Gezin en kinderen",

@@ -7,10 +7,10 @@
   "total_municipalities": 285,
   "bv_domains": 10,
   "bv_subdomeins": 57,
-  "bv_beleidsvelds": 145,
+  "bv_beleidsvelds": 142,
   "rek_niveau3s": 4,
   "rek_alg_rekenings": 114,
-  "bv_chunks": 6,
+  "bv_chunks": 5,
   "rek_chunks": 4,
   "chunk_size": 5000
 }
