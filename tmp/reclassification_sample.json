@@ -1,0 +1,2386 @@
+[
+  {
+    "municipality": "Leuven",
+    "ac_short": "Blijven investeren in basisinfrastructuur door onderhouden van voetpaden, fietspaden en wegen.",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "verlichting",
+      "groen"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "werking",
+      "verlichting",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Antwerpen",
+    "ac_short": "Basisinrichting, opwaardering",
+    "orig": [
+      "cultuur"
+    ],
+    "new": [
+      "wegenbouw",
+      "cultuur"
+    ]
+  },
+  {
+    "municipality": "Antwerpen",
+    "ac_short": "Publieke dienstverlening",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "Samenwerking sport Farys",
+    "orig": [
+      "sport"
+    ],
+    "new": [
+      "wegenbouw",
+      "sport",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Beveren-Kruibeke-Zwijndrecht",
+    "ac_short": "Een goed onderhouden wegennet",
+    "orig": [
+      "wegenbouw",
+      "ruimtelijke-ordening"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking",
+      "veiligheid",
+      "ruimtelijke-ordening"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "District09 Stedenfonds exploitatie",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "Beheer van regen- en afvalwater",
+    "orig": [
+      "riolering"
+    ],
+    "new": [
+      "riolering",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "sogent - gebiedsontwikkeling",
+    "orig": [
+      "ruimtelijke-ordening"
+    ],
+    "new": [
+      "werking",
+      "ruimtelijke-ordening"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "Onderhoud en Toezicht Aannemers WBW",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "onderhoud MOK/niet-MOK FM Themagebouwen",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Aalst",
+    "ac_short": "(Her)aanleg van verouderde straten en pleinen over het volledige grondgebied van de stad Aalst",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "verlichting",
+      "groen"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "veiligheid",
+      "verlichting",
+      "groen",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Antwerpen",
+    "ac_short": "Reguliere werking Politie",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "Onderhoud MOK/niet-MOK FM Onderwijs",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Antwerpen",
+    "ac_short": "Recurrent onderhoud",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Antwerpen",
+    "ac_short": "Eigen werking - effectieve, ef",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Aalst",
+    "ac_short": "Beheren van het budget",
+    "orig": [
+      "zorg"
+    ],
+    "new": [
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Geel",
+    "ac_short": "Patrimonium: investeert",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Beveren-Kruibeke-Zwijndrecht",
+    "ac_short": "De bijdrage aan de werking van Zorgpunt Waasland",
+    "orig": [
+      "verlichting",
+      "zorg"
+    ],
+    "new": [
+      "werking",
+      "verlichting",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Hasselt",
+    "ac_short": "4.2.1 Veilige weginfrastructuur is uniform, leesbaar en degelijk onderhouden.",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Brugge",
+    "ac_short": "Regulier onderhoud - Bouwkundig",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Middelkerke",
+    "ac_short": "Nieuwe zeedijk",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "cultuur",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Leuven",
+    "ac_short": "Renovatie van het stadhuis als toeristische topattractie en erfgoedhuis.",
+    "orig": [
+      "cultuur"
+    ],
+    "new": [
+      "cultuur",
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Beveren-Kruibeke-Zwijndrecht",
+    "ac_short": "Een actueel en onderhouden sportinfrastructuur in elke deelgemeente",
+    "orig": [
+      "sport"
+    ],
+    "new": [
+      "wegenbouw",
+      "sport",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Knokke-Heist",
+    "ac_short": "Bouw van een nieuw politiegebouw",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Izegem",
+    "ac_short": "Bouwen van een nieuwe kunstacademie",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "wegenbouw"
+    ]
+  },
+  {
+    "municipality": "Zemst",
+    "ac_short": "We realiseren de eerste fase van het masterplan zorg- en welzijnssite",
+    "orig": [
+      "gebouwen",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "gebouwen",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Vilvoorde",
+    "ac_short": "Er is structureel overleg met Riopact om een correcte financiële rapportering, de kwaliteit van de d",
+    "orig": [
+      "riolering"
+    ],
+    "new": [
+      "riolering",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Bilzen-Hoeselt",
+    "ac_short": "Investeren in projecten ter verbetering van de waterhuishouding, leefkwaliteit en weginfrastructuur.",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "groen"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "werking",
+      "veiligheid",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Antwerpen",
+    "ac_short": "Opnemen bouwheerschap voor ere",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Aalst",
+    "ac_short": "Onderhoud op een structurele en planmatige manier van de openbare ruimtes",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Dendermonde",
+    "ac_short": "Erfgoed opwaarderen",
+    "orig": [
+      "cultuur",
+      "groen"
+    ],
+    "new": [
+      "cultuur",
+      "veiligheid",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Jabbeke",
+    "ac_short": "Jaarlijks wordt een overzicht van de gerealiseerde investeringen gepubliceerd.",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Leuven",
+    "ac_short": "Verder uitwerken van de podiumkunstensite tot multifunctionele en levendige infrastructuur.",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "wegenbouw"
+    ]
+  },
+  {
+    "municipality": "Leuven",
+    "ac_short": "Veiligheid verhogen door doelgroep- en risicogerichte preventie en herstelgerichte interventies.",
+    "orig": [
+      "scholenbouw",
+      "zorg"
+    ],
+    "new": [
+      "scholenbouw",
+      "werking",
+      "veiligheid",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Antwerpen",
+    "ac_short": "Reguliere werking brandweer",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "werking",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Waregem",
+    "ac_short": "SD2.AP06.AC03. Verder investeren in het waterbeheer met het oog op bereiken van de doelstellingen",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Beveren-Kruibeke-Zwijndrecht",
+    "ac_short": "Een modern en goed onderhouden patrimonium gemeentelijk onderwijs",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "wegenbouw",
+      "gebouwen",
+      "werking",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Turnhout",
+    "ac_short": "14.2.2 We investeren in ons stedelijk patrimonium",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Haacht",
+    "ac_short": "uitvoering gesubsidieerde aquafinprojecten",
+    "orig": [
+      "riolering"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "Brandweerzone centrum",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "werking",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Tienen",
+    "ac_short": "Heraanleggen van gemeentewegen",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "groen"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "werking",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Aarschot",
+    "ac_short": "Actie 3.1.2 We ontwerpen, bouwen en onderhouden rioleringen, wegen, pleinen, fiets- en voetpaden.",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "groen"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "werking",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Mechelen",
+    "ac_short": "Mechelen streeft naar een gezond financieel beleid op basis van een langetermijnvisie.",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Dilsen-Stokkem",
+    "ac_short": "Wonen, patrimonium, open ruimte, mobiliteit, economie en toerisme",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "cultuur",
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Leuven",
+    "ac_short": "Bouwen, vernieuwen en verduurzamen van de nodige multifunctionele infrastructuur.",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "wegenbouw",
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Puurs-Sint-Amands",
+    "ac_short": "Uitvoeren weg- en rioleringsprojecten",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "gebouwen",
+      "groen"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "gebouwen",
+      "veiligheid",
+      "groen",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Brecht",
+    "ac_short": "Tegen 31 december 2030 wordt een woonzorgcentrum gebouwd op de site van de welzijnscampus.",
+    "orig": [
+      "wegenbouw",
+      "groen",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking",
+      "groen",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Pelt",
+    "ac_short": "Aanleg van veilige fietspaden en renovatie van riolering",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "gebouwen",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Ranst",
+    "ac_short": "Ranst creëert en onderhoudt wegen, paden en pleinen",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Zonhoven",
+    "ac_short": "Zonhoven investeert in veilige wegen, kwaliteitsvolle riolering en een duurzaam waterbeheer.",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "verlichting",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "gebouwen",
+      "werking",
+      "veiligheid",
+      "verlichting",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Beerse",
+    "ac_short": "01.01.01.01 De bouw van het dienstverleningscentrum in Bisschopslaan 56 realiseren",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Beerse",
+    "ac_short": "04.01.01.01 Overig beleid",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Genk",
+    "ac_short": "We zorgen dat het openbaar domein goed onderhouden is en klaar voor de toekomst.",
+    "orig": [
+      "zorg"
+    ],
+    "new": [
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Beersel",
+    "ac_short": "We realiseren een nieuw woonzorgcentrum en lokaal dienstencentrum.",
+    "orig": [
+      "gebouwen",
+      "zorg"
+    ],
+    "new": [
+      "gebouwen",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Malle",
+    "ac_short": "Malle zorgt voor een kwalitatieve weg- en rioleringsinfrastructuur",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "groen",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "werking",
+      "veiligheid",
+      "groen",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Heist-op-den-Berg",
+    "ac_short": "AC060401 Aangepaste verkeersinfrastructuur en -maatregelen dragen bij tot verkeersveiligheid",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Mol",
+    "ac_short": "Kwaliteit, comfort en veiligheid gebouwen",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Veurne",
+    "ac_short": "Sportaccomodatie",
+    "orig": [
+      "sport"
+    ],
+    "new": [
+      "wegenbouw",
+      "sport"
+    ]
+  },
+  {
+    "municipality": "Overijse",
+    "ac_short": "Investeringen sportinfrastructuur",
+    "orig": [
+      "sport",
+      "groen"
+    ],
+    "new": [
+      "wegenbouw",
+      "sport",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Zonnebeke",
+    "ac_short": "Nieuwe onderwijsinfrastructuur",
+    "orig": [
+      "scholenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "scholenbouw"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "District09",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Oudenaarde",
+    "ac_short": "We zetten verder in op de realisatie van een eigentijdse cultuursite met een regionale uitstraling",
+    "orig": [
+      "wegenbouw",
+      "cultuur"
+    ],
+    "new": [
+      "wegenbouw",
+      "cultuur",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Lier",
+    "ac_short": "Restauratie fase 2/3/4/5 begijnhof",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "cultuur"
+    ]
+  },
+  {
+    "municipality": "Leopoldsburg",
+    "ac_short": "Het bestuur zorgt voor een aangename sportieve infrastructuur",
+    "orig": [
+      "sport",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "sport",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Landen",
+    "ac_short": "AC 1.1.3: Extra aandacht voor de leefbaarheid & veiligheid van alle weggebruikers bij wegenwerken",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Halle",
+    "ac_short": "Vernieuwen van wegen en rioleringen",
+    "orig": [
+      "wegenbouw",
+      "riolering"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Nieuwpoort",
+    "ac_short": "Stadskantoor",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Tienen",
+    "ac_short": "Omschakelen van curatief naar preventief onderhoud van gemeentewegen",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Beerse",
+    "ac_short": "01.01.02.01 De bouw van de GIBLO-school in Antwerpseweg 48 realiseren",
+    "orig": [
+      "wegenbouw",
+      "scholenbouw",
+      "cultuur"
+    ],
+    "new": [
+      "wegenbouw",
+      "scholenbouw",
+      "cultuur",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Hasselt",
+    "ac_short": "3.4.1 We zetten concrete stappen vooruit in de verduurzamingsstrategie voor ons eigen patrimonium...",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Brugge",
+    "ac_short": "Met de Vlaamse Mijn VerbouwPremie bieden we financiële steun",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Brugge",
+    "ac_short": "Recurrent beleid Klimaat en energie",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "A&L - Aankoop wagens en fietsen",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Lochristi",
+    "ac_short": "Lochristi zet in op aangepaste weginfrastructuur.",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Brugge",
+    "ac_short": "Met ondersteuning van de Vlaamse overheid renoveren en richt",
+    "orig": [
+      "cultuur",
+      "groen"
+    ],
+    "new": [
+      "cultuur",
+      "werking",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Ranst",
+    "ac_short": "Ranst opwaardeert haar patrimonium",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Boortmeerbeek",
+    "ac_short": "We bouwen een nieuwe gemeenteschool",
+    "orig": [
+      "scholenbouw"
+    ],
+    "new": [
+      "scholenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Kortemark",
+    "ac_short": "Gelijkblijvend beleid technische dienst",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Genk",
+    "ac_short": "We beheren en onderhouden het eigen patrimonium.",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Opwijk",
+    "ac_short": "Project Vetweyde – aanleg sport- en jeugdinfrastructuur",
+    "orig": [
+      "sport",
+      "groen",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "sport",
+      "werking",
+      "groen",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Mechelen",
+    "ac_short": "Mechelen versnelt de digitale transisite via het gerichte inzet van digitale toepassingen en hard...",
+    "orig": [
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Ninove",
+    "ac_short": "Kwaliteitverhogende renovatie- en aanpassingswerken gebouwen",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Ronse",
+    "ac_short": "Nieuw Administratief Centrum",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Tessenderlo-Ham",
+    "ac_short": "Onderhoud en aanleg weg- en fietsinfrastructuur",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Leuven",
+    "ac_short": "Huisvesting van diensten optimaliseren en stadspatrimonium toekomstgericht inzetten volgens noden.",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Veurne",
+    "ac_short": "Nieuwbouw Zonnewende: een huis van de toekomst voor onze toekomst!",
+    "orig": [
+      "zorg"
+    ],
+    "new": [
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "Infrastructuur cultuur",
+    "orig": [
+      "cultuur"
+    ],
+    "new": [
+      "wegenbouw",
+      "cultuur"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "Interne werking FM Welzijn",
+    "orig": [
+      "zorg"
+    ],
+    "new": [
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Haaltert",
+    "ac_short": "Ontwikkelen van een duurzame, innovatieve sportsite Dreef met sporthal en buitensportfaciliteiten",
+    "orig": [
+      "sport"
+    ],
+    "new": [
+      "wegenbouw",
+      "sport",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Genk",
+    "ac_short": "We zorgen dat alle financiële verplichtingen op tijd worden nagekomen.",
+    "orig": [
+      "zorg"
+    ],
+    "new": [
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Wervik",
+    "ac_short": "We garanderen veilige, duurzame en vlot berijdbare wegen door een gefaseerde aanpak van noodzakelijk",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "verlichting"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "werking",
+      "veiligheid",
+      "verlichting"
+    ]
+  },
+  {
+    "municipality": "Mechelen",
+    "ac_short": "Mechelen investeert in sportinfrastructuur",
+    "orig": [
+      "sport"
+    ],
+    "new": [
+      "wegenbouw",
+      "sport"
+    ]
+  },
+  {
+    "municipality": "Menen",
+    "ac_short": "Wij ontwikkelen een strategisch vastgoedbeleid op maat",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "cultuur",
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Mol",
+    "ac_short": "Duurzame, gedeelde en toekomstgerichte sportsite Donk",
+    "orig": [
+      "sport",
+      "groen"
+    ],
+    "new": [
+      "sport",
+      "werking",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Oostkamp",
+    "ac_short": "4.3.2. Rioolbeheer ism Riopact",
+    "orig": [
+      "riolering"
+    ],
+    "new": [
+      "riolering",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Aalst",
+    "ac_short": "Investeren in de restauratie van de Sint-Jozefkerk (Fase 2: dak, gewelven en gevels)",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "cultuur"
+    ]
+  },
+  {
+    "municipality": "Oud-Heverlee",
+    "ac_short": "De twee vestigingen van de GBS De Lijsterboom worden vernieuwd met subsidies.",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Berlaar",
+    "ac_short": "A010301",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "wegenbouw",
+      "cultuur"
+    ]
+  },
+  {
+    "municipality": "Tienen",
+    "ac_short": "Regliere werking Financiën",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Leuven",
+    "ac_short": "Bouwen, vernieuwen en verduurzamen van de nodige indoor sportinfrastructuur.",
+    "orig": [
+      "sport"
+    ],
+    "new": [
+      "wegenbouw",
+      "sport",
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Zedelgem",
+    "ac_short": "Ja",
+    "orig": [
+      "sport"
+    ],
+    "new": [
+      "sport",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Brecht",
+    "ac_short": "Tegen 31 december 2030 heeft Sint-Job-in-'t-Goor een nieuw ontmoetingscentrum.",
+    "orig": [
+      "gebouwen",
+      "groen",
+      "ruimtelijke-ordening"
+    ],
+    "new": [
+      "cultuur",
+      "gebouwen",
+      "werking",
+      "groen",
+      "ruimtelijke-ordening"
+    ]
+  },
+  {
+    "municipality": "Harelbeke",
+    "ac_short": "Sterke publieke diensten: complementair beleid",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Deinze",
+    "ac_short": "uitvoering: aanleg van fietspad N35 (Kouter-Tielt)",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Zele",
+    "ac_short": "Realisatie van het project Kruisstraat-Rinkhout-Langevelde",
+    "orig": [
+      "wegenbouw",
+      "riolering"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Opwijk",
+    "ac_short": "Aanleggen van fietssnelwegen",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Leuven",
+    "ac_short": "Door een veilige ICT-architectuur en -infrastructuur de interne werking performant ondersteunen.",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Leuven",
+    "ac_short": "Uitvoeren van groot bouwkundig en technisch onderhoud van gebouwen, en vervangingsinvesteringen.",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Wemmel",
+    "ac_short": "Gemeentehuis / Kasteel: Restauratie en uitbreiding",
+    "orig": [
+      "gebouwen",
+      "zorg"
+    ],
+    "new": [
+      "cultuur",
+      "gebouwen",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Hoogstraten",
+    "ac_short": "Een nieuwe brandweerkazerne",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Tienen",
+    "ac_short": "Bouwen van een nieuw stadsmagazijn",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Herk-de-Stad",
+    "ac_short": "We blijven, in nauwe afstemming met diverse partners, investeren in ons wegen- en rioleringsnet.",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "groen"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "werking",
+      "veiligheid",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Ninove",
+    "ac_short": "Onderzoek nieuwe locatie  technische dienst",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Sint-Gillis-Waas",
+    "ac_short": "Wegenis, fiets- en voetpaden efficiënt onderhouden",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Destelbergen",
+    "ac_short": "Integraal waterbeleid en zuiveringsinfrastructuur",
+    "orig": [
+      "riolering"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering"
+    ]
+  },
+  {
+    "municipality": "Ronse",
+    "ac_short": "Heraanleg openbare infrastructuur",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Wervik",
+    "ac_short": "Realisatie van het nieuwe Oosthove als toekomstgerichte stedelijke ontmoetings- en belevingsplaats",
+    "orig": [
+      "cultuur",
+      "verlichting",
+      "groen"
+    ],
+    "new": [
+      "wegenbouw",
+      "cultuur",
+      "gebouwen",
+      "werking",
+      "verlichting",
+      "groen",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Essen",
+    "ac_short": "Essen zorgt voor de opstart en de werking van het nieuwe vrijetijdscentrum.",
+    "orig": [
+      "zorg"
+    ],
+    "new": [
+      "cultuur",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Peer",
+    "ac_short": "Stad Peer investeert volop in de toekomst van de fiets.",
+    "orig": [
+      "wegenbouw",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Lier",
+    "ac_short": "Restauratie Sint-Gummaruskerk",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "cultuur"
+    ]
+  },
+  {
+    "municipality": "Oudenaarde",
+    "ac_short": "Overig beleid - Financiële dienst",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Mechelen",
+    "ac_short": "Mechelen zet in op het onderhoud van het openbaar domein en werkt een nieuw intensief netheidspla...",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Westerlo",
+    "ac_short": "rioleringonderhoud",
+    "orig": [
+      "riolering"
+    ],
+    "new": [
+      "riolering",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Beringen",
+    "ac_short": "In stand houden patrimonium",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Hasselt",
+    "ac_short": "5.6.5 We investeren in onze interne efficiëntie door het verbeteren van onze processen en systeme...",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Hemiksem",
+    "ac_short": "We investeren in sportaccommodaties met multifunctioneel gebruik",
+    "orig": [
+      "sport",
+      "groen"
+    ],
+    "new": [
+      "sport",
+      "gebouwen",
+      "groen",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Roeselare",
+    "ac_short": "Bijkomend investeren in veiligheid (PZ RIHO) en de brandweer",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Scherpenheuvel-Zichem",
+    "ac_short": "Streven naar kwalitatief en betaalbaar onderwijs",
+    "orig": [
+      "scholenbouw",
+      "cultuur",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "scholenbouw",
+      "cultuur",
+      "gebouwen",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Knokke-Heist",
+    "ac_short": "Bouw van een nieuwe brandweerkazerne",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Oudenaarde",
+    "ac_short": "We realiseren een duurzaam en klimaatadaptief sportpark op de site Rodelos",
+    "orig": [
+      "sport",
+      "groen"
+    ],
+    "new": [
+      "sport",
+      "gebouwen",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Sint-Pieters-Leeuw",
+    "ac_short": "We zorgen via de herbestemming van de kerken van Oudenaken en Ruisbroek voor de creatie van bij",
+    "orig": [
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "cultuur",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Pelt",
+    "ac_short": "Faciliteren duurzame mobiliteit voor de lokale bedrijvigheid",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "groen",
+      "ruimtelijke-ordening"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "gebouwen",
+      "werking",
+      "groen",
+      "ruimtelijke-ordening"
+    ]
+  },
+  {
+    "municipality": "Lille",
+    "ac_short": "toekomstvisie op vrije tijd van een ambitieuze vrijetijdsgemeente",
+    "orig": [
+      "wegenbouw",
+      "cultuur",
+      "groen"
+    ],
+    "new": [
+      "wegenbouw",
+      "cultuur",
+      "werking",
+      "groen",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Leuven",
+    "ac_short": "Regulier onderhoud van gebouwen gefocust op verdere verduurzaming.",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "onderhouden openbaar groen",
+    "orig": [
+      "groen"
+    ],
+    "new": [
+      "werking",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Genk",
+    "ac_short": "Afstemmen  veiligheidsbeleid  met PZ Carma, BWOL en andere partners.",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Riemst",
+    "ac_short": "Gebouwen verduurzamen volgens klimaatdoelen",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Leopoldsburg",
+    "ac_short": "Het bestuur onderhoudt, herstelt en voorziet benodigdheden van wegenis en riolering",
+    "orig": [
+      "wegenbouw",
+      "riolering"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Landen",
+    "ac_short": "AC 6.1.1: Sportinfrastructuur renoveren en uitbreiden.",
+    "orig": [
+      "sport"
+    ],
+    "new": [
+      "wegenbouw",
+      "sport"
+    ]
+  },
+  {
+    "municipality": "Antwerpen",
+    "ac_short": "Ondersteunen eredienstbesturen",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Turnhout",
+    "ac_short": "14.4.2 We staan voor een goed beheer van onze werkmiddelen",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Oudsbergen",
+    "ac_short": "Wegenwerken uitvoeren",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Sint-Niklaas",
+    "ac_short": "Onderhouden van stadsgebouwen.",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Leuven",
+    "ac_short": "In kader van een masterplan (her)bestemmen van de grote Leuvense abdijen en hun (kunst)patrimonium.",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Ternat",
+    "ac_short": "Het LB realiseert tegen 09/2028 een nieuw schoolgebouw voor het gemeentelijk onderwijs in Lombeek.",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "scholenbouw",
+      "sport",
+      "cultuur",
+      "groen",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "scholenbouw",
+      "sport",
+      "cultuur",
+      "werking",
+      "groen",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Westerlo",
+    "ac_short": "toekomstbestendig maken van gebouwen",
+    "orig": [
+      "zorg"
+    ],
+    "new": [
+      "gebouwen",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Grimbergen",
+    "ac_short": "We voeren de verplichte renovatie van het gemeentehuis uit.",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Zaventem",
+    "ac_short": "3.2.3 We zetten in op slimme mobiliteitsoplossingen",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Maldegem",
+    "ac_short": "Investeren in onderhoud en renovatie van wegen, voet- en fietspaden",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Lokeren",
+    "ac_short": "Verderzetten ontwerp en uitvoer bovenlokale rioleringsprojec",
+    "orig": [
+      "wegenbouw",
+      "riolering"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Lier",
+    "ac_short": "Restauratie H. Geestgebouw",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "cultuur"
+    ]
+  },
+  {
+    "municipality": "Beveren-Kruibeke-Zwijndrecht",
+    "ac_short": "Herstel en onderhoud waardevol erfgoedpatrimonium",
+    "orig": [
+      "cultuur",
+      "zorg"
+    ],
+    "new": [
+      "cultuur",
+      "gebouwen",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Boutersem",
+    "ac_short": "Het LB zet in op kwaliteitsvolle mobiliteitsinfrastructuur.",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "scholenbouw",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "scholenbouw",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Halle",
+    "ac_short": "Uitvoeren van jaarlijks structureel wegenonderhoud",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Kortenberg",
+    "ac_short": "Renovatie  polyvalente zaal Erps-Kwerps",
+    "orig": [
+      "cultuur"
+    ],
+    "new": [
+      "cultuur",
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Tielt",
+    "ac_short": "We onderhouden ons wegennet op een gestructureerde manier.​",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Merchtem",
+    "ac_short": "Nieuwbouw Tuinbouwschool",
+    "orig": [
+      "scholenbouw"
+    ],
+    "new": [
+      "scholenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Turnhout",
+    "ac_short": "6.2.3 We onderhouden ons rioleringsstelsel, zowel in het centrum als in landelijke zones",
+    "orig": [
+      "riolering"
+    ],
+    "new": [
+      "riolering",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Willebroek",
+    "ac_short": "Welzijnscampus- kleinschalige woonprojecten",
+    "orig": [
+      "zorg"
+    ],
+    "new": [
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Turnhout",
+    "ac_short": "6.2.2 We onderhouden voet- en fietspaden, rijwegen, bruggen en (buurt)pleinen",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Puurs-Sint-Amands",
+    "ac_short": "Optimaliseren van sportinfrastructuur in de leefgemeenschappen, onder meer via cocreatie",
+    "orig": [
+      "sport",
+      "groen",
+      "ruimtelijke-ordening"
+    ],
+    "new": [
+      "wegenbouw",
+      "sport",
+      "gebouwen",
+      "werking",
+      "groen",
+      "ruimtelijke-ordening"
+    ]
+  },
+  {
+    "municipality": "Antwerpen",
+    "ac_short": "Nieuwbouw en renovatie brandwe",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Tessenderlo-Ham",
+    "ac_short": "Gebiedsdekkende rioleringsprojecten realiseren",
+    "orig": [
+      "riolering"
+    ],
+    "new": [
+      "riolering",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Stabroek",
+    "ac_short": "Rioleringen",
+    "orig": [
+      "riolering"
+    ],
+    "new": [
+      "riolering",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Knokke-Heist",
+    "ac_short": "Jeugdsite / Huis van het Kind",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Beringen",
+    "ac_short": "Uitvoeren basiswerking dienst financiën",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Zaventem",
+    "ac_short": "3.1.2 We realiseren de herbestemming van de strategische gemeentelijke gebouwen en gronden.",
+    "orig": [
+      "zorg"
+    ],
+    "new": [
+      "cultuur",
+      "gebouwen",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "ondersteunen REGent",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Anzegem",
+    "ac_short": "Nieuwe fase werken Gemeentepunt in functie van verdere centralisatie van de diensten.",
+    "orig": [
+      "zorg"
+    ],
+    "new": [
+      "gebouwen",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Kuurne",
+    "ac_short": "Nieuw zwembad",
+    "orig": [
+      "scholenbouw",
+      "sport",
+      "groen"
+    ],
+    "new": [
+      "scholenbouw",
+      "sport",
+      "werking",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Damme",
+    "ac_short": "Onderhouden en verbeteren van wegen, ontwikkelen van een klimaatneutrale straat",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "sport",
+      "verlichting",
+      "ruimtelijke-ordening"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "sport",
+      "gebouwen",
+      "werking",
+      "verlichting",
+      "ruimtelijke-ordening"
+    ]
+  },
+  {
+    "municipality": "Malle",
+    "ac_short": "Malle beheert samen met Stichting Kempens Landschap het kasteeldomein in Westmalle",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "cultuur",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Blankenberge",
+    "ac_short": "Gelijkblijvend Beleid Technische Diensten",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Brugge",
+    "ac_short": "De plannen voor de volledige renovatie van het Belfort werke",
+    "orig": [
+      "verlichting"
+    ],
+    "new": [
+      "gebouwen",
+      "verlichting"
+    ]
+  },
+  {
+    "municipality": "Grimbergen",
+    "ac_short": "Gelijkblijvend beleid - Financiële dienst",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Sint-Truiden",
+    "ac_short": "We voorzien in definitieve huisvesting voor onze administratieve diensten",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Aarschot",
+    "ac_short": "Actie 2.1.3 We versterken onze rol als scholenstad.",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Menen",
+    "ac_short": "Investeren in verbeteren van onze mobiliteitsinfrastructuur",
+    "orig": [
+      "wegenbouw"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Gent",
+    "ac_short": "verkeerstechniek",
+    "orig": [
+      "wegenbouw",
+      "verlichting"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking",
+      "verlichting"
+    ]
+  },
+  {
+    "municipality": "Ravels",
+    "ac_short": "Onderhoud en optimalisatie patrimonium",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Diepenbeek",
+    "ac_short": "Opwaardering en realisatie infrastructuur: wegenis- en riolering",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "groen"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "gebouwen",
+      "werking",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Zonhoven",
+    "ac_short": "Zonhoven investeert in duurzame, energiezuinige publieke gebouwen + goed onderhouden openbaar domein",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "wegenbouw",
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Moorslede",
+    "ac_short": "Administratief Centrum",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Pittem",
+    "ac_short": "We bouwen een nieuwe sportsite met plaats voor verenigingen, individuele sporters en initiatieven",
+    "orig": [
+      "sport"
+    ],
+    "new": [
+      "sport",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Schelle",
+    "ac_short": "We herstructureren en vergroenen de Fabiolalaan en aanpalende straten",
+    "orig": [
+      "wegenbouw",
+      "groen"
+    ],
+    "new": [
+      "wegenbouw",
+      "veiligheid",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Dendermonde",
+    "ac_short": "Collectorwerken Mespelare-Oudegem",
+    "orig": [
+      "wegenbouw",
+      "riolering",
+      "verlichting",
+      "ruimtelijke-ordening",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "riolering",
+      "veiligheid",
+      "verlichting",
+      "ruimtelijke-ordening",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Antwerpen",
+    "ac_short": "Investeringsondersteuningen",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Aartselaar",
+    "ac_short": "Het realiseren van een socioculturele campus",
+    "orig": [
+      "scholenbouw",
+      "cultuur",
+      "zorg"
+    ],
+    "new": [
+      "scholenbouw",
+      "cultuur",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Voeren",
+    "ac_short": "Ontwikkelen van een (gezamenlijk) concept om het politiegebouw en het gemeentehuis toekomstbestendig",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Tessenderlo-Ham",
+    "ac_short": "Gelijkblijvend beleid financiële dienst",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Halle",
+    "ac_short": "Kerkenpatrimonium optimaliseren",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "cultuur",
+      "gebouwen",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Sint-Truiden",
+    "ac_short": "We zorgen voor een structureel beheer van onze weginfrastructuur",
+    "orig": [
+      "wegenbouw",
+      "zorg"
+    ],
+    "new": [
+      "wegenbouw",
+      "werking",
+      "zorg"
+    ]
+  },
+  {
+    "municipality": "Kasterlee",
+    "ac_short": "Kasterlee werkt samen met Pidpa/Aquafin voor het beheer van de riolering.",
+    "orig": [
+      "riolering"
+    ],
+    "new": [
+      "riolering",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Mol",
+    "ac_short": "Energie-efficiënt en milieuvriendelijk wagenpark",
+    "orig": [
+      "groen"
+    ],
+    "new": [
+      "gebouwen",
+      "werking",
+      "groen"
+    ]
+  },
+  {
+    "municipality": "Antwerpen",
+    "ac_short": "Een veilige, efficiënte en kos",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Antwerpen",
+    "ac_short": "Sectorondersteuning en organis",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Zulte",
+    "ac_short": "Investeringstoelage Farys voor rioleringswerken",
+    "orig": [
+      "riolering"
+    ],
+    "new": [
+      "riolering",
+      "werking"
+    ]
+  },
+  {
+    "municipality": "Middelkerke",
+    "ac_short": "Nieuwe sporthal De Barloke",
+    "orig": [
+      "sport"
+    ],
+    "new": [
+      "sport",
+      "veiligheid"
+    ]
+  },
+  {
+    "municipality": "Anzegem",
+    "ac_short": "Gelijkblijvend beleid - Patrimonium Gemeente",
+    "orig": [
+      "overige"
+    ],
+    "new": [
+      "gebouwen"
+    ]
+  },
+  {
+    "municipality": "Lille",
+    "ac_short": "waarborgen van veiligheid en hulpverlening ( brandweerzone)",
+    "orig": [
+      "gebouwen"
+    ],
+    "new": [
+      "gebouwen",
+      "veiligheid"
+    ]
+  }
+]
