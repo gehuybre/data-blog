@@ -3,6 +3,7 @@
 ## Handleidingen
 
 - [Blog Post Structuur](BLOG-POST-STRUCTUUR.md) - Hoe een analyse/blogbericht moet worden opgezet
+- [Git LFS](GIT-LFS.md) - Huidige LFS-regels en gebruik
 - [Embed how‑to](files/embuild-analyses/embed-howto.md) - Stappen om een sectie embeddable te maken (config, tests)
 - [Sections how‑to](files/sections-howto.md) - Wanneer `AnalysisSection` of `TimeSeriesSection` te gebruiken
 - [FilterableTable — gebruik](files/src/components/analyses/shared/FilterableTable.md) - Voorbeeld en data shape

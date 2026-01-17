@@ -186,7 +186,12 @@ docs/                      # Documentation (see LLM_DOCUMENTATION_PROTOCOL.md)
 - **geo-utils.ts** - Geographic reference data (regions, provinces, municipalities)
 
 #### Charts & Analysis
-- **FilterableChart** - Recharts wrapper with filtering
+- **FilterableChart** - Modulaire Recharts wrapper met filtering en multiple chart types
+  - Ondersteunt: `composed` (default: bar + line), `line`, `bar`, `area`
+  - Consistente styling via `chart-theme.ts`
+  - Auto-scaling Y-axis formatters
+  - Moving average voor single metric charts
+  - Multi-series support met highlighting
 - **FilterableTable** - Sortable data tables
 - **AnalysisSection** - Main wrapper for analysis visualizations (chart/table/map tabs)
 - **TimeSeriesSection** - Time series visualization wrapper
@@ -243,6 +248,79 @@ const municipalityData = expandProvinceToMunicipalities(
 - ❌ `UnifiedMap.tsx` (deleted)
 - ❌ `MapLevelToggle.tsx` (deleted)
 - ❌ `InteractiveMap.tsx` (gerefactored → MunicipalityMap)
+
+## Chart Architecture
+
+### FilterableChart - Modulaire Chart Component (Januari 2025)
+
+`FilterableChart` is een flexibele wrapper rond Recharts die consistente styling en meerdere chart types ondersteunt.
+
+**Kernfeatures:**
+- 4 chart types: `composed`, `line`, `bar`, `area`
+- Single metric of multi-series data
+- Moving average (alleen voor single metric)
+- Auto-scaling Y-axis formatters
+- Series highlighting
+- Backwards compatible (default: `composed`)
+
+**Voorbeelden:**
+
+```typescript
+import { FilterableChart } from "@/components/analyses/shared/FilterableChart"
+
+// 1. Default: Bar + Line (composed) - backwards compatible
+<FilterableChart
+  data={quarterlyData}
+  getLabel={(d) => `${d.y} Q${d.q}`}
+  getValue={(d) => d.value}
+  showMovingAverage={true}  // Toont 4-periodes moving average
+/>
+
+// 2. Line chart voor trends
+<FilterableChart
+  data={timeSeriesData}
+  chartType="line"
+  getLabel={(d) => d.period}
+  getValue={(d) => d.amount}
+  yAxisLabel="Aantal"
+/>
+
+// 3. Area chart voor cumulatieve data
+<FilterableChart
+  data={cumulativeData}
+  chartType="area"
+  getLabel={(d) => d.year}
+  getValue={(d) => d.total}
+  isCurrency={true}  // Auto-formatter met € symbool
+/>
+
+// 4. Multi-series vergelijking (gebruikt altijd Line chart)
+<FilterableChart
+  data={comparisonData}
+  series={[
+    { key: 'region1', label: 'Vlaanderen', color: 'var(--color-chart-1)' },
+    { key: 'region2', label: 'Brussel', color: 'var(--color-chart-2)' },
+    { key: 'region3', label: 'Wallonië', color: 'var(--color-chart-3)' }
+  ]}
+  highlightSeriesKey={selectedRegion}  // Highlight geselecteerde serie
+  chartType="area"  // Ook mogelijk: 'line' of 'bar'
+/>
+```
+
+**Chart Type Gedrag:**
+
+| Type | Single Metric | Multi-Series | Best voor |
+|------|---------------|--------------|-----------|
+| `composed` | Bar + Line (MA) | Lines | Quarterly data met trend |
+| `line` | Line + Line (MA) | Lines | Continue trends |
+| `bar` | Bar alleen | Grouped bars | Categorische vergelijking |
+| `area` | Filled area + Line (MA) | Stacked areas | Cumulatieve/volume data |
+
+**Styling:**
+- Alle kleuren via `chart-theme.ts`: `var(--color-chart-1)` t/m `var(--color-chart-5)`
+- Y-axis: auto-scaled (k/M suffixes) boven 10k
+- Currency mode: `isCurrency={true}` voor € formatting
+- Consistent grid, tooltips, legend across all types
 
 ## Documentation Protocol
 
