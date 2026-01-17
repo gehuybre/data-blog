@@ -1,0 +1,17 @@
+# Docs coverage ignore file
+# One glob pattern per line, relative to repo root. Blank lines and # comments are ignored.
+
+# Ignore large generated outputs and data
+embuild-analyses/**/data/**
+embuild-analyses/**/results/**
+embuild-analyses/out/**
+out/**
+.next/**
+node_modules/**
+
+# Ignore temporary/test files
+**/*.test.*
+**/__tests__/**
+
+# Ignore GitHub Actions workflows and unrelated tooling (they are documented elsewhere)
+.github/**

@@ -1,3 +1,18 @@
+---
+kind: file
+path: src/components/analyses/shared/MunicipalityMap.tsx
+role: Unknown
+workflows: []
+inputs: []
+outputs: []
+interfaces: []
+stability: experimental
+owner: Unknown
+safe_to_delete_when: Unknown
+superseded_by: null
+last_reviewed: 2026-01-17
+---
+
 # MunicipalityMap — Input & Geo-tips 🗺️
 
 Korte beschrijving

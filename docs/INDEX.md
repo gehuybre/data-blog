@@ -3,6 +3,7 @@
 ## Handleidingen
 
 - [Blog Post Structuur](BLOG-POST-STRUCTUUR.md) - Hoe een analyse/blogbericht moet worden opgezet
+- [Git LFS](GIT-LFS.md) - Huidige LFS-regels en gebruik
 - [Embed how‑to](files/embuild-analyses/embed-howto.md) - Stappen om een sectie embeddable te maken (config, tests)
 - [Sections how‑to](files/sections-howto.md) - Wanneer `AnalysisSection` of `TimeSeriesSection` te gebruiken
 - [FilterableTable — gebruik](files/src/components/analyses/shared/FilterableTable.md) - Voorbeeld en data shape
@@ -32,6 +33,11 @@
 - [Update Vergunningen Data](workflows/WF-update-vergunningen-data.md)
 - [Update Starters-Stoppers Data](workflows/WF-update-starters-stoppers-data.md)
 - [Gemeentelijke Investeringen](workflows/WF-gemeentelijke-investeringen.md) - Municipal investment data processing from BBC-DR system
+- [Documentation Example](workflows/WF-example.md) - Example workflow demonstrating how to document changes and entrypoints
+
+## Key entrypoints
+
+- [src/cli/main.py](files/src/cli/main.py.md): CLI entrypoint used for project commands (example)
 
 ## Files
 

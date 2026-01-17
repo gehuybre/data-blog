@@ -1,3 +1,18 @@
+---
+kind: file
+path: embuild-analyses/src/lib/map-utils.ts
+role: Unknown
+workflows: []
+inputs: []
+outputs: []
+interfaces: []
+stability: experimental
+owner: Unknown
+safe_to_delete_when: Unknown
+superseded_by: null
+last_reviewed: 2026-01-17
+---
+
 # map-utils.ts
 
 **Bestand**: `embuild-analyses/src/lib/map-utils.ts`

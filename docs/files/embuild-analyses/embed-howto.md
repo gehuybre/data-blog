@@ -1,3 +1,10 @@
+---
+kind: file
+path: embuild-analyses/embed-howto.md
+role: guide
+last_reviewed: 2026-01-17
+---
+
 # Embed how‑to — Stappen om een sectie embeddable te maken ✅
 
 Korte beschrijving

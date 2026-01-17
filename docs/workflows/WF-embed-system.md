@@ -1,7 +1,17 @@
 ---
 kind: workflow
+id: WF-embed-system
 name: Iframe Embed System
 slug: embed-system
+status: active
+owner: Unknown
+trigger: manual
+last_reviewed: 2026-01-17
+files:
+  - embuild-analyses/src/lib/embed-config.ts
+  - embuild-analyses/src/app/embed/[slug]/[section]/page.tsx
+  - embuild-analyses/src/app/embed/[slug]/[section]/EmbedClient.tsx
+  - embuild-analyses/src/components/analyses/shared/ExportButtons.tsx
 inputs:
   - EMBED_CONFIGS in src/lib/embed-config.ts
   - Analysis data in analyses/*/results/*.json

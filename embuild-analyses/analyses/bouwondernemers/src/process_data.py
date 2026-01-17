@@ -105,13 +105,22 @@ def download_and_extract_year(year: int) -> pd.DataFrame | None:
             extracted_path = DATA_DIR / txt_file
 
             # Read the pipe-delimited file
-            df = pd.read_csv(
-                extracted_path,
-                sep="|",
-                encoding="utf-8-sig",
-                dtype=str,
-                low_memory=False,
-            )
+            try:
+                df = pd.read_csv(
+                    extracted_path,
+                    sep="|",
+                    encoding="utf-8-sig",
+                    dtype=str,
+                    low_memory=False,
+                )
+            except UnicodeDecodeError:
+                df = pd.read_csv(
+                    extracted_path,
+                    sep="|",
+                    encoding="latin-1",
+                    dtype=str,
+                    low_memory=False,
+                )
 
             # Add year column
             df["YEAR"] = year
@@ -204,15 +213,11 @@ def process_data() -> None:
     if "MS_ENTREP_NUM" in df.columns:
         df["MS_ENTREP_NUM"] = pd.to_numeric(df["MS_ENTREP_NUM"], errors="coerce")
 
-    # Filter for construction sector (NACE code F)
-    # NACE F = Construction / Bouwnijverheid
-    if "CD_NACE" in df.columns:
-        df_construction = df[df["CD_NACE"].str.startswith("F", na=False)].copy()
-    else:
+    if "CD_NACE" not in df.columns:
         print("Warning: CD_NACE column not found, using all sectors")
-        df_construction = df.copy()
 
-    print(f"Construction sector rows: {len(df_construction)}")
+    df_all = df.copy()
+    print(f"Total rows for all sectors: {len(df_all)}")
 
     # Update frontmatter with latest year
     update_mdx_frontmatter_date(CONTENT_FILE, f"{latest_year}-12-31")
@@ -229,11 +234,33 @@ def process_data() -> None:
         lookups["age_range"] = build_lookup(df, "CD_AGE_RANGE", "AGE_RANGE_DESCR_NL", "AGE_RANGE_DESCR_EN")
 
     # Aggregate data by different dimensions
+    # 0. By year + region + sector + gender + age (full grain for cross-filters)
+    group_cols_all = ["YEAR", "CD_RGN_REFNIS", "CD_NACE", "CD_GENDER", "CD_AGE_RANGE"]
+    if all(col in df_all.columns for col in group_cols_all + ["MS_ENTREP_NUM"]):
+        grouped_all = (
+            df_all[group_cols_all + ["MS_ENTREP_NUM"]]
+            .groupby(group_cols_all, dropna=False)["MS_ENTREP_NUM"]
+            .sum(min_count=1)
+            .reset_index()
+        )
+        grouped_all = grouped_all.rename(
+            columns={
+                "YEAR": "y",
+                "CD_RGN_REFNIS": "r",
+                "CD_NACE": "s",
+                "CD_GENDER": "g",
+                "CD_AGE_RANGE": "a",
+                "MS_ENTREP_NUM": "v",
+            }
+        )
+    else:
+        grouped_all = pd.DataFrame()
+
     # 1. By year + region + sector
     group_cols_sector = ["YEAR", "CD_RGN_REFNIS", "CD_NACE"]
-    if all(col in df_construction.columns for col in group_cols_sector + ["MS_ENTREP_NUM"]):
+    if all(col in df_all.columns for col in group_cols_sector + ["MS_ENTREP_NUM"]):
         grouped_sector = (
-            df_construction[group_cols_sector + ["MS_ENTREP_NUM"]]
+            df_all[group_cols_sector + ["MS_ENTREP_NUM"]]
             .groupby(group_cols_sector, dropna=False)["MS_ENTREP_NUM"]
             .sum(min_count=1)
             .reset_index()
@@ -251,9 +278,9 @@ def process_data() -> None:
 
     # 2. By year + region + gender
     group_cols_gender = ["YEAR", "CD_RGN_REFNIS", "CD_GENDER"]
-    if all(col in df_construction.columns for col in group_cols_gender + ["MS_ENTREP_NUM"]):
+    if all(col in df_all.columns for col in group_cols_gender + ["MS_ENTREP_NUM"]):
         grouped_gender = (
-            df_construction[group_cols_gender + ["MS_ENTREP_NUM"]]
+            df_all[group_cols_gender + ["MS_ENTREP_NUM"]]
             .groupby(group_cols_gender, dropna=False)["MS_ENTREP_NUM"]
             .sum(min_count=1)
             .reset_index()
@@ -271,9 +298,9 @@ def process_data() -> None:
 
     # 3. By year + region (for region comparison)
     group_cols_region = ["YEAR", "CD_RGN_REFNIS"]
-    if all(col in df_construction.columns for col in group_cols_region + ["MS_ENTREP_NUM"]):
+    if all(col in df_all.columns for col in group_cols_region + ["MS_ENTREP_NUM"]):
         grouped_region = (
-            df_construction[group_cols_region + ["MS_ENTREP_NUM"]]
+            df_all[group_cols_region + ["MS_ENTREP_NUM"]]
             .groupby(group_cols_region, dropna=False)["MS_ENTREP_NUM"]
             .sum(min_count=1)
             .reset_index()
@@ -290,9 +317,9 @@ def process_data() -> None:
 
     # 4. By year + region + age
     group_cols_age = ["YEAR", "CD_RGN_REFNIS", "CD_AGE_RANGE"]
-    if all(col in df_construction.columns for col in group_cols_age + ["MS_ENTREP_NUM"]):
+    if all(col in df_all.columns for col in group_cols_age + ["MS_ENTREP_NUM"]):
         grouped_age = (
-            df_construction[group_cols_age + ["MS_ENTREP_NUM"]]
+            df_all[group_cols_age + ["MS_ENTREP_NUM"]]
             .groupby(group_cols_age, dropna=False)["MS_ENTREP_NUM"]
             .sum(min_count=1)
             .reset_index()
@@ -309,6 +336,14 @@ def process_data() -> None:
         grouped_age = pd.DataFrame()
 
     # Save all datasets
+    if not grouped_all.empty:
+        records_all = json.loads(grouped_all.to_json(orient="records"))
+        (RESULTS_DIR / "by_all.json").write_text(
+            json.dumps(records_all, ensure_ascii=False, separators=(",", ":"), allow_nan=False),
+            encoding="utf-8",
+        )
+        grouped_all.to_csv(RESULTS_DIR / "by_all.csv", index=False)
+
     if not grouped_sector.empty:
         records_sector = json.loads(grouped_sector.to_json(orient="records"))
         (RESULTS_DIR / "by_sector.json").write_text(
@@ -348,6 +383,7 @@ def process_data() -> None:
     )
 
     print("\nProcessing complete!")
+    print(f"  - by_all: {len(records_all) if not grouped_all.empty else 0} records")
     print(f"  - by_sector: {len(records_sector) if not grouped_sector.empty else 0} records")
     print(f"  - by_gender: {len(records_gender) if not grouped_gender.empty else 0} records")
     print(f"  - by_region: {len(records_region) if not grouped_region.empty else 0} records")

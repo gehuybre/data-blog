@@ -5,6 +5,7 @@ role: Configuration
 workflows:
   - WF-project-setup
 inputs: []
+last_reviewed: 2026-01-17
 ---
 
 # requirements.txt

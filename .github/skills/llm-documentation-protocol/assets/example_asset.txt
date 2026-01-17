@@ -1,0 +1,64 @@
+# LLM Documentation Protocol - Asset Templates
+
+Korte set kant-en-klare sjablonen en voorbeelden die je kunt kopiëren naar `docs/`.
+Deze tekst is een asset (niet bedoeld om door de skill automatisch ingeladen te worden), maar als voorbeeld voor mensen die docs schrijven.
+
+---
+
+## Workflow front matter (kopiëren naar `docs/workflows/WF-<slug>.md`)
+
+```md
+---
+kind: workflow
+id: WF-<slug>
+owner: Unknown
+status: active
+trigger: Unknown
+inputs: []
+outputs: []
+entrypoints: []
+files: []
+last_reviewed: YYYY-MM-DD
+---
+```
+
+## File doc front matter (kopiëren naar `docs/files/<repo-path>.md`)
+
+```md
+---
+kind: file
+path: <repo-relative-path>
+role: Unknown
+workflows: []
+inputs: []
+outputs: []
+interfaces: []
+stability: experimental
+owner: Unknown
+safe_to_delete_when: Unknown
+superseded_by: null
+last_reviewed: YYYY-MM-DD
+---
+```
+
+## `docs/INDEX.md` snippet
+
+```md
+## Workflows
+- [WF-example](workflows/WF-example.md): One-line summary
+
+## Key entrypoints
+- [src/cli/main.py](files/src/cli/main.py.md): One-line summary
+```
+
+## Quick PR checklist (voeg toe aan PR-body)
+
+- [ ] Nieuwe bestanden hebben een file doc of een korte reden waarom niet
+- [ ] Workflow docs bijgewerkt en front matter compleet
+- [ ] `docs/INDEX.md` bijgewerkt
+- [ ] `last_reviewed` bijgewerkt naar vandaag in alle aangepaste docs
+- [ ] Links werken en verwijzingen bestaan
+
+---
+
+Gebruik deze voorbeelden als startpunt; pas `id`, `path` en `inputs/outputs` aan naar de concrete wijzigingen in je PR.

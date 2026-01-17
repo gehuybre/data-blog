@@ -1,5 +1,18 @@
-path: embuild-analyses/analyses/prijsherziening-index-i-2021/src/process_prijsherziening.py
 ---
+kind: file
+path: embuild-analyses/analyses/prijsherziening-index-i-2021/src/process_prijsherziening.py
+role: Unknown
+workflows: []
+inputs: []
+outputs: []
+interfaces: []
+stability: experimental
+owner: Unknown
+safe_to_delete_when: Unknown
+superseded_by: null
+last_reviewed: 2026-01-17
+---
+
 # File: embuild-analyses/analyses/prijsherziening-index-i-2021/src/process_prijsherziening.py
 
 Processes data for the price-revision index (Index I 2021) analysis.

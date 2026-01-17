@@ -14,6 +14,11 @@
             "date": 1768087841691,
             "name": "/Users/gerthuybrechts/pyprojects/data-blog/logs/mcp-puppeteer-2026-01-11.log",
             "hash": "83e3203162988c56572767933d6d90f3ac11cfc3b9443ae88d12b21f492021de"
+        },
+        {
+            "date": 1768659102983,
+            "name": "/Users/gerthuybrechts/pyprojects/data-blog/logs/mcp-puppeteer-2026-01-17.log",
+            "hash": "a1997497ecea810bd4f01b052c0dbcc951802d7ad7b640f18ba6d1be4022d50e"
         }
     ],
     "hashType": "sha256"

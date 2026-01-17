@@ -143,6 +143,7 @@ The `BouwondernemersDashboard` component (`embuild-analyses/src/components/analy
    - Multi-line chart showing evolution of each F-code subsector
    - Geographic filter
    - Chart and table views
+   - Uses short sector labels when configured in `embuild-analyses/src/lib/sector-short-labels.ts`
 
 3. **Gender Time Series**:
    - Male/Female breakdown over time
@@ -158,6 +159,17 @@ The `BouwondernemersDashboard` component (`embuild-analyses/src/components/analy
    - Distribution across age ranges
    - Geographic filter
    - Chart and table views
+
+## Sector Short Labels
+
+If the default NACE sector labels are too long, you can define short overrides in:
+
+`embuild-analyses/src/lib/sector-short-labels.ts`
+
+When a code is present in the mapping, the dashboard uses the short label in:
+- sector filter dropdown
+- chart legends and tooltips
+- sector tables
 
 ## Running the Script
 

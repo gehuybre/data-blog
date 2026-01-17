@@ -10,10 +10,10 @@ entrypoints: []
 files:
   - embuild-analyses/package.json
   - embuild-analyses/contentlayer.config.ts
-  - embuild-analyses/next.config.ts
+  - embuild-analyses/next.config.mjs
   - run_blog.py
   - requirements.txt
-last_reviewed: 2025-12-13
+last_reviewed: 2026-01-17
 ---
 
 # Project Setup

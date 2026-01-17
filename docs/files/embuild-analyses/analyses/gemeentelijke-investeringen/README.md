@@ -2,6 +2,7 @@
 kind: file
 path: embuild-analyses/analyses/gemeentelijke-investeringen
 role: Analysis
+last_reviewed: 2026-01-17
 ---
 
 # Analysis: Gemeentelijke Investeringen

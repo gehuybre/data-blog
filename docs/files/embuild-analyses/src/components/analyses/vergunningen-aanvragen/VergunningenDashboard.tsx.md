@@ -2,6 +2,7 @@
 kind: file
 path: embuild-analyses/src/components/analyses/vergunningen-aanvragen/VergunningenDashboard.tsx
 role: UI Component
+last_reviewed: 2026-01-17
 ---
 
 # VergunningenDashboard.tsx
