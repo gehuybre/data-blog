@@ -15,6 +15,7 @@ import { InvesteringenREKCategorySection } from "@/components/analyses/gemeentel
 import { InvesteringenBVScatterSection } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenBVScatterSection"
 import { InvesteringenREKScatterSection } from "@/components/analyses/gemeentelijke-investeringen/InvesteringenREKScatterSection"
 import { BouwprojectenEmbed } from "@/components/analyses/bouwprojecten-gemeenten/BouwprojectenEmbed"
+import { BouwondernemersEmbed } from "@/components/analyses/bouwondernemers/BouwondernemersEmbed"
 import { ProvinceCode, RegionCode } from "@/lib/geo-utils"
 import { getEmbedConfig, getValidSections } from "@/lib/embed-config"
 import { EmbedDataRow, MunicipalityData } from "@/lib/embed-types"
@@ -496,6 +497,28 @@ export function EmbedClient({ slug, section }: EmbedClientProps) {
     // Handle BouwprojectenEmbed
     if (config.component === "BouwprojectenEmbed") {
       return <BouwprojectenEmbed />
+    }
+
+    // Handle BouwondernemersEmbed
+    if (config.component === "BouwondernemersEmbed") {
+      const validSections = getValidSections(slug)
+      if (!validSections.includes(section)) {
+        return (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Ongeldige sectie: {section}. Geldige opties: {validSections.join(", ")}
+            </p>
+          </div>
+        )
+      }
+
+      return (
+        <BouwondernemersEmbed
+          section={section as "overview" | "by-sector" | "by-gender" | "by-region" | "by-age"}
+          viewType={toChartOrTableViewType(urlParams.view)}
+          displayMode={(urlParams.metric === "index" || urlParams.type === "index") ? "index" : "absolute"}
+        />
+      )
     }
 
     // Unknown custom component

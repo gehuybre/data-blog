@@ -54,12 +54,56 @@ type Lookups = {
   age_range?: LookupItem[]
 }
 
+const TOP_SECTOR_COUNT = 10
+const OTHER_SECTOR_CODE = "OTHER"
+const OTHER_SECTOR_LABEL_NL = "Overige"
+
+const topSectorCodes = (() => {
+  const totals = new Map<string, number>()
+  for (const row of byAllData as DataRow[]) {
+    if (!row.s || typeof row.v !== "number") continue
+    const code = String(row.s)
+    totals.set(code, (totals.get(code) ?? 0) + row.v)
+  }
+  return Array.from(totals.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, TOP_SECTOR_COUNT)
+    .map(([code]) => code)
+})()
+
+const topSectorSet = new Set(topSectorCodes)
+
 function stripSectorPrefix(code: string, label: string) {
   const trimmed = label.trim()
   if (!trimmed) return trimmed
   const escapedCode = code.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
   const prefixPattern = new RegExp(`^${escapedCode}\\s*[-–—:]?\\s+`, "i")
   return trimmed.replace(prefixPattern, "")
+}
+
+function mapSectorCode(code?: string | null): string | null {
+  if (!code) return null
+  const normalized = String(code)
+  if (topSectorSet.size === 0) return normalized
+  return topSectorSet.has(normalized) ? normalized : OTHER_SECTOR_CODE
+}
+
+function buildSectorLabelMap(): Map<string, string> {
+  const sectorMap = new Map<string, string>()
+  if (lookups && (lookups as Lookups).nace) {
+    for (const item of (lookups as Lookups).nace!) {
+      const code = String(item.code)
+      if (topSectorSet.size > 0 && !topSectorSet.has(code)) continue
+      const rawLabel = item.nl || item.en || code
+      const overrideLabel = SECTOR_SHORT_LABELS[code]
+      const label = overrideLabel ?? stripSectorPrefix(code, rawLabel) ?? code
+      sectorMap.set(code, label)
+    }
+  }
+  if (topSectorSet.size > 0) {
+    sectorMap.set(OTHER_SECTOR_CODE, OTHER_SECTOR_LABEL_NL)
+  }
+  return sectorMap
 }
 
 type SectorFilterInlineProps = {
@@ -70,16 +114,7 @@ type SectorFilterInlineProps = {
 function SectorFilterInline({ selected, onChange }: SectorFilterInlineProps) {
   const [open, setOpen] = React.useState(false)
   const sectors = React.useMemo(() => {
-    const sectorMap = new Map<string, string>()
-    if (lookups && (lookups as Lookups).nace) {
-      for (const item of (lookups as Lookups).nace!) {
-        const code = String(item.code)
-        const rawLabel = item.nl || item.en || code
-        const overrideLabel = SECTOR_SHORT_LABELS[code]
-        const label = overrideLabel ?? stripSectorPrefix(code, rawLabel) ?? code
-        sectorMap.set(code, label)
-      }
-    }
+    const sectorMap = buildSectorLabelMap()
     return Array.from(sectorMap.entries())
       .map(([code, label]) => ({ code, label }))
       .sort((a, b) => a.label.localeCompare(b.label, "nl"))
@@ -220,9 +255,14 @@ function AgeFilterInline({ selected, onChange }: AgeFilterInlineProps) {
         ageMap.set(code, label)
       }
     }
+    // Helper function to extract numeric value from age range label
+    const getAgeValue = (label: string) => {
+      const match = label.match(/\d+/)
+      return match ? Number(match[0]) : Number.MAX_SAFE_INTEGER
+    }
     return Array.from(ageMap.entries())
       .map(([code, label]) => ({ code, label }))
-      .sort((a, b) => a.label.localeCompare(b.label, "nl"))
+      .sort((a, b) => getAgeValue(a.label) - getAgeValue(b.label))
   }, [])
 
   const selectedLabel = React.useMemo(() => {
@@ -274,10 +314,6 @@ function AgeFilterInline({ selected, onChange }: AgeFilterInlineProps) {
   )
 }
 
-function formatInt(n: number) {
-  return new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(n)
-}
-
 function filterRowsByRegion(rows: DataRow[], selectedRegion: RegionCode): DataRow[] {
   if (selectedRegion === "1000") return rows
   return rows.filter((r) => r.r && String(r.r) === String(selectedRegion))
@@ -285,6 +321,12 @@ function filterRowsByRegion(rows: DataRow[], selectedRegion: RegionCode): DataRo
 
 function filterRowsBySector(rows: DataRow[], sector: string | null): DataRow[] {
   if (!sector) return rows
+  if (topSectorSet.size === 0) {
+    return rows.filter((r) => r.s && String(r.s) === String(sector))
+  }
+  if (sector === OTHER_SECTOR_CODE) {
+    return rows.filter((r) => r.s && !topSectorSet.has(String(r.s)))
+  }
   return rows.filter((r) => r.s && String(r.s) === String(sector))
 }
 
@@ -319,7 +361,7 @@ function OverviewSection() {
   const [selectedSector, setSelectedSector] = React.useState<string | null>(null)
   const [selectedGender, setSelectedGender] = React.useState<string | null>(null)
   const [selectedAge, setSelectedAge] = React.useState<string | null>(null)
-  const [displayMode, setDisplayMode] = React.useState<"absolute" | "relative">("absolute")
+  const [displayMode, setDisplayMode] = React.useState<"absolute" | "index">("absolute")
   const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
 
   const data = React.useMemo(() => {
@@ -338,25 +380,13 @@ function OverviewSection() {
       agg.set(r.y, (agg.get(r.y) ?? 0) + r.v)
     }
 
-    const totalByYear = new Map<number, number>()
-    if (displayMode === "relative") {
-      // Calculate totals for all sectors, keeping other filters (gender/age) intact.
-      const allFiltered = filterRowsByAge(
-        filterRowsByGender(filterRowsByRegion(byAllData as DataRow[], selectedRegion), selectedGender),
-        selectedAge
-      )
-      for (const r of allFiltered) {
-        if (typeof r.y !== "number" || typeof r.v !== "number") continue
-        totalByYear.set(r.y, (totalByYear.get(r.y) ?? 0) + r.v)
-      }
-    }
+    const sorted = Array.from(agg.entries()).sort((a, b) => a[0] - b[0])
+    const baseValue = sorted.length > 0 && displayMode === "index" ? sorted[0][1] : 1
 
-    return Array.from(agg.entries())
-      .map(([y, v]) => {
+    return sorted.map(([y, v]) => {
         let value = v
-        if (displayMode === "relative") {
-          const total = totalByYear.get(y) ?? 0
-          value = total > 0 ? (v / total) * 100 : 0
+        if (displayMode === "index") {
+          value = baseValue > 0 ? (v / baseValue) * 100 : 0
         }
         return {
           sortValue: y,
@@ -364,7 +394,6 @@ function OverviewSection() {
           value,
         }
       })
-      .sort((a, b) => a.sortValue - b.sortValue)
   }, [selectedRegion, selectedSector, selectedGender, selectedAge, displayMode])
 
   const exportData = React.useMemo(
@@ -377,7 +406,7 @@ function OverviewSection() {
     [data]
   )
 
-  const valueLabel = displayMode === "absolute" ? "Aantal ondernemers" : "Percentage (%)"
+  const valueLabel = displayMode === "absolute" ? "Aantal ondernemers" : "Index (basis 100)"
 
   return (
     <div className="space-y-4">
@@ -411,13 +440,13 @@ function OverviewSection() {
             <SectorFilterInline selected={selectedSector} onChange={setSelectedSector} />
             <GenderFilterInline selected={selectedGender} onChange={setSelectedGender} />
             <AgeFilterInline selected={selectedAge} onChange={setSelectedAge} />
-            <Tabs value={displayMode} onValueChange={(v) => setDisplayMode(v as "absolute" | "relative")}>
+            <Tabs value={displayMode} onValueChange={(v) => setDisplayMode(v as "absolute" | "index")}>
               <TabsList className="h-9">
                 <TabsTrigger value="absolute" className="text-xs px-3">
                   Abs
                 </TabsTrigger>
-                <TabsTrigger value="relative" className="text-xs px-3">
-                  Rel
+                <TabsTrigger value="index" className="text-xs px-3">
+                  Index
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -461,6 +490,7 @@ function BySectorSection() {
   const [selectedSector, setSelectedSector] = React.useState<string | null>(null)
   const [selectedGender, setSelectedGender] = React.useState<string | null>(null)
   const [selectedAge, setSelectedAge] = React.useState<string | null>(null)
+  const [displayMode, setDisplayMode] = React.useState<"absolute" | "index">("absolute")
   const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
 
   const { chartData, tableData, series, legendKeys } = React.useMemo(() => {
@@ -476,21 +506,14 @@ function BySectorSection() {
     const agg = new Map<string, number>() // key: "year-sector"
     for (const r of filtered) {
       if (typeof r.y !== "number" || typeof r.v !== "number" || !r.s) continue
-      const key = `${r.y}-${r.s}`
+      const mappedSector = mapSectorCode(r.s)
+      if (!mappedSector) continue
+      const key = `${r.y}-${mappedSector}`
       agg.set(key, (agg.get(key) ?? 0) + r.v)
     }
 
     // Build sector labels
-    const sectorLabels = new Map<string, string>()
-    if (lookups && (lookups as Lookups).nace) {
-      for (const item of (lookups as Lookups).nace!) {
-        const code = String(item.code)
-        const rawLabel = item.nl || item.en || code
-        const overrideLabel = SECTOR_SHORT_LABELS[code]
-        const label = overrideLabel ?? stripSectorPrefix(code, rawLabel) ?? code
-        sectorLabels.set(code, label)
-      }
-    }
+    const sectorLabels = buildSectorLabelMap()
 
     // Transform to line chart format
     const seriesKeys = new Set<string>()
@@ -507,9 +530,24 @@ function BySectorSection() {
       sectorTotals.set(sector, (sectorTotals.get(sector) ?? 0) + value)
     }
 
-    const chartData: LineSeriesPoint[] = Array.from(dataByYear.entries())
+    let chartData: LineSeriesPoint[] = Array.from(dataByYear.entries())
       .map(([year, sectors]) => ({ year, ...sectors }))
       .sort((a, b) => a.year - b.year)
+
+    // Apply index calculation if needed
+    if (displayMode === "index" && chartData.length > 0) {
+      const baseYear = chartData[0]
+      const indexedData = chartData.map((yearData) => {
+        const indexed: LineSeriesPoint = { year: yearData.year }
+        for (const sector of seriesKeys) {
+          const baseValue = baseYear[sector] ?? 0
+          const currentValue = yearData[sector] ?? 0
+          indexed[sector] = baseValue > 0 ? (currentValue / baseValue) * 100 : 0
+        }
+        return indexed
+      })
+      chartData = indexedData
+    }
 
     // Table data: rows per sector, columns per year
     const years = Array.from(dataByYear.keys()).sort((a, b) => a - b)
@@ -539,7 +577,7 @@ function BySectorSection() {
       .map(([sector]) => sector)
 
     return { chartData, tableData, series, legendKeys }
-  }, [selectedRegion, selectedSector, selectedGender, selectedAge])
+  }, [selectedRegion, selectedSector, selectedGender, selectedAge, displayMode])
 
   const exportData = React.useMemo(() => {
     return tableData.map((row) => ({
@@ -552,6 +590,8 @@ function BySectorSection() {
     }))
   }, [tableData])
 
+  const valueLabel = displayMode === "absolute" ? "Aantal ondernemers" : "Index (basis 100)"
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -563,7 +603,7 @@ function BySectorSection() {
           sectionId="by-sector"
           viewType={currentView}
           periodHeaders={["Sector"]}
-          valueLabel="Aantal ondernemers"
+          valueLabel={valueLabel}
           dataSource="Statbel - Ondernemers Datalab"
           dataSourceUrl="https://statbel.fgov.be/nl/open-data/ondernemers-datalab"
         />
@@ -584,6 +624,16 @@ function BySectorSection() {
             <SectorFilterInline selected={selectedSector} onChange={setSelectedSector} />
             <GenderFilterInline selected={selectedGender} onChange={setSelectedGender} />
             <AgeFilterInline selected={selectedAge} onChange={setSelectedAge} />
+            <Tabs value={displayMode} onValueChange={(v) => setDisplayMode(v as "absolute" | "index")}>
+              <TabsList className="h-9">
+                <TabsTrigger value="absolute" className="text-xs px-3">
+                  Abs
+                </TabsTrigger>
+                <TabsTrigger value="index" className="text-xs px-3">
+                  Index
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
         </div>
         <TabsContent value="chart">
@@ -596,7 +646,7 @@ function BySectorSection() {
                 data={chartData}
                 getLabel={(d) => String((d as LineSeriesPoint).year)}
                 getSortValue={(d) => (d as LineSeriesPoint).year}
-                yAxisLabel="Aantal ondernemers"
+                yAxisLabel={valueLabel}
                 series={series}
                 legendVisibleKeys={legendKeys}
                 highlightSeriesKey={selectedSector}
@@ -625,6 +675,7 @@ function ByGenderSection() {
   const [selectedSector, setSelectedSector] = React.useState<string | null>(null)
   const [selectedGender, setSelectedGender] = React.useState<string | null>(null)
   const [selectedAge, setSelectedAge] = React.useState<string | null>(null)
+  const [displayMode, setDisplayMode] = React.useState<"absolute" | "index">("absolute")
   const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
 
   const { chartData, tableData, series } = React.useMemo(() => {
@@ -666,9 +717,24 @@ function ByGenderSection() {
       dataByYear.get(year)![gender] = value
     }
 
-    const chartData: LineSeriesPoint[] = Array.from(dataByYear.entries())
+    let chartData: LineSeriesPoint[] = Array.from(dataByYear.entries())
       .map(([year, genders]) => ({ year, ...genders }))
       .sort((a, b) => a.year - b.year)
+
+    // Apply index calculation if needed
+    if (displayMode === "index" && chartData.length > 0) {
+      const baseYear = chartData[0]
+      const indexedData = chartData.map((yearData) => {
+        const indexed: LineSeriesPoint = { year: yearData.year }
+        for (const gender of seriesKeys) {
+          const baseValue = baseYear[gender] ?? 0
+          const currentValue = yearData[gender] ?? 0
+          indexed[gender] = baseValue > 0 ? (currentValue / baseValue) * 100 : 0
+        }
+        return indexed
+      })
+      chartData = indexedData
+    }
 
     // Table data
     const years = Array.from(dataByYear.keys()).sort((a, b) => a - b)
@@ -694,7 +760,7 @@ function ByGenderSection() {
       .sort((a, b) => a.label.localeCompare(b.label, "nl"))
 
     return { chartData, tableData, series }
-  }, [selectedRegion, selectedSector, selectedGender, selectedAge])
+  }, [selectedRegion, selectedSector, selectedGender, selectedAge, displayMode])
 
   const exportData = React.useMemo(() => {
     return tableData.map((row) => ({
@@ -707,6 +773,8 @@ function ByGenderSection() {
     }))
   }, [tableData])
 
+  const valueLabel = displayMode === "absolute" ? "Aantal ondernemers" : "Index (basis 100)"
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -718,7 +786,7 @@ function ByGenderSection() {
           sectionId="by-gender"
           viewType={currentView}
           periodHeaders={["Geslacht"]}
-          valueLabel="Aantal ondernemers"
+          valueLabel={valueLabel}
           dataSource="Statbel - Ondernemers Datalab"
           dataSourceUrl="https://statbel.fgov.be/nl/open-data/ondernemers-datalab"
         />
@@ -739,6 +807,16 @@ function ByGenderSection() {
             <SectorFilterInline selected={selectedSector} onChange={setSelectedSector} />
             <GenderFilterInline selected={selectedGender} onChange={setSelectedGender} />
             <AgeFilterInline selected={selectedAge} onChange={setSelectedAge} />
+            <Tabs value={displayMode} onValueChange={(v) => setDisplayMode(v as "absolute" | "index")}>
+              <TabsList className="h-9">
+                <TabsTrigger value="absolute" className="text-xs px-3">
+                  Abs
+                </TabsTrigger>
+                <TabsTrigger value="index" className="text-xs px-3">
+                  Index
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
         </div>
         <TabsContent value="chart">
@@ -751,7 +829,7 @@ function ByGenderSection() {
                 data={chartData}
                 getLabel={(d) => String((d as LineSeriesPoint).year)}
                 getSortValue={(d) => (d as LineSeriesPoint).year}
-                yAxisLabel="Aantal ondernemers"
+                yAxisLabel={valueLabel}
                 series={series}
                 highlightSeriesKey={selectedGender}
               />
@@ -779,6 +857,7 @@ function ByRegionSection() {
   const [selectedSector, setSelectedSector] = React.useState<string | null>(null)
   const [selectedGender, setSelectedGender] = React.useState<string | null>(null)
   const [selectedAge, setSelectedAge] = React.useState<string | null>(null)
+  const [displayMode, setDisplayMode] = React.useState<"absolute" | "index">("absolute")
   const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
 
   const { chartData, tableData, series } = React.useMemo(() => {
@@ -819,9 +898,24 @@ function ByRegionSection() {
       dataByYear.get(year)![regionCode] = value
     }
 
-    const chartData: LineSeriesPoint[] = Array.from(dataByYear.entries())
+    let chartData: LineSeriesPoint[] = Array.from(dataByYear.entries())
       .map(([year, regions]) => ({ year, ...regions }))
       .sort((a, b) => a.year - b.year)
+
+    // Apply index calculation if needed
+    if (displayMode === "index" && chartData.length > 0) {
+      const baseYear = chartData[0]
+      const indexedData = chartData.map((yearData) => {
+        const indexed: LineSeriesPoint = { year: yearData.year }
+        for (const regionCode of seriesKeys) {
+          const baseValue = baseYear[regionCode] ?? 0
+          const currentValue = yearData[regionCode] ?? 0
+          indexed[regionCode] = baseValue > 0 ? (currentValue / baseValue) * 100 : 0
+        }
+        return indexed
+      })
+      chartData = indexedData
+    }
 
     // Table data
     const years = Array.from(dataByYear.keys()).sort((a, b) => a - b)
@@ -847,7 +941,7 @@ function ByRegionSection() {
       .sort((a, b) => a.label.localeCompare(b.label, "nl"))
 
     return { chartData, tableData, series }
-  }, [selectedRegion, selectedSector, selectedGender, selectedAge])
+  }, [selectedRegion, selectedSector, selectedGender, selectedAge, displayMode])
 
   const exportData = React.useMemo(() => {
     return tableData.map((row) => ({
@@ -860,6 +954,8 @@ function ByRegionSection() {
     }))
   }, [tableData])
 
+  const valueLabel = displayMode === "absolute" ? "Aantal ondernemers" : "Index (basis 100)"
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -871,7 +967,7 @@ function ByRegionSection() {
           sectionId="by-region"
           viewType={currentView}
           periodHeaders={["Regio"]}
-          valueLabel="Aantal ondernemers"
+          valueLabel={valueLabel}
           dataSource="Statbel - Ondernemers Datalab"
           dataSourceUrl="https://statbel.fgov.be/nl/open-data/ondernemers-datalab"
         />
@@ -892,6 +988,16 @@ function ByRegionSection() {
             <SectorFilterInline selected={selectedSector} onChange={setSelectedSector} />
             <GenderFilterInline selected={selectedGender} onChange={setSelectedGender} />
             <AgeFilterInline selected={selectedAge} onChange={setSelectedAge} />
+            <Tabs value={displayMode} onValueChange={(v) => setDisplayMode(v as "absolute" | "index")}>
+              <TabsList className="h-9">
+                <TabsTrigger value="absolute" className="text-xs px-3">
+                  Abs
+                </TabsTrigger>
+                <TabsTrigger value="index" className="text-xs px-3">
+                  Index
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
         </div>
         <TabsContent value="chart">
@@ -904,7 +1010,7 @@ function ByRegionSection() {
                 data={chartData}
                 getLabel={(d) => String((d as LineSeriesPoint).year)}
                 getSortValue={(d) => (d as LineSeriesPoint).year}
-                yAxisLabel="Aantal ondernemers"
+                yAxisLabel={valueLabel}
                 series={series}
                 highlightSeriesKey={selectedRegion === "1000" ? null : selectedRegion}
               />
@@ -932,6 +1038,7 @@ function ByAgeSection() {
   const [selectedSector, setSelectedSector] = React.useState<string | null>(null)
   const [selectedGender, setSelectedGender] = React.useState<string | null>(null)
   const [selectedAge, setSelectedAge] = React.useState<string | null>(null)
+  const [displayMode, setDisplayMode] = React.useState<"absolute" | "index">("absolute")
   const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
 
   const { chartData, tableData, series } = React.useMemo(() => {
@@ -975,9 +1082,24 @@ function ByAgeSection() {
       dataByYear.get(year)![age] = value
     }
 
-    const chartData: LineSeriesPoint[] = Array.from(dataByYear.entries())
+    let chartData: LineSeriesPoint[] = Array.from(dataByYear.entries())
       .map(([year, ages]) => ({ year, ...ages }))
       .sort((a, b) => a.year - b.year)
+
+    // Apply index calculation if needed
+    if (displayMode === "index" && chartData.length > 0) {
+      const baseYear = chartData[0]
+      const indexedData = chartData.map((yearData) => {
+        const indexed: LineSeriesPoint = { year: yearData.year }
+        for (const age of seriesKeys) {
+          const baseValue = baseYear[age] ?? 0
+          const currentValue = yearData[age] ?? 0
+          indexed[age] = baseValue > 0 ? (currentValue / baseValue) * 100 : 0
+        }
+        return indexed
+      })
+      chartData = indexedData
+    }
 
     // Table data
     const years = Array.from(dataByYear.keys()).sort((a, b) => a - b)
@@ -1010,7 +1132,7 @@ function ByAgeSection() {
       .sort((a, b) => getAgeSortValue(a.key, a.label) - getAgeSortValue(b.key, b.label))
 
     return { chartData, tableData, series }
-  }, [selectedRegion, selectedSector, selectedGender, selectedAge])
+  }, [selectedRegion, selectedSector, selectedGender, selectedAge, displayMode])
 
   const exportData = React.useMemo(() => {
     return tableData.map((row) => ({
@@ -1023,6 +1145,8 @@ function ByAgeSection() {
     }))
   }, [tableData])
 
+  const valueLabel = displayMode === "absolute" ? "Aantal ondernemers" : "Index (basis 100)"
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -1034,7 +1158,7 @@ function ByAgeSection() {
           sectionId="by-age"
           viewType={currentView}
           periodHeaders={["Leeftijd"]}
-          valueLabel="Aantal ondernemers"
+          valueLabel={valueLabel}
           dataSource="Statbel - Ondernemers Datalab"
           dataSourceUrl="https://statbel.fgov.be/nl/open-data/ondernemers-datalab"
         />
@@ -1055,6 +1179,16 @@ function ByAgeSection() {
             <SectorFilterInline selected={selectedSector} onChange={setSelectedSector} />
             <GenderFilterInline selected={selectedGender} onChange={setSelectedGender} />
             <AgeFilterInline selected={selectedAge} onChange={setSelectedAge} />
+            <Tabs value={displayMode} onValueChange={(v) => setDisplayMode(v as "absolute" | "index")}>
+              <TabsList className="h-9">
+                <TabsTrigger value="absolute" className="text-xs px-3">
+                  Abs
+                </TabsTrigger>
+                <TabsTrigger value="index" className="text-xs px-3">
+                  Index
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
         </div>
         <TabsContent value="chart">
@@ -1067,7 +1201,7 @@ function ByAgeSection() {
                 data={chartData}
                 getLabel={(d) => String((d as LineSeriesPoint).year)}
                 getSortValue={(d) => (d as LineSeriesPoint).year}
-                yAxisLabel="Aantal ondernemers"
+                yAxisLabel={valueLabel}
                 series={series}
                 highlightSeriesKey={selectedAge}
               />

@@ -75,8 +75,6 @@ export function FilterableChart<TData = UnknownRecord>({
   chartType = 'composed',
 }: FilterableChartProps<TData>) {
   const [mounted, setMounted] = useState(false)
-  const [chartPointerY, setChartPointerY] = useState<number | null>(null)
-  const [chartPixelHeight, setChartPixelHeight] = useState<number | null>(null)
 
   const hasSeries = Boolean(series?.length)
 
@@ -166,6 +164,12 @@ export function FilterableChart<TData = UnknownRecord>({
       const pad = min === 0 ? 1 : Math.abs(min) * 0.1
       min -= pad
       max += pad
+    } else {
+      // Add padding to prevent series from being too close to edges
+      const range = max - min
+      const padding = range * 0.1
+      min -= padding
+      max += padding
     }
     return { min, max }
   }, [chartData, hasSeries, series])
@@ -192,36 +196,45 @@ export function FilterableChart<TData = UnknownRecord>({
   const chartMargin = yAxisLabel ? { ...CHART_THEME.margin, left: 28 } : CHART_THEME.margin
 
   // Custom tooltip component to show labels instead of keys
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label, coordinate }: any) => {
     if (!active || !payload || payload.length === 0) return null
 
+    // For multi-series charts, filter to show only the nearest series to the cursor
     let filteredPayload = payload
-    if (hasSeries && chartType !== "bar" && payload.length > 1) {
-      if (!yDomain || chartPointerY == null || chartPixelHeight == null) return null
-      const innerHeight = chartPixelHeight - chartMargin.top - chartMargin.bottom
-      if (innerHeight <= 0) return null
-      const domainSpan = yDomain.max - yDomain.min
-      if (!Number.isFinite(domainSpan) || domainSpan === 0) return null
-      const clampedPointerY = Math.min(
-        chartMargin.top + innerHeight,
-        Math.max(chartMargin.top, chartPointerY)
-      )
-      const nearest = payload.reduce(
-        (best: { entry: any; distance: number } | null, entry: any) => {
-          const value = Number(entry?.value)
-          if (!Number.isFinite(value)) return best
-          const normalized = (yDomain.max - value) / domainSpan
-          const entryY = chartMargin.top + normalized * innerHeight
-          const distance = Math.abs(entryY - clampedPointerY)
-          if (!best || distance < best.distance) {
-            return { entry, distance }
+    if (hasSeries && chartType !== "bar" && payload.length > 1 && coordinate) {
+      // Use Recharts' coordinate.y which gives us the exact mouse Y position
+      const mouseY = coordinate.y
+
+      if (yDomain && Number.isFinite(mouseY)) {
+        // Assume default chart height of 400px if not set
+        const innerHeight = 400
+        const domainSpan = yDomain.max - yDomain.min
+
+        if (Number.isFinite(domainSpan) && domainSpan > 0 && innerHeight > 0) {
+          // Find the entry with value closest to the mouse position
+          const nearest = payload.reduce(
+            (best: { entry: any; distance: number } | null, entry: any) => {
+              const value = Number(entry?.value)
+              if (!Number.isFinite(value)) return best
+
+              // Calculate Y position of this value in the chart
+              const normalized = (yDomain.max - value) / domainSpan
+              const entryY = chartMargin.top + normalized * (innerHeight - chartMargin.top - chartMargin.bottom)
+              const distance = Math.abs(entryY - mouseY)
+
+              if (!best || distance < best.distance) {
+                return { entry, distance }
+              }
+              return best
+            },
+            null
+          )
+
+          if (nearest?.entry) {
+            filteredPayload = [nearest.entry]
           }
-          return best
-        },
-        null
-      )
-      if (!nearest?.entry) return null
-      filteredPayload = [nearest.entry]
+        }
+      }
     }
 
     return (
@@ -320,22 +333,6 @@ export function FilterableChart<TData = UnknownRecord>({
     return <div className="h-[400px] w-full min-w-0" />
   }
 
-  const handleChartMouseMove = (_state: any, event: any) => {
-    if (!hasSeries) return
-    if (!event?.currentTarget || typeof event.clientY !== "number") return
-    const rect = event.currentTarget.getBoundingClientRect()
-    const scaleY = rect.height / event.currentTarget.offsetHeight
-    const nextPointerY = Math.round((event.clientY - rect.top) / scaleY)
-    const nextHeight = rect.height / scaleY
-    setChartPointerY((prev) => (prev === nextPointerY ? prev : nextPointerY))
-    setChartPixelHeight((prev) => (prev === nextHeight ? prev : nextHeight))
-  }
-
-  const handleChartMouseLeave = () => {
-    setChartPointerY(null)
-    setChartPixelHeight(null)
-  }
-
   // Common chart elements
   const commonElements = (
     <>
@@ -351,6 +348,7 @@ export function FilterableChart<TData = UnknownRecord>({
         tickLine={false}
         axisLine={false}
         tickFormatter={computedYAxisFormatter}
+        domain={yDomain ? [yDomain.min, yDomain.max] : undefined}
         label={
           yAxisLabel
             ? {
@@ -363,7 +361,7 @@ export function FilterableChart<TData = UnknownRecord>({
         }
       />
       {hasSeries ? (
-        <Tooltip content={<CustomTooltip />} shared={false} />
+        <Tooltip content={<CustomTooltip />} shared={false} trigger="hover" />
       ) : (
         <Tooltip
           contentStyle={{
@@ -387,8 +385,8 @@ export function FilterableChart<TData = UnknownRecord>({
   // Render series (for multi-line charts)
   const renderSeriesLines = () => {
     return lineSeries.map((s) => {
-      const isHighlighted = highlightSeriesKey && s.key === highlightSeriesKey
-      const isDimmed = highlightSeriesKey && s.key !== highlightSeriesKey
+      const isHighlighted = Boolean(highlightSeriesKey && s.key === highlightSeriesKey)
+      const isDimmed = Boolean(highlightSeriesKey && highlightSeriesKey !== s.key)
       return (
         <Line
           key={s.key}
@@ -397,6 +395,7 @@ export function FilterableChart<TData = UnknownRecord>({
           name={s.label}
           stroke={s.color}
           dot={false}
+          activeDot={{ r: 4 }}
           strokeWidth={isHighlighted ? 3 : 2}
           strokeOpacity={isDimmed ? 0.25 : 1}
         />
@@ -406,8 +405,8 @@ export function FilterableChart<TData = UnknownRecord>({
 
   const renderSeriesAreas = () => {
     return lineSeries.map((s) => {
-      const isHighlighted = highlightSeriesKey && s.key === highlightSeriesKey
-      const isDimmed = highlightSeriesKey && s.key !== highlightSeriesKey
+      const isHighlighted = Boolean(highlightSeriesKey && s.key === highlightSeriesKey)
+      const isDimmed = Boolean(highlightSeriesKey && highlightSeriesKey !== s.key)
       return (
         <Area
           key={s.key}
@@ -416,6 +415,7 @@ export function FilterableChart<TData = UnknownRecord>({
           name={s.label}
           stroke={s.color}
           fill={s.color}
+          activeDot={{ r: 4 }}
           fillOpacity={isDimmed ? 0.1 : 0.3}
           strokeWidth={isHighlighted ? 3 : 2}
           strokeOpacity={isDimmed ? 0.25 : 1}
@@ -426,8 +426,8 @@ export function FilterableChart<TData = UnknownRecord>({
 
   const renderSeriesBars = () => {
     return lineSeries.map((s, index) => {
-      const isHighlighted = highlightSeriesKey && s.key === highlightSeriesKey
-      const isDimmed = highlightSeriesKey && s.key !== highlightSeriesKey
+      const isHighlighted = Boolean(highlightSeriesKey && s.key === highlightSeriesKey)
+      const isDimmed = Boolean(highlightSeriesKey && highlightSeriesKey !== s.key)
       return (
         <Bar
           key={s.key}
@@ -533,36 +533,21 @@ export function FilterableChart<TData = UnknownRecord>({
       switch (chartType) {
         case 'line':
           return (
-            <LineChart
-              data={chartData}
-              margin={chartMargin}
-              onMouseMove={handleChartMouseMove}
-              onMouseLeave={handleChartMouseLeave}
-            >
+            <LineChart data={chartData} margin={chartMargin}>
               {commonElements}
               {renderSeriesLines()}
             </LineChart>
           )
         case 'bar':
           return (
-            <BarChart
-              data={chartData}
-              margin={chartMargin}
-              onMouseMove={handleChartMouseMove}
-              onMouseLeave={handleChartMouseLeave}
-            >
+            <BarChart data={chartData} margin={chartMargin}>
               {commonElements}
               {renderSeriesBars()}
             </BarChart>
           )
         case 'area':
           return (
-            <AreaChart
-              data={chartData}
-              margin={chartMargin}
-              onMouseMove={handleChartMouseMove}
-              onMouseLeave={handleChartMouseLeave}
-            >
+            <AreaChart data={chartData} margin={chartMargin}>
               {commonElements}
               {renderSeriesAreas()}
             </AreaChart>
@@ -570,12 +555,7 @@ export function FilterableChart<TData = UnknownRecord>({
         case 'composed':
         default:
           return (
-            <ComposedChart
-              data={chartData}
-              margin={chartMargin}
-              onMouseMove={handleChartMouseMove}
-              onMouseLeave={handleChartMouseLeave}
-            >
+            <ComposedChart data={chartData} margin={chartMargin}>
               {commonElements}
               {renderSeriesLines()}
             </ComposedChart>
