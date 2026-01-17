@@ -1,5 +1,18 @@
-path: embuild-analyses/analyses/bouwprojecten-gemeenten/src/process_project_details.py
 ---
+kind: file
+path: embuild-analyses/analyses/bouwprojecten-gemeenten/src/process_project_details.py
+role: Unknown
+workflows: []
+inputs: []
+outputs: []
+interfaces: []
+stability: experimental
+owner: Unknown
+safe_to_delete_when: Unknown
+superseded_by: null
+last_reviewed: 2026-01-17
+---
+
 # File: embuild-analyses/analyses/bouwprojecten-gemeenten/src/process_project_details.py
 
 Process municipal investment project details from a CSV export of the meerjarenplan projecten.

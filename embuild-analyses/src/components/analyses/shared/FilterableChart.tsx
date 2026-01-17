@@ -75,6 +75,8 @@ export function FilterableChart<TData = UnknownRecord>({
   chartType = 'composed',
 }: FilterableChartProps<TData>) {
   const [mounted, setMounted] = useState(false)
+  const [chartPointerY, setChartPointerY] = useState<number | null>(null)
+  const [chartPixelHeight, setChartPixelHeight] = useState<number | null>(null)
 
   const hasSeries = Boolean(series?.length)
 
@@ -150,6 +152,24 @@ export function FilterableChart<TData = UnknownRecord>({
     return formatter
   }, [chartData, yAxisFormatter, isCurrency, hasSeries, series])
 
+  const yDomain = useMemo(() => {
+    const values = hasSeries
+      ? chartData.flatMap((d: any) =>
+          (series ?? []).map((s) => (typeof d?.[s.key] === "number" ? d[s.key] : NaN))
+        )
+      : chartData.map((d: any) => d.value)
+    const numericValues = values.filter((value) => Number.isFinite(value)) as number[]
+    if (numericValues.length === 0) return null
+    let min = Math.min(...numericValues)
+    let max = Math.max(...numericValues)
+    if (min === max) {
+      const pad = min === 0 ? 1 : Math.abs(min) * 0.1
+      min -= pad
+      max += pad
+    }
+    return { min, max }
+  }, [chartData, hasSeries, series])
+
   const lineSeries = useMemo(() => {
     if (!hasSeries) return []
     const palette = [
@@ -168,6 +188,79 @@ export function FilterableChart<TData = UnknownRecord>({
   const legendLabelByKey = useMemo(() => {
     return new Map(lineSeries.map((s) => [s.key, s.label ?? s.key]))
   }, [lineSeries])
+
+  const chartMargin = yAxisLabel ? { ...CHART_THEME.margin, left: 28 } : CHART_THEME.margin
+
+  // Custom tooltip component to show labels instead of keys
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload || payload.length === 0) return null
+
+    let filteredPayload = payload
+    if (hasSeries && chartType !== "bar" && payload.length > 1) {
+      if (!yDomain || chartPointerY == null || chartPixelHeight == null) return null
+      const innerHeight = chartPixelHeight - chartMargin.top - chartMargin.bottom
+      if (innerHeight <= 0) return null
+      const domainSpan = yDomain.max - yDomain.min
+      if (!Number.isFinite(domainSpan) || domainSpan === 0) return null
+      const clampedPointerY = Math.min(
+        chartMargin.top + innerHeight,
+        Math.max(chartMargin.top, chartPointerY)
+      )
+      const nearest = payload.reduce(
+        (best: { entry: any; distance: number } | null, entry: any) => {
+          const value = Number(entry?.value)
+          if (!Number.isFinite(value)) return best
+          const normalized = (yDomain.max - value) / domainSpan
+          const entryY = chartMargin.top + normalized * innerHeight
+          const distance = Math.abs(entryY - clampedPointerY)
+          if (!best || distance < best.distance) {
+            return { entry, distance }
+          }
+          return best
+        },
+        null
+      )
+      if (!nearest?.entry) return null
+      filteredPayload = [nearest.entry]
+    }
+
+    return (
+      <div
+        style={{
+          backgroundColor: "var(--popover)",
+          color: "var(--popover-foreground)",
+          borderRadius: "var(--radius)",
+          border: "1px solid var(--border)",
+          padding: "8px 12px",
+        }}
+      >
+        <p style={{ marginBottom: "4px", fontWeight: 500 }}>{label}</p>
+        {filteredPayload.map((entry: any, index: number) => {
+          const seriesLabel = legendLabelByKey.get(entry.dataKey) || entry.name || entry.dataKey
+          const displayValue = isCurrency
+            ? `€${entry.value.toLocaleString('nl-BE')}`
+            : entry.value.toLocaleString('nl-BE')
+          return (
+            <p
+              key={`tooltip-item-${index}`}
+              style={{ margin: "2px 0", display: "flex", alignItems: "center", gap: "8px" }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  backgroundColor: entry.color,
+                }}
+              />
+              <span>{seriesLabel}: {displayValue}</span>
+            </p>
+          )
+        })}
+      </div>
+    )
+  }
   const renderLegend = (props: { payload?: readonly LegendPayload[] }) => {
     const payload = props.payload ?? []
     const allowed = legendVisibleKeys ? new Set(legendVisibleKeys) : null
@@ -227,7 +320,21 @@ export function FilterableChart<TData = UnknownRecord>({
     return <div className="h-[400px] w-full min-w-0" />
   }
 
-  const chartMargin = yAxisLabel ? { ...CHART_THEME.margin, left: 28 } : CHART_THEME.margin
+  const handleChartMouseMove = (_state: any, event: any) => {
+    if (!hasSeries) return
+    if (!event?.currentTarget || typeof event.clientY !== "number") return
+    const rect = event.currentTarget.getBoundingClientRect()
+    const scaleY = rect.height / event.currentTarget.offsetHeight
+    const nextPointerY = Math.round((event.clientY - rect.top) / scaleY)
+    const nextHeight = rect.height / scaleY
+    setChartPointerY((prev) => (prev === nextPointerY ? prev : nextPointerY))
+    setChartPixelHeight((prev) => (prev === nextHeight ? prev : nextHeight))
+  }
+
+  const handleChartMouseLeave = () => {
+    setChartPointerY(null)
+    setChartPixelHeight(null)
+  }
 
   // Common chart elements
   const commonElements = (
@@ -255,14 +362,18 @@ export function FilterableChart<TData = UnknownRecord>({
             : undefined
         }
       />
-      <Tooltip
-        contentStyle={{
-          backgroundColor: "var(--popover)",
-          color: "var(--popover-foreground)",
-          borderRadius: "var(--radius)",
-          border: "1px solid var(--border)",
-        }}
-      />
+      {hasSeries ? (
+        <Tooltip content={<CustomTooltip />} shared={false} />
+      ) : (
+        <Tooltip
+          contentStyle={{
+            backgroundColor: "var(--popover)",
+            color: "var(--popover-foreground)",
+            borderRadius: "var(--radius)",
+            border: "1px solid var(--border)",
+          }}
+        />
+      )}
       {hasSeries ? (
         <Legend iconType="circle" content={renderLegend} />
       ) : legendVisibleKeys ? (
@@ -422,21 +533,36 @@ export function FilterableChart<TData = UnknownRecord>({
       switch (chartType) {
         case 'line':
           return (
-            <LineChart data={chartData} margin={chartMargin}>
+            <LineChart
+              data={chartData}
+              margin={chartMargin}
+              onMouseMove={handleChartMouseMove}
+              onMouseLeave={handleChartMouseLeave}
+            >
               {commonElements}
               {renderSeriesLines()}
             </LineChart>
           )
         case 'bar':
           return (
-            <BarChart data={chartData} margin={chartMargin}>
+            <BarChart
+              data={chartData}
+              margin={chartMargin}
+              onMouseMove={handleChartMouseMove}
+              onMouseLeave={handleChartMouseLeave}
+            >
               {commonElements}
               {renderSeriesBars()}
             </BarChart>
           )
         case 'area':
           return (
-            <AreaChart data={chartData} margin={chartMargin}>
+            <AreaChart
+              data={chartData}
+              margin={chartMargin}
+              onMouseMove={handleChartMouseMove}
+              onMouseLeave={handleChartMouseLeave}
+            >
               {commonElements}
               {renderSeriesAreas()}
             </AreaChart>
@@ -444,7 +570,12 @@ export function FilterableChart<TData = UnknownRecord>({
         case 'composed':
         default:
           return (
-            <ComposedChart data={chartData} margin={chartMargin}>
+            <ComposedChart
+              data={chartData}
+              margin={chartMargin}
+              onMouseMove={handleChartMouseMove}
+              onMouseLeave={handleChartMouseLeave}
+            >
               {commonElements}
               {renderSeriesLines()}
             </ComposedChart>

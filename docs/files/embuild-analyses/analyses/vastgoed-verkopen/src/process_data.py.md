@@ -1,5 +1,18 @@
-path: embuild-analyses/analyses/vastgoed-verkopen/src/process_data.py
 ---
+kind: file
+path: embuild-analyses/analyses/vastgoed-verkopen/src/process_data.py
+role: Unknown
+workflows: []
+inputs: []
+outputs: []
+interfaces: []
+stability: experimental
+owner: Unknown
+safe_to_delete_when: Unknown
+superseded_by: null
+last_reviewed: 2026-01-17
+---
+
 # File: embuild-analyses/analyses/vastgoed-verkopen/src/process_data.py
 
 Processes property sales and transaction data used in the Vastgoed Verkopen analysis.

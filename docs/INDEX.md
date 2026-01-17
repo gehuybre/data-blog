@@ -33,6 +33,11 @@
 - [Update Vergunningen Data](workflows/WF-update-vergunningen-data.md)
 - [Update Starters-Stoppers Data](workflows/WF-update-starters-stoppers-data.md)
 - [Gemeentelijke Investeringen](workflows/WF-gemeentelijke-investeringen.md) - Municipal investment data processing from BBC-DR system
+- [Documentation Example](workflows/WF-example.md) - Example workflow demonstrating how to document changes and entrypoints
+
+## Key entrypoints
+
+- [src/cli/main.py](files/src/cli/main.py.md): CLI entrypoint used for project commands (example)
 
 ## Files
 

@@ -1,5 +1,18 @@
-path: embuild-analyses/analyses/gemeentelijke-investeringen/src/prepare_visualizations.py
 ---
+kind: file
+path: embuild-analyses/analyses/gemeentelijke-investeringen/src/prepare_visualizations.py
+role: Unknown
+workflows: []
+inputs: []
+outputs: []
+interfaces: []
+stability: experimental
+owner: Unknown
+safe_to_delete_when: Unknown
+superseded_by: null
+last_reviewed: 2026-01-17
+---
+
 # File: embuild-analyses/analyses/gemeentelijke-investeringen/src/prepare_visualizations.py
 
 Prepare visualization-ready datasets and summary stats for the Gemeentelijke Investeringen analysis.

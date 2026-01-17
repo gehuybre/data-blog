@@ -2,6 +2,7 @@
 kind: file
 path: embuild-analyses/analyses/prijsherziening-index-i-2021
 role: Analysis
+last_reviewed: 2026-01-17
 ---
 
 # Analysis: Prijsherziening Index I 2021

@@ -10,6 +10,7 @@ import { ExportButtons } from "../shared/ExportButtons"
 import { GeoProvider, useGeo } from "../shared/GeoContext"
 import { GeoFilterInline } from "../shared/GeoFilterInline"
 import { REGIONS, type RegionCode } from "@/lib/geo-utils"
+import { SECTOR_SHORT_LABELS } from "@/lib/sector-short-labels"
 
 // Import data
 import byAllData from "../../../../analyses/bouwondernemers/results/by_all.json"
@@ -74,7 +75,8 @@ function SectorFilterInline({ selected, onChange }: SectorFilterInlineProps) {
       for (const item of (lookups as Lookups).nace!) {
         const code = String(item.code)
         const rawLabel = item.nl || item.en || code
-        const label = stripSectorPrefix(code, rawLabel) || code
+        const overrideLabel = SECTOR_SHORT_LABELS[code]
+        const label = overrideLabel ?? stripSectorPrefix(code, rawLabel) ?? code
         sectorMap.set(code, label)
       }
     }
@@ -483,11 +485,10 @@ function BySectorSection() {
     if (lookups && (lookups as Lookups).nace) {
       for (const item of (lookups as Lookups).nace!) {
         const code = String(item.code)
-        if (code.startsWith("F")) {
-          const rawLabel = item.nl || item.en || code
-          const label = stripSectorPrefix(code, rawLabel) || code
-          sectorLabels.set(code, label)
-        }
+        const rawLabel = item.nl || item.en || code
+        const overrideLabel = SECTOR_SHORT_LABELS[code]
+        const label = overrideLabel ?? stripSectorPrefix(code, rawLabel) ?? code
+        sectorLabels.set(code, label)
       }
     }
 

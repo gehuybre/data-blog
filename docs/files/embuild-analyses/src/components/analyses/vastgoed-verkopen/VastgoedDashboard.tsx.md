@@ -2,6 +2,7 @@
 kind: file
 path: embuild-analyses/src/components/analyses/vastgoed-verkopen/VastgoedDashboard.tsx
 role: UI Component
+last_reviewed: 2026-01-17
 ---
 
 # VastgoedDashboard.tsx

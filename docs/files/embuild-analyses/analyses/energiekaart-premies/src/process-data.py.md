@@ -1,5 +1,18 @@
-path: embuild-analyses/analyses/energiekaart-premies/src/process-data.py
 ---
+kind: file
+path: embuild-analyses/analyses/energiekaart-premies/src/process-data.py
+role: Unknown
+workflows: []
+inputs: []
+outputs: []
+interfaces: []
+stability: experimental
+owner: Unknown
+safe_to_delete_when: Unknown
+superseded_by: null
+last_reviewed: 2026-01-17
+---
+
 # File: embuild-analyses/analyses/energiekaart-premies/src/process-data.py
 
 Processing pipeline for Energiekaart — normalises raw data and produces the JSON results consumed by the analysis UI.

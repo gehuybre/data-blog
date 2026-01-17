@@ -2,6 +2,7 @@
 kind: file
 path: embuild-analyses/analyses/starters-stoppers
 role: Analysis
+last_reviewed: 2026-01-17
 ---
 
 # Analysis: Starters-Stoppers

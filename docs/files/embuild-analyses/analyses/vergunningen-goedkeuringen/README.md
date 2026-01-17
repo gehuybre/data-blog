@@ -2,6 +2,7 @@
 kind: file
 path: embuild-analyses/analyses/vergunningen-goedkeuringen
 role: Analysis
+last_reviewed: 2026-01-17
 ---
 
 # Analysis: Vergunningen Goedkeuringen

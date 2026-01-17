@@ -10,6 +10,7 @@ outputs:
 technologies:
   - TypeScript
   - Next.js static export
+last_reviewed: 2026-01-17
 ---
 
 # embed-config.ts

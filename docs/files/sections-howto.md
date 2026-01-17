@@ -1,3 +1,18 @@
+---
+kind: file
+path: docs/files/sections-howto.md
+role: guide
+workflows: []
+inputs: []
+outputs: []
+interfaces: []
+stability: stable
+owner: Unknown
+safe_to_delete_when: null
+superseded_by: null
+last_reviewed: 2026-01-17
+---
+
 # Sections how‑to — AnalysisSection vs TimeSeriesSection ⚙️
 
 Korte beschrijving
