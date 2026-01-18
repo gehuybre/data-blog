@@ -277,6 +277,41 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
       },
     },
   },
+  {
+    slug: "bouwondernemers",
+    sections: {
+      overview: {
+        type: "custom",
+        title: "Overzicht bouwondernemers",
+        component: "BouwondernemersEmbed",
+        height: 600,
+      },
+      "by-sector": {
+        type: "custom",
+        title: "Bouwondernemers per sector",
+        component: "BouwondernemersEmbed",
+        height: 600,
+      },
+      "by-gender": {
+        type: "custom",
+        title: "Bouwondernemers per geslacht",
+        component: "BouwondernemersEmbed",
+        height: 600,
+      },
+      "by-region": {
+        type: "custom",
+        title: "Bouwondernemers per regio",
+        component: "BouwondernemersEmbed",
+        height: 600,
+      },
+      "by-age": {
+        type: "custom",
+        title: "Bouwondernemers per leeftijd",
+        component: "BouwondernemersEmbed",
+        height: 600,
+      },
+    },
+  },
 ]
 
 /**
