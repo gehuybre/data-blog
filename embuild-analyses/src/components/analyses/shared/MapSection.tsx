@@ -115,10 +115,22 @@ export function MapSection<TData extends UnknownRecord = UnknownRecord>({
     if (!getGeoCode) return municipalities
 
     // Get all municipality codes that have data
+    const codes = data.map((d) => String(getGeoCode(d) ?? ""))
+
+    // Validate format: we expect 5-digit NIS codes
+    const invalidCodes = codes.filter((c) => c !== "" && c.length !== 5)
+    if (invalidCodes.length > 0) {
+      // Warn the developer during runtime that data does not use 5-digit NIS codes
+      // This is a soft warning to encourage normalization/aggregation before showing a map
+      // Example: "Must be 5-digit NIS code"
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[MapSection] Detected ${invalidCodes.length} municipality codes that are not 5 digits (examples: ${invalidCodes.slice(0,5).join(', ')}). Data used with MapSection must contain current 5-digit NIS municipality codes.`
+      )
+    }
+
     const codesWithData = new Set(
-      data
-        .map((d) => String(getGeoCode(d) ?? ""))
-        .filter((code) => code !== "" && code.length === 5) // Must be 5-digit NIS code
+      codes.filter((code) => code !== "" && code.length === 5) // Must be 5-digit NIS code
     )
 
     // Only show municipalities that have data

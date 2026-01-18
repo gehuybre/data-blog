@@ -6,6 +6,9 @@ import type { MunicipalityData } from "./types"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InfoIcon } from "lucide-react"
 import { DataTable } from "./DataTable"
+import { ExportButtons } from "../shared/ExportButtons"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CHART_THEME } from "@/lib/chart-theme"
 import {
   ResponsiveContainer,
   BarChart,
@@ -21,6 +24,8 @@ import {
 
 interface HuishoudensSectionProps {
   data: MunicipalityData[]
+  viewType?: "chart" | "table"
+  hideControls?: boolean
 }
 
 const columns = [
@@ -46,8 +51,10 @@ function calculateQuartiles(values: number[]) {
   return { min, q1, median, q3, max, mean }
 }
 
-export function HuishoudensSection({ data }: HuishoudensSectionProps) {
+export function HuishoudensSection({ data, viewType, hideControls = false }: HuishoudensSectionProps) {
   const hasHouseholdData = data.some(d => d.HH_available)
+  const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
+  const activeView = viewType ?? currentView
 
   if (!hasHouseholdData) {
     return (
@@ -65,6 +72,17 @@ export function HuishoudensSection({ data }: HuishoudensSectionProps) {
   }
 
   const cleanData = data.filter(d => d.HH_available)
+  const exportData = useMemo(() => {
+    return cleanData.map((d) => ({
+      label: d.TX_REFNIS_NL,
+      value: 0,
+      periodCells: [d.TX_REFNIS_NL],
+      HH_1p_pct: d.hh_1_pct_toename ?? 0,
+      HH_2p_pct: d.hh_2_pct_toename ?? 0,
+      HH_3p_pct: d.hh_3_pct_toename ?? 0,
+      HH_4plus_pct: d["hh_4+_pct_toename"] ?? 0,
+    }))
+  }, [cleanData])
 
   // Calculate box plot data (quartiles for percentage growth)
   const boxPlotData = useMemo(() => {
@@ -107,88 +125,168 @@ export function HuishoudensSection({ data }: HuishoudensSectionProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold mb-4">Huishoudens - voorspelde toename 2025-2040</h2>
-        <p className="text-muted-foreground">
-          Projecties van huishoudensgroei per grootte (1, 2, 3, 4+ personen).
-        </p>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Box plot - Percentage distribution */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h3 className="text-lg font-medium mb-3">Distributie percentage toename</h3>
-          <ResponsiveContainer width="100%" height={320}>
-            <ComposedChart data={boxPlotData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '6px'
-                }}
-                formatter={(value) => (typeof value === 'number' ? value.toFixed(1) + '%' : value)}
-              />
-              <Legend />
-              <Bar dataKey="min" fill="transparent" stroke="var(--color-chart-1)" stackId="a" />
-              <Bar dataKey="q1" fill="var(--color-chart-1)" opacity={0.3} stackId="a" />
-              <Bar dataKey="median" fill="var(--color-chart-1)" opacity={0.6} stackId="a" />
-              <Bar dataKey="q3" fill="var(--color-chart-1)" opacity={0.3} stackId="a" />
-              <Bar dataKey="max" fill="transparent" stroke="var(--color-chart-1)" stackId="a" />
-              <Line type="monotone" dataKey="mean" stroke="var(--color-chart-5)" strokeWidth={2} dot={{ r: 4 }} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          <h2 className="text-2xl font-semibold mb-2">Huishoudens - voorspelde toename 2025-2040</h2>
+          <p className="text-muted-foreground">
+            Projecties van huishoudensgroei per grootte (1, 2, 3, 4+ personen).
+          </p>
         </div>
-
-        {/* Total absolute growth */}
-        <div>
-          <h3 className="text-lg font-medium mb-3">Totale absolute toename per gemeente (top 15)</h3>
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={stackedBarData.slice(0, 10)} layout="horizontal">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis type="number" tick={{ fontSize: 12 }} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={100} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '6px'
-                }}
-              />
-              <Legend />
-              <Bar dataKey="total" fill="var(--color-chart-1)" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        {!hideControls && (
+          <ExportButtons
+            data={exportData}
+            title="Huishoudens - voorspelde toename 2025-2040"
+            slug="betaalbaar-arr"
+            sectionId="huishoudens"
+            viewType={activeView}
+            periodHeaders={["Gemeente"]}
+            valueLabel="Aantal"
+            dataSource="Statbel, Vlaamse Overheid"
+            dataSourceUrl="https://statbel.fgov.be/"
+          />
+        )}
       </div>
 
-      {/* Stacked bar chart - Absolute growth breakdown */}
-      <div>
-        <h3 className="text-lg font-medium mb-3">Absolute toename per huishoudensgrootte (top 15 gemeenten)</h3>
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={stackedBarData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
-            <YAxis tick={{ fontSize: 12 }} label={{ value: 'Absolute toename', angle: -90, position: 'insideLeft' }} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'hsl(var(--background))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '6px'
-              }}
-            />
-            <Legend />
-            <Bar dataKey="1 persoon" stackId="a" fill="var(--color-chart-1)" />
-            <Bar dataKey="2 personen" stackId="a" fill="var(--color-chart-2)" />
-            <Bar dataKey="3 personen" stackId="a" fill="var(--color-chart-3)" />
-            <Bar dataKey="4+ personen" stackId="a" fill="var(--color-chart-4)" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {hideControls ? (
+        <>
+          {activeView === "chart" && (
+            <>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Distributie percentage toename</h3>
+                  <ResponsiveContainer width="100%" height={320}>
+                    <ComposedChart data={boxPlotData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip
+                        contentStyle={CHART_THEME.tooltip}
+                        formatter={(value) => (typeof value === 'number' ? value.toFixed(1) + '%' : value)}
+                      />
+                      <Legend />
+                      <Bar dataKey="min" fill="transparent" stroke="var(--color-chart-1)" stackId="a" />
+                      <Bar dataKey="q1" fill="var(--color-chart-1)" opacity={0.3} stackId="a" />
+                      <Bar dataKey="median" fill="var(--color-chart-1)" opacity={0.6} stackId="a" />
+                      <Bar dataKey="q3" fill="var(--color-chart-1)" opacity={0.3} stackId="a" />
+                      <Bar dataKey="max" fill="transparent" stroke="var(--color-chart-1)" stackId="a" />
+                      <Line type="monotone" dataKey="mean" stroke="var(--color-chart-5)" strokeWidth={2} dot={{ r: 4 }} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
 
-      <DataTable data={cleanData} columns={columns} />
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Totale absolute toename per gemeente (top 15)</h3>
+                  <ResponsiveContainer width="100%" height={320}>
+                    <BarChart data={stackedBarData.slice(0, 15)} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis type="number" tick={{ fontSize: 12 }} />
+                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={100} />
+                      <Tooltip
+                        contentStyle={CHART_THEME.tooltip}
+                      />
+                      <Legend />
+                      <Bar dataKey="total" fill="var(--color-chart-1)" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium mb-3">Absolute toename per huishoudensgrootte (top 15 gemeenten)</h3>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={stackedBarData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
+                    <YAxis tick={{ fontSize: 12 }} label={{ value: 'Absolute toename', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip
+                      contentStyle={CHART_THEME.tooltip}
+                    />
+                    <Legend />
+                    <Bar dataKey="1 persoon" stackId="a" fill="var(--color-chart-1)" />
+                    <Bar dataKey="2 personen" stackId="a" fill="var(--color-chart-2)" />
+                    <Bar dataKey="3 personen" stackId="a" fill="var(--color-chart-3)" />
+                    <Bar dataKey="4+ personen" stackId="a" fill="var(--color-chart-4)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </>
+          )}
+
+          {activeView === "table" && (
+            <DataTable data={cleanData} columns={columns} />
+          )}
+        </>
+      ) : (
+        <Tabs defaultValue="chart" onValueChange={(value) => setCurrentView(value as "chart" | "table")}>
+          <TabsList>
+            <TabsTrigger value="chart">Grafiek</TabsTrigger>
+            <TabsTrigger value="table">Tabel</TabsTrigger>
+          </TabsList>
+          <TabsContent value="chart" className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <h3 className="text-lg font-medium mb-3">Distributie percentage toename</h3>
+                <ResponsiveContainer width="100%" height={320}>
+                  <ComposedChart data={boxPlotData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      contentStyle={CHART_THEME.tooltip}
+                      formatter={(value) => (typeof value === 'number' ? value.toFixed(1) + '%' : value)}
+                    />
+                    <Legend />
+                    <Bar dataKey="min" fill="transparent" stroke="var(--color-chart-1)" stackId="a" />
+                    <Bar dataKey="q1" fill="var(--color-chart-1)" opacity={0.3} stackId="a" />
+                    <Bar dataKey="median" fill="var(--color-chart-1)" opacity={0.6} stackId="a" />
+                    <Bar dataKey="q3" fill="var(--color-chart-1)" opacity={0.3} stackId="a" />
+                    <Bar dataKey="max" fill="transparent" stroke="var(--color-chart-1)" stackId="a" />
+                    <Line type="monotone" dataKey="mean" stroke="var(--color-chart-5)" strokeWidth={2} dot={{ r: 4 }} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium mb-3">Totale absolute toename per gemeente (top 15)</h3>
+                  <ResponsiveContainer width="100%" height={320}>
+                    <BarChart data={stackedBarData.slice(0, 15)} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis type="number" tick={{ fontSize: 12 }} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={100} />
+                    <Tooltip
+                      contentStyle={CHART_THEME.tooltip}
+                    />
+                    <Legend />
+                    <Bar dataKey="total" fill="var(--color-chart-1)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-3">Absolute toename per huishoudensgrootte (top 15 gemeenten)</h3>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={stackedBarData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
+                  <YAxis tick={{ fontSize: 12 }} label={{ value: 'Absolute toename', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip
+                    contentStyle={CHART_THEME.tooltip}
+                  />
+                  <Legend />
+                  <Bar dataKey="1 persoon" stackId="a" fill="var(--color-chart-1)" />
+                  <Bar dataKey="2 personen" stackId="a" fill="var(--color-chart-2)" />
+                  <Bar dataKey="3 personen" stackId="a" fill="var(--color-chart-3)" />
+                  <Bar dataKey="4+ personen" stackId="a" fill="var(--color-chart-4)" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </TabsContent>
+          <TabsContent value="table">
+            <DataTable data={cleanData} columns={columns} />
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   )
 }

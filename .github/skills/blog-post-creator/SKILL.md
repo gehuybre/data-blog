@@ -25,6 +25,15 @@ Ask the user for:
   - Publication date of the data
 - **Analysis focus**: What questions should this analysis answer?
 
+### Manual validation scripts
+
+This repository includes helper validation scripts you can run locally to check analysis files and components. These scripts are intentionally provided as *manual* checks and are not part of the global CI/test suite. They live under `.github/skills/blog-post-creator/scripts/`.
+
+- `python .github/skills/blog-post-creator/scripts/validate_mdx.py` — check MDX conventions (no body H1, import + mount component)
+- `python .github/skills/blog-post-creator/scripts/validate_component_usage.py` — check that `AnalysisSection` / `TimeSeriesSection` usages have `slug` and `sectionId`
+- `node .github/skills/blog-post-creator/scripts/validate_embed_consistency.js` — check standard embeds have entries in `embed-data-registry`
+
+Add these to your local pre-commit workflow if you want them to run before commits (recommended for contributors).
 ### 2. Create Directory Structure
 
 Create the following structure in `embuild-analyses/analyses/<slug>/`:

@@ -80,9 +80,20 @@ def create_arrondissement_aggregates(df_municipalities):
     """Create arrondissement-level aggregates from municipality data."""
     # Load arrondissement reference data
     refnis = pd.read_csv(DATA_DIR / 'refnis.csv', dtype=str)
+    refnis['CD_REFNIS'] = refnis['CD_REFNIS'].str.zfill(5)
     arr_map = (refnis[refnis['LVL_REFNIS'] == '3'][['CD_REFNIS', 'TX_REFNIS_NL']]
                .drop_duplicates()
                .rename(columns={'CD_REFNIS': 'CD_ARR', 'TX_REFNIS_NL': 'TX_ARR_NL'}))
+
+    df_municipalities = df_municipalities.copy()
+    df_municipalities['CD_REFNIS'] = df_municipalities['CD_REFNIS'].astype(str).str.zfill(5)
+    df_municipalities['CD_ARR'] = df_municipalities['CD_REFNIS'].str.slice(0, 2) + '000'
+
+    missing_arr = sorted(set(df_municipalities['CD_ARR']) - set(arr_map['CD_ARR']))
+    if missing_arr:
+        sample = ', '.join(missing_arr[:10])
+        suffix = '...' if len(missing_arr) > 10 else ''
+        print(f"Warning: {len(missing_arr)} arrondissement codes missing in refnis: {sample}{suffix}")
 
     # Columns to aggregate by summing
     agg_cols = [col for col in [
@@ -94,9 +105,9 @@ def create_arrondissement_aggregates(df_municipalities):
     ] if col in df_municipalities.columns]
 
     # Group by arrondissement and sum
-    df_agg = (df_municipalities.groupby('CD_SUP_REFNIS', as_index=False)[agg_cols]
+    df_agg = (df_municipalities.groupby('CD_ARR', as_index=False)[agg_cols]
               .sum()
-              .rename(columns={'CD_SUP_REFNIS': 'CD_ARR'}))
+              .rename(columns={'CD_ARR': 'CD_ARR'}))
 
     # Merge with arrondissement names
     df_agg = df_agg.merge(arr_map, on='CD_ARR', how='left')
@@ -127,12 +138,12 @@ def create_arrondissement_aggregates(df_municipalities):
     for pct_col, base_col in zip(hh_pct_cols, hh_2025_cols):
         if pct_col in df_municipalities.columns and base_col in df_municipalities.columns:
             # Calculate weighted average: (sum of increases) / (sum of base) * 100
-            grouped = df_municipalities.groupby('CD_SUP_REFNIS')
+            grouped = df_municipalities.groupby('CD_ARR')
             weighted_avg = (
                 grouped.apply(lambda x: (x[pct_col] * x[base_col]).sum() / x[base_col].sum() * 100
                              if x[base_col].sum() > 0 else 0, include_groups=False)
                 .reset_index()
-                .rename(columns={0: pct_col, 'CD_SUP_REFNIS': 'CD_ARR'})
+                .rename(columns={0: pct_col, 'CD_ARR': 'CD_ARR'})
             )
             df_agg = df_agg.merge(weighted_avg, on='CD_ARR', how='left')
 

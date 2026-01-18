@@ -1,4 +1,3 @@
-name: Update energiekaart-premies data
 
 on:
   schedule:

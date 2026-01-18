@@ -4,6 +4,9 @@ import * as React from "react"
 import { useMemo } from "react"
 import type { MunicipalityData } from "./types"
 import { DataTable } from "./DataTable"
+import { ExportButtons } from "../shared/ExportButtons"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CHART_THEME } from "@/lib/chart-theme"
 import {
   ResponsiveContainer,
   BarChart,
@@ -17,6 +20,8 @@ import {
 
 interface VergunningenSectionProps {
   data: MunicipalityData[]
+  viewType?: "chart" | "table"
+  hideControls?: boolean
 }
 
 const columns = [
@@ -24,9 +29,28 @@ const columns = [
   { key: "Woningen_Nieuwbouw_2019sep_2022aug", header: "Nieuwbouw 2019-2022", format: "number" as const, sortable: true },
   { key: "Woningen_Nieuwbouw_2022sep_2025aug", header: "Nieuwbouw 2022-2025", format: "number" as const, sortable: true },
   { key: "Woningen_Nieuwbouw_pct_verschil_36m", header: "Nieuwbouw %", format: "percentage" as const, sortable: true },
+  { key: "Gebouwen_Renovatie_2019sep_2022aug", header: "Renovatie 2019-2022", format: "number" as const, sortable: true },
+  { key: "Gebouwen_Renovatie_2022sep_2025aug", header: "Renovatie 2022-2025", format: "number" as const, sortable: true },
+  { key: "Gebouwen_Renovatie_pct_verschil_36m", header: "Renovatie %", format: "percentage" as const, sortable: true },
 ]
 
-export function VergunningenSection({ data }: VergunningenSectionProps) {
+export function VergunningenSection({ data, viewType, hideControls = false }: VergunningenSectionProps) {
+  const [currentView, setCurrentView] = React.useState<"chart" | "table">("chart")
+  const activeView = viewType ?? currentView
+
+  const exportData = useMemo(() => {
+    return data.map((d) => ({
+      label: d.TX_REFNIS_NL,
+      value: 0,
+      periodCells: [d.TX_REFNIS_NL],
+      Nieuwbouw_2019_2022: d.Woningen_Nieuwbouw_2019sep_2022aug ?? 0,
+      Nieuwbouw_2022_2025: d.Woningen_Nieuwbouw_2022sep_2025aug ?? 0,
+      Nieuwbouw_pct: d.Woningen_Nieuwbouw_pct_verschil_36m ?? 0,
+      Renovatie_2019_2022: d.Gebouwen_Renovatie_2019sep_2022aug ?? 0,
+      Renovatie_2022_2025: d.Gebouwen_Renovatie_2022sep_2025aug ?? 0,
+      Renovatie_pct: d.Gebouwen_Renovatie_pct_verschil_36m ?? 0,
+    }))
+  }, [data])
   // Prepare grouped bar chart data for new construction
   const nieuwbouwData = useMemo(() => {
     return data
@@ -86,111 +110,206 @@ export function VergunningenSection({ data }: VergunningenSectionProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold mb-4">Bouwvergunningen - 36 maanden vergelijking</h2>
-        <p className="text-muted-foreground">
-          Vergelijking van nieuwbouw en renovatie tussen twee 36-maanden periodes.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-semibold mb-2">Bouwvergunningen - 36 maanden vergelijking</h2>
+          <p className="text-muted-foreground">
+            Vergelijking van nieuwbouw en renovatie tussen twee 36-maanden periodes.
+          </p>
+        </div>
+        {!hideControls && (
+          <ExportButtons
+            data={exportData}
+            title="Bouwvergunningen - 36 maanden vergelijking"
+            slug="betaalbaar-arr"
+            sectionId="vergunningen"
+            viewType={activeView}
+            periodHeaders={["Gemeente"]}
+            valueLabel="Aantal"
+            dataSource="Statbel, Vlaamse Overheid"
+            dataSourceUrl="https://statbel.fgov.be/"
+          />
+        )}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* New construction comparison */}
-        <div>
-          <h3 className="text-lg font-medium mb-3">Nieuwbouw woningen - 36 maanden</h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={nieuwbouwData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
-              <YAxis tick={{ fontSize: 12 }} label={{ value: 'Aantal woningen', angle: -90, position: 'insideLeft' }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '6px'
-                }}
-              />
-              <Legend />
-              <Bar dataKey="2019-2022" fill="var(--color-chart-2)" />
-              <Bar dataKey="2022-2025" fill="var(--color-chart-1)" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      {hideControls ? (
+        <>
+          {activeView === "chart" && (
+            <>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Nieuwbouw woningen - 36 maanden</h3>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={nieuwbouwData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
+                      <YAxis tick={{ fontSize: 12 }} label={{ value: 'Aantal woningen', angle: -90, position: 'insideLeft' }} />
+                      <Tooltip
+                        contentStyle={CHART_THEME.tooltip}
+                      />
+                      <Legend />
+                      <Bar dataKey="2019-2022" fill="var(--color-chart-2)" />
+                      <Bar dataKey="2022-2025" fill="var(--color-chart-1)" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
 
-        {/* Renovation comparison */}
-        <div>
-          <h3 className="text-lg font-medium mb-3">Renovatie gebouwen - 36 maanden</h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={renovatieData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
-              <YAxis tick={{ fontSize: 12 }} label={{ value: 'Aantal gebouwen', angle: -90, position: 'insideLeft' }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '6px'
-                }}
-              />
-              <Legend />
-              <Bar dataKey="2019-2022" fill="var(--color-chart-4)" />
-              <Bar dataKey="2022-2025" fill="var(--color-chart-3)" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Renovatie gebouwen - 36 maanden</h3>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={renovatieData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
+                      <YAxis tick={{ fontSize: 12 }} label={{ value: 'Aantal gebouwen', angle: -90, position: 'insideLeft' }} />
+                      <Tooltip
+                        contentStyle={CHART_THEME.tooltip}
+                      />
+                      <Legend />
+                      <Bar dataKey="2019-2022" fill="var(--color-chart-4)" />
+                      <Bar dataKey="2022-2025" fill="var(--color-chart-3)" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
 
-      {/* Percentage difference charts */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <h3 className="text-lg font-medium mb-3">Percentage verschil nieuwbouw woningen</h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={nieuwbouwVerschilData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
-              <YAxis tick={{ fontSize: 12 }} label={{ value: 'Verschil (%)', angle: -90, position: 'insideLeft' }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '6px'
-                }}
-                formatter={(value) => (typeof value === 'number' ? value.toFixed(1) + '%' : value)}
-              />
-              <Bar
-                dataKey="verschil"
-                fill="var(--color-chart-1)"
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Percentage verschil nieuwbouw woningen</h3>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={nieuwbouwVerschilData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
+                      <YAxis tick={{ fontSize: 12 }} label={{ value: 'Verschil (%)', angle: -90, position: 'insideLeft' }} />
+                      <Tooltip
+                        contentStyle={CHART_THEME.tooltip}
+                        formatter={(value) => (typeof value === 'number' ? value.toFixed(1) + '%' : value)}
+                      />
+                      <Bar
+                        dataKey="verschil"
+                        fill="var(--color-chart-1)"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
 
-        <div>
-          <h3 className="text-lg font-medium mb-3">Percentage verschil renovatie gebouwen</h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={renovatieVerschilData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
-              <YAxis tick={{ fontSize: 12 }} label={{ value: 'Verschil (%)', angle: -90, position: 'insideLeft' }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '6px'
-                }}
-                formatter={(value) => (typeof value === 'number' ? value.toFixed(1) + '%' : value)}
-              />
-              <Bar
-                dataKey="verschil"
-                fill="var(--color-chart-3)"
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Percentage verschil renovatie gebouwen</h3>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={renovatieVerschilData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
+                      <YAxis tick={{ fontSize: 12 }} label={{ value: 'Verschil (%)', angle: -90, position: 'insideLeft' }} />
+                      <Tooltip
+                        contentStyle={CHART_THEME.tooltip}
+                        formatter={(value) => (typeof value === 'number' ? value.toFixed(1) + '%' : value)}
+                      />
+                      <Bar
+                        dataKey="verschil"
+                        fill="var(--color-chart-3)"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </>
+          )}
 
-      <DataTable data={data} columns={columns} />
+          {activeView === "table" && (
+            <DataTable data={data} columns={columns} />
+          )}
+        </>
+      ) : (
+        <Tabs defaultValue="chart" onValueChange={(value) => setCurrentView(value as "chart" | "table")}>
+          <TabsList>
+            <TabsTrigger value="chart">Grafiek</TabsTrigger>
+            <TabsTrigger value="table">Tabel</TabsTrigger>
+          </TabsList>
+          <TabsContent value="chart" className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <h3 className="text-lg font-medium mb-3">Nieuwbouw woningen - 36 maanden</h3>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={nieuwbouwData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
+                    <YAxis tick={{ fontSize: 12 }} label={{ value: 'Aantal woningen', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip
+                      contentStyle={CHART_THEME.tooltip}
+                    />
+                    <Legend />
+                    <Bar dataKey="2019-2022" fill="var(--color-chart-2)" />
+                    <Bar dataKey="2022-2025" fill="var(--color-chart-1)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium mb-3">Renovatie gebouwen - 36 maanden</h3>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={renovatieData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
+                    <YAxis tick={{ fontSize: 12 }} label={{ value: 'Aantal gebouwen', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip
+                      contentStyle={CHART_THEME.tooltip}
+                    />
+                    <Legend />
+                    <Bar dataKey="2019-2022" fill="var(--color-chart-4)" />
+                    <Bar dataKey="2022-2025" fill="var(--color-chart-3)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <h3 className="text-lg font-medium mb-3">Percentage verschil nieuwbouw woningen</h3>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={nieuwbouwVerschilData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
+                    <YAxis tick={{ fontSize: 12 }} label={{ value: 'Verschil (%)', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip
+                      contentStyle={CHART_THEME.tooltip}
+                      formatter={(value) => (typeof value === 'number' ? value.toFixed(1) + '%' : value)}
+                    />
+                    <Bar
+                      dataKey="verschil"
+                      fill="var(--color-chart-1)"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium mb-3">Percentage verschil renovatie gebouwen</h3>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={renovatieVerschilData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} height={100} angle={-45} />
+                    <YAxis tick={{ fontSize: 12 }} label={{ value: 'Verschil (%)', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip
+                      contentStyle={CHART_THEME.tooltip}
+                      formatter={(value) => (typeof value === 'number' ? value.toFixed(1) + '%' : value)}
+                    />
+                    <Bar
+                      dataKey="verschil"
+                      fill="var(--color-chart-3)"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="table">
+            <DataTable data={data} columns={columns} />
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   )
 }

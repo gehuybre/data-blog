@@ -4,7 +4,6 @@ import * as React from "react"
 import { useState, useMemo } from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -17,7 +16,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 
-import type { MunicipalityData, SummaryMetrics } from "./types"
+import type { ArrondissementData, MunicipalityData, SummaryMetrics } from "./types"
 import { GebouwenparkSection } from "./GebouwenparkSection"
 import { HuishoudensSection } from "./HuishoudensSection"
 import { VergunningenSection } from "./VergunningenSection"
@@ -25,10 +24,16 @@ import { CorrelatiesSection } from "./CorrelatiesSection"
 import { VergelijkingSection } from "./VergelijkingSection"
 
 // Import CSV data (will be loaded client-side)
-// Use NEXT_PUBLIC_BASE_PATH from environment (empty in dev, /data-blog in production)
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
-const MUNICIPALITIES_DATA_PATH = `${basePath}/analyses/betaalbaar-arr/results/municipalities.csv`
-const ARRONDISSEMENTS_DATA_PATH = `${basePath}/analyses/betaalbaar-arr/results/arrondissements.csv`
+// Derive basePath from the current URL to avoid relying on process.env in the browser.
+function getBasePath(): string {
+  if (typeof window === "undefined") return ""
+  const marker = "/analyses/"
+  const index = window.location.pathname.indexOf(marker)
+  if (index > 0) {
+    return window.location.pathname.slice(0, index)
+  }
+  return ""
+}
 
 function formatInt(n: number) {
   return new Intl.NumberFormat("nl-BE", { maximumFractionDigits: 0 }).format(n)
@@ -64,6 +69,7 @@ function calculateSummaryMetrics(data: MunicipalityData[]): SummaryMetrics {
 
 export function BetaalbaarArrDashboard() {
   const [municipalitiesData, setMunicipalitiesData] = useState<MunicipalityData[]>([])
+  const [arrondissementsData, setArrondissementsData] = useState<ArrondissementData[]>([])
   const [selectedArrondissement, setSelectedArrondissement] = useState<string>("all")
   const [loading, setLoading] = useState(true)
   const [arrPopoverOpen, setArrPopoverOpen] = useState(false)
@@ -72,21 +78,31 @@ export function BetaalbaarArrDashboard() {
   React.useEffect(() => {
     async function loadData() {
       try {
-        const response = await fetch(MUNICIPALITIES_DATA_PATH)
-        const csvText = await response.text()
+        const basePath = getBasePath()
+        const municipalitiesPath = `${basePath}/analyses/betaalbaar-arr/results/municipalities.csv`
+        const arrondissementsPath = `${basePath}/analyses/betaalbaar-arr/results/arrondissements.csv`
+        const [municipalitiesResponse, arrondissementsResponse] = await Promise.all([
+          fetch(municipalitiesPath),
+          fetch(arrondissementsPath),
+        ])
+        const [municipalitiesText, arrondissementsText] = await Promise.all([
+          municipalitiesResponse.text(),
+          arrondissementsResponse.text(),
+        ])
 
         // Parse CSV (simple implementation - could use papaparse library)
-        const lines = csvText.split("\n")
-        const headers = lines[0].split(",")
-        const data: MunicipalityData[] = []
+        const normalizeHeader = (header: string) => header.trim().replace(/-/g, "_")
+        const municipalityLines = municipalitiesText.split("\n")
+        const municipalityHeaders = municipalityLines[0].split(",").map(normalizeHeader)
+        const municipalities: MunicipalityData[] = []
 
-        for (let i = 1; i < lines.length; i++) {
-          if (!lines[i].trim()) continue
-          const values = lines[i].split(",")
+        for (let i = 1; i < municipalityLines.length; i++) {
+          if (!municipalityLines[i].trim()) continue
+          const values = municipalityLines[i].split(",")
           const row: any = {}
 
-          headers.forEach((header, idx) => {
-            const trimmedHeader = header.trim()
+          municipalityHeaders.forEach((header, idx) => {
+            const trimmedHeader = header
             const value = values[idx]?.trim()
 
             // Type conversions
@@ -100,10 +116,34 @@ export function BetaalbaarArrDashboard() {
             }
           })
 
-          data.push(row as MunicipalityData)
+          municipalities.push(row as MunicipalityData)
         }
 
-        setMunicipalitiesData(data)
+        const arrondissementLines = arrondissementsText.split("\n")
+        const arrondissementHeaders = arrondissementLines[0].split(",").map(normalizeHeader)
+        const arrondissements: ArrondissementData[] = []
+
+        for (let i = 1; i < arrondissementLines.length; i++) {
+          if (!arrondissementLines[i].trim()) continue
+          const values = arrondissementLines[i].split(",")
+          const row: any = {}
+
+          arrondissementHeaders.forEach((header, idx) => {
+            const trimmedHeader = header
+            const value = values[idx]?.trim()
+
+            if (trimmedHeader === "CD_ARR" || trimmedHeader === "TX_ARR_NL") {
+              row[trimmedHeader] = value
+            } else {
+              row[trimmedHeader] = value === "" || value === "nan" ? null : parseFloat(value)
+            }
+          })
+
+          arrondissements.push(row as ArrondissementData)
+        }
+
+        setMunicipalitiesData(municipalities)
+        setArrondissementsData(arrondissements)
         setLoading(false)
       } catch (error) {
         console.error("Failed to load municipalities data:", error)
@@ -114,19 +154,29 @@ export function BetaalbaarArrDashboard() {
     loadData()
   }, [])
 
+  const arrNameByCode = useMemo(() => {
+    const map = new Map<string, string>()
+    arrondissementsData.forEach(arr => {
+      if (arr.CD_ARR && arr.TX_ARR_NL) {
+        map.set(arr.CD_ARR, arr.TX_ARR_NL)
+      }
+    })
+    return map
+  }, [arrondissementsData])
+
   // Get unique arrondissements
   const arrondissements = useMemo(() => {
     const unique = new Map<string, string>()
     municipalitiesData.forEach(d => {
       if (d.CD_SUP_REFNIS && !unique.has(d.CD_SUP_REFNIS)) {
-        // Get arrondissement name from first municipality in that arrondissement
-        unique.set(d.CD_SUP_REFNIS, d.TX_REFNIS_NL) // Using municipality name as placeholder
+        const arrName = arrNameByCode.get(d.CD_SUP_REFNIS) ?? d.TX_REFNIS_NL
+        unique.set(d.CD_SUP_REFNIS, arrName)
       }
     })
     return Array.from(unique.entries())
       .map(([code, name]) => ({ code, name }))
       .sort((a, b) => a.name.localeCompare(b.name))
-  }, [municipalitiesData])
+  }, [municipalitiesData, arrNameByCode])
 
   // Filter data by selected arrondissement
   const filteredData = useMemo(() => {
@@ -273,36 +323,13 @@ export function BetaalbaarArrDashboard() {
         </Card>
       </div>
 
-      {/* Main tabs */}
-      <Tabs defaultValue="gebouwenpark" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="gebouwenpark">Gebouwenpark</TabsTrigger>
-          <TabsTrigger value="huishoudens">Huishoudens</TabsTrigger>
-          <TabsTrigger value="vergunningen">Vergunningen</TabsTrigger>
-          <TabsTrigger value="correlaties">Correlaties</TabsTrigger>
-          <TabsTrigger value="vergelijking">Vergelijking</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="gebouwenpark" className="space-y-4">
-          <GebouwenparkSection data={filteredData} />
-        </TabsContent>
-
-        <TabsContent value="huishoudens" className="space-y-4">
-          <HuishoudensSection data={filteredData} />
-        </TabsContent>
-
-        <TabsContent value="vergunningen" className="space-y-4">
-          <VergunningenSection data={filteredData} />
-        </TabsContent>
-
-        <TabsContent value="correlaties" className="space-y-4">
-          <CorrelatiesSection data={filteredData} />
-        </TabsContent>
-
-        <TabsContent value="vergelijking" className="space-y-4">
-          <VergelijkingSection data={municipalitiesData} />
-        </TabsContent>
-      </Tabs>
+      <div className="space-y-10">
+        <GebouwenparkSection data={filteredData} />
+        <HuishoudensSection data={filteredData} />
+        <VergunningenSection data={filteredData} />
+        <CorrelatiesSection data={filteredData} />
+        <VergelijkingSection data={municipalitiesData} arrNameByCode={arrNameByCode} />
+      </div>
     </div>
   )
 }
