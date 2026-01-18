@@ -312,6 +312,41 @@ export const EMBED_CONFIGS: AnalysisEmbedConfig[] = [
       },
     },
   },
+  {
+    slug: "betaalbaar-arr",
+    sections: {
+      gebouwenpark: {
+        type: "custom",
+        title: "Gebouwenpark per arrondissement",
+        component: "BetaalbaarArrEmbed",
+        height: 700,
+      },
+      huishoudens: {
+        type: "custom",
+        title: "Huishoudensgroei per arrondissement",
+        component: "BetaalbaarArrEmbed",
+        height: 700,
+      },
+      vergunningen: {
+        type: "custom",
+        title: "Bouwvergunningen per arrondissement",
+        component: "BetaalbaarArrEmbed",
+        height: 700,
+      },
+      correlaties: {
+        type: "custom",
+        title: "Correlaties wonen per arrondissement",
+        component: "BetaalbaarArrEmbed",
+        height: 800,
+      },
+      vergelijking: {
+        type: "custom",
+        title: "Vergelijking arrondissementen",
+        component: "BetaalbaarArrEmbed",
+        height: 700,
+      },
+    },
+  },
 ]
 
 /**

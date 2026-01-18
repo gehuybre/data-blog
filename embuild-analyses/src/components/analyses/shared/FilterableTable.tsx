@@ -26,6 +26,14 @@ export function FilterableTable<TData = UnknownRecord>({
 }: FilterableTableProps<TData>) {
   const hasSortValue = data.some((d: any) => typeof d?.sortValue === "number")
   const sortedData = [...data]
+  const yearColumnKeys = Array.from(
+    new Set(
+      data.flatMap((row: any) =>
+        Object.keys(row ?? {}).filter((key) => /^y\d{4}$/.test(key))
+      )
+    )
+  ).sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)))
+  const hasYearColumns = yearColumnKeys.length > 0
 
   if (hasSortValue) {
     sortedData.sort((a: any, b: any) => (a.sortValue as number) - (b.sortValue as number))
@@ -36,9 +44,10 @@ export function FilterableTable<TData = UnknownRecord>({
   }
 
   const hasPeriodCells = sortedData.some((d: any) => Array.isArray(d?.periodCells))
-  const headers = hasPeriodCells
+  const baseHeaders = hasPeriodCells
     ? (periodHeaders ?? ["Periode"])
     : ["Jaar", "Kwartaal"]
+  const headers = hasYearColumns ? [...baseHeaders, ...yearColumnKeys.map((key) => key.slice(1))] : baseHeaders
 
   return (
     <div className="max-h-[400px] overflow-auto">
@@ -48,7 +57,7 @@ export function FilterableTable<TData = UnknownRecord>({
             {headers.map((h, i) => (
               <TableHead key={i}>{h}</TableHead>
             ))}
-            <TableHead className="text-right">{label}</TableHead>
+            {!hasYearColumns && <TableHead className="text-right">{label}</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -62,14 +71,22 @@ export function FilterableTable<TData = UnknownRecord>({
                   <TableCell>Q{(d as any).q}</TableCell>
                 </>
               )}
-              <TableCell className="text-right">
-                {(d as any)?.formattedValue ??
-                  (typeof (d as any)?.value === "number"
-                    ? (d as any).value
-                    : metric
-                      ? (d as any)?.[metric]
-                      : (d as any)?.value)}
-              </TableCell>
+              {hasYearColumns ? (
+                yearColumnKeys.map((key) => (
+                  <TableCell key={key} className="text-right">
+                    {(d as any)?.[key] ?? ""}
+                  </TableCell>
+                ))
+              ) : (
+                <TableCell className="text-right">
+                  {(d as any)?.formattedValue ??
+                    (typeof (d as any)?.value === "number"
+                      ? (d as any).value
+                      : metric
+                        ? (d as any)?.[metric]
+                        : (d as any)?.value)}
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>
